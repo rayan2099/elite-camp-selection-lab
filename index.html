@@ -1,0 +1,1707 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>أكاديمية النخبة | مختبر اختيار المهارات والقيم</title>
+<style>
+:root{
+  --bg:#f4f6f9;--surface:#fff;--soft:#eef2f7;--soft2:#e7edf5;--fg:#12223a;--muted:#64748b;
+  --line:#dbe2ea;--accent:#f07b3a;--accentsoft:#fde9dc;--navy:#0d1f3a;--good:#168660;
+  --warn:#c2410c;--bad:#b42318;--shadow:0 8px 28px #12223a08;
+  color-scheme:light;
+}
+html[data-theme=dark]{
+  --bg:#09131f;--surface:#101e30;--soft:#15263c;--soft2:#1a2c44;--fg:#e7edf5;--muted:#9fb0c4;
+  --line:#26394e;--accentsoft:#3a281e;--good:#50cca0;--warn:#f0a868;--bad:#f07b7b;
+  --shadow:0 8px 28px #0006;color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.7 Tahoma,"Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--line);border-radius:9px;background:var(--surface);padding:9px 14px;transition:.15s}
+button:hover{border-color:var(--accent)}
+button:disabled{cursor:not-allowed;opacity:.45}
+button.primary{background:var(--accent);color:#22140d;border-color:var(--accent);font-weight:700}
+button.primary:hover{filter:brightness(1.05)}
+button.ghost{background:transparent}
+button.small{font-size:12px;padding:5px 10px;border-radius:7px}
+button.danger{color:var(--bad);border-color:#e0b4b4}
+button.icon{padding:6px 9px}
+a{color:inherit}
+h1,h2,h3,h4{margin:0;line-height:1.35;letter-spacing:-.2px}
+h1{font-size:26px;font-weight:800}
+h2{font-size:18px;font-weight:800}
+h3{font-size:15px;font-weight:700}
+p{margin:0}
+small{font-size:12px}
+.muted{color:var(--muted)}
+.help{color:var(--muted);font-size:12px;line-height:1.65}
+.eyebrow{font-size:10.5px;letter-spacing:.16em;color:var(--muted);font-weight:700;text-transform:uppercase}
+.mono{font-variant-numeric:tabular-nums}
+.hidden{display:none!important}
+.printonly{display:none}
+.demo{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-size:11.5px;color:var(--muted);margin-bottom:16px}
+.demo span:last-child{color:var(--accent);font-weight:700;letter-spacing:.02em}
+
+/* ---------- layout ---------- */
+#shell{display:grid;grid-template-columns:268px 1fr;min-height:100vh}
+#sidebar{position:sticky;top:0;height:100vh;overflow:auto;background:var(--surface);border-inline-start:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:18px}
+.brand{display:flex;align-items:center;gap:11px;padding:4px 6px 16px;border-bottom:1px solid var(--line)}
+.brand svg{width:44px;height:24px;color:var(--accent);flex:none}
+.brand b{display:block;font-size:14px}
+.brand small{display:block;font-size:9.5px;letter-spacing:.2em;color:var(--muted)}
+.navgroup{display:flex;flex-direction:column;gap:3px}
+.navlabel{font-size:10px;letter-spacing:.14em;color:var(--muted);font-weight:700;padding:8px 10px 4px}
+.navbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:start;background:transparent;border:none;border-radius:9px;padding:9px 10px;font-size:13.5px;color:var(--fg)}
+.navbtn svg{width:17px;height:17px;flex:none;opacity:.65}
+.navbtn:hover{background:var(--soft)}
+.navbtn.active{background:var(--navy);color:#fff;font-weight:700}
+.navbtn.active svg{opacity:1}
+html[data-theme=dark] .navbtn.active{background:var(--accent);color:#22140d}
+.navbtn .cnt{margin-inline-start:auto;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.navbtn.active .cnt{color:#ffffffb0}
+.sidefoot{margin-top:auto;font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;line-height:1.7}
+.sidefoot b{color:var(--fg);display:block;font-size:12px;margin-top:2px}
+
+#main{min-width:0;display:flex;flex-direction:column}
+#topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:11px 26px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.crumb{font-size:12.5px;color:var(--muted);display:flex;gap:7px;align-items:center}
+.crumb b{color:var(--fg)}
+.toptools{margin-inline-start:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+html[data-theme=dark] .avatar{background:var(--accent);color:#22140d}
+#app{padding:22px 26px 60px;max-width:1480px;width:100%}
+#hamb{display:none}
+
+/* ---------- blocks ---------- */
+.pagehead{display:flex;gap:18px;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap}
+.pagehead .actions{display:flex;gap:8px;flex-wrap:wrap}
+.grid{display:grid;gap:16px}
+.cols2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cols3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cols4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.spacer{margin-top:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.card.pad0{padding:0;overflow:hidden}
+.card h2{display:flex;align-items:center;gap:8px}
+.row{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.row.start{justify-content:flex-start}
+.wrap{flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--soft);color:var(--muted);white-space:nowrap}
+.pill.orange{background:var(--accentsoft);color:#a8501c}
+html[data-theme=dark] .pill.orange{color:#ffb98a}
+.pill.good{background:#16866014;color:var(--good)}
+.pill.bad{background:#b4231814;color:var(--bad)}
+.pill.navy{background:var(--navy);color:#fff}
+html[data-theme=dark] .pill.navy{background:var(--accent);color:#22140d}
+.pill.line{background:transparent;border:1px solid var(--line)}
+.bar{height:8px;border-radius:99px;background:var(--soft2);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:99px;background:var(--accent);transition:width .35s}
+.bar.good>i{background:var(--good)}
+.bar.bad>i{background:var(--bad)}
+.kv{display:flex;align-items:baseline;gap:8px}
+.big{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1}
+.metric .label{font-size:12px;color:var(--muted);font-weight:600}
+.metric .value{font-size:26px;font-weight:800;margin-top:6px;letter-spacing:-.5px}
+.metric .sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.note{background:var(--soft);border-radius:11px;padding:13px;font-size:13px}
+.note.orange{background:var(--accentsoft)}
+.empty{padding:26px 14px;text-align:center;color:var(--muted);font-size:13px}
+hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
+
+/* ---------- forms ---------- */
+label.fld{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:var(--muted);min-width:0}
+label.fld input,label.fld select,label.fld textarea{font-weight:400;color:var(--fg);border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;font-size:13.5px;width:100%}
+label.fld input:focus,label.fld select:focus,label.fld textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+label.fld textarea{resize:vertical;min-height:70px;line-height:1.6}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fields .wide{grid-column:1/-1}
+.filters{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}
+.filters input[type=search]{flex:1;min-width:180px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 12px;font-size:13px}
+.filters select{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 10px;font-size:13px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface)}
+.seg button{border:none;border-radius:0;padding:7px 12px;font-size:12.5px;background:transparent}
+.seg button+button{border-inline-start:1px solid var(--line)}
+.seg button.on{background:var(--navy);color:#fff;font-weight:700}
+html[data-theme=dark] .seg button.on{background:var(--accent);color:#22140d}
+
+/* ---------- library ---------- */
+.libgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
+.libcard{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:15px;display:flex;flex-direction:column;gap:10px;position:relative;transition:.15s;border-inline-start:3px solid var(--tc,var(--line))}
+.libcard:hover{box-shadow:0 10px 26px #12223a10;transform:translateY(-1px)}
+.libcard.on{background:color-mix(in srgb,var(--accentsoft) 55%,var(--surface));border-color:var(--accent)}
+.libcard .ttl{font-size:15px;font-weight:800;line-height:1.45}
+.libcard .goal{font-size:12.5px;color:var(--muted);line-height:1.65;flex:1}
+.libcard .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.trackchip{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--soft);color:var(--muted)}
+.trackchip i{width:7px;height:7px;border-radius:50%;background:var(--tc);display:inline-block}
+.libcard .foot{display:flex;gap:7px;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding-top:10px}
+
+/* ---------- table ---------- */
+.tablewrap{overflow:auto;border-radius:11px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+table.wide{min-width:1040px}
+th,td{padding:9px 11px;text-align:start;border-bottom:1px solid var(--line);vertical-align:middle}
+th{background:var(--soft);font-size:11.5px;color:var(--muted);font-weight:700;white-space:nowrap;position:sticky;top:0}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:color-mix(in srgb,var(--soft) 55%,transparent)}
+td select,td input{border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:5px 8px;font-size:12.5px;max-width:100%}
+
+/* ---------- day board ---------- */
+.days{display:grid;grid-template-columns:repeat(auto-fill,minmax(322px,1fr));gap:14px}
+.daycol{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:220px}
+.daycol.over{border-color:var(--warn);box-shadow:0 0 0 3px #c2410c14}
+.dayhead{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);padding-bottom:9px}
+.dayhead b{font-size:13.5px}
+.dayhead small{display:block;color:var(--muted);font-size:11px;font-weight:400}
+.chip{display:flex;align-items:center;gap:7px;background:var(--soft);border-radius:9px;padding:7px 9px;font-size:12px;line-height:1.45}
+.chip .x{border:none;background:transparent;color:var(--muted);padding:0 2px;font-size:14px;line-height:1}
+.chip .x:hover{color:var(--bad)}
+.chip i.dot{width:6px;height:6px;border-radius:50%;flex:none;background:var(--tc)}
+.chip.core{background:var(--accentsoft)}
+
+/* ---------- readiness ---------- */
+.checks{display:flex;flex-direction:column;gap:0}
+.check{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}
+.check:last-child{border-bottom:none}
+.check .ic{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;flex:none;margin-top:2px}
+.check .ic.ok{background:#16866018;color:var(--good)}
+.check .ic.no{background:#c2410c18;color:var(--warn)}
+.check b{font-size:13.5px;display:block}
+.check p{font-size:12px;color:var(--muted);line-height:1.6}
+.ring{width:96px;height:96px;flex:none;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .val{position:absolute;inset:0;display:grid;place-items:center;font-size:20px;font-weight:800}
+
+/* ---------- misc ---------- */
+#modal{border:none;padding:0;border-radius:16px;max-width:min(760px,94vw);width:100%;background:var(--surface);color:var(--fg);box-shadow:0 30px 90px #07101f55}
+#modal::backdrop{background:#07101f66;backdrop-filter:blur(3px)}
+#modal .inner{padding:22px}
+#modal .x{position:absolute;inset-inline-end:14px;top:12px;width:32px;height:32px;display:grid;place-items:center;border:none;border-radius:50%;background:var(--soft);font-size:14px;color:var(--muted);padding:0;line-height:1}
+#toasts{position:fixed;inset-inline-end:20px;bottom:20px;z-index:80;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--navy);color:#fff;padding:10px 15px;border-radius:10px;font-size:12.5px;box-shadow:0 12px 30px #07101f55;animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}}
+.phase{display:grid;gap:8px}
+.phase .p{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:12.5px;line-height:1.75}
+.phase .p>b:first-child{display:grid;place-items:center;width:22px;height:22px;border-radius:6px;background:var(--soft);font-size:11px;flex:none}
+.phase .p span{color:var(--muted)}
+.pv{display:flex;gap:10px;align-items:center;font-size:12px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.pv:last-child{border:none}
+.tagcloud{display:flex;gap:6px;flex-wrap:wrap}
+.ladder{display:flex;flex-direction:column;gap:6px}
+.step{display:flex;gap:10px;align-items:center;font-size:12.5px;padding:8px 10px;background:var(--soft);border-radius:9px}
+.step>b:first-child{width:20px;height:20px;display:grid;place-items:center;border-radius:50%;background:var(--surface);font-size:10.5px;flex:none;flex:none}
+.locked{display:grid;place-items:center;gap:10px;padding:44px 20px;text-align:center}
+.statline{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.statline b{color:var(--fg);font-size:13px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.legend i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-inline-end:5px}
+
+/* matrix */
+.matrix td,.matrix th{text-align:center;font-size:12px}
+.matrix td:first-child,.matrix th:first-child{text-align:start}
+.matrix .cell{display:inline-grid;place-items:center;min-width:30px;height:24px;border-radius:6px;background:var(--soft);font-size:11.5px;font-weight:700}
+.matrix .cell.z{background:transparent;color:#cfd8e3}
+.matrix .cell.l1{background:#f07b3a22;color:#a8501c}
+.matrix .cell.l2{background:#f07b3a55;color:#7a3711}
+.matrix .cell.l3{background:var(--accent);color:#22140d}
+
+@media print{
+  @page{size:A4;margin:12mm}
+  body{background:#fff}
+  #sidebar,#topbar,.noprint,#toasts,.pagehead{display:none!important}
+  #shell{grid-template-columns:1fr}
+  #app{padding:0;max-width:none}
+  .card{box-shadow:none;border:none;padding:0 0 10px;break-inside:auto}
+  .tablewrap{border:none;overflow:visible}
+  table{min-width:0!important;font-size:10px}
+  th{background:#f1f4f8!important;color:#33415c!important;position:static}
+  th,td{padding:5px 6px;border-bottom:1px solid #dbe2ea}
+  tr{break-inside:avoid}
+  .ring,.bar,.pill,.trackchip{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .grid{display:block}
+  .card+.card{margin-top:8px}
+  #app h1{font-size:17px}
+  #app h2{font-size:13px}
+  .help{font-size:9.5px}
+  .printonly{display:block!important}
+    .screenonly,.ring{display:none!important}
+  .keep{break-inside:avoid}
+  a[href]:after{content:''}
+}
+@media(max-width:1080px){
+  .cols4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cols3{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:860px){
+  #shell{grid-template-columns:1fr}
+  #sidebar{position:fixed;inset-inline-start:0;top:0;z-index:60;width:270px;transform:translateX(110%);transition:.2s;box-shadow:0 0 60px #0003}
+  html[dir=rtl] #sidebar{inset-inline-start:auto;inset-inline-end:0;transform:translateX(-110%)}
+  #sidebar.open{transform:none}
+  #hamb{display:inline-block}
+  #app{padding:16px 14px 50px}
+  .cols2,.cols3,.cols4{grid-template-columns:1fr}
+  .fields{grid-template-columns:1fr}
+  h1{font-size:21px}
+  #topbar{padding:9px 14px}
+  .crumb{display:none}
+}
+</style>
+</head>
+<body>
+<div id="shell">
+  <aside id="sidebar"></aside>
+  <div id="main">
+    <header id="topbar"></header>
+    <main id="app"></main>
+  </div>
+</div>
+<div id="toasts"></div>
+<dialog id="modal"><div class="inner" id="modalInner"></div></dialog>
+<script>
+/* ==========================================================================
+   أكاديمية النخبة — مختبر اختيار المهارات والقيم
+   المحتوى مستخرج من «وثيقة البرامج المعتمدة» (ستة مسارات · 60 برنامجًا)
+   ========================================================================== */
+const TRACKS=[
+  {id:'lead', ar:'التنمية الشخصية والقيادة', en:'Personal growth & leadership', short:'القيادة', color:'#f07b3a'},
+  {id:'values', ar:'القيم التربوية', en:'Educational values', short:'القيم', color:'#168660'},
+  {id:'life', ar:'المهارات الحياتية', en:'Life skills', short:'الحياة', color:'#3b7dd8'},
+  {id:'stem', ar:'العلوم والابتكار', en:'Science & innovation', short:'العلوم', color:'#8a5cf5'},
+  {id:'sport', ar:'الرياضة', en:'Sport', short:'الرياضة', color:'#d94f5c'},
+  {id:'trips', ar:'الرحلات والبرامج النوعية', en:'Trips & specialty programs', short:'الرحلات', color:'#b8862e'}
+];
+const FIELDS={
+  'lead.thinking':['التفكير والتخطيط','Thinking & planning'],
+  'lead.emotional':['الوعي النفسي والانفعالي','Emotional awareness'],
+  'lead.comm':['التواصل والقيادة','Communication & leadership'],
+  'lead.islamic':['القيم الإسلامية في القيادة','Islamic leadership values'],
+  'lead.self':['الوعي بالذات','Self-awareness'],
+  'values.faith':['القيم الدينية والروحية','Faith & spiritual values'],
+  'values.ethics':['الالتزام الأخلاقي','Moral commitment'],
+  'values.relations':['العلاقات والرفق','Relationships & kindness'],
+  'values.justice':['العدل والإنصاف','Justice & fairness'],
+  'values.balance':['التوازن النفسي','Inner balance'],
+  'life.practical':['المهارات العملية والمنزلية','Practical & home skills'],
+  'life.health':['الصحة والسلامة','Health & safety'],
+  'life.money':['الوعي المالي','Financial awareness'],
+  'life.family':['الأسرة والمجتمع','Family & community'],
+  'life.digital':['الوعي الرقمي','Digital awareness'],
+  'stem.code':['البرمجة والحاسب','Coding & computing'],
+  'stem.robotics':['الروبوتات والهندسة','Robotics & engineering'],
+  'stem.tech':['التقنيات الحديثة','Emerging technology'],
+  'stem.innovation':['الابتكار والمشاريع','Innovation & projects'],
+  'stem.collaborate':['التعاون وعرض الأفكار','Collaboration & pitching'],
+  'sport.fitness':['اللياقة البدنية والصحية','Physical fitness'],
+  'sport.teamgames':['الألعاب الجماعية','Team games'],
+  'sport.solo':['الألعاب الفردية','Individual sports'],
+  'sport.fairplay':['القيم والتوازن في الملعب','Values on the field'],
+  'sport.tournaments':['البطولات والدوريات','Tournaments & leagues'],
+  'trips.national':['الرحلات الوطنية','National trips'],
+  'trips.community':['الرحلات المجتمعية','Community trips'],
+  'trips.educational':['الرحلات التعليمية','Educational trips'],
+  'trips.fun':['الرحلات الترفيهية','Recreational trips'],
+  'trips.adventure':['الاستكشافية والمبيت','Expedition & overnight']
+};
+const NEEDS={
+  trainer:['منشّط مدرب','Facilitator'],materials:['أدوات ومطبوعات','Materials'],
+  devices:['أجهزة وشبكة','Devices'],space:['قاعة مجهزة','Indoor space'],
+  outdoor:['مساحة خارجية','Outdoor space'],transport:['نقل','Transport'],
+  guest:['ضيف أو خبير','Guest speaker'],safety:['تأمين وسلامة','Safety cover'],
+  family:['موافقة ومشاركة أسرة','Family consent'],media:['توثيق إعلامي','Media capture'],
+  kit:['حزمة تدريب خاصة','Special kit'],facility:['مرفق خارجي','External facility']
+};
+const PHASE_LABELS=[['الدورة التدريبية','أساليب التعلم'],['الورشة التطبيقية','أساليب الممارسة'],['التحدي','أساليب إظهار الأثر']];
+const LIB=[
+/* ---------------- مسار التنمية الشخصية والقيادة ---------------- */
+{id:'L1',t:'lead',f:'thinking',ar:'إدارة الوقت',en:'Time management',ages:[10,15],load:2,need:['trainer','materials'],tags:['planning','discipline'],
+ goal:{ar:'تنظيم الوقت والتخطيط للمهام وبناء عادة الالتزام.',en:'Organise time, plan tasks and build a habit of commitment.'},
+ ph:[['أساليب تنظيم الوقت والتخطيط للمهام.','Methods for organising time and planning tasks.'],
+     ['إعداد خطة عملية لأسبوع كامل.','Build a practical plan for a full week.'],
+     ['تطبيق الخطة أسبوعًا ومتابعة الالتزام بها.','Apply the plan for a week and track commitment.']]},
+{id:'L2',t:'lead',f:'thinking',ar:'مهارات التفكير الإبداعي',en:'Creative thinking',ages:[10,15],load:2,need:['trainer','materials'],tags:['creativity','ideation'],
+ goal:{ar:'تطوير التفكير المنظم والإبداعي في حل المشكلات.',en:'Develop structured, creative problem solving.'},
+ ph:[['التعرف إلى أساليب التفكير الإبداعي.','Explore creative-thinking methods.'],
+     ['حل مشكلة جماعيًا بطرق غير تقليدية.','Solve a problem as a team in unconventional ways.'],
+     ['ابتكار فكرة خلال العمل ضمن فرق.','Invent a new idea while working in teams.']]},
+{id:'L3',t:'lead',f:'comm',ar:'فن التواصل الفعال',en:'Effective communication',ages:[10,15],load:2,need:['trainer','materials'],tags:['communication','dialogue'],
+ goal:{ar:'تنمية مهارات الحوار والتواصل والإقناع مع الآخرين.',en:'Build dialogue, communication and persuasion skills.'},
+ ph:[['قواعد الحوار وأدوات التواصل والإقناع.','Dialogue rules, communication and persuasion tools.'],
+     ['إجراء حوار ثنائي وتطبيق آدابه.','Run a paired dialogue applying its etiquette.'],
+     ['مناظرة ودية لعرض الرأي أمام الجمهور.','A friendly debate presenting a view to an audience.']]},
+{id:'L4',t:'lead',f:'comm',ar:'التحدث أمام الجمهور',en:'Public speaking',ages:[11,15],load:3,need:['trainer','space','media'],tags:['publicspeaking','confidence'],
+ goal:{ar:'التغلب على رهبة المنصة وتقديم فكرة بوضوح وثبات.',en:'Overcome stage fear and present an idea clearly and steadily.'},
+ ph:[['أساليب التعامل مع رهبة التحدث.','Handling the fear of speaking.'],
+     ['إلقاء كلمة قصيرة مدتها دقيقة واحدة.','Deliver a one-minute talk.'],
+     ['مسابقة المتحدث الصغير أمام الحضور.','A young-speaker contest in front of an audience.']]},
+{id:'L5',t:'lead',f:'emotional',ar:'الثقة بالنفس',en:'Self-confidence',ages:[10,15],load:2,need:['trainer','safety'],tags:['confidence','initiative'],
+ goal:{ar:'تعزيز الثقة بالنفس والقدرة على تقديم الذات.',en:'Strengthen self-confidence and self-presentation.'},
+ ph:[['التعرف إلى أساليب بناء الثقة بالنفس.','Explore ways to build self-confidence.'],
+     ['تقديم الطالب نفسه في تمرين فردي.','A short individual self-introduction exercise.'],
+     ['عرض ذاتي قصير بثبات أمام الجمهور.','A brief, steady self-presentation to an audience.']]},
+{id:'L6',t:'lead',f:'thinking',ar:'اتخاذ القرار',en:'Decision making',ages:[11,15],load:2,need:['trainer','materials'],tags:['decision','planning'],
+ goal:{ar:'الموازنة بين البدائل واتخاذ قرار مبني على معايير.',en:'Weigh alternatives and decide against clear criteria.'},
+ ph:[['خطوات اتخاذ القرار والموازنة بين البدائل.','Decision steps and weighing alternatives.'],
+     ['اختيار حل مناسب لموقف افتراضي.','Choose a fitting solution for a scenario.'],
+     ['اتخاذ قرار جماعي سريع ضمن فرق.','Make a fast group decision within teams.']]},
+{id:'L7',t:'lead',f:'comm',ar:'القيادة المبكرة',en:'Early leadership',ages:[12,15],load:3,need:['trainer','materials'],tags:['leadership','teamwork','responsibility'],
+ goal:{ar:'فهم أدوار القائد وتولي مسؤولية فريق فعليًا.',en:'Understand a leader’s roles and actually lead a team.'},
+ ph:[['مفهوم القيادة وأدوار قائد الفريق.','Leadership concepts and team-leader roles.'],
+     ['تولي قيادة الفريق لمدة يوم واحد.','Lead a team for one day.'],
+     ['مهمة جماعية لتطبيق مهارات القيادة.','A group mission applying leadership skills.']]},
+{id:'L8',t:'lead',f:'emotional',ar:'الذكاء العاطفي',en:'Emotional intelligence',ages:[10,15],load:2,need:['trainer','safety'],tags:['emotions','dialogue'],
+ goal:{ar:'فهم المشاعر وضبط الانفعالات في المواقف المختلفة.',en:'Understand feelings and regulate emotions across situations.'},
+ ph:[['فهم المشاعر والتعرف إلى أثرها في السلوك.','Understand feelings and their effect on behaviour.'],
+     ['محاكاة موقف يتطلب ضبط الانفعال.','Simulate a situation that demands emotional control.'],
+     ['تطبيق مهارات التعامل الهادئ مع المشاعر.','Apply calm-responding skills.']]},
+{id:'L9',t:'lead',f:'islamic',ar:'قيم القيادة من السيرة',en:'Leadership values from the Seerah',ages:[10,15],load:1,need:['trainer','guest'],tags:['islamicvalues','rolemodels','leadership'],
+ goal:{ar:'ربط القيادة بالقيم الإسلامية والقدوة الحسنة.',en:'Connect leadership to Islamic values and good role models.'},
+ ph:[['نماذج قيادية من السيرة النبوية وسير الصحابة.','Leadership models from the Seerah and the Companions.'],
+     ['تحليل قصة واستخلاص قيمها القيادية.','Analyse a story and extract its leadership values.'],
+     ['عرض موقف يطبق إحدى القيم القيادية.','Present a situation applying one leadership value.']]},
+{id:'L10',t:'lead',f:'islamic',ar:'الحوار بالتي هي أحسن',en:'Good-faith dialogue',ages:[10,15],load:2,need:['trainer','guest'],tags:['dialogue','islamicvalues'],
+ goal:{ar:'احترام الاختلاف وإدارة الحوار بآداب واضحة.',en:'Respect difference and manage dialogue with clear etiquette.'},
+ ph:[['آداب الحوار واحترام الاختلاف في الإسلام.','Dialogue etiquette and respecting difference.'],
+     ['مناقشة موضوع بسيط مع احترام الآراء.','Discuss a simple topic while respecting views.'],
+     ['مناظرة بين الفرق تلتزم بآداب الحوار.','A team debate bound by dialogue etiquette.']]},
+{id:'L11',t:'lead',f:'thinking',ar:'التفكير الإيجابي',en:'Positive thinking',ages:[10,15],load:1,need:['trainer'],tags:['positivity','confidence'],
+ goal:{ar:'بناء نظرة إيجابية وأثرها في السلوك اليومي.',en:'Build a positive outlook and its effect on daily behaviour.'},
+ ph:[['أسس التفكير الإيجابي وأثره في السلوك.','Foundations of positive thinking and its impact.'],
+     ['تدوين عشرة أمور إيجابية في حياة الطالب.','List ten positive things in the student’s life.'],
+     ['مشاركة أمر إيجابي يوميًا لمدة أسبوع.','Share one positive thing daily for a week.']]},
+{id:'L12',t:'lead',f:'thinking',ar:'بناء العادات الناجحة',en:'Building successful habits',ages:[10,15],load:2,need:['trainer','materials'],tags:['planning','discipline','positivity'],
+ goal:{ar:'تكوين عادة إيجابية والمحافظة عليها بخطة واضحة.',en:'Form and sustain a positive habit with a clear plan.'},
+ ph:[['خطوات تكوين عادة إيجابية والمحافظة عليها.','Steps to form and keep a positive habit.'],
+     ['اختيار عادة وإعداد خطة لتطبيقها.','Choose a habit and plan its application.'],
+     ['متابعة ممارسة العادة لمدة أسبوع.','Track the habit for a week.']]},
+{id:'L13',t:'lead',f:'emotional',ar:'إدارة الضغوط',en:'Stress management',ages:[11,15],load:2,need:['trainer','safety'],tags:['stress','emotions'],
+ goal:{ar:'التعامل مع التوتر والضغط بهدوء وأدوات عملية.',en:'Handle tension and pressure calmly with practical tools.'},
+ ph:[['التعرف إلى التوتر وأساليب التعامل معه.','Recognise stress and ways to handle it.'],
+     ['تطبيق تمرين للتنفس والاسترخاء.','Practise breathing and relaxation.'],
+     ['محاكاة موقف ضاغط والتعامل معه بهدوء.','Simulate a high-pressure moment and respond calmly.']]},
+{id:'L14',t:'lead',f:'self',ar:'اكتشاف نقاط القوة',en:'Discovering strengths',ages:[10,15],load:2,need:['trainer','materials'],tags:['confidence','strengths'],
+ goal:{ar:'فهم القدرات والاهتمامات وتحديد فرص التحسن.',en:'Understand abilities and interests, and spot growth areas.'},
+ ph:[['التعرف إلى القدرات والاهتمامات الشخصية.','Explore personal abilities and interests.'],
+     ['إعداد خريطة لنقاط القوة وفرص التحسن.','Map strengths and growth opportunities.'],
+     ['عرض إحدى نقاط القوة أمام الزملاء.','Present one strength to peers.']]},
+{id:'L15',t:'lead',f:'comm',ar:'المبادرة والتغيير',en:'Initiative & change',ages:[11,15],load:2,need:['trainer','materials'],tags:['initiative','leadership'],
+ goal:{ar:'الانتقال من الفكرة إلى خطوة عملية تُحدث فرقًا.',en:'Move from idea to a practical step that makes a difference.'},
+ ph:[['مفهوم المبادرة ودورها في إحداث التغيير.','What initiative is and how it drives change.'],
+     ['تحديد خطوة عملية لتحسين موقف يومي.','Define a practical step to improve a daily situation.'],
+     ['تنفيذ مبادرة صغيرة ضمن فريق.','Deliver a small initiative inside a team.']]},
+
+/* ---------------- مسار القيم التربوية ---------------- */
+{id:'V1',t:'values',f:'ethics',ar:'الصدق والأمانة',en:'Honesty & trustworthiness',ages:[10,15],load:1,need:['trainer','materials'],tags:['honesty','trust'],
+ goal:{ar:'ترسيخ الصدق والأمانة في القول والعمل.',en:'Anchor honesty and trustworthiness in word and deed.'},
+ ph:[['معنى الصدق والأمانة في الحياة اليومية.','The meaning of honesty in daily life.'],
+     ['تطبيق الصدق في مواقف عملية.','Apply honesty in practical situations.'],
+     ['متابعة الالتزام بالصدق لمدة أسبوع.','Track honesty commitment for a week.']]},
+{id:'V2',t:'values',f:'faith',ar:'بر الوالدين',en:'Honoring parents',ages:[10,15],load:1,need:['trainer','family'],tags:['parents','mercy'],
+ goal:{ar:'تحويل البر إلى أعمال يومية ملموسة مع الأسرة.',en:'Turn honouring parents into concrete daily acts.'},
+ ph:[['معنى بر الوالدين في القرآن والسنة.','The meaning of honouring parents in Quran and Sunnah.'],
+     ['إعداد قائمة بأعمال البر الممكنة.','List feasible acts of kindness to parents.'],
+     ['تنفيذ عمل من أعمال البر مع ولي الأمر.','Carry out one act of kindness with a parent.']]},
+{id:'V3',t:'values',f:'faith',ar:'الإحسان والإتقان',en:'Excellence in work',ages:[10,15],load:1,need:['trainer','materials'],tags:['excellence','responsibility'],
+ goal:{ar:'إتقان العمل وربط الجودة بالقيمة لا بالنتيجة فقط.',en:'Master the work and tie quality to values, not outcomes alone.'},
+ ph:[['مفهوم الإحسان وأهمية إتقان العمل.','The concept of excellence and doing work well.'],
+     ['إنجاز رسم أو عمل يدوي بإتقان.','Complete a drawing or craft with care.'],
+     ['مسابقة لاختيار عمل متقن.','A contest for the most accomplished piece.']]},
+{id:'V4',t:'values',f:'relations',ar:'التعاون والعمل الجماعي',en:'Cooperation & teamwork',ages:[10,15],load:2,need:['trainer','materials'],tags:['teamwork','kindness'],
+ goal:{ar:'إنجاز مهمة مشتركة بروح الفريق وتنسيق الأدوار.',en:'Deliver a shared task with coordination and team spirit.'},
+ ph:[['معنى التعاون وفائدته في إنجاز المهام.','The meaning and value of cooperation.'],
+     ['لعبة جماعية تتطلب تنسيق الأدوار.','A team game requiring role coordination.'],
+     ['إنجاز مهمة مشتركة بروح الفريق.','Complete a shared task in team spirit.']]},
+{id:'V5',t:'values',f:'ethics',ar:'المسؤولية والانضباط',en:'Responsibility & discipline',ages:[10,15],load:2,need:['trainer','materials'],tags:['responsibility','discipline'],
+ goal:{ar:'تحمّل المسؤولية والالتزام بالمهام والمواعيد.',en:'Own responsibility and commit to tasks and times.'},
+ ph:[['معنى المسؤولية والالتزام بالمهام.','What responsibility and task commitment mean.'],
+     ['إدارة نشاط جماعي بانضباط.','Run a group activity with discipline.'],
+     ['أسبوع من الالتزام بالحضور والمهام.','A week of committed attendance and tasks.']]},
+{id:'V6',t:'values',f:'justice',ar:'العدل والإنصاف',en:'Justice & fairness',ages:[11,15],load:2,need:['trainer','materials'],tags:['justice','decision'],
+ goal:{ar:'فهم الحقوق والواجبات والتمييز بين العادل وغيره.',en:'Understand rights and duties and tell fair from unfair.'},
+ ph:[['معنى العدل وتطبيقاته في الحياة.','The meaning of justice and its applications.'],
+     ['تحليل مواقف غير عادلة واقتراح حلول.','Analyse unfair situations and propose solutions.'],
+     ['محاكاة لجنة طلابية تفصل بين الآراء بعدل.','A student panel judging views fairly.']]},
+{id:'V7',t:'values',f:'faith',ar:'الحياء والعفة',en:'Modesty & decency',ages:[10,15],load:1,need:['trainer'],tags:['modesty'],
+ goal:{ar:'فهم الحياء كسلوك يومي لا كشعار.',en:'Understand modesty as daily conduct, not a slogan.'},
+ ph:[['معنى الحياء والعفة في الإسلام.','The meaning of modesty in Islam.'],
+     ['مناقشة مواقف تعبر عن الحياء والعفة.','Discuss situations that express modesty.'],
+     ['تطبيق سلوك يعكس الحياء ومتابعته.','Apply and track one modest behaviour.']]},
+{id:'V8',t:'values',f:'faith',ar:'قيمنا وقدوتنا',en:'Our values & role models',ages:[10,15],load:1,need:['trainer','guest'],tags:['rolemodels','islamicvalues'],
+ goal:{ar:'الاقتداء بنماذج حسنة وفهم القيمة من القصة.',en:'Learn from good role models and read values in stories.'},
+ ph:[['قصص من سير الأنبياء والصحابة.','Stories from the prophets and the Companions.'],
+     ['سرد قصة ومناقشة القيمة التي تتضمنها.','Tell a story and discuss the value within it.'],
+     ['تقديم قصة تعبر عن قيمة تربوية.','Present a story expressing a value.']]},
+{id:'V9',t:'values',f:'ethics',ar:'الأمانة في العمل والكلمة',en:'Trust in word & work',ages:[10,15],load:1,need:['trainer','materials'],tags:['trust','honesty'],
+ goal:{ar:'أمانة القول والعمل في المواقف اليومية.',en:'Honesty of word and work in everyday situations.'},
+ ph:[['صور الأمانة في القول والعمل.','Forms of trustworthiness in speech and work.'],
+     ['كتابة موقف يوضح قيمة الأمانة.','Write a situation that shows trust.'],
+     ['إعداد رسالة قصيرة تحث على الأمانة.','Prepare a short message promoting trust.']]},
+{id:'V10',t:'values',f:'relations',ar:'الرفق بالحيوان والطبيعة',en:'Kindness to animals & nature',ages:[10,15],load:2,need:['trainer','outdoor'],tags:['kindness','mercy'],
+ goal:{ar:'الرحمة بالمحيط والعناية بالطبيعة عمليًا.',en:'Practise compassion for animals and care for nature.'},
+ ph:[['قيمة الرحمة بالحيوان والعناية بالطبيعة.','Compassion for animals and care for nature.'],
+     ['زراعة نبات أو المشاركة في رعايته.','Plant something or help care for it.'],
+     ['تنفيذ مبادرة بيئية مصغرة.','Deliver a small environmental initiative.']]},
+{id:'V11',t:'values',f:'balance',ar:'الامتنان وتقدير النعم',en:'Gratitude',ages:[10,15],load:1,need:['trainer','materials'],tags:['gratitude','positivity'],
+ goal:{ar:'تنمية الشكر وتقدير النعم في التفاصيل اليومية.',en:'Cultivate gratitude in everyday details.'},
+ ph:[['أهمية الشكر وتقدير النعم.','The importance of gratitude.'],
+     ['كتابة ثلاث نعم في حياة الطالب.','Write three blessings in the student’s life.'],
+     ['تدوين مظاهر الامتنان خلال أسبوع.','Record moments of gratitude over a week.']]},
+{id:'V12',t:'values',f:'relations',ar:'الأخلاق الرياضية',en:'Sportsmanship',ages:[10,15],load:2,need:['trainer','outdoor','safety'],tags:['sportsmanship','fairplay','emotions'],
+ goal:{ar:'اللعب النظيف واحترام المنافس وقبول الخسارة.',en:'Play fair, respect opponents and accept losing.'},
+ ph:[['معنى اللعب النظيف وقيم المنافسة.','What fair play and competition values mean.'],
+     ['مباراة يلتزم المشاركون فيها بالقيم.','A match where participants commit to values.'],
+     ['كأس الروح الرياضية للسلوك الإيجابي.','A sportsmanship cup for positive conduct.']]},
+{id:'V13',t:'values',f:'ethics',ar:'الوفاء بالعهد',en:'Keeping promises',ages:[10,15],load:1,need:['trainer','materials'],tags:['commitment','trust'],
+ goal:{ar:'الالتزام بالاتفاقات ومتابعة الوفاء بها.',en:'Commit to agreements and follow through.'},
+ ph:[['قيمة الوفاء بالعهد في القرآن والسنة.','The value of keeping promises.'],
+     ['صياغة اتفاق بسيط بين الطلاب.','Draft a simple agreement between students.'],
+     ['متابعة الوفاء بالاتفاق خلال أسبوع.','Track adherence for a week.']]},
+{id:'V14',t:'values',f:'balance',ar:'التواضع والاعتدال',en:'Humility & moderation',ages:[10,15],load:1,need:['trainer'],tags:['humility','positivity'],
+ goal:{ar:'التمييز بين التواضع والغرور والاعتدال في التعامل.',en:'Tell humility from arrogance and stay moderate.'},
+ ph:[['معنى التواضع والاعتدال في التعامل.','The meaning of humility and moderation.'],
+     ['نقاش يميز بين التواضع والغرور.','A discussion separating humility from arrogance.'],
+     ['رصد مواقف عملية تعبر عن التواضع.','Observe real situations that show humility.']]},
+{id:'V15',t:'values',f:'faith',ar:'الرحمة والعطف',en:'Compassion & kindness',ages:[10,15],load:2,need:['trainer','transport','family'],tags:['mercy','kindness','service'],
+ goal:{ar:'تحويل الرحمة إلى مبادرة تصل إلى الآخرين.',en:'Turn compassion into an initiative that reaches others.'},
+ ph:[['معنى الرحمة والعطف في التعامل.','The meaning of compassion in dealing with others.'],
+     ['رسم مشهد أو كتابة قصة عن الرحمة.','Draw a scene or write a story about compassion.'],
+     ['مبادرة رحمة بزيارة دار أيتام أو مستشفى.','A compassion visit to an orphanage or hospital.']]},
+
+/* ---------------- مسار المهارات الحياتية ---------------- */
+{id:'H1',t:'life',f:'practical',ar:'إعداد الطعام الصحي',en:'Healthy cooking',ages:[10,15],load:2,need:['trainer','kit','safety'],tags:['cooking','independence'],
+ goal:{ar:'اختيار الغذاء الصحي وإعداد وجبة باستقلالية.',en:'Choose healthy food and prepare a meal independently.'},
+ ph:[['مبادئ اختيار الغذاء الصحي.','Principles of healthy food choices.'],
+     ['إعداد وجبة خفيفة صحية.','Prepare a healthy snack.'],
+     ['إعداد وجبة بسيطة بصورة مستقلة.','Prepare a simple meal independently.']]},
+{id:'H2',t:'life',f:'practical',ar:'الزراعة المنزلية',en:'Home gardening',ages:[10,14],load:1,need:['trainer','materials','outdoor'],tags:['gardening','independence'],
+ goal:{ar:'العناية بالنبات ومراقبة النمو مسؤولية يومية.',en:'Care for a plant and follow its growth daily.'},
+ ph:[['مبادئ الزراعة والعناية بالنبات.','Gardening and plant-care basics.'],
+     ['غرس بذرة في أصيص صغير.','Plant a seed in a small pot.'],
+     ['متابعة نمو النبات أسبوعيًا.','Follow the plant’s growth weekly.']]},
+{id:'H3',t:'life',f:'practical',ar:'الحرف اليدوية والصيانة البسيطة',en:'Crafts & simple repair',ages:[11,15],load:2,need:['trainer','kit','safety'],tags:['crafts','independence'],
+ goal:{ar:'استخدام الأدوات وإنجاز إصلاح بسيط بأمان.',en:'Use tools safely and complete a simple repair.'},
+ ph:[['التعرف إلى الأدوات وقواعد استخدامها.','Know the tools and how to use them safely.'],
+     ['إصلاح شيء بسيط، مثل لعبة أو كرسي.','Repair something simple, like a toy or chair.'],
+     ['إنجاز إصلاح بسيط وتوضيح خطواته.','Complete a repair and explain the steps.']]},
+{id:'H4',t:'life',f:'practical',ar:'المهارات المنزلية الأساسية',en:'Basic home skills',ages:[10,14],load:1,need:['trainer','materials'],tags:['home','independence'],
+ goal:{ar:'الترتيب والنظافة كعادات مستقلة.',en:'Tidiness and cleanliness as independent habits.'},
+ ph:[['مبادئ الترتيب والنظافة المنزلية.','Basics of tidiness and home cleanliness.'],
+     ['ترتيب غرفة خلال وقت محدد.','Tidy a room within a set time.'],
+     ['تقييم الغرفة وفق معايير الترتيب.','Evaluate the room against tidy criteria.']]},
+{id:'H5',t:'life',f:'health',ar:'العادات الصحية اليومية',en:'Daily health habits',ages:[10,15],load:1,need:['trainer','materials'],tags:['hygiene','discipline'],
+ goal:{ar:'النوم والنشاط والغذاء المتوازن في جدول يومي.',en:'Sleep, activity and balanced food in a daily routine.'},
+ ph:[['أهمية النوم والنشاط والغذاء المتوازن.','Why sleep, activity and balanced food matter.'],
+     ['إعداد جدول يومي للعادات الصحية.','Build a daily healthy-habits schedule.'],
+     ['متابعة العادات الصحية لمدة سبعة أيام.','Track the habits for seven days.']]},
+{id:'H6',t:'life',f:'health',ar:'الإسعافات الأولية',en:'First aid',ages:[11,15],load:2,need:['trainer','kit','safety'],tags:['firstaid','safety'],
+ goal:{ar:'التصرف الأولي الصحيح في الجروح والحروق.',en:'Respond correctly to cuts and burns.'},
+ ph:[['مبادئ التعامل مع الجروح والحروق.','Basics of handling cuts and burns.'],
+     ['تطبيق مبسط باستخدام أدوات تدريبية.','A simplified drill with training materials.'],
+     ['مهمة جماعية للمسعفين الصغار.','A team mission for young first-aiders.']]},
+{id:'H7',t:'life',f:'health',ar:'السلامة الشخصية',en:'Personal safety',ages:[10,15],load:1,need:['trainer','safety'],tags:['safety','independence'],
+ goal:{ar:'قواعد السلامة في المنزل والمدرسة والشارع.',en:'Safety rules at home, school and on the street.'},
+ ph:[['قواعد السلامة في المنزل والمدرسة والشارع.','Safety rules at home, school and street.'],
+     ['محاكاة مواقف والتدرب على التصرف السليم.','Simulate situations and practise the right response.'],
+     ['تطبيق قواعد السلامة في مهمة عملية.','Apply safety rules in a practical mission.']]},
+{id:'H8',t:'life',f:'money',ar:'إدارة المال الشخصي',en:'Personal money management',ages:[10,15],load:2,need:['trainer','materials'],tags:['money','saving'],
+ goal:{ar:'الادخار والإنفاق الواعي وتوزيع المصروف.',en:'Save, spend consciously and allocate pocket money.'},
+ ph:[['مبادئ الادخار والإنفاق الواعي.','Saving and conscious-spending basics.'],
+     ['توزيع المصروف الأسبوعي على أظرف.','Split weekly money into envelopes.'],
+     ['تحدي الادخار وفق الخطة المحددة.','A saving challenge per the plan.']]},
+{id:'H9',t:'life',f:'money',ar:'التسوق الذكي',en:'Smart shopping',ages:[10,15],load:1,need:['trainer','transport'],tags:['shopping','money'],
+ goal:{ar:'التمييز بين الحاجة والرغبة عند الشراء.',en:'Tell needs from wants when buying.'},
+ ph:[['التمييز بين الاحتياجات والرغبات.','Telling needs from wants.'],
+     ['محاكاة التسوق وفق قائمة محددة.','A shopping simulation against a set list.'],
+     ['اختيار مشتريات مناسبة للاحتياج.','Choose purchases that fit the need.']]},
+{id:'H10',t:'life',f:'money',ar:'التخطيط المالي البسيط',en:'Simple budgeting',ages:[12,15],load:2,need:['trainer','materials'],tags:['budget','money'],
+ goal:{ar:'إعداد ميزانية شخصية وشرح بنودها.',en:'Build a personal budget and explain its lines.'},
+ ph:[['مفهوم الميزانية وتوزيع المصروفات.','Budget concepts and expense allocation.'],
+     ['إعداد ميزانية شخصية لمدة شهر.','Prepare a one-month personal budget.'],
+     ['عرض خطة الميزانية وتوضيح بنودها.','Present the budget and explain its lines.']]},
+{id:'H11',t:'life',f:'family',ar:'خدمة المجتمع',en:'Community service',ages:[10,15],load:2,need:['trainer','transport','family'],tags:['service','civic'],
+ goal:{ar:'معنى التطوع وتنفيذ مبادرة داخل المجتمع.',en:'Understand volunteering and run an initiative.'},
+ ph:[['معنى التطوع وخدمة الآخرين.','The meaning of volunteering and serving others.'],
+     ['تنفيذ مبادرة تطوعية داخل الأكاديمية.','Run a volunteering initiative within the academy.'],
+     ['اقتراح فكرة لخدمة المجتمع.','Propose an idea to serve the community.']]},
+{id:'H12',t:'life',f:'family',ar:'مهارات التعامل مع الأسرة',en:'Family interaction skills',ages:[10,15],load:1,need:['trainer','family'],tags:['family','parents'],
+ goal:{ar:'آداب الحديث والتعاون مع أفراد الأسرة.',en:'Conversation etiquette and cooperation at home.'},
+ ph:[['آداب الحديث والتعامل مع أفراد الأسرة.','Etiquette for talking with family members.'],
+     ['محاكاة موقف يومي مع ولي الأمر.','Simulate a daily situation with a parent.'],
+     ['متابعة أعمال البر والتعاون خلال أسبوع.','Track kindness and cooperation for a week.']]},
+{id:'H13',t:'life',f:'family',ar:'العمل الجماعي المنزلي',en:'Household teamwork',ages:[10,14],load:1,need:['trainer','materials'],tags:['chores','teamwork','family'],
+ goal:{ar:'المشاركة في مهام المنزل كمسؤولية مشتركة.',en:'Share household tasks as joint responsibility.'},
+ ph:[['قيمة المشاركة في مهام المنزل.','The value of sharing household tasks.'],
+     ['إعداد ركن أو وجبة بمشاركة جماعية.','Set up a corner or meal as a group.'],
+     ['تنفيذ مساهمة منزلية وتوثيقها.','Contribute at home and document it.']]},
+{id:'H14',t:'life',f:'digital',ar:'الاستخدام الآمن للتقنية',en:'Safe tech use',ages:[10,15],load:1,need:['trainer','devices'],tags:['screen','safety'],
+ goal:{ar:'تنظيم استخدام الأجهزة وحماية الوقت والخصوصية.',en:'Regulate device use and protect time and privacy.'},
+ ph:[['أثر الإفراط في استخدام الأجهزة.','The effect of excessive device use.'],
+     ['إعداد خطة للابتعاد عن الأجهزة ليلًا.','Plan device-free evenings.'],
+     ['تطبيق الخطة خلال أسبوع ومتابعتها.','Apply and track the plan for a week.']]},
+{id:'H15',t:'life',f:'digital',ar:'التطبيقات المفيدة',en:'Useful apps',ages:[10,15],load:1,need:['trainer','devices'],tags:['apps','screen'],
+ goal:{ar:'توظيف التطبيقات في التعلم والإبداع.',en:'Use apps for learning and creating.'},
+ ph:[['التعرف إلى تطبيقات التعلم والإبداع.','Explore learning and creativity apps.'],
+     ['تجربة تطبيق تعليمي بصورة عملية.','Try an educational app hands-on.'],
+     ['عرض استخدام مفيد لأحد التطبيقات.','Show a useful use of one app.']]},
+
+/* ---------------- مسار العلوم والابتكار ---------------- */
+{id:'S1',t:'stem',f:'code',ar:'البرمجة المرئية باستخدام سكراتش',en:'Visual coding with Scratch',ages:[10,14],load:2,need:['trainer','devices'],tags:['scratch','creativity'],
+ goal:{ar:'بناء لعبة بسيطة بأوامر مرئية خطوة بخطوة.',en:'Build a simple game with visual blocks, step by step.'},
+ ph:[['أساسيات البرمجة المرئية في سكراتش.','Visual programming basics in Scratch.'],
+     ['تصميم لعبة بسيطة باستخدام الأوامر.','Design a simple game using blocks.'],
+     ['عرض لعبة تعليمية صغيرة.','Present a small educational game.']]},
+{id:'S2',t:'stem',f:'code',ar:'مهارات التطبيقات المكتبية',en:'Office app skills',ages:[10,15],load:1,need:['trainer','devices'],tags:['office'],
+ goal:{ar:'إنتاج مستند أو جدول أو عرض منظم.',en:'Produce a tidy document, table or deck.'},
+ ph:[['مدخل إلى وورد وإكسل وباوربوينت.','Intro to Word, Excel and PowerPoint.'],
+     ['إنشاء مستند أو جدول أو عرض تقديمي.','Create a document, table or presentation.'],
+     ['تقديم عرض منظم باستخدام الأدوات.','Deliver an organised presentation with the tools.']]},
+{id:'S3',t:'stem',f:'code',ar:'البرمجة النصية باستخدام بايثون',en:'Python scripting',ages:[12,15],load:3,need:['trainer','devices'],tags:['python','creativity'],
+ goal:{ar:'كتابة برنامج قصير يؤدي مهمة محددة.',en:'Write a short program that performs a set task.'},
+ ph:[['فهم الأوامر الأساسية في لغة بايثون.','Understand basic Python commands.'],
+     ['كتابة برنامج بسيط لآلة حاسبة.','Write a simple calculator program.'],
+     ['كتابة برنامج قصير يؤدي مهمة محددة.','Write a short program for a given task.']]},
+{id:'S4',t:'stem',f:'code',ar:'تصميم مواقع الويب المبسطة',en:'Simple web pages',ages:[12,15],load:3,need:['trainer','devices'],tags:['web','creativity'],
+ goal:{ar:'بناء صفحة تعريفية واضحة ومنظمة.',en:'Build a clear, well-structured profile page.'},
+ ph:[['أساسيات بناء صفحات الويب.','Web page building basics.'],
+     ['تصميم صفحة تعريفية لكل طالب.','Design a profile page for each student.'],
+     ['عرض موقع تعريفي واضح ومنظم.','Present a clear, organised profile site.']]},
+{id:'S5',t:'stem',f:'robotics',ar:'الروبوتات المبسطة',en:'Simple robotics',ages:[11,15],load:3,need:['trainer','kit','devices'],tags:['robots','stem'],
+ goal:{ar:'تركيب روبوت صغير وتجربة حركته.',en:'Assemble a small robot and test its movement.'},
+ ph:[['التعرف إلى مكونات الروبوت.','Identify robot components.'],
+     ['تركيب روبوت صغير.','Assemble a small robot.'],
+     ['تحدي حركة الروبوت وسرعته.','A robot speed and movement challenge.']]},
+{id:'S6',t:'stem',f:'robotics',ar:'أردوينو والاختراعات الصغيرة',en:'Arduino & micro-inventions',ages:[12,15],load:3,need:['trainer','kit','devices'],tags:['arduino','stem','creativity'],
+ goal:{ar:'ابتكار أداة تؤدي وظيفة عملية بالمستشعرات.',en:'Invent a tool with sensors that does a real job.'},
+ ph:[['التعرف إلى أساسيات لوحة أردوينو.','Arduino board basics.'],
+     ['تشغيل مصباح أو مستشعر للحركة.','Drive a light or motion sensor.'],
+     ['ابتكار أداة تؤدي وظيفة عملية.','Invent a tool that serves a practical need.']]},
+{id:'S7',t:'stem',f:'robotics',ar:'التصميم في العلوم والهندسة والرياضيات',en:'STEM design',ages:[11,15],load:2,need:['trainer','materials','space'],tags:['stem','teamwork','creativity'],
+ goal:{ar:'بناء نموذج واختبار قدرته على التحمل.',en:'Build a model and test how much it holds.'},
+ ph:[['مدخل إلى التعلم التكاملي التطبيقي.','Intro to applied integrated learning.'],
+     ['بناء نموذج لجسر أو برج بأدوات بسيطة.','Build a bridge or tower from simple materials.'],
+     ['اختبار قدرة النموذج على التحمل.','Test the model’s load capacity.']]},
+{id:'S8',t:'stem',f:'tech',ar:'الذكاء الاصطناعي المبسط',en:'AI basics',ages:[12,15],load:2,need:['trainer','devices'],tags:['ai','creativity'],
+ goal:{ar:'فهم فكرة الذكاء الاصطناعي واستخدام أداة منه.',en:'Understand AI and use one AI tool.'},
+ ph:[['مقدمة في مفهوم الذكاء الاصطناعي.','Introduction to artificial intelligence.'],
+     ['تجربة أداة لإنشاء نص أو رسم.','Try a tool that generates text or images.'],
+     ['عرض فكرة تستخدم الذكاء الاصطناعي.','Pitch an idea that uses AI.']]},
+{id:'S9',t:'stem',f:'tech',ar:'الواقع الافتراضي والمعزز',en:'VR & AR',ages:[11,15],load:2,need:['trainer','devices','safety'],tags:['vr','creativity'],
+ goal:{ar:'التمييز بين الواقعين واقتراح استخدام مبتكر.',en:'Distinguish VR from AR and propose a novel use.'},
+ ph:[['التمييز بين الواقع الافتراضي والمعزز.','Tell virtual from augmented reality.'],
+     ['تجربة نظارة للواقع الافتراضي.','Try a VR headset.'],
+     ['اقتراح استخدام مبتكر للتجربة.','Propose an innovative use of the experience.']]},
+{id:'S10',t:'stem',f:'tech',ar:'التطبيقات التعليمية المفيدة',en:'Educational apps',ages:[10,15],load:1,need:['trainer','devices'],tags:['edapps','apps'],
+ goal:{ar:'اختيار تطبيق يدعم التعلم وعرض استخدامه.',en:'Pick a learning app and show how it helps.'},
+ ph:[['التعرف إلى تطبيقات تدعم التعلم.','Explore apps that support learning.'],
+     ['تجربة أحد التطبيقات بصورة عملية.','Try one app hands-on.'],
+     ['عرض استخدام تعليمي مفيد للتطبيق.','Show a useful educational use.']]},
+{id:'S11',t:'stem',f:'innovation',ar:'التفكير الابتكاري',en:'Innovative thinking',ages:[11,15],load:2,need:['trainer','materials'],tags:['ideation','creativity'],
+ goal:{ar:'توليد أفكار جديدة وتوضيح فائدتها.',en:'Generate fresh ideas and explain their value.'},
+ ph:[['أساليب توليد الأفكار وتطويرها.','Methods to generate and develop ideas.'],
+     ['جلسة عصف ذهني جماعية.','A group brainstorming session.'],
+     ['تقديم فكرة جديدة وتوضيح فائدتها.','Present a new idea and its benefit.']]},
+{id:'S12',t:'stem',f:'innovation',ar:'المشاريع التقنية المصغرة',en:'Mini tech projects',ages:[11,15],load:3,need:['trainer','kit','devices'],tags:['projects','teamwork'],
+ goal:{ar:'تنفيذ مشروع صغير وعرض فائدته.',en:'Deliver a small project and present its value.'},
+ ph:[['خطوات إعداد مشروع تقني صغير.','Steps to prepare a small tech project.'],
+     ['تنفيذ مشروع جماعي أو جهاز بسيط.','Build a group project or simple device.'],
+     ['عرض المشروع وشرح فائدته.','Present the project and its benefit.']]},
+{id:'S13',t:'stem',f:'innovation',ar:'هاكاثون مصغر',en:'Mini hackathon',ages:[12,15],load:3,need:['trainer','devices','space'],tags:['hackathon','teamwork','ideation'],
+ goal:{ar:'تطوير فكرة أو نموذج خلال 24 ساعة بروح الفريق.',en:'Develop an idea or prototype in 24 hours as a team.'},
+ ph:[['مفهوم الهاكاثون وطريقة العمل فيه.','What a hackathon is and how it works.'],
+     ['تشكيل فرق وتحديد فكرة لكل فريق.','Form teams and pick an idea per team.'],
+     ['تطوير فكرة أو نموذج خلال 24 ساعة.','Develop an idea or prototype within 24 hours.']]},
+{id:'S14',t:'stem',f:'collaborate',ar:'التعاون عبر مستندات جوجل',en:'Shared documents',ages:[11,15],load:1,need:['trainer','devices'],tags:['docs','teamwork'],
+ goal:{ar:'تقسيم الأدوار وكتابة تقرير جماعي منظم.',en:'Split roles and co-write an organised report.'},
+ ph:[['كيفية استخدام المستندات المشتركة.','How to use shared documents.'],
+     ['كتابة تقرير جماعي وتقسيم الأدوار.','Co-write a report and divide roles.'],
+     ['تقديم تقرير جماعي واضح ومنظم.','Deliver a clear, organised group report.']]},
+{id:'S15',t:'stem',f:'collaborate',ar:'العروض التقديمية المبتكرة',en:'Creative presentations',ages:[11,15],load:2,need:['trainer','devices','space'],tags:['presentations','publicspeaking'],
+ goal:{ar:'تنظيم الفكرة وعرضها بإقناع أمام لجنة.',en:'Organise an idea and pitch it persuasively.'},
+ ph:[['أساسيات تنظيم الفكرة وعرضها.','Basics of structuring and presenting an idea.'],
+     ['إعداد عرض تقديمي قصير.','Prepare a short presentation.'],
+     ['تقديم عرض إقناعي أمام اللجنة.','Deliver a persuasive pitch to a panel.']]},
+
+/* ---------------- مسار الرياضة ---------------- */
+{id:'SP1',t:'sport',f:'fitness',ar:'اللياقة البدنية والصحية',en:'Physical fitness',ages:[10,15],load:2,need:['trainer','outdoor','safety'],tags:['fitness','discipline'],
+ goal:{ar:'تنمية عناصر اللياقة وتعزيز الانضباط والانتظام.',en:'Build fitness components, discipline and consistency.'},
+ ph:[['التحمل والسرعة والقوة والمرونة والتوازن.','Endurance, speed, strength, flexibility, balance.'],
+     ['حصص كروس فت مصغرة وتحديات أسبوعية في الوثب والضغط والجري.','Mini circuits and weekly jump, push-up and run challenges.'],
+     ['اختبارات شهرية لقياس التطور وسباقات جماعية وكأس لياقة كل نصف سنة.','Monthly checks, group races and a fitness cup each half-year.']]},
+{id:'SP2',t:'sport',f:'teamgames',ar:'الألعاب الجماعية',en:'Team games',ages:[10,15],load:2,need:['outdoor','trainer','safety'],tags:['football','basketball','volleyball','teamwork'],
+ goal:{ar:'تطوير المهارات الفنية والعمل بروح الفريق.',en:'Develop technical skills and team spirit.'},
+ ph:[['كرة القدم وكرة السلة وكرة الطائرة وكرة اليد وألعاب متنوعة.','Football, basketball, volleyball, handball and mixed games.'],
+     ['التمرير والتحكم والتصويب والدفاع والمبادئ التكتيكية.','Passing, control, shooting, defence and tactics.'],
+     ['دوري داخلي وخارجي وكأس الأكاديمية وجوائز اللعب النظيف.','Internal and external leagues, academy cup and fair-play awards.']]},
+{id:'SP3',t:'sport',f:'solo',ar:'الألعاب الفردية',en:'Individual sports',ages:[10,15],load:2,need:['outdoor','trainer','safety'],tags:['swimming','martial','gymnastics','athletics'],
+ goal:{ar:'بناء مستوى فردي متدرج وتقدير الذات.',en:'Build graded individual skill and self-esteem.'},
+ ph:[['السباحة والدفاع عن النفس والجمباز وألعاب القوى المصغرة.','Swimming, self-defence, gymnastics and mini athletics.'],
+     ['توزيع الطلاب على مستويات مبتدئة ومتوسطة ومتقدمة.','Place students in beginner, intermediate and advanced levels.'],
+     ['بطولات فردية موسمية وعرض للمهارات أمام الجمهور.','Seasonal individual tournaments and a skills showcase.']]},
+{id:'SP4',t:'sport',f:'fairplay',ar:'القيم والتوازن في الملعب',en:'Values on the field',ages:[10,15],load:2,need:['trainer','outdoor','safety'],tags:['sportsmanship','emotions','fairplay'],
+ goal:{ar:'ضبط الانفعالات واحترام المنافس والتفكير تحت الضغط.',en:'Regulate emotions, respect rivals and think under pressure.'},
+ ph:[['الروح الرياضية والانضباط واللعب النظيف واحترام المنافس.','Sportsmanship, discipline, fair play and respect.'],
+     ['ورشة تطبيقية وإسناد التحكيم للطلاب في مباريات مصغرة.','Workshop and student refereeing in mini matches.'],
+     ['جائزة الروح الرياضية وتحليل مواقف الخسارة والفوز.','A sportsmanship award and analysis of loss and win.']]},
+{id:'SP5',t:'sport',f:'tournaments',ar:'البطولات والدوريات',en:'Tournaments & leagues',ages:[10,15],load:3,need:['outdoor','trainer','media','safety'],tags:['tournaments','teamwork','sportsmanship'],
+ goal:{ar:'تشغيل منافسة منظمة وتكريم عادل للمشاركين.',en:'Run an organised competition with fair recognition.'},
+ ph:[['البطولات الداخلية في كرة القدم والسلة والطائرة وبطولة اللياقة ودوري السباحة.','Internal football, basketball and volleyball leagues, a fitness cup and a summer swim league.'],
+     ['مباريات ودية ومشاركة في بطولات محلية أو إقليمية.','Friendlies and local or regional tournaments.'],
+     ['جداول وتحكيم ونشر نتائج وجوائز وكؤوس وأوسمة قيم.','Schedules, refereeing, published results, trophies and values medals.']]},
+
+/* ---------------- مسار الرحلات والبرامج النوعية ---------------- */
+{id:'T1',t:'trips',f:'national',ar:'الرحلات الوطنية',en:'National trips',ages:[10,15],load:2,need:['transport','trainer','family'],tags:['belonging','civic'],
+ goal:{ar:'ترسيخ الانتماء للوطن والاعتزاز بالهوية.',en:'Anchor national belonging and pride in identity.'},
+ ph:[['ترسيخ الانتماء للوطن والاعتزاز بالهوية.','Anchor belonging to the nation and pride in identity.'],
+     ['زيارة المعالم الوطنية والمتاحف والمواقع التاريخية والمشاركة في المناسبات الوطنية.','Visit national landmarks, museums and heritage sites and join national events.'],
+     ['تنمية الوعي التاريخي والثقافي وتعزيز الاعتزاز بالوطن.','Grow historical and cultural awareness and national pride.']]},
+{id:'T2',t:'trips',f:'community',ar:'الرحلات المجتمعية',en:'Community trips',ages:[11,15],load:2,need:['transport','trainer','family'],tags:['service','civic','mercy'],
+ goal:{ar:'إشراك الطلاب في خدمة المجتمع بصورة عملية.',en:'Involve students in practical community service.'},
+ ph:[['إشراك الطلاب في خدمة المجتمع بصورة عملية.','Involve students in hands-on community service.'],
+     ['زيارة دور الأيتام والمستشفيات والمراكز الخدمية والمشاركة في المبادرات البيئية.','Visit orphanages, hospitals and service centres and join environmental initiatives.'],
+     ['تعزيز الرحمة والعطاء والمسؤولية المجتمعية والانتماء للمجتمع.','Strengthen compassion, giving, social responsibility and belonging.']]},
+{id:'T3',t:'trips',f:'educational',ar:'الرحلات التعليمية',en:'Educational trips',ages:[11,15],load:2,need:['transport','trainer'],tags:['learningtrips','stem'],
+ goal:{ar:'ربط التعلم بتجارب معرفية خارج الأكاديمية.',en:'Tie learning to knowledge experiences outside the academy.'},
+ ph:[['ربط التعلم بتجارب معرفية خارج الأكاديمية.','Connect learning to out-of-academy knowledge experiences.'],
+     ['زيارة الجامعات والمصانع والمعارض العلمية والمراكز التقنية.','Visit universities, factories, science fairs and tech centres.'],
+     ['تنمية الطموح الأكاديمي والمهني وتحفيز الفضول العلمي والابتكار.','Grow academic ambition and spark scientific curiosity and innovation.']]},
+{id:'T4',t:'trips',f:'fun',ar:'الرحلات الترفيهية',en:'Recreational trips',ages:[10,15],load:1,need:['transport','trainer','safety'],tags:['fun','teamwork'],
+ goal:{ar:'مساحة للتجديد النفسي والترفيه المنضبط.',en:'Space for renewal and disciplined fun.'},
+ ph:[['إتاحة مساحة للتجديد النفسي والترفيه المنضبط.','Provide space for renewal and disciplined recreation.'],
+     ['أنشطة في الحدائق والملاهي ومراكز الترفيه إلى جانب الأنشطة المائية.','Activities in parks, amusement parks and entertainment centres plus water activities.'],
+     ['تعزيز التوازن النفسي والصداقات وروح المشاركة.','Strengthen balance, friendships and participation.']]},
+{id:'T5',t:'trips',f:'adventure',ar:'الرحلات الاستكشافية والمبيت',en:'Expedition & overnight',ages:[12,15],load:3,need:['transport','outdoor','safety','family','kit'],tags:['adventure','independence','teamwork'],
+ goal:{ar:'تنمية الشخصية عبر تحديات ميدانية واقعية.',en:'Grow character through real field challenges.'},
+ ph:[['تنمية الشخصية من خلال التجارب الميدانية والتحديات الواقعية.','Develop character through field experience and real challenges.'],
+     ['مخيمات برية وإقامة في استراحات ريفية ورحلات مشي ومغامرات.','Desert camps, rural lodges, hikes and adventures.'],
+     ['تعزيز الاعتماد على النفس والشجاعة والقيادة والتعاون في بيئة طبيعية.','Strengthen independence, courage, leadership and teamwork in nature.']]}
+];
+const TRACK=id=>TRACKS.find(t=>t.id===id);
+const ITEM=id=>LIB.find(x=>x.id===id);
+const FIELDOF=(t,f)=>{const v=FIELDS[t+'.'+f];return v?v[0]:''};
+const FIELDEN=(t,f)=>{const v=FIELDS[t+'.'+f];return v?v[1]:''};
+/* ============================ الحالة والإعدادات ============================ */
+const DAYS_DEFAULT=[
+ {ar:'التعارف وبناء الفريق',en:'Belonging & team identity'},
+ {ar:'المال والأعمال',en:'Money & business'},
+ {ar:'مجلس النخبة',en:'Elite council'},
+ {ar:'موسم الرياض',en:'Riyadh season'},
+ {ar:'الرياضة والمبادرة',en:'Sport & initiative'},
+ {ar:'حصاد الرحلة والختام',en:'Reflection & graduation'}
+];
+const STUDENTS=[
+ {id:1,ar:'عبدالله العتيبي',en:'Abdullah Alotaibi',age:13,team:1,c1:['المبادرة بالمشاركة','Initiating participation'],c2:['طلب المساعدة عند الحاجة','Asking for support'],tags:['initiative','confidence']},
+ {id:2,ar:'عمر القحطاني',en:'Omar Alqahtani',age:14,team:2,c1:['الإنصات وتقبّل اختلاف الآراء','Listening to different views'],c2:['إدارة الانفعال أثناء المنافسة','Managing emotion in competition'],tags:['dialogue','emotions']},
+ {id:3,ar:'فهد الدوسري',en:'Fahad Aldosari',age:11,team:3,c1:['المبادرة بالمشاركة','Initiating participation'],c2:['طلب المساعدة عند الحاجة','Asking for support'],tags:['initiative','confidence']},
+ {id:4,ar:'محمد السبيعي',en:'Mohammed Alsubaie',age:15,team:4,c1:['تنظيم الوقت وتسليم المهمة','Managing time and delivery'],c2:['مساندة زميل جديد','Supporting a new teammate'],tags:['planning','teamwork']},
+ {id:5,ar:'راشد الحربي',en:'Rashed Alharbi',age:13,team:1,c1:['التعاون وتقاسم الأدوار','Sharing roles'],c2:['الاستمرار بعد الإخفاق','Trying again after setbacks'],tags:['teamwork','positivity']},
+ {id:6,ar:'خالد المطيري',en:'Khalid Almutairi',age:14,team:2,c1:['المحاولة بعد التعثّر','Trying again after setbacks'],c2:['شرح الفكرة بوضوح','Explaining an idea clearly'],tags:['positivity','communication']},
+ {id:7,ar:'سلمان الشمري',en:'Salman Alshammari',age:10,team:3,c1:['الاعتماد على النفس','Building independence'],c2:['المشاركة في قرار جماعي','Joining group decisions'],tags:['independence','decision']},
+ {id:8,ar:'يزيد العنزي',en:'Yazeed Alanazi',age:15,team:4,c1:['عرض الأفكار أمام الفريق','Presenting to the team'],c2:['القيادة بالإنصات','Leading by listening'],tags:['publicspeaking','leadership']}
+];
+const TEAMS=[
+ {id:1,ar:'الصقور',en:'Falcons',color:'#f07b3a'},{id:2,ar:'الفهود',en:'Panthers',color:'#e2a72c'},
+ {id:3,ar:'المها',en:'Oryx',color:'#168660'},{id:4,ar:'النخبة',en:'Elite',color:'#3b7dd8'}
+];
+const ROLES=[
+ {id:'director',ar:'مدير المعسكر',en:'Camp director'},
+ {id:'programs',ar:'قائد البرامج',en:'Programs lead'},
+ {id:'values',ar:'مسؤول القيم',en:'Values lead'},
+ {id:'field',ar:'مشرف ميداني',en:'Field supervisor'}
+];
+const CAPS={
+ director:['select','approve','brief','reset','export'],
+ programs:['select','brief','export'],
+ values:['select','approve','export'],
+ field:['export']
+};
+const DRAFT=[
+ {id:'L3',pri:'core',day:1,why:'مهارة أساس لتكوين الفريق وتقليل سوء الفهم في أول يوم.'},
+ {id:'V4',pri:'core',day:1,why:'ربط قيمة التعاون بهوية الفريق منذ الانطلاق.'},
+ {id:'L1',pri:'core',day:2,why:'يوم المال والأعمال يحتاج تخطيطًا وتوزيع وقت واضح.'},
+ {id:'H8',pri:'support',day:2,why:'يوظّف تخطيط الوقت في إدارة المصروف الشخصي.'},
+ {id:'L9',pri:'core',day:3,why:'مجلس النخبة فرصة لربط القيادة بالسيرة والقدوة.'},
+ {id:'L10',pri:'support',day:3,why:'يخدم تحدي الإنصات واحترام الاختلاف عند الطلاب.'},
+ {id:'S7',pri:'core',day:4,why:'نشاط بناء واختبار نموذج يجمع العلوم والعمل الجماعي.'},
+ {id:'L7',pri:'support',day:4,why:'تولي قيادة فريق ليوم واحد يترجم المهارة إلى ممارسة.'},
+ {id:'SP4',pri:'core',day:5,why:'يوم الرياضة يحتاج إطارًا قيميًا لضبط المنافسة.'},
+ {id:'V11',pri:'core',day:6,why:'الختام يقتضي وقفة امتنان وتقدير للنعم والجهود.'}
+];
+
+function initial(){
+  return {
+    version:3, role:'director', lang:'ar', theme:'light', page:'dashboard', draft:true,
+    meta:{campAr:'معسكر خريف النخبة',campEn:'Elite Autumn Camp',cityAr:'الرياض',cityEn:'Riyadh',
+      start:'2026-11-22',end:'2026-11-27',ageMin:10,ageMax:15,students:8,teams:4,
+      days:DAYS_DEFAULT.map(d=>({...d}))},
+    rules:{coreTarget:8,valuesMin:3,perDayMax:3,minTracks:4,coverageMin:70,requireWhy:true},
+    selected:DRAFT.map(d=>({...d,owner:'programs',approved:false,at:Date.now()})),
+    prep:{}, log:[], bank:'',
+    students:STUDENTS.map(s=>({...s}))
+  };
+}
+let S;
+try{
+  S=JSON.parse(localStorage.getItem('elite-select-v1'));
+  if(!S||S.version!==3) S=initial();
+}catch(e){ S=initial(); }
+let lang=S.lang||'ar';
+let page=S.page||'dashboard';
+let libFilter={q:'',track:'all',field:'all',age:'all',only:false};
+
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const L=o=>o?(o[lang]??o.ar??''):'';
+const T=(ar,en)=>lang==='ar'?ar:en;
+const DAYTEXT=(i)=>{const d=S.meta.days[i-1];return d?L(d):''};
+const ROLE=id=>ROLES.find(r=>r.id===id)||ROLES[0];
+const can=cap=>(CAPS[S.role]||[]).includes(cap);
+const save=()=>{try{localStorage.setItem('elite-select-v1',JSON.stringify(S))}catch(e){toast(T('تعذّر الحفظ المحلي في هذا المتصفح.','Local storage is unavailable in this browser.'))}};
+function toast(msg){const t=document.getElementById('toasts');t.innerHTML=`<div class="toast">${esc(msg)}</div>`;clearTimeout(window.__tt);window.__tt=setTimeout(()=>t.innerHTML='',3200)}
+function logIt(ar,en){S.log.unshift({id:Date.now()+Math.random(),at:Date.now(),ar,en,role:S.role});if(S.log.length>300)S.log.length=300}
+
+/* ============================ المشتقات ============================ */
+const selected=()=>S.selected;
+const isSel=id=>S.selected.some(x=>x.id===id);
+const selCount=()=>S.selected.length;
+const coreCount=()=>S.selected.filter(x=>x.pri==='core').length;
+const trackCount=id=>S.selected.filter(x=>ITEM(x.id)&&ITEM(x.id).t===id).length;
+const dayLoad=d=>S.selected.filter(x=>x.day===d).length;
+const unassigned=()=>S.selected.filter(x=>!x.day).length;
+const valuesCount=()=>S.selected.filter(x=>{const i=ITEM(x.id);return i&&i.t==='values'}).length;
+const trackCovered=()=>TRACKS.filter(t=>trackCount(t.id)>0).length;
+
+function readiness(){
+  const checks=[];
+  const chk=(ok,ar,en,noteAr,noteEn,fix)=>checks.push({ok,ar,en,note:T(noteAr,noteEn),fix});
+  const miss=unassigned();
+  chk(miss===0,'كل برنامج مختار له يوم محدد','Every selected program has a day',
+      miss?`${miss} برنامجًا دون يوم`:'مكتمل',miss?`${miss} without a day`:'Complete','days');
+  const core=coreCount();
+  chk(core>=S.rules.coreTarget,'استيفاء عدد البرامج الأساسية','Core programs target met',
+      `${core} من ${S.rules.coreTarget}`,`${core} of ${S.rules.coreTarget}`,'selection');
+  const vc=valuesCount();
+  chk(vc>=S.rules.valuesMin,'الحد الأدنى من برامج القيم','Minimum values programs',
+      `${vc} من ${S.rules.valuesMin}`,`${vc} of ${S.rules.valuesMin}`,'library');
+  const tc=trackCovered();
+  chk(tc>=S.rules.minTracks,'تنوّع المسارات','Track diversity',
+      `${tc} من ${TRACKS.length} مسارات`,`${tc} of ${TRACKS.length} tracks`,'library');
+  const over=S.meta.days.map((d,i)=>({i:i+1,n:dayLoad(i+1)})).filter(x=>x.n>S.rules.perDayMax);
+  chk(over.length===0,'لا يوم محمّل فوق الحد','No day over capacity',
+      over.length?`اليوم ${over.map(o=>o.i).join('، ')}`:`الحد ${S.rules.perDayMax} لكل يوم`,
+      over.length?`Day ${over.map(o=>o.i).join(', ')}`:`Max ${S.rules.perDayMax} per day`,'days');
+  const noWhy=S.selected.filter(x=>!x.why||x.why.trim().length<8).length;
+  chk(noWhy===0,'لكل اختيار مبرر مكتوب','Every pick has a rationale',
+      noWhy?`${noWhy} بلا مبرر`:'مكتمل',noWhy?`${noWhy} missing`:'Complete','selection');
+  const f=fitStats();
+  chk(f.pct>=S.rules.coverageMin,'تغطية تحديات الطلاب','Student-challenge coverage',
+      `${f.pct}% من ${f.total} طالبًا`,`${f.pct}% of ${f.total} students`,'fit');
+  const passed=checks.filter(c=>c.ok).length;
+  return {checks,passed,total:checks.length,score:Math.round(passed/checks.length*100)};
+}
+
+function needsAgg(){
+  const map={};
+  S.selected.forEach(x=>{const i=ITEM(x.id);if(!i)return;i.need.forEach(n=>{map[n]=(map[n]||0)+1})});
+  return Object.entries(map).sort((a,b)=>b[1]-a[1]);
+}
+
+function fitStats(){
+  const total=S.students.length;
+  let covered=0; const per=[];
+  S.students.forEach(st=>{
+    const matches=S.selected.filter(x=>{const i=ITEM(x.id);return i&&i.tags.some(t=>st.tags.includes(t))});
+    if(matches.length)covered++;
+    per.push({st,matches});
+  });
+  return {pct:total?Math.round(covered/total*100):0,total,covered,per};
+}
+
+function tagCoverage(){
+  const all={};
+  S.students.forEach(s=>s.tags.forEach(t=>{all[t]=all[t]||{tag:t,students:[],items:[]}}));
+  S.students.forEach(s=>s.tags.forEach(t=>all[t].students.push(s)));
+  S.selected.forEach(x=>{const i=ITEM(x.id);if(!i)return;i.tags.forEach(t=>{if(all[t])all[t].items.push(i)})});
+  return Object.values(all).sort((a,b)=>b.students.length-a.students.length);
+}
+
+/* ============================ واجهة عامة ============================ */
+function icon(name){
+  const p={
+    dashboard:'M3 12h7V3H3v9Zm0 9h7v-6H3v6Zm9 0h9V9h-9v12Zm0-18v3h9V3h-9Z',
+    library:'M4 4h6v16H4zM13 4h7v7h-7zM13 14h7v6h-7z',
+    select:'M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z',
+    calendar:'M7 2v2H4v18h16V4h-3V2h-2v2H9V2H7Zm11 8v10H6V10h12Z',
+    target:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12Zm0 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z',
+    check:'M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4Zm-1 13.4L7.6 12 6.2 13.4 11 18.2l7.2-7.2-1.4-1.4L11 15.4Z',
+    export:'M12 3v10.6l3.3-3.3 1.4 1.4L12 17.4l-4.7-4.7 1.4-1.4L12 14.6V3h0ZM4 19h16v2H4z'
+  }[name]||'M4 4h16v16H4z';
+  return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
+}
+const NAV=[
+  ['plan',[['dashboard','لوحة التخطيط','Planning board'],['library','مكتبة البرامج','Program library'],['selection','الاختيار','Selection'],['days','خريطة الأيام','Day map']]],
+  ['verify',[['fit','الملاءمة مع الطلاب','Fit with students'],['readiness','فحص الجاهزية','Readiness check']]],
+  ['out',[['outputs','حزمة التجهيز','Prep pack']]]
+];
+const PAGE_TITLES={
+  dashboard:['لوحة التخطيط','Planning board'],library:['مكتبة البرامج','Program library'],
+  selection:['اختيار المهارات والقيم','Skills & values selection'],days:['خريطة الأيام','Day map'],
+  fit:['الملاءمة مع تحديات الطلاب','Fit with student challenges'],readiness:['فحص الجاهزية','Readiness check'],
+  outputs:['حزمة التجهيز','Prep pack']
+};
+
+function header(){
+  document.documentElement.lang=lang;
+  document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+  document.documentElement.dataset.theme=S.theme;
+  const rd=readiness();
+  $('#sidebar').innerHTML=`
+    <div class="brand">
+      <svg viewBox="0 0 92 46" aria-hidden="true"><path fill="currentColor" d="M2 40 24 6l10 16 6-9 20 27H46L34 23l-8 17H2Z"/><path fill="currentColor" opacity=".45" d="M62 40 80 12l10 28H62Z"/></svg>
+      <div><b>${T('أكاديمية النخبة','Elite Academy')}</b><small>SELECTION LAB</small></div>
+    </div>
+    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({plan:'التخطيط والاختيار',verify:'التحقق',out:'المخرجات'}[g],{plan:'PLAN & SELECT',verify:'VERIFY',out:'OUTPUT'}[g])}</div>
+      ${items.map(([id,ar,en])=>`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}</button>`).join('')}
+    </div>`).join('')}
+    <div class="sidefoot">
+      <span>${T('جاهزية الاختيار','Selection readiness')}</span>
+      <b dir="ltr" style="text-align:start">${rd.passed}/${rd.total} · ${rd.score}%</b>
+      <div class="bar ${rd.score>=80?'good':''}" style="margin-top:7px"><i style="width:${rd.score}%"></i></div>
+      <p style="margin-top:9px">${T('نختار أولًا… ثم نجهّز.','Select first. Prepare after.')}</p>
+    </div>`;
+
+  $('#topbar').innerHTML=`
+    <button class="icon" id="hamb" data-act="menu" aria-label="menu">☰</button>
+    <div class="crumb">${T('مختبر الاختيار','Selection lab')} <span class="muted">/</span> <b>${T(...PAGE_TITLES[page])}</b></div>
+    <div class="toptools">
+      <span class="pill line">${T('الدور: ','Role: ')}${L(ROLE(S.role))}</span>
+      <select id="roleSel" aria-label="${T('الدور','Role')}" style="border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;font-size:12px">
+        ${ROLES.map(r=>`<option value="${r.id}" ${S.role===r.id?'selected':''}>${L(r)}</option>`).join('')}
+      </select>
+      <button class="small" data-act="lang">${lang==='ar'?'EN':'العربية'}</button>
+      <button class="small" data-act="guide" aria-label="${T('دليل الاستخدام','How it works')}" title="${T('دليل الاستخدام','How it works')}">?</button>
+      <button class="small" data-act="theme" aria-label="theme">${S.theme==='light'?'☾':'☀'}</button>
+    </div>`;
+}
+
+function pageHead(titleAr,titleEn,descAr,descEn,actions=''){
+  return `<div class="pagehead"><div><div class="eyebrow">${T('مرحلة التخطيط والتجهيز','PLANNING & PREPARATION')}</div>
+    <h1>${T(titleAr,titleEn)}</h1><p class="muted" style="font-size:13px;margin-top:4px">${T(descAr,descEn)}</p></div>
+    <div class="actions">${actions}</div></div>`;
+}
+
+/* ============================ ١ · لوحة التخطيط ============================ */
+function pageDashboard(){
+  const rd=readiness(), f=fitStats(), m=S.meta, days=m.days.length;
+  const na=needsAgg();
+  const top=rd.checks.filter(c=>!c.ok).slice(0,3);
+  return pageHead('لوحة التخطيط','Planning board',
+    'نحدّد ما نريد أن يكتسبه الطالب في هذا المعسكر قبل أن نجهّز أي نشاط.',
+    'Decide what students should gain before preparing any activity.',
+    `<button class="primary" data-act="go:library">${T('ابدأ من المكتبة','Start from the library')}</button>
+     <button data-act="brief">${T('بيانات المعسكر','Camp brief')}</button>`)
+  +`${S.draft?`<div class="note orange" style="margin-bottom:16px">◆ <b>${T('مسودة أولية:','Starting draft:')}</b> ${T('عشرة برامج موزّعة على ستة أيام كمثال. عدّلها كما تريد، أو','ten programs across six days as an example. Edit them, or')}
+      <button class="small" data-act="reset" ${can('reset')?'':'disabled'} style="margin-inline-start:6px">${T('صفّر الخطة','Clear the plan')}</button></div>`:''}
+  <div class="grid cols4">
+    ${metric(T('برامج مختارة','Selected programs'),selCount(),T(`من ${LIB.length} في المكتبة`,`of ${LIB.length} in the library`))}
+    ${metric(T('برامج أساسية','Core programs'),`${T(coreCount()+' من '+S.rules.coreTarget, coreCount()+' of '+S.rules.coreTarget)}`,T('الحد المتفق عليه','Agreed target'))}
+    ${metric(T('تغطية تحديات الطلاب','Challenge coverage'),f.pct+'%',T(`${f.covered} من ${f.total} طلاب`,`${f.covered} of ${f.total} students`))}
+    ${metric(T('جاهزية الاختيار','Selection readiness'),rd.score+'%',T(`${rd.passed} من ${rd.total} فحوص`,`${rd.passed} of ${rd.total} checks`))}
+  </div>
+  <div class="grid cols2 spacer">
+    <div class="card">
+      <div class="row"><h2>${T('هوية المعسكر','Camp identity')}</h2>
+        <button class="small" data-act="brief" ${can('brief')?'':'disabled'}>${T('تعديل','Edit')}</button></div>
+      <div class="grid cols2" style="margin-top:14px;gap:12px">
+        <div><div class="help">${T('المعسكر','Camp')}</div><b>${esc(L({ar:m.campAr,en:m.campEn}))}</b></div>
+        <div><div class="help">${T('المدينة','City')}</div><b>${esc(L({ar:m.cityAr,en:m.cityEn}))}</b></div>
+        <div><div class="help">${T('المدة','Dates')}</div><b class="mono" dir="ltr" style="display:inline-block">${esc(m.start)} → ${esc(m.end)}</b></div>
+        <div><div class="help">${T('الفئة العمرية','Age range')}</div><b class="mono"><span dir="ltr">${m.ageMin}–${m.ageMax}</span> ${T('سنة','yrs')}</b></div>
+        <div><div class="help">${T('الطلاب','Students')}</div><b class="mono">${m.students}</b></div>
+        <div><div class="help">${T('الأيام','Days')}</div><b class="mono">${days}</b></div>
+      </div>
+      <hr class="sep">
+      <div class="help">${T('الأيام: ','Days: ')}${m.days.map((d,i)=>`${i+1}. ${esc(L(d))}`).join(' · ')}</div>
+    </div>
+    <div class="card">
+      <div class="row"><h2>${T('جاهزية الاختيار','Selection readiness')}</h2><span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}%</span></div>
+      <div class="row" style="align-items:center;margin-top:12px;justify-content:flex-start;gap:18px">
+        ${ring(rd.score)}
+        <div style="flex:1;min-width:0">
+          ${rd.checks.slice(0,4).map(c=>`<div class="pv"><span class="pill ${c.ok?'good':'bad'}">${c.ok?'✓':'!'}</span><span style="flex:1">${T(c.ar,c.en)}</span><small class="muted">${esc(c.note||'')}</small></div>`).join('')}
+          <button class="small" data-act="go:readiness" style="margin-top:8px">${T('فتح الفحص الكامل','Open full check')}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="grid cols2 spacer">
+    <div class="card">
+      <h2>${T('التوازن بين المسارات','Balance across tracks')}</h2>
+      <p class="help" style="margin:6px 0 14px">${T('ستة مسارات في الوثيقة المعتمدة؛ الاختيار الجيد لا يترك مسارًا فارغًا.','Six approved tracks; a sound selection leaves none empty.')}</p>
+      ${TRACKS.map(t=>{const n=trackCount(t.id),pct=Math.round(n/Math.max(1,selCount())*100);return `
+        <div style="margin-bottom:11px">
+          <div class="row"><span style="font-size:12.5px"><i class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${t.color};margin-inline-end:6px"></i>${L(t)}</span><b class="mono" style="font-size:12px">${n}</b></div>
+          <div class="bar" style="margin-top:5px"><i style="width:${pct}%;background:${t.color}"></i></div>
+        </div>`}).join('')}
+    </div>
+    <div class="card">
+      <div class="row"><h2>${T('التالية في التخطيط','Next in planning')}</h2><span class="pill line">${T('آلي','Auto')}</span></div>
+      ${top.length?top.map(c=>`<div class="listrow" style="border-bottom:1px solid var(--line);padding:11px 0">
+        <div class="row"><b style="font-size:13px">${T(c.ar,c.en)}</b>${c.fix?`<button class="small" data-act="go:${c.fix}">${T('معالجة','Fix')}</button>`:''}</div>
+        <p class="help">${esc(c.note||'')}</p></div>`).join(''):`<div class="note" style="margin-top:12px"><b>${T('الخطة مكتملة الشروط.','All checks pass.')}</b><p class="help">${T('يمكنك الانتقال إلى حزمة التجهيز وطباعة ورقة الاختيار.','Move to the prep pack and print the selection sheet.')}</p></div>`}
+      <hr class="sep">
+      <div class="row"><b style="font-size:12.5px">${T('متطلبات التجهيز المترتبة','Resulting prep needs')}</b><button class="small" data-act="go:readiness">${T('التفاصيل','Details')}</button></div>
+      <div class="tagcloud" style="margin-top:9px">${na.length?na.map(([k,n])=>`<span class="pill line">${esc(L({ar:NEEDS[k][0],en:NEEDS[k][1]}))} · ${n}</span>`).join(''):`<span class="help">${T('لا متطلبات بعد.','No requirements yet.')}</span>`}</div>
+    </div>
+  </div>
+  <div class="card spacer">
+    <div class="row"><h2>${T('آخر قرارات الاختيار','Latest selection decisions')}</h2><span class="pill line">${S.log.length} ${T('حدث','events')}</span></div>
+    ${S.log.slice(0,5).map(l=>`<div class="pv"><small class="muted mono">${time(l.at)}</small><span style="flex:1">${esc(L(l))}</span><span class="pill line">${L(ROLE(l.role))}</span></div>`).join('')||`<div class="empty">${T('سيُسجّل هنا كل تعديل على الاختيار.','Every selection change will be logged here.')}</div>`}
+  </div>`;
+}
+function metric(label,value,sub){return `<div class="card metric"><div class="label">${label}</div><div class="value mono">${value}</div><div class="sub">${sub}</div></div>`}
+function ring(pct){
+  const r=40,c=2*Math.PI*r,off=c-(Math.min(100,pct)/100)*c;
+  return `<div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--soft2)" stroke-width="9"/>
+    <circle cx="50" cy="50" r="${r}" fill="none" stroke="${pct>=80?'var(--good)':'var(--accent)'}" stroke-width="9" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${off}"/></svg><div class="val">${pct}%</div></div>`;
+}
+const time=ts=>new Date(ts).toLocaleString(lang==='ar'?'ar-SA-u-ca-gregory-nu-latn':'en-GB',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+
+/* ============================ ٢ · المكتبة ============================ */
+function pageLibrary(){
+  return pageHead('مكتبة البرامج','Program library',
+    'كل ما اعتمدته الأكاديمية في ستة مسارات؛ اختر ما يخدم هذا المعسكر فقط.',
+    'Everything the academy has approved across six tracks. Pick only what serves this camp.',
+    `<button data-act="go:selection">${T('عرض الاختيار','View selection')} (${selCount()})</button>`)
+  +`<div class="card">
+      <div class="filters" style="margin:0">
+        <input type="search" id="q" placeholder="${T('ابحث باسم البرنامج أو الهدف…','Search a program or goal…')}" value="${esc(libFilter.q)}">
+        <select id="fTrack"><option value="all">${T('كل المسارات','All tracks')}</option>${TRACKS.map(t=>`<option value="${t.id}" ${libFilter.track===t.id?'selected':''}>${L(t)}</option>`).join('')}</select>
+        <select id="fField"><option value="all">${T('كل المجالات','All fields')}</option>${fieldsFor(libFilter.track).map(([k,v])=>`<option value="${k}" ${libFilter.field===k?'selected':''}>${L({ar:v[0],en:v[1]})}</option>`).join('')}</select>
+        <select id="fAge"><option value="all">${T('كل الأعمار','All ages')}</option><option value="y" ${libFilter.age==='y'?'selected':''}>10–12</option><option value="m" ${libFilter.age==='m'?'selected':''}>13–15</option></select>
+        <label class="pill line" style="cursor:pointer;gap:7px"><input type="checkbox" id="fOnly" ${libFilter.only?'checked':''} style="margin:0"> ${T('المختار فقط','Selected only')}</label>
+      </div>
+      <div class="row" style="margin-top:12px"><span class="help">${T('النتائج: ','Results: ')}<b id="libCount">0</b></span>
+        <span class="help">${T('المختار من المكتبة: ','Picked: ')}<b>${selCount()}</b></span></div>
+    </div>
+    <div class="libgrid spacer" id="libGrid"></div>`;
+}
+function fieldsFor(track){
+  return Object.entries(FIELDS).filter(([k])=>track==='all'||k.startsWith(track+'.'));
+}
+function libList(){
+  const q=libFilter.q.trim().toLowerCase();
+  return LIB.filter(i=>{
+    if(libFilter.track!=='all'&&i.t!==libFilter.track)return false;
+    if(libFilter.field!=='all'&&i.t+'.'+i.f!==libFilter.field)return false;
+    if(libFilter.age==='y'&&i.ages[1]>12)return false;
+    if(libFilter.age==='m'&&i.ages[0]<13)return false;
+    if(libFilter.only&&!isSel(i.id))return false;
+    if(q&&!(L({ar:i.ar,en:i.en})+' '+L(i.goal)+' '+L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)})).toLowerCase().includes(q))return false;
+    return true;
+  });
+}
+function libCard(i){
+  const on=isSel(i.id), t=TRACK(i.t);
+  return `<article class="libcard ${on?'on':''}" style="--tc:${t.color}">
+    <div class="meta"><span class="trackchip" style="--tc:${t.color}"><i></i>${L(t)}</span><span class="trackchip">${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))}</span></div>
+    <div class="ttl">${esc(L({ar:i.ar,en:i.en}))}</div>
+    <div class="goal">${esc(L(i.goal))}</div>
+    <div class="meta">
+      <span class="pill">${i.ages[0]}–${i.ages[1]} ${T('سنة','yrs')}</span>
+      <span class="pill">${T('حمل','Load')} ${i.load}/3</span>
+      <span class="pill">${i.need.length} ${T('متطلب','needs')}</span>
+    </div>
+    <div class="foot">
+      <button class="small" data-act="item:${i.id}">${T('التفاصيل','Details')}</button>
+      ${can('select')?`<button class="small ${on?'':'primary'}" data-act="${on?'unpick':'pick'}:${i.id}">${on?T('إزالة من الخطة','Remove'):T('أضف إلى الخطة','Add to plan')}</button>`:`<span class="help">${T('عرض فقط','View only')}</span>`}
+    </div>
+  </article>`;
+}
+
+/* ============================ ٣ · الاختيار ============================ */
+function pageSelection(){
+  const rd=readiness();
+  const ro=!can('select');
+  return pageHead('اختيار المهارات والقيم','Skills & values selection',
+    'لكل اختيار: أولوية، يوم، وسبب مكتوب. لا نضيف برنامجًا لا نعرف لماذا اخترناه.',
+    'Every pick carries a priority, a day and a written reason.',
+    `${can('select')?`<button data-act="go:days">${T('توزيع الأيام','Day map')}</button>`:''}<button class="primary" data-act="go:library">${can('select')?T('+ أضف من المكتبة','+ Add from library'):T('المكتبة','Library')}</button>`)
+  +`${ro?viewOnly():''}<div class="grid cols4">
+      ${metric(T('الإجمالي','Total'),selCount(),T('برنامجًا في الخطة','programs in the plan'))}
+      ${metric(T('أساسي','Core'),coreCount(),T(`الحد ${S.rules.coreTarget}`,`target ${S.rules.coreTarget}`))}
+      ${metric(T('قيم','Values'),valuesCount(),T(`الحد ${S.rules.valuesMin}`,`min ${S.rules.valuesMin}`))}
+      ${metric(T('مبرر مكتوب','Rationale'),`${selCount()-S.selected.filter(x=>!x.why||x.why.trim().length<8).length} / ${selCount()}`,T('يُراجع قبل الاعتماد','reviewed before approval'))}
+    </div>
+    <div class="card spacer pad0">
+      ${selCount()?`<div class="tablewrap" style="border:none">
+        <table class="wide"><thead><tr>
+          <th>${T('البرنامج','Program')}</th><th>${T('المسار','Track')}</th><th>${T('الأولوية','Priority')}</th>
+          <th>${T('اليوم','Day')}</th><th style="min-width:220px">${T('لماذا اخترناه؟','Why this one?')}</th>
+          <th>${T('الاعتماد','Approval')}</th><th></th>
+        </tr></thead><tbody>
+        ${S.selected.map(s=>{const i=ITEM(s.id);if(!i)return '';const t=TRACK(i.t);return `<tr>
+          <td><b style="font-size:13px">${esc(L({ar:i.ar,en:i.en}))}</b><div class="help">${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))} · ${i.ages[0]}–${i.ages[1]} ${T('سنة','yrs')}</div></td>
+          <td><span class="trackchip" style="--tc:${t.color}"><i></i>${L(t)}</span></td>
+          <td><select data-edit="pri:${s.id}" ${can('select')?'':'disabled'}>
+            <option value="core" ${s.pri==='core'?'selected':''}>${T('أساسي','Core')}</option>
+            <option value="support" ${s.pri==='support'?'selected':''}>${T('مساند','Support')}</option></select></td>
+          <td><select data-edit="day:${s.id}" ${can('select')?'':'disabled'}>
+            ${S.meta.days.map((d,k)=>`<option value="${k+1}" ${s.day===k+1?'selected':''}>${k+1} · ${esc(L(d))}</option>`).join('')}
+            ${!s.day?`<option value="" selected>${T('غير موزّع','Unassigned')}</option>`:''}</select></td>
+          <td><textarea data-edit="why:${s.id}" rows="2" placeholder="${T('اربط السبب بتحدٍ أو هدف يوم…','Tie it to a challenge or day goal…')}" ${can('select')?'':'disabled'} style="width:100%;min-width:220px;border:1px solid var(--line);border-radius:7px;padding:5px 8px;font-size:12.5px;resize:vertical;line-height:1.6">${esc(s.why||'')}</textarea></td>
+          <td>${s.approved?`<span class="pill good">${T('معتمد','Approved')}</span>`:`<span class="pill orange">${T('مسودة','Draft')}</span>`}</td>
+          <td style="white-space:nowrap">
+            ${can('approve')?`<button class="small" data-act="approve:${s.id}">${s.approved?T('سحب','Unset'):T('اعتماد','Approve')}</button>`:''}
+            ${can('select')?`<button class="small danger" data-act="unpick:${s.id}">✕</button>`:''}
+          </td></tr>`}).join('')}
+        </tbody></table></div>`
+      :`<div class="empty" style="padding:44px">
+          <div style="font-size:15px;font-weight:700;color:var(--fg)">${T('الخطة فارغة','The plan is empty')}</div>
+          <p class="help" style="margin:6px 0 14px">${T('ابدأ باختيار ٣–٤ برامج فقط، ثم وسّع بعد مراجعة الملاءمة.','Start with 3–4 programs, then expand after the fit review.')}</p>
+          <button class="primary" data-act="go:library">${T('فتح المكتبة','Open library')}</button></div>`}
+    </div>
+    <div class="grid cols2 spacer">
+      <div class="card"><h2>${T('قواعد الاختيار','Selection rules')}</h2>
+        <p class="help" style="margin-top:6px">${T('تُطبَّق هذه القواعد تلقائيًا في فحص الجاهزية.','These rules drive the readiness check.')}</p>
+        <div class="fields spacer">
+          <label class="fld">${T('الحد الأدنى للبرامج الأساسية','Minimum core programs')}<input type="number" min="1" max="40" value="${S.rules.coreTarget}" data-rule="coreTarget" style="max-width:120px" ${can('brief')?'':'disabled'}></label>
+          <label class="fld">${T('الحد الأدنى لبرامج القيم','Minimum values programs')}<input type="number" min="0" max="20" value="${S.rules.valuesMin}" data-rule="valuesMin" style="max-width:120px" ${can('brief')?'':'disabled'}></label>
+          <label class="fld">${T('أقصى عدد في اليوم','Max programs per day')}<input type="number" min="1" max="12" value="${S.rules.perDayMax}" data-rule="perDayMax" style="max-width:120px" ${can('brief')?'':'disabled'}></label>
+          <label class="fld">${T('أقل عدد مسارات','Minimum tracks covered')}<input type="number" min="1" max="6" value="${S.rules.minTracks}" data-rule="minTracks" style="max-width:120px" ${can('brief')?'':'disabled'}></label>
+          <label class="fld wide">${T('أدنى نسبة تغطية لتحديات الطلاب (%)','Minimum student-challenge coverage (%)')}<input type="number" min="0" max="100" value="${S.rules.coverageMin}" data-rule="coverageMin" style="max-width:120px" ${can('brief')?'':'disabled'}></label>
+        </div>
+      </div>
+      <div class="card"><h2>${T('توزيع الأولويات','Priority mix')}</h2>
+        ${S.selected.length?`<div class="grid cols2" style="margin-top:12px;gap:12px">
+          <div><div class="help">${T('أساسي','Core')}</div><div class="big mono">${coreCount()}</div><div class="bar good" style="margin-top:6px"><i style="width:${coreCount()/selCount()*100}%"></i></div></div>
+          <div><div class="help">${T('مساند','Support')}</div><div class="big mono">${selCount()-coreCount()}</div><div class="bar" style="margin-top:6px"><i style="width:${(selCount()-coreCount())/selCount()*100}%"></i></div></div>
+        </div>
+        <hr class="sep">
+        ${TRACKS.filter(t=>trackCount(t.id)).map(t=>`<div class="row" style="padding:4px 0"><span style="font-size:12.5px">${L(t)}</span><b class="mono" style="font-size:12px">${trackCount(t.id)}</b></div>`).join('')}`
+        :`<p class="help" style="margin-top:12px">${T('لا اختيار بعد.','Nothing selected yet.')}</p>`}
+      </div>
+    </div>
+    ${rd.score<100?`<div class="note orange spacer"><b>${T('قبل الاعتماد: ','Before approval: ')}</b>${T(`${rd.total-rd.passed} شرطًا لم يُستوفَ بعد. راجع فحص الجاهزية.`,`${rd.total-rd.passed} condition(s) still open. See the readiness check.`)}
+      <button class="small" data-act="go:readiness" style="margin-inline-start:8px">${T('فتح الفحص','Open check')}</button></div>`:''}`;
+}
+function viewOnly(){
+  return `<div class="note orange" style="margin-bottom:14px">◍ ${T('عرض فقط: دورك يطّلع على الخطة دون تعديلها. التعديل متاح لقائد البرامج ومدير المعسكر.','Read-only: your role can review the plan without editing. Editing is open to the programs lead and camp director.')}</div>`;
+}
+function lockedView(){
+  return `<div class="pagehead"><div><h1>${T(...PAGE_TITLES[page])}</h1></div></div>
+    <div class="card locked"><div style="font-size:28px">◍</div>
+      <h2>${T('هذه المساحة غير متاحة لدورك','Not available for your role')}</h2>
+      <p class="muted">${T('الدور الحالي: ','Current role: ')}${L(ROLE(S.role))}</p>
+      <button class="primary" data-act="role:director">${T('افتح كمدير معسكر','Open as camp director')}</button></div>`;
+}
+
+/* ============================ ٤ · خريطة الأيام ============================ */
+function pageDays(){
+  const ro=!can('select');
+  return pageHead('خريطة الأيام','Day map',
+    'نوزّع المختار على أيام المعسكر، فنرى الحمل اليومي قبل أن نرى الجدول.',
+    'Distribute the selection across camp days to see daily load before the timetable.',
+    `${ro?'':`<button data-act="go:selection">${T('قائمة الاختيار','Selection list')}</button>
+     <button class="primary" data-act="autoplan">${T('توزيع تلقائي','Auto-distribute')}</button>`}`)
+  +`${ro?viewOnly():''}<div class="days">
+    ${S.meta.days.map((d,i)=>{const n=i+1,items=S.selected.filter(x=>x.day===n),over=items.length>S.rules.perDayMax;
+      return `<section class="daycol ${over?'over':''}">
+        <div class="dayhead"><div><b>${T('اليوم','Day')} ${n}</b><small>${esc(L(d))}</small></div>
+          <span class="pill ${over?'bad':'line'}">${items.length}/${S.rules.perDayMax}</span></div>
+        <div class="bar ${over?'bad':''}"><i style="width:${Math.min(100,items.length/S.rules.perDayMax*100)}%"></i></div>
+        ${items.map(x=>{const it=ITEM(x.id),t=TRACK(it.t);return `<div class="chip ${x.pri==='core'?'core':''}" style="--tc:${t.color}">
+            <i class="dot"></i><span style="flex:1;cursor:pointer" data-act="edit:${x.id}">${esc(L({ar:it.ar,en:it.en}))}</span>
+            ${ro?'':`<button class="x" data-act="unpick:${x.id}" title="${T('إزالة','Remove')}">✕</button>`}</div>`}).join('')||`<p class="help">${T('لا برامج في هذا اليوم بعد.','No programs on this day yet.')}</p>`}
+        ${ro?'':`<button class="small" data-act="pickday:${n}" style="margin-top:auto">${T('+ أضف لهذا اليوم','+ Add to this day')}</button>`}
+      </section>`}).join('')}
+  </div>
+  ${unassigned()?`<div class="card spacer"><div class="row"><h2>${T('غير موزّع','Unassigned')}</h2><span class="pill bad">${unassigned()}</span></div>
+    <p class="help" style="margin:6px 0 12px">${T('برامج مختارة دون يوم؛ لا تظهر في الجدول.','Selected programs without a day; they will not appear in the timetable.')}</p>
+    ${S.selected.filter(x=>!x.day).map(x=>{const it=ITEM(x.id);return `<div class="row" style="padding:7px 0;border-bottom:1px dashed var(--line)"><span style="font-size:12.5px">${esc(L({ar:it.ar,en:it.en}))}</span>
+      <select data-edit="day:${x.id}" style="border:1px solid var(--line);border-radius:7px;padding:4px 8px;font-size:12px"><option value="">${T('اختر يومًا','Choose day')}</option>${S.meta.days.map((d,k)=>`<option value="${k+1}">${k+1} · ${esc(L(d))}</option>`).join('')}</select></div>`}).join('')}
+  </div>`:''}`;
+}
+
+/* ============================ ٥ · الملاءمة ============================ */
+function pageFit(){
+  const f=fitStats(), tags=tagCoverage();
+  return pageHead('الملاءمة مع تحديات الطلاب','Fit with student challenges',
+    'لا نقيس الطالب؛ نسأل: هل يخدم اختيارُنا التحديات التي أعلنتها الأسر؟',
+    'We are not measuring students. We ask whether the selection serves the family-agreed challenges.',
+    `<button data-act="go:library">${T('تعديل الاختيار','Adjust selection')}</button>`)
+  +`<div class="grid cols3">
+      <div class="card" style="display:flex;gap:16px;align-items:center">
+        ${ring(f.pct)}
+        <div><div class="help">${T('تغطية التحديات','Challenge coverage')}</div>
+          <div class="big mono"><span dir="ltr">${f.covered}/${f.total}</span></div>
+          <p class="help">${T('طالب لديه برنامج مختار يخدم أحد تحدّييه على الأقل.','Students with at least one selected program serving a challenge.')}</p></div>
+      </div>
+      <div class="card metric"><div class="label">${T('تحديات غير مغطاة','Uncovered challenges')}</div>
+        <div class="value mono">${tags.filter(t=>!t.items.length).length}</div><div class="sub">${T(`من ${tags.length} محورًا`,`of ${tags.length} themes`)}</div></div>
+      <div class="card metric"><div class="label">${T('أكثر برنامج يخدم الطلاب','Highest-fit program')}</div>
+        <div class="value" style="font-size:15px;line-height:1.5">${(()=>{const r=S.selected.map(x=>{const it=ITEM(x.id);const n=S.students.filter(s=>it.tags.some(t=>s.tags.includes(t))).length;return{it,n}}).sort((a,b)=>b.n-a.n)[0];return r?`${esc(L({ar:r.it.ar,en:r.it.en}))}`:T('لا تتوفر بيانات','No data')})()}</div>
+        <div class="sub">${T('بحسب وسوم التحديات','By challenge tags')}</div></div>
+    </div>
+    <div class="card spacer">
+      <div class="row"><h2>${T('الطلاب وتحدياتهم','Students & their challenges')}</h2><span class="pill line">${T('بيانات تجريبية','Sample data')}</span></div>
+      <div class="tablewrap" style="margin-top:12px"><table><thead><tr>
+        <th>${T('الطالب','Student')}</th><th>${T('الفريق','Team')}</th><th>${T('التحدي الأول','First challenge')}</th><th>${T('التحدي الثاني','Second challenge')}</th>
+        <th>${T('البرامج التي تخدمه','Serving programs')}</th><th>${T('الحالة','Status')}</th></tr></thead><tbody>
+        ${f.per.map(({st,matches})=>`<tr>
+          <td><b>${esc(L({ar:st.ar,en:st.en}))}</b><div class="help">${st.age} ${T('سنة','yrs')}</div></td>
+          <td>${esc(L(TEAMS.find(t=>t.id===st.team)||{ar:'—',en:'—'}))}</td>
+          <td>${esc(L({ar:st.c1[0],en:st.c1[1]}))}</td>
+          <td>${esc(L({ar:st.c2[0],en:st.c2[1]}))}</td>
+          <td>${matches.length?matches.slice(0,3).map(m=>{const mi=ITEM(m.id);return `<span class="pill">${esc(L({ar:mi.ar,en:mi.en}))}</span>`}).join(' '):`<span class="help">${T('لا شيء بعد','Nothing yet')}</span>`}</td>
+          <td>${matches.length?`<span class="pill good">${T('مغطى','Covered')}</span>`:`<span class="pill bad">${T('فجوة','Gap')}</span>`}</td>
+        </tr>`).join('')}
+      </tbody></table></div>
+    </div>
+    <div class="grid cols2 spacer">
+      <div class="card"><h2>${T('تغطية محاور التحديات','Challenge theme coverage')}</h2>
+        <p class="help" style="margin:6px 0 12px">${T('كل محور يمثل حاجة أعلنتها الأسر؛ الفجوة تعني أن الخطة لا تخدمه.','Each theme is a declared family need; a gap means the plan does not serve it.')}</p>
+        ${tags.map(t=>`<div class="pv"><span style="flex:1">${esc(tagName(t.tag))} <small class="muted">(${t.students.length})</small></span>
+          ${t.items.length?`<span class="pill good">${t.items.length} ${T('برنامج','programs')}</span>`:`<span class="pill bad">${T('فجوة','gap')}</span>`}</div>`).join('')}
+      </div>
+      <div class="card"><h2>${T('ماذا يعني هذا؟','What this means')}</h2>
+        <div class="note" style="margin-top:10px">
+          <p>${T('هذه ليست نتيجة تقييم للطالب، بل مرآة لاختيارنا: إذا بقيت تحديات الطلاب بلا برنامج، فالخطة تحتاج مراجعة لا الطالب.','This is not a student assessment. It is a mirror of our selection: if a challenge has no program, the plan needs revision, not the student.')}</p>
+        </div>
+        <div class="spacer">
+          ${tags.filter(t=>!t.items.length).slice(0,4).map(t=>`<div class="step"><b>+</b><span>${T('أضف برنامجًا يخدم: ','Add a program for: ')}<b>${esc(tagName(t.tag))}</b></span></div>`).join('')||`<p class="help">${T('كل المحاور مغطاة.','Every theme is covered.')}</p>`}
+        </div>
+        <p class="help spacer">${T('البيانات الثمانية للطلاب تجريبية ومأخوذة من نموذج التشغيل؛ استبدلها ببيانات الأسر الفعلية عند التطبيق.','The eight student records are sample data from the operations prototype; replace them with real family data in production.')}</p>
+      </div>
+    </div>`;
+}
+const TAGNAMES={
+  initiative:['المبادرة','Initiative'],confidence:['الثقة','Confidence'],dialogue:['الحوار','Dialogue'],
+  emotions:['ضبط الانفعال','Emotion control'],planning:['التخطيط','Planning'],teamwork:['العمل الجماعي','Teamwork'],
+  positivity:['الإيجابية','Positivity'],communication:['التواصل','Communication'],independence:['الاستقلالية','Independence'],
+  decision:['اتخاذ القرار','Decision making'],publicspeaking:['التحدث أمام الجمهور','Public speaking'],leadership:['القيادة','Leadership']
+};
+const tagName=t=>TAGNAMES[t]?L({ar:TAGNAMES[t][0],en:TAGNAMES[t][1]}):t;
+
+/* ============================ ٦ · الجاهزية ============================ */
+function pageReadiness(){
+  const rd=readiness(), na=needsAgg();
+  return pageHead('فحص الجاهزية','Readiness check',
+    'الاختيار يصبح قرارًا عندما تُستوفى شروطه وتُعرف متطلباته.',
+    'A selection becomes a decision when its conditions are met and needs are known.',
+    `<button data-act="go:outputs">${T('حزمة التجهيز','Prep pack')}</button>
+     <button class="primary" data-act="print">${T('طباعة ورقة الاختيار','Print selection sheet')}</button>`)
+  +`<div class="grid cols2" style="align-items:start">
+      <div class="card">
+        <div style="display:flex;gap:18px;align-items:center">
+          ${ring(rd.score)}
+          <div><div class="help">${T('الفحص الآلي','Automated check')}</div>
+            <div class="big mono"><span dir="ltr">${rd.passed}/${rd.total}</span></div>
+            <p class="help">${T('شرطًا مستوفيًا من قواعد الاختيار المعلنة.','conditions met from the declared rules.')}</p>
+            <button class="small" data-act="go:selection" style="margin-top:6px">${T('تعديل القواعد','Edit rules')}</button></div>
+        </div>
+        <hr class="sep">
+        <div class="statline" style="justify-content:space-between">
+          <span>${T('مستوفى','Met')} <b>${rd.passed}</b></span>
+          <span>${T('معلّق','Open')} <b>${rd.total-rd.passed}</b></span>
+          <span>${T('معتمد','Approved')} <b>${T(S.selected.filter(x=>x.approved).length+' من '+selCount(), S.selected.filter(x=>x.approved).length+' of '+selCount())}</b></span>
+        </div>
+        <div class="note ${rd.score>=80?'':'orange'}" style="margin-top:12px">
+          <b style="font-size:12.5px">${rd.score>=80?T('الاختيار جاهز للاعتماد','Ready for approval'):T('الاختيار غير جاهز بعد','Not ready yet')}</b>
+          <p class="help" style="margin-top:3px">${rd.score>=80?T('استُوفي الحد المطلوب؛ ارفعه للاعتماد الرسمي.','Threshold met; send it for formal approval.'):T('أكمل الشروط المعلّمة في القائمة المجاورة.','Complete the flagged conditions in the list.')}</p>
+        </div>
+      </div>
+      <div class="card"><h2>${T('قائمة الشروط','Condition list')}</h2>
+        <div class="checks" style="margin-top:6px">
+        ${rd.checks.map(c=>`<div class="check"><div class="ic ${c.ok?'ok':'no'}">${c.ok?'✓':'!'}</div>
+          <div style="flex:1"><b>${T(c.ar,c.en)}</b><p>${esc(c.note||'')}</p></div>
+          ${!c.ok&&c.fix?`<button class="small" data-act="go:${c.fix}">${T('معالجة','Fix')}</button>`:''}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="card spacer">
+      <div class="row"><h2>${T('متطلبات التجهيز المترتبة على الاختيار','Prep requirements implied by the selection')}</h2>
+        <span class="pill line">${T('مولّدة تلقائيًا','Auto-generated')}</span></div>
+      <p class="help" style="margin:6px 0 12px">${T('لا نجهّز ما لم نختره. هذه القائمة هي جسر الاختيار إلى الميدان.','We prepare only what we picked. This list is the bridge from selection to the field.')}</p>
+      ${na.length?`<div class="tablewrap"><table><thead><tr><th>${T('المتطلب','Requirement')}</th><th>${T('البرامج','Programs')}</th><th>${T('المسؤول','Owner')}</th><th>${T('الحالة','Status')}</th></tr></thead><tbody>
+        ${na.map(([k,n])=>`<tr><td><b>${esc(L({ar:NEEDS[k][0],en:NEEDS[k][1]}))}</b></td>
+          <td><span class="pill">${n}</span></td>
+          <td><input data-prep="owner:${k}" value="${esc((S.prep[k]||{}).owner||'')}" placeholder="${T('اسم المسؤول','Owner name')}" style="width:150px"></td>
+          <td><label class="pill ${((S.prep[k]||{}).done)?'good':'line'}" style="cursor:pointer"><input type="checkbox" data-prep="done:${k}" ${((S.prep[k]||{}).done)?'checked':''} style="margin:0"> ${((S.prep[k]||{}).done)?T('جاهز','Ready'):T('قيد التجهيز','In progress')}</label></td></tr>`).join('')}
+      </tbody></table></div>`:`<div class="empty">${T('لا متطلبات لأن الخطة فارغة.','No requirements yet because the plan is empty.')}</div>`}
+    </div>
+    <div class="grid cols2 spacer">
+      <div class="card"><h2>${T('لوحة قرار التجهيز','Preparation decision')}</h2>
+        <div class="note" style="margin-top:10px">
+          <b>${rd.score>=80?T('جاهز للاعتماد','Ready to approve'):T('غير جاهز للاعتماد بعد','Not ready yet')}</b>
+          <p class="help" style="margin-top:6px">${rd.score>=80?T('استُوفي الحد المطلوب من الشروط؛ يمكن رفع الاختيار للاعتماد الرسمي.','The required threshold is met; the selection can go for formal approval.'):T('أكمل الشروط المعلّمة قبل رفع الاختيار للاعتماد.','Complete the flagged conditions before formal approval.')}</p>
+        </div>
+        <div class="actions spacer" style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="primary" data-act="approveAll" ${can('approve')?'':'disabled'}>${T('اعتماد الاختيار بالكامل','Approve the whole selection')}</button>
+          <button data-act="print">${T('طباعة','Print')}</button>
+        </div>
+        <p class="help" style="margin-top:10px">${T('الاعتماد قرار إداري داخل هذا الملف؛ لا يغني عن توقيع جهة الإشراف.','Approval here is an in-file admin mark; it does not replace official sign-off.')}</p>
+      </div>
+      <div class="card"><h2>${T('أثر الاختيار على الميزانية والوقت','Impact on time and budget')}</h2>
+        <p class="help" style="margin:6px 0 12px">${T('تقدير وصفي لعبء التجهيز لا لتكلفة مالية دقيقة.','A descriptive preparation-load estimate, not a cost figure.')}</p>
+        ${S.meta.days.map((d,i)=>{const n=dayLoad(i+1);return `<div class="pv"><span style="flex:1">${T('اليوم','Day')} ${i+1} · ${esc(L(d))}</span>
+          <span class="bar" style="width:110px"><i style="width:${Math.min(100,n/Math.max(1,S.rules.perDayMax)*100)}%;background:${n>S.rules.perDayMax?'var(--bad)':'var(--accent)'}"></i></span>
+          <small class="muted mono">${n}</small></div>`}).join('')}
+        <hr class="sep">
+        <div class="statline"><span>${T('إجمالي الخبرات','Total experiences')} <b>${S.selected.reduce((a,x)=>a+(ITEM(x.id)?ITEM(x.id).load:0),0)}</b></span>
+          <span>${T('حمل ثقيل','Heavy load')} <b>${S.selected.filter(x=>ITEM(x.id)&&ITEM(x.id).load===3).length}</b></span></div>
+      </div>
+    </div>`;
+}
+
+/* ============================ ٧ · حزمة التجهيز ============================ */
+function pageOutputs(){
+  const rd=readiness();
+  return pageHead('حزمة التجهيز','Prep pack',
+    'ورقة اختيار واحدة تسلّم لفريق التنفيذ: ماذا اخترنا، لماذا، وأين.',
+    'One selection sheet for the delivery team: what we picked, why and where.',
+    `<button data-act="print" class="primary">${T('طباعة / PDF','Print / PDF')}</button>
+     <button data-act="exportJson">${T('تصدير الخطة','Export plan')}</button>
+     <button data-act="importClick">${T('استيراد خطة','Import plan')}</button>
+     <button data-act="copySummary">${T('نسخ ملخص','Copy summary')}</button>
+     <button data-act="exportCsv">${T('تصدير CSV','Export CSV')}</button>
+     <input type="file" id="importFile" accept=".json,application/json" hidden>`)
+  +`<div class="printonly" style="margin-bottom:14px;border-bottom:2px solid #0d1f3a;padding-bottom:10px">
+      <div class="row" style="align-items:flex-start">
+        <div>
+          <div class="eyebrow">${T('أكاديمية النخبة · وثيقة اختيار','ELITE ACADEMY · SELECTION RECORD')}</div>
+          <h1 style="font-size:20px;margin-top:4px">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))}</h1>
+          <p class="help">${esc(L({ar:S.meta.cityAr,en:S.meta.cityEn}))} · <span dir="ltr">${esc(S.meta.start)} — ${esc(S.meta.end)}</span> · ${S.meta.students} ${T('طالبًا','students')} · ${selCount()} ${T('برنامجًا','programs')}</p>
+        </div>
+        <div style="text-align:center"><b style="font-size:22px">${readiness().score}%</b><div class="help">${T('جاهزية الاختيار','Readiness')}</div></div>
+      </div>
+    </div>
+    <div class="card screenonly">
+      <div class="row"><div><div class="eyebrow">${T('وثيقة الاختيار','SELECTION RECORD')}</div>
+        <h2 style="margin-top:6px">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))}</h2>
+        <p class="help">${esc(L({ar:S.meta.cityAr,en:S.meta.cityEn}))} · <span dir="ltr">${esc(S.meta.start)} — ${esc(S.meta.end)}</span> · ${S.meta.students} ${T('طالبًا','students')} · ${S.meta.days.length} ${T('أيام','days')}</p></div>
+        <div style="text-align:center">${ring(rd.score)}<div class="help" style="text-align:center">${T('جاهزية الاختيار','Readiness')}</div></div>
+      </div>
+      <hr class="sep">
+      <div class="statline"><span>${T('برامج','Programs')} <b>${selCount()}</b></span><span>${T('أساسي','Core')} <b>${coreCount()}</b></span><span>${T('قيم','Values')} <b>${valuesCount()}</b></span><span>${T('مسارات','Tracks')} <b>${trackCovered()}</b></span><span>${T('معتمد','Approved')} <b>${S.selected.filter(x=>x.approved).length}</b></span></div>
+    </div>
+    <div class="card spacer">
+      <h2>${T('جدول الاختيار','Selection table')}</h2>
+      ${S.selected.length?`<div class="tablewrap" style="margin-top:12px"><table><thead><tr>
+        <th>${T('اليوم','Day')}</th><th>${T('البرنامج','Program')}</th><th>${T('المسار / المجال','Track / field')}</th><th>${T('الأولوية','Priority')}</th>
+        <th>${T('مبرر الاختيار','Rationale')}</th><th>${T('المتطلبات','Needs')}</th></tr></thead><tbody>
+        ${[...S.selected].sort((a,b)=>(a.day||9)-(b.day||9)).map(x=>{const i=ITEM(x.id);const t=TRACK(i.t);return `<tr>
+          <td class="mono" style="white-space:nowrap">${x.day?T('يوم ','D')+' '+x.day:'—'}</td>
+          <td><b>${esc(L({ar:i.ar,en:i.en}))}</b></td>
+          <td>${esc(L(t))}<div class="help">${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))}</div></td>
+          <td>${x.pri==='core'?`<span class="pill orange">${T('أساسي','Core')}</span>`:`<span class="pill">${T('مساند','Support')}</span>`}</td>
+          <td style="max-width:280px">${esc(x.why||'—')}</td>
+          <td>${i.need.map(n=>`<span class="pill line">${esc(L({ar:NEEDS[n][0],en:NEEDS[n][1]}))}</span>`).join(' ')}</td></tr>`}).join('')}
+      </tbody></table></div>`:`<div class="empty">${T('لا اختيار لتجهيزه.','Nothing selected to pack.')}</div>`}
+    </div>
+    ${S.selected.length?`<div class="grid cols2 spacer">
+      <div class="card keep"><h2>${T('برامج حسب اليوم','Programs by day')}</h2>
+        ${S.meta.days.map((d,i)=>{const items=S.selected.filter(x=>x.day===i+1);return items.length?`<div style="margin:10px 0"><b style="font-size:12.5px">${T('اليوم','Day')} ${i+1} · ${esc(L(d))}</b>
+          <div class="tagcloud" style="margin-top:5px">${items.map(x=>`<span class="pill">${esc(L({ar:ITEM(x.id).ar,en:ITEM(x.id).en}))}</span>`).join('')}</div></div>`:''}).join('')||`<p class="help">${T('لا توزيع بعد.','No distribution yet.')}</p>`}
+      </div>
+      <div class="card keep"><h2>${T('سجل القرار','Decision log')}</h2>
+        <div style="max-height:330px;overflow:auto;margin-top:8px">
+        ${S.log.map(l=>`<div class="pv"><small class="muted mono">${time(l.at)}</small><span style="flex:1;font-size:12px">${esc(L(l))}</span><small class="muted">${L(ROLE(l.role))}</small></div>`).join('')||`<div class="empty">${T('فارغ','Empty')}</div>`}
+        </div>
+      </div>
+    </div>`:''}
+    <div class="card screenonly spacer">
+      <h2>${T('كيف تشارك الخطة مع فريقك','How to share the plan')}</h2>
+      <div class="grid cols3" style="margin-top:12px;gap:12px">
+        <div class="note"><b style="font-size:12.5px">1 · شارك الملف</b><p class="help">${T('أرسل ملف HTML نفسه (أو الحزمة المضغوطة)؛ يفتحه المستلم بالضغط عليه دون إنترنت.','Send the HTML file (or the zipped pack). The recipient opens it by double-click, offline.')}</p></div>
+        <div class="note"><b style="font-size:12.5px">2 · شارك الخطة</b><p class="help">${T('«تصدير الخطة» ينتج ملف JSON؛ يفتحه زميلك بـ«استيراد خطة» فتظهر عنده نفس البرامج والأيام والمبررات.','Export plan creates a JSON file; a colleague uses Import plan to load the same programs, days and rationales.')}</p></div>
+        <div class="note"><b style="font-size:12.5px">3 · شارك القرار</b><p class="help">${T('«نسخ ملخص» ينسخ نصًا جاهزًا للواتساب، و«طباعة» تنتج ورقة اختيار رسمية.','Copy summary gives WhatsApp-ready text; Print produces an official selection sheet.')}</p></div>
+      </div>
+      <p class="help" style="margin-top:10px">${T('ملاحظة: لا يوجد خادم مشترك؛ كل نسخة تحتفظ ببياناتها في متصفحها، والتبادل يتم بالملفات.','Note: there is no shared server. Each copy keeps its own data in its browser; exchange happens through files.')}</p>
+    </div>
+    <p class="help" style="margin-top:18px">${T('حدود الأداة: اختيار وصفي داخلي لا يُعد تقييمًا علميًا معياريًا للطالب، والحفظ على هذا المتصفح فقط.','Scope: an internal descriptive selection, not a standardised student assessment. Data is stored in this browser only.')}</p>`;
+}
+/* ============================ العرض والتنقل ============================ */
+const PAGES={dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
+function render(){
+  if(!PAGES[page]) page='dashboard';
+  header();
+  const container=$('#app');
+  container.innerHTML=`<div class="demo noprint"><span>◈ ${T('مختبر اختيار · بيانات الطلاب تجريبية · الحفظ على هذا المتصفح فقط','Selection lab · sample student data · saved in this browser only')}</span><span>${T('اختيار لا تقييم','Select, do not assess')}</span></div>`+PAGES[page]();
+  if(page==='library'){renderLib();}
+  S.page=page;S.lang=lang;save();
+  try{history.replaceState(null,'','#'+page)}catch(e){}
+  window.scrollTo(0,0);
+}
+function renderLib(){
+  const grid=$('#libGrid');if(!grid)return;
+  const list=libList();
+  grid.innerHTML=list.length?list.map(libCard).join(''):`<div class="empty" style="grid-column:1/-1">${T('لا نتائج مطابقة. جرّب مسارًا آخر أو امسح البحث.','No matches. Try another track or clear the search.')}</div>`;
+  const c=$('#libCount');if(c)c.textContent=list.length;
+}
+
+/* ============================ الإجراءات ============================ */
+function pick(id,silent){
+  if(!can('select')){toast(T('هذا الإجراء غير متاح لدورك.','This action is not available for your role.'));return}
+  if(isSel(id))return;
+  const it=ITEM(id),loads=S.meta.days.map((d,i)=>({d:i+1,n:dayLoad(i+1)})).sort((a,b)=>a.n-b.n);
+  const day=loads.length?loads[0].d:1;
+  S.selected.push({id,pri:'support',day,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
+  logIt(`أُضيف للخطة: ${it.ar}`,`Added to plan: ${it.en}`);
+  save();
+  if(!silent){toast(T(`أُضيف «${it.ar}» إلى خطة اليوم ${day}`,`Added “${it.en}” to day ${day}`));render()}
+  else render();
+}
+function unpick(id){
+  if(!can('select')){toast(T('هذا الإجراء غير متاح لدورك.','This action is not available for your role.'));return}
+  const it=ITEM(id);const was=S.selected.find(x=>x.id===id);
+  S.selected=S.selected.filter(x=>x.id!==id);S.draft=false;
+  if(was&&was.approved)logIt(`سُحب من الخطة: ${it.ar}`,`Removed from plan: ${it.en}`);
+  else logIt(`أُزيل من الخطة: ${it.ar}`,`Removed from plan: ${it.en}`);
+  save();render();
+}
+function patch(id,k,v){
+  const x=S.selected.find(s=>s.id===id);if(!x)return;
+  x[k]=k==='day'?(v?+v:null):v;S.draft=false;
+  const it=ITEM(id);
+  logIt(`تعديل «${it.ar}»: ${k==='day'?'اليوم '+v:k==='pri'?(v==='core'?'أساسي':'مساند'):'تحديث المبرر'}`,`Updated “${it.en}”: ${k}`);
+  save();
+}
+function autoPlan(){
+  if(!can('select'))return;
+  const order=[...S.selected].sort((a,b)=>{
+    const A=ITEM(a.id),B=ITEM(b.id);
+    if(a.pri!==b.pri)return a.pri==='core'?-1:1;
+    return (B.load||0)-(A.load||0);
+  });
+  const loads=S.meta.days.map(()=>0);
+  order.forEach(x=>{
+    let best=0;
+    for(let i=0;i<loads.length;i++){if(loads[i]<loads[best])best=i}
+    x.day=best+1;loads[best]++;
+  });
+  logIt(T('توزيع تلقائي متوازن على أيام المعسكر','Auto-distributed across camp days').ar||'توزيع تلقائي متوازن على أيام المعسكر','Auto-distributed across camp days');
+  save();render();toast(T('وُزّعت البرامج على الأيام بأقل حمل.','Programs distributed with the lowest daily load.'));
+}
+
+/* ---------- النوافذ ---------- */
+function openModal(html){
+  $('#modalInner').innerHTML=`<button class="x" data-act="close" aria-label="close">✕</button>${html}`;
+  const m=$('#modal');if(!m.open)m.showModal();
+}
+const closeModal=()=>{const m=$('#modal');if(m.open)m.close()};
+
+function guideModal(){
+  const steps=lang==='ar'?[
+    ['01','اختر من المكتبة','ستون برنامجًا في ستة مسارات. لا تختر كل شيء: اختر ما يخدم هذا المعسكر وفئته العمرية.'],
+    ['02','اكتب سبب كل اختيار','لكل برنامج: أولوية (أساسي/مساند)، يوم، ومبرر مكتوب. الاختيار بلا سبب يصبح تجهيزًا بلا هدف.'],
+    ['03','راجع الملاءمة','هل يخدم اختيارك التحديات التي أعلنتها الأسر؟ الفجوة تعني أن الخطة تحتاج مراجعة، لا الطالب.'],
+    ['04','افحص ثم سلّم','استوفِ شروط الجاهزية، ثم صدّر «ورقة الاختيار» لفريق التنفيذ: ماذا اخترنا، لماذا، وأين.']
+  ]:[
+    ['01','Pick from the library','Sixty programs across six tracks. Do not pick everything: pick what serves this camp and its age band.'],
+    ['02','Write the reason','For every program: priority, day and a written rationale. A pick without a reason is preparation without a purpose.'],
+    ['03','Review the fit','Does your selection serve the challenges families declared? A gap means the plan needs revision, not the student.'],
+    ['04','Check, then hand over','Meet the readiness conditions, then export the selection sheet for the delivery team.']
+  ];
+  openModal(`<div class="eyebrow">${T('دليل الاستخدام','HOW IT WORKS')}</div>
+    <h2 style="margin-top:6px">${T('أداة اختيار، لا أداة تقييم','A selection tool, not an assessment')}</h2>
+    <p class="help" style="margin-top:6px">${T('نستخدمها في مرحلة التخطيط وتجهيز المعسكر: نقرّر ما نريد أن يكتسبه الطالب، قبل أن نجهّز أي نشاط.','Used while planning and preparing the camp: decide what students should gain before preparing any activity.')}</p>
+    <div class="spacer">${steps.map(([n,t,d])=>`<div class="step" style="align-items:flex-start;margin-bottom:8px"><b>${n}</b><span><b style="font-size:12.5px">${t}</b><br><span class="help">${d}</span></span></div>`).join('')}</div>
+    <div class="note orange" style="margin-top:12px"><b>${T('حدود الأداة','Scope')}</b>
+      <p class="help" style="margin-top:4px">${T('لا تقيس الطالب ولا تصدر أحكامًا عليه، ولا تتصل بخادم. كل البيانات تُحفظ في هذا المتصفح فقط، والطلاب الثمانية بيانات تجريبية.','It does not measure or judge students and makes no network calls. Everything is stored in this browser only, and the eight student records are sample data.')}</p></div>
+    <div class="actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <button data-act="go:library" class="primary">${T('ابدأ بالمكتبة','Start with the library')}</button>
+      <button data-act="close">${T('إغلاق','Close')}</button>
+    </div>`);
+}
+
+function briefModal(){
+  const m=S.meta;
+  openModal(`<div class="eyebrow">${T('بيانات المعسكر','CAMP BRIEF')}</div>
+    <h2 style="margin-top:6px">${T('هوية المعسكر وأيامه','Camp identity & days')}</h2>
+    <p class="help">${T('هذه البيانات تظهر في ورقة الاختيار المطبوعة.','These fields appear on the printed selection sheet.')}</p>
+    <div class="fields spacer">
+      <label class="fld">${T('اسم المعسكر (عربي)','Camp name (Arabic)')}<input id="bCampAr" value="${esc(m.campAr)}"></label>
+      <label class="fld">${T('Camp name (English)','Camp name (English)')}<input id="bCampEn" value="${esc(m.campEn)}" dir="ltr"></label>
+      <label class="fld">${T('المدينة','City')}<input id="bCity" value="${esc(m.cityAr)}"></label>
+      <label class="fld">${T('المدة','Dates')}<div class="row" style="gap:6px"><input id="bStart" type="date" value="${esc(m.start)}"><input id="bEnd" type="date" value="${esc(m.end)}"></div></label>
+      <label class="fld">${T('أصغر سن','Youngest')}<input id="bAgeMin" type="number" min="6" max="18" value="${m.ageMin}"></label>
+      <label class="fld">${T('أكبر سن','Oldest')}<input id="bAgeMax" type="number" min="6" max="18" value="${m.ageMax}"></label>
+      <label class="fld">${T('عدد الطلاب','Students')}<input id="bStudents" type="number" min="1" max="500" value="${m.students}"></label>
+      <label class="fld">${T('عدد الفرق','Teams')}<input id="bTeams" type="number" min="1" max="20" value="${m.teams}"></label>
+    </div>
+    <h3 style="margin:18px 0 8px">${T('موضوعات الأيام','Day themes')}</h3>
+    ${m.days.map((d,i)=>`<div class="row" style="margin-bottom:6px;gap:8px"><span class="pill">${i+1}</span>
+      <input id="dayAr${i}" value="${esc(d.ar)}" style="flex:1;border:1px solid var(--line);border-radius:7px;padding:6px 9px">
+      <input id="dayEn${i}" value="${esc(d.en)}" dir="ltr" style="flex:1;border:1px solid var(--line);border-radius:7px;padding:6px 9px"></div>`).join('')}
+    <div class="actions" style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end">
+      <button data-act="close">${T('إلغاء','Cancel')}</button>
+      <button class="primary" data-act="saveBrief">${T('حفظ','Save')}</button>
+    </div>`);
+}
+function saveBrief(){
+  const g=id=>$('#'+id)?$('#'+id).value:'';
+  S.meta.campAr=g('bCampAr')||S.meta.campAr;S.meta.campEn=g('bCampEn')||S.meta.campEn;
+  S.meta.cityAr=g('bCity')||S.meta.cityAr;S.meta.start=g('bStart');S.meta.end=g('bEnd');
+  S.meta.ageMin=+g('bAgeMin')||S.meta.ageMin;S.meta.ageMax=+g('bAgeMax')||S.meta.ageMax;
+  S.meta.students=+g('bStudents')||S.meta.students;S.meta.teams=+g('bTeams')||S.meta.teams;
+  S.meta.days.forEach((d,i)=>{d.ar=g('dayAr'+i)||d.ar;d.en=g('dayEn'+i)||d.en});
+  logIt('تحديث بيانات المعسكر','Updated camp brief');
+  save();closeModal();render();
+}
+function itemModal(id){
+  const i=ITEM(id),t=TRACK(i.t),on=isSel(id);
+  const pl=i.t==='sport'||i.t==='trips'
+    ? [T('الغاية','Purpose'),T('البرامج','Programs'),T('الأثر المتوقع','Expected impact')]
+    : PHASE_LABELS.map(p=>L({ar:p[0],en:p[1]}));
+  openModal(`<div class="row" style="align-items:flex-start;padding-inline-end:44px">
+      <div><span class="trackchip" style="--tc:${t.color}"><i></i>${L(t)}</span>
+        <h2 style="margin-top:8px">${esc(L({ar:i.ar,en:i.en}))}</h2>
+        <p class="help">${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))} · ${i.ages[0]}–${i.ages[1]} ${T('سنة','yrs')} · ${T('حمل','Load')} ${i.load}/3</p></div>
+      <span class="pill ${on?'good':'line'}">${on?T('في الخطة','In plan'):T('غير مختار','Not selected')}</span>
+    </div>
+    <div class="note" style="margin-top:14px"><b>${T('الهدف','Goal')}</b><p>${esc(L(i.goal))}</p></div>
+    <h3 style="margin:16px 0 8px">${T('محتوى البرنامج','Program content')}</h3>
+    <div class="phase">
+      ${i.ph.map((p,k)=>`<div class="p"><b>0${k+1}</b><div><b style="font-size:12.5px">${pl[k]}</b><br><span>${esc(L({ar:p[0],en:p[1]}))}</span></div></div>`).join('')}
+    </div>
+    <h3 style="margin:16px 0 8px">${T('متطلبات التجهيز','Preparation needs')}</h3>
+    <div class="tagcloud">${i.need.map(n=>`<span class="pill line">${esc(L({ar:NEEDS[n][0],en:NEEDS[n][1]}))}</span>`).join('')}</div>
+    <div class="actions" style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end">
+      ${on?`<button data-act="edit:${id}">${T('تخصيص الاختيار','Customise pick')}</button><button class="danger" data-act="unpick:${id}">${T('إزالة','Remove')}</button>`
+          :`<button class="primary" data-act="pick:${id}">${T('أضف إلى الخطة','Add to plan')}</button>`}
+      <button data-act="close">${T('إغلاق','Close')}</button>
+    </div>`);
+}
+function editModal(id){
+  const x=S.selected.find(s=>s.id===id);if(!x)return;
+  const i=ITEM(id);
+  openModal(`<div class="eyebrow">${T('قرار الاختيار','SELECTION DECISION')}</div>
+    <h2 style="margin-top:6px">${esc(L({ar:i.ar,en:i.en}))}</h2>
+    <p class="help">${esc(L(TRACK(i.t)))} · ${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))}</p>
+    <div class="fields spacer">
+      <label class="fld">${T('الأولوية','Priority')}<select id="ePri">
+        <option value="core" ${x.pri==='core'?'selected':''}>${T('أساسي — يُنفّذ كاملًا','Core — fully delivered')}</option>
+        <option value="support" ${x.pri==='support'?'selected':''}>${T('مساند — يُدمج في نشاط','Support — embedded')}</option></select></label>
+      <label class="fld">${T('اليوم','Day')}<select id="eDay">
+        <option value="">${T('غير موزّع','Unassigned')}</option>
+        ${S.meta.days.map((d,k)=>`<option value="${k+1}" ${x.day===k+1?'selected':''}>${k+1} · ${esc(L(d))}</option>`).join('')}</select></label>
+      <label class="fld wide">${T('لماذا اخترنا هذا البرنامج لهذا المعسكر؟','Why this program for this camp?')}
+        <textarea id="eWhy" placeholder="${T('اربط السبب بتحدٍ أعلنته الأسر أو بهدف يوم محدد…','Tie the reason to a family-declared challenge or a specific day goal…')}">${esc(x.why||'')}</textarea></label>
+    </div>
+    <div class="note" style="margin-top:12px"><b>${T('محتوى البرنامج','Content')}</b>
+      <p class="help" style="margin-top:4px">${i.ph.map(p=>esc(L({ar:p[0],en:p[1]}))).join(' · ')}</p></div>
+    <div class="actions" style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end">
+      ${can('approve')?`<button data-act="approve:${id}">${x.approved?T('سحب الاعتماد','Unapprove'):T('اعتماد','Approve')}</button>`:''}
+      <button class="danger" data-act="unpick:${id}">${T('إزالة من الخطة','Remove')}</button>
+      <button class="primary" data-act="saveEdit:${id}">${T('حفظ القرار','Save decision')}</button>
+    </div>`);
+}
+function saveEdit(id){
+  const x=S.selected.find(s=>s.id===id);if(!x)return;
+  x.pri=$('#ePri').value;x.day=$('#eDay').value?+$('#eDay').value:null;x.why=$('#eWhy').value.trim();
+  logIt(`حُدّث قرار «${ITEM(id).ar}»`,`Decision updated: ${ITEM(id).en}`);
+  save();closeModal();render();toast(T('حُفظ قرار الاختيار.','Decision saved.'));
+}
+function pickerModal(day){
+  const pool=LIB.filter(i=>!isSel(i.id));
+  openModal(`<div class="row"><h2>${T('أضف إلى اليوم','Add to day')} ${day} · ${esc(DAYTEXT(day))}</h2><span class="pill line">${pool.length} ${T('متاح','available')}</span></div>
+    <input id="pkQ" placeholder="${T('ابحث…','Search…')}" style="width:100%;margin:12px 0;border:1px solid var(--line);border-radius:8px;padding:8px 11px">
+    <div id="pkList" style="max-height:50vh;overflow:auto">${pool.map(i=>`<div class="pv" data-pk="${i.id}">
+      <span style="flex:1"><b style="font-size:12.5px">${esc(L({ar:i.ar,en:i.en}))}</b><div class="help">${esc(L(TRACK(i.t)))}</div></span>
+      <button class="small primary" data-pickhere="${i.id}">${T('أضف','Add')}</button></div>`).join('')||`<div class="empty">${T('كل المكتبة مختارة.','The whole library is selected.')}</div>`}</div>
+    <div class="actions" style="display:flex;justify-content:flex-end;margin-top:14px"><button data-act="close">${T('إغلاق','Close')}</button></div>`);
+}
+
+/* ---------- التصدير ---------- */
+function download(name,content,type){
+  const a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type:type||'text/plain;charset=utf-8'}));
+  a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);
+}
+function packData(){
+  return {
+    camp:{ar:S.meta.campAr,en:S.meta.campEn,city:S.meta.cityAr,start:S.meta.start,end:S.meta.end,ageMin:S.meta.ageMin,ageMax:S.meta.ageMax,students:S.meta.students,days:S.meta.days},
+    rules:S.rules,readiness:readiness().score,
+    selection:[...S.selected].sort((a,b)=>(a.day||9)-(b.day||9)).map(x=>{const i=ITEM(x.id);return {
+      day:x.day,programAr:i.ar,programEn:i.en,track:L(TRACK(i.t)),field:L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}),
+      priority:x.pri,rationale:x.why||'',approved:!!x.approved,
+      phases:i.ph.map(p=>({ar:p[0],en:p[1]})),needs:i.need.map(n=>L({ar:NEEDS[n][0],en:NEEDS[n][1]}))
+    }}),
+    requirements:needsAgg().map(([k,n])=>({need:L({ar:NEEDS[k][0],en:NEEDS[k][1]}),programs:n,owner:(S.prep[k]||{}).owner||'',done:!!(S.prep[k]||{}).done})),
+    coverage:fitStats().pct,
+    generated:new Date().toISOString()
+  };
+}
+function parsePlan(obj){
+  const mapAr=new Map(LIB.map(i=>[i.ar,i.id]));
+  const mapEn=new Map(LIB.map(i=>[i.en,i.id]));
+  if(!obj||!Array.isArray(obj.selection))throw new Error('no selection');
+  const picked=[];
+  obj.selection.forEach(r=>{
+    const id=mapAr.get(r.programAr)||mapEn.get(r.programEn)||(ITEM(r.id)?r.id:null);
+    if(!id)return;
+    picked.push({id,pri:r.priority==='core'?'core':'support',day:r.day?+r.day:null,
+      why:r.rationale||'',owner:'programs',approved:!!r.approved,at:Date.now()});
+  });
+  if(!picked.length)throw new Error('nothing matched');
+  return {picked,camp:obj.camp||null,rules:obj.rules||null};
+}
+function importClick(){ $('#importFile') && $('#importFile').click(); }
+function readImport(file){
+  if(!file)return;
+  const fr=new FileReader();
+  fr.onload=()=>{
+    try{
+      pendingImport=parsePlan(JSON.parse(fr.result));
+      importPreview();
+    }catch(e){toast(T('ملف غير صالح. تأكد أنه مُصدَّر من هذه الأداة.','Invalid file. Make sure it was exported from this tool.'))}
+  };
+  fr.readAsText(file);
+}
+let pendingImport=null;
+function importPreview(){
+  const p=pendingImport;if(!p)return;
+  openModal(`<div class="eyebrow">${T('استيراد خطة','IMPORT PLAN')}</div>
+    <h2 style="margin-top:6px">${T('استبدال الخطة الحالية؟','Replace the current plan?')}</h2>
+    <p class="help" style="margin-top:6px">${T(`الملف يحتوي ${p.picked.length} برنامجًا. ستحل هذه الخطة محل الاختيار الحالي (${selCount()} برنامجًا) ويمكنك تعديلها بعد الاستيراد.`,`The file holds ${p.picked.length} programs. It will replace the current selection (${selCount()}) and stay editable.`)}</p>
+    <div class="note" style="margin-top:12px">${p.picked.map(x=>{const i=ITEM(x.id);return `<div class="pv"><span style="flex:1">${esc(L({ar:i.ar,en:i.en}))}</span><span class="pill">${x.day?T('يوم ','D')+x.day:'—'}</span></div>`}).join('')}</div>
+    <div class="actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button data-act="close">${T('إلغاء','Cancel')}</button>
+      <button class="primary" data-act="doImport">${T('استيراد','Import')}</button>
+    </div>`);
+}
+function doImport(){
+  const p=pendingImport;if(!p)return;
+  S.selected=p.picked;S.draft=false;
+  if(p.camp){['campAr','campEn','cityAr','start','end','ageMin','ageMax','students'].forEach(k=>{if(p.camp[k]!=null)S.meta[k]=p.camp[k]})}
+  if(p.rules)Object.assign(S.rules,p.rules);
+  logIt(`استيراد خطة (${p.picked.length} برنامجًا)`,`Plan imported (${p.picked.length} programs)`);
+  pendingImport=null;save();closeModal();render();
+  toast(T('تم استيراد الخطة؛ راجع الملاءمة والجاهزية.','Plan imported; review fit and readiness.'));
+}
+function summaryText(){
+  const lines=[];
+  lines.push(T('خطة اختيار المهارات والقيم — ','Skills & values selection — ')+L({ar:S.meta.campAr,en:S.meta.campEn}));
+  lines.push(`${L({ar:S.meta.cityAr,en:S.meta.cityEn})} · ${S.meta.start} — ${S.meta.end} · ${S.meta.students} ${T('طالبًا','students')}`);
+  lines.push('');
+  S.meta.days.forEach((d,i)=>{
+    const items=S.selected.filter(x=>x.day===i+1);
+    if(!items.length)return;
+    lines.push(`${T('اليوم','Day')} ${i+1} · ${L(d)}`);
+    items.forEach(x=>{const it=ITEM(x.id);lines.push(`  • ${L({ar:it.ar,en:it.en})}${x.pri==='core'?T(' (أساسي)',' (core)'):''}`)});
+  });
+  const un=S.selected.filter(x=>!x.day);
+  if(un.length){lines.push('');lines.push(T('غير موزّع:','Unassigned:')+' '+un.map(x=>L({ar:ITEM(x.id).ar,en:ITEM(x.id).en})).join('، '));}
+  lines.push('');
+  lines.push(T('الجاهزية: ','Readiness: ')+readiness().score+'% · '+T('المعتمد: ','Approved: ')+S.selected.filter(x=>x.approved).length+'/'+selCount());
+  return lines.join('\n');
+}
+function copySummary(){
+  const text=summaryText();
+  const done=()=>toast(T('نُسخ الملخص — الصقه في واتساب أو بريد الفريق.','Summary copied — paste it into WhatsApp or email.'));
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done))}
+  else fallbackCopy(text,done);
+}
+function fallbackCopy(text,done){
+  const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');done()}catch(e){openModal(`<h2>${T('انسخ الملخص','Copy the summary')}</h2><textarea style="width:100%;min-height:260px">${esc(text)}</textarea>`)}
+  ta.remove();
+}
+function exportJson(){download('elite-camp-selection.json',JSON.stringify(packData(),null,2),'application/json');toast(T('صُدّر ملف JSON.','JSON exported.'));}
+function exportCsv(){
+  const rows=[['day','program_ar','program_en','track','field','priority','rationale','needs','approved']];
+  [...S.selected].sort((a,b)=>(a.day||9)-(b.day||9)).forEach(x=>{const i=ITEM(x.id);
+    rows.push([x.day||'',i.ar,i.en,L(TRACK(i.t)),L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}),x.pri,(x.why||'').replace(/"/g,'""'),i.need.map(n=>L({ar:NEEDS[n][0],en:NEEDS[n][1]})).join(' | '),x.approved?1:0])});
+  const csv='\uFEFF'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  download('elite-camp-selection.csv',csv,'text/csv;charset=utf-8');toast(T('صُدّر ملف CSV.','CSV exported.'));
+}
+
+/* ============================ الأحداث ============================ */
+document.addEventListener('click',e=>{
+  const nav=e.target.closest('[data-page]');
+  if(nav){page=nav.dataset.page;if(window.innerWidth<860)$('#sidebar').classList.remove('open');render();return}
+  const pickHere=e.target.closest('[data-pickhere]');
+  if(pickHere){const id=pickHere.dataset.pickhere;pick(id,true);const x=S.selected.find(s=>s.id===id);if(x)x.day=+$('#modalInner').dataset.day||1;const d=window.__pickDay;if(d&&x)x.day=d;save();closeModal();render();toast(T('أُضيف إلى اليوم.','Added to the day.'));return}
+  const el=e.target.closest('[data-act]');if(!el)return;
+  const [a,arg]=el.dataset.act.split(':');
+  const map={
+    go:()=>{page=arg;render()},
+    lang:()=>{lang=lang==='ar'?'en':'ar';render()},
+    theme:()=>{S.theme=S.theme==='light'?'dark':'light';render()},
+    menu:()=>{$('#sidebar').classList.toggle('open')},
+    close:()=>closeModal(),
+    brief:()=>can('brief')?briefModal():toast(T('تعديل البيانات متاح للإدارة.','Editing the brief is admin-only.')),
+    guide:()=>guideModal(),
+    saveBrief:()=>saveBrief(),
+    item:()=>itemModal(arg),
+    pick:()=>{pick(arg)},
+    unpick:()=>{unpick(arg)},
+    edit:()=>{closeModal();editModal(arg)},
+    saveEdit:()=>saveEdit(arg),
+    pickday:()=>{window.__pickDay=+arg;pickerModal(+arg)},
+    approve:()=>{
+      if(!can('approve'))return toast(T('الاعتماد متاح للمدير أو مسؤول القيم.','Approval is for the director or values lead.'));
+      const x=S.selected.find(s=>s.id===arg);if(!x)return;
+      x.approved=!x.approved;logIt(`${x.approved?'اعتُمد':'سُحب اعتماد'} «${ITEM(arg).ar}»`,`${x.approved?'Approved':'Unapproved'}: ${ITEM(arg).en}`);
+      save();closeModal();render();},
+    approveAll:()=>{
+      if(!can('approve'))return;
+      S.selected.forEach(x=>x.approved=true);logIt('اعتُمد الاختيار بالكامل','Full selection approved');
+      save();render();toast(T('اعتُمدت كل البرامج المختارة.','All selected programs approved.'));},
+    autoplan:()=>autoPlan(),
+    print:()=>{closeModal();setTimeout(()=>window.print(),120)},
+    exportJson:()=>exportJson(),
+    importClick:()=>importClick(),
+    doImport:()=>doImport(),
+    copySummary:()=>copySummary(),
+    exportCsv:()=>exportCsv(),
+    reset:()=>{
+      if(!can('reset'))return;
+      S.selected=[];S.prep={};S.draft=false;logIt('صُفّر الاختيار','Selection cleared');save();render();toast(T('صُفّرت الخطة.','Plan cleared.'));},
+    draft:()=>{
+      S.selected=DRAFT.map(d=>({...d,owner:'programs',approved:false,at:Date.now()}));
+      S.draft=true;logIt('استُعيدت المسودة الأولية','Example draft restored');save();render();},
+    role:()=>{S.role=arg;logIt(`تبديل الدور إلى ${ROLE(arg).ar}`,`Role switched to ${ROLE(arg).en}`);save();render()}
+  };
+  if(map[a]){e.preventDefault();map[a]()}
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='q'){libFilter.q=t.value;renderLib()}
+  if(t.id==='pkQ'){const q=t.value.toLowerCase();$$('#pkList [data-pk]').forEach(r=>{const i=ITEM(r.dataset.pk);r.style.display=(L({ar:i.ar,en:i.en})+' '+L(i.goal)).toLowerCase().includes(q)?'':'none'})}
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='fTrack'){libFilter.track=t.value;libFilter.field='all';render();return}
+  if(t.id==='fField'){libFilter.field=t.value;render();return}
+  if(t.id==='fAge'){libFilter.age=t.value;render();return}
+  if(t.id==='fOnly'){libFilter.only=t.checked;render();return}
+  if(t.id==='importFile'){readImport(t.files&&t.files[0]);t.value='';return}
+  if(t.id==='roleSel'){S.role=t.value;logIt(`تبديل الدور إلى ${ROLE(t.value).ar}`,`Role switched to ${ROLE(t.value).en}`);save();render();return}
+  const ed=t.closest('[data-edit]');
+  if(ed){const [k,id]=ed.dataset.edit.split(':');patch(id,k,t.value);if(k!=='why')render();return}
+  const ru=t.closest('[data-rule]');
+  if(ru){S.rules[ru.dataset.rule]=+t.value;logIt('تحديث قواعد الاختيار','Selection rules updated');save();render();return}
+  const pr=t.closest('[data-prep]');
+  if(pr){const [k,key]=pr.dataset.prep.split(':');S.prep[key]=S.prep[key]||{};
+    S.prep[key][k]=k==='done'?t.checked:t.value;save();if(k==='done')render();return}
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeModal();
+  if((e.key==='/'||e.key==='k')&&page==='library'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();$('#q')&&$('#q').focus()}
+});
+
+/* ============================ البدء ============================ */
+(function boot(){
+  const h=(location.hash||'').replace('#','');
+  if(h&&PAGES[h])page=h;
+  if(!S.log.length){logIt('أُنشئت مسودة الاختيار','Example draft created');save()}
+  if(!S.seenGuide&&!location.hash){S.seenGuide=true;setTimeout(()=>{if(!$('#modal').open)guideModal()},400)}
+  render();
+})();
+</script>
+</body>
+</html>
