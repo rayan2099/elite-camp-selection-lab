@@ -272,6 +272,29 @@ html[data-theme=dark] .plan-day .dn{background:var(--accent);color:#22140d}
 .wizdots{display:flex;gap:6px;margin:12px 0 18px}
 .wizdots i{height:5px;flex:1;border-radius:99px;background:var(--soft2)}
 .wizdots i.on{background:var(--accent)}
+
+/* ---------- daily timeline ---------- */
+.tl{--tl-time:92px;position:relative;margin-top:6px}
+.tl:before{content:"";position:absolute;top:8px;bottom:8px;inset-inline-start:calc(var(--tl-time) + 17px);width:2px;background:var(--soft2)}
+.tlrow{display:grid;grid-template-columns:var(--tl-time) 34px 1fr;gap:10px;align-items:flex-start;position:relative;padding:4px 0}
+.tltime{font-size:10.5px;color:var(--muted);text-align:end;padding-top:9px;direction:ltr;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tldot{width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;position:relative;z-index:1;box-shadow:0 0 0 3px var(--surface)}
+.tldot svg{width:15px;height:15px}
+.tlrow.prog .tldot{background:var(--accent);color:#22140d}
+.tlbody{padding-top:5px;min-width:0}
+.tlbody>b{font-size:12.5px;display:block}
+.tlprog{display:flex;flex-wrap:wrap;align-items:center;gap:8px;width:fit-content;max-width:100%;background:color-mix(in srgb,var(--bc) 13%,var(--surface));border-inline-start:3px solid var(--bc);border-radius:8px;padding:6px 9px;margin:5px 0}
+.tlname{font-size:12px;font-weight:700}
+.tlmeta{font-size:10px;color:var(--muted)}
+.tlwhy{flex-basis:100%;font-size:10.5px;color:var(--muted);line-height:1.6}
+.tlhint{font-size:10.5px;color:var(--muted)}
+.tlrow.tl-empty .tldot{opacity:.5}
+.daybar{display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:8px}
+.daynum{background:var(--navy);color:#fff;border-radius:10px;padding:6px 12px;text-align:center;line-height:1.15;min-width:56px}
+.daynum small{font-size:8.5px;letter-spacing:.08em;opacity:.75;display:block}
+.daynum b{font-size:18px}
+html[data-theme=dark] .daynum{background:var(--accent);color:#22140d}
+@media(max-width:600px){.tl{--tl-time:68px}.tltime{font-size:9.5px}.tlbody>b{font-size:11.5px}}
 /* ---------- misc ---------- */
 #modal{border:none;padding:0;border-radius:16px;max-width:min(760px,94vw);width:100%;background:var(--surface);color:var(--fg);box-shadow:0 30px 90px #07101f55}
 #modal::backdrop{background:#07101f66;backdrop-filter:blur(3px)}
@@ -308,7 +331,7 @@ html[data-theme=dark] .plan-day .dn{background:var(--accent);color:#22140d}
 @media print{
   @page{size:A4;margin:12mm}
   body{background:#fff}
-  #sidebar,#topbar,.noprint,#toasts,.pagehead{display:none!important}
+  #sidebar,#topbar,.noprint,#toasts,.pagehead,.stepper,.bar-strip{display:none!important}
   #shell{grid-template-columns:1fr}
   #app{padding:0;max-width:none}
   .card{box-shadow:none;border:none;padding:0 0 10px;break-inside:auto}
@@ -326,6 +349,16 @@ html[data-theme=dark] .plan-day .dn{background:var(--accent);color:#22140d}
   .printonly{display:block!important}
     .screenonly,.ring{display:none!important}
   .keep{break-inside:avoid}
+  .pbreak{break-before:page}
+  .pheadline{display:block;font-size:9px;color:#64748b;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #e2e8f0}
+  .printcover{display:block;margin-bottom:12px;border-bottom:2px solid #0d1f3a;padding-bottom:10px}
+  .dayblock{border:none;padding:0;box-shadow:none;break-inside:auto}
+  .daybar{border-bottom:2px solid #0d1f3a}
+  .tl:before{background:#cbd5e1}
+  .tldot{background:#0d1f3a!important;color:#fff!important;box-shadow:none}
+  .tlrow.prog .tldot{background:#f07b3a!important;color:#22140d!important}
+  .tlprog{border:1px solid #e2e8f0;border-inline-start:3px solid #94a3b8}
+  .tlwhy{color:#475569}
   a[href]:after{content:''}
 }
 @media(max-width:1080px){
@@ -1507,11 +1540,11 @@ function pageOutputs(){
    منشئ المعسكر — تجربة التركيب بالمكعبات
    ========================================================================== */
 const STEPS=[
-  ['اللوح','Baseplate'],
-  ['القطع','Bricks'],
+  ['الأساس','Foundation'],
+  ['المكوّنات','Components'],
   ['التركيب','Assembly'],
-  ['التماسك','Stability'],
-  ['الخطة','Plan']
+  ['التوازن','Balance'],
+  ['البرنامج','Program']
 ];
 let held=null;
 
@@ -1552,7 +1585,7 @@ function buildStrip(){
 }
 function builderFooter(){
   const n=S.step;
-  return `<div class="row" style="margin-top:18px;gap:8px;flex-wrap:wrap">
+  return `<div class="row noprint" style="margin-top:18px;gap:8px;flex-wrap:wrap">
     <button data-act="step:${n-1}" ${n===1?'disabled':''}>${T('→ السابق','← Back')}</button>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       ${n<5?`<button class="primary" data-act="step:${n+1}">${T('التالي: ','Next: ')}${T(STEPS[n][0],STEPS[n][1])}</button>`
@@ -1613,7 +1646,7 @@ function stepBricks(){
   const placed=S.selected.filter(x=>x.day);
   return `<div class="build2">
     <div class="card">
-      <div class="row wrap"><h2>${T('صندوق القطع','Brick bins')}</h2>
+      <div class="row wrap"><h2>${T('صندوق المكوّنات','Component bins')}</h2>
         <div class="seg">${[['all',T('الكل','All')]].concat(TRACKS.map(t=>[t.id,L(t)])).map(([id,label])=>
           `<button class="${track===id?'on':''}" data-act="bin:${id}">${label}</button>`).join('')}</div></div>
       <p class="help" style="margin:6px 0 12px">${T('اضغط على أي قطعة لإضافتها إلى صندوقك، ثم ركّبها على الأيام في الخطوة التالية.','Tap a brick to add it to your tray, then snap it onto a day in the next step.')}</p>
@@ -1652,7 +1685,7 @@ function stepAssemble(){
   const tray=S.selected.filter(x=>!x.day);
   const max=S.rules.perDayMax;
   return `<div class="card">
-    <div class="row wrap"><h2>${T('صندوق القطع','Tray')}</h2>
+    <div class="row wrap"><h2>${T('صندوق المكوّنات','Tray')}</h2>
       <span class="help">${T('اسحب القطعة إلى اليوم، أو اضغطها ثم اضغط اليوم.','Drag a brick onto a day, or tap it then tap the day.')}</span></div>
     <div class="tray" style="margin-top:12px" data-plate="0">
       ${tray.length?tray.map(x=>brickEl(ITEM(x.id),{sub:`<span>${T('اسحبني','drag me')}</span>`})).join(''):`<div class="empty">${T('كل القطع مثبّتة — البناء جاهز للمراجعة.','All bricks placed — ready to check.')}</div>`}
@@ -1695,7 +1728,7 @@ function stepStability(){
   const maxH=Math.max(1,...S.meta.days.map((d,i)=>dayLoad(i+1)));
   return `<div class="build3">
     <div class="card">
-      <div class="row"><h2>${T('قوة التماسك','Structure strength')}</h2><span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}%</span></div>
+      <div class="row"><h2>${T('توازن البناء','Build balance')}</h2><span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}%</span></div>
       <div class="statline" style="margin:10px 0 14px"><span>${T('مستوفى','met')} <b>${rd.passed}</b></span><span>${T('معلّق','open')} <b>${rd.total-rd.passed}</b></span></div>
       <div class="checklg">
         ${rd.checks.map(c=>`<div class="cg ${c.ok?'ok':'no'}"><div class="led">${c.ok?'✓':'!'}</div>
@@ -1728,6 +1761,86 @@ function stepStability(){
 }
 
 /* ---------- ٥ · الخطة ---------- */
+
+/* ---------- البرنامج اليومي ---------- */
+const DAY_TEMPLATE=[
+  {t:'04:30', ar:'صلاة الفجر', en:'Fajr prayer', ic:'prayer'},
+  {t:'08:00', ar:'الاستيقاظ', en:'Wake up', ic:'sun'},
+  {t:'08:00 – 08:40', ar:'الفطور', en:'Breakfast', ic:'meal'},
+  {t:'08:40 – 09:40', slot:'badge', ar:'جلسة الشارة', en:'Badge session', ic:'badge'},
+  {t:'09:40 – 10:40', ar:'مسبح', en:'Pool', ic:'pool'},
+  {t:'10:40 – 11:40', slot:'elite', ar:'ضحويات النخبة', en:'Elite session', ic:'target'},
+  {t:'11:40 – 12:00', ar:'صلاة الظهر', en:'Dhuhr prayer', ic:'prayer'},
+  {t:'12:00 – 13:00', ar:'وقت الجوال', en:'Phone time', ic:'phone'},
+  {t:'13:00 – 13:40', ar:'الغداء', en:'Lunch', ic:'meal'},
+  {t:'13:40 – 14:40', ar:'وقت حر', en:'Free time', ic:'free'},
+  {t:'14:40 – 15:40', slot:'workshop', ar:'ورشة تطبيقية', en:'Workshop', ic:'tools'},
+  {t:'15:40 – 16:00', ar:'صلاة العصر', en:'Asr prayer', ic:'prayer'},
+  {t:'16:00 – 18:00', slot:'sport', ar:'نشاط رياضي', en:'Sport', ic:'ball'},
+  {t:'18:40 – 19:00', ar:'صلاة المغرب', en:'Maghrib prayer', ic:'prayer'},
+  {t:'19:00 – 19:40', ar:'القهوة والشاي', en:'Coffee & tea', ic:'coffee'},
+  {t:'19:40 – 20:40', slot:'culture', ar:'جلسة ثقافية', en:'Cultural session', ic:'book'},
+  {t:'20:40 – 21:20', ar:'العشاء', en:'Dinner', ic:'meal'},
+  {t:'21:20 – 22:00', ar:'استعداد للنوم', en:'Wind down', ic:'moon'},
+  {t:'22:00', ar:'النوم', en:'Sleep', ic:'sleep'}
+];
+const SLOTS=['badge','elite','workshop','sport','culture'];
+const TICONS={
+  prayer:'M12 3c1.8 2.2 2.8 4.4 2.8 6.4H9.2C9.2 7.4 10.2 5.2 12 3ZM6 11h12v9H6v-9Zm6 0v9',
+  sun:'M12 7.5A4.5 4.5 0 1 0 12 16.5 4.5 4.5 0 0 0 12 7.5ZM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19',
+  meal:'M7 3v7a2 2 0 0 0 4 0V3M9 10v11M16 3c-1.4 1.8-2 3.6-2 5.4s.6 2.6 2 2.6 2-.8 2-2.6S17.4 4.8 16 3Zm0 8v10',
+  badge:'M12 3l2.4 4.8 5.3.8-3.8 3.7.9 5.2L12 15l-4.8 2.5.9-5.2L4.3 8.6l5.3-.8L12 3Z',
+  pool:'M3 9c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 21c2-2 4-2 6 0s4 2 6 0 4-2 6 0',
+  target:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 4a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z',
+  phone:'M8 2h8v20H8V2Zm3 17h2',
+  free:'M12 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm-7 18c0-3.9 3.1-7 7-7s7 3.1 7 7',
+  tools:'M14.5 3 21 9.5l-3.5 3.5L11 6.5 14.5 3ZM3 14.5 9.5 21l3.5-3.5L6.5 11 3 14.5Z',
+  ball:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm-4 4 4 3.5L16 7M8 20l1.5-5.5M16 20l-1.5-5.5',
+  coffee:'M4 8h13v5.5A4.5 4.5 0 0 1 12.5 18H8.5A4.5 4.5 0 0 1 4 13.5V8Zm13 1h2a2 2 0 0 1 0 4h-2M3 21h15',
+  book:'M4 4h7v16H4zM13 4h7v16h-7z',
+  moon:'M15 3a9 9 0 1 0 0 18 7 7 0 0 1 0-18Z',
+  sleep:'M3 19h18M5 19v-6h9v6M6 13V8h6v5'
+};
+function tico(n){
+  const d=TICONS[n]||TICONS.badge;
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+}
+function dayItems(day){
+  return S.selected.filter(x=>x.day===day)
+    .map(x=>({x,i:ITEM(x.id)}))
+    .filter(o=>o.i)
+    .sort((a,b)=>(a.x.pri==='core'?0:1)-(b.x.pri==='core'?0:1));
+}
+function slotMap(day){
+  const items=dayItems(day), map={};
+  items.forEach((o,k)=>{
+    const slot=SLOTS[Math.min(k,SLOTS.length-1)];
+    (map[slot]=map[slot]||[]).push(o);
+  });
+  return map;
+}
+function dayTimeline(day,opts){
+  const map=slotMap(day), o=opts||{};
+  return `<div class="tl">${DAY_TEMPLATE.map(row=>{
+    const items=row.slot?(map[row.slot]||[]):[];
+    const body = row.slot
+      ? (items.length
+          ? items.map(it=>{
+              const t=TRACK(it.i.t);
+              return `<div class="tlprog" style="--bc:${t.color}">
+                <span class="tlname">${esc(L({ar:it.i.ar,en:it.i.en}))}</span>
+                <span class="tlmeta">${esc(L(t.short))} · ${it.x.pri==='core'?T('أساسي','core'):T('مساند','support')}</span>
+                ${o.why&&it.x.why?`<small class="tlwhy">${esc(it.x.why)}</small>`:''}
+              </div>`}).join('')
+          : `<span class="tlhint">${T('جلسة شاغرة','Open session')}</span>`)
+      : '';
+    return `<div class="tlrow ${row.slot?'prog':'fixed'} ${row.slot&&!items.length?'tl-empty':''}">
+      <div class="tltime">${row.t}</div>
+      <div class="tldot">${tico(row.ic)}</div>
+      <div class="tlbody"><b>${T(row.ar,row.en)}</b>${body}</div>
+    </div>`}).join('')}</div>`;
+}
+
 function planDays(){
   return S.meta.days.map((d,i)=>{
     const n=i+1,items=S.selected
@@ -1753,19 +1866,38 @@ function planDays(){
     </div>`;
   }).join('');
 }
+
+function programSection(){
+  return S.meta.days.map((d,i)=>{
+    const n=i+1, items=dayItems(n), count=items.length;
+    const date=(()=>{if(!S.meta.start)return '';const s=new Date(S.meta.start+'T00:00:00');if(isNaN(s))return '';
+      s.setDate(s.getDate()+i);return s.toLocaleDateString(lang==='ar'?'ar-SA-u-ca-gregory-nu-latn':'en-GB',{weekday:'long',day:'numeric',month:'long'})})();
+    return `<section class="card dayblock ${i>0?'pbreak':''}">
+      <div class="printonly pheadline">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))} · ${esc(S.meta.start)} — ${esc(S.meta.end)}</div>
+      <div class="daybar">
+        <div class="daynum"><small>${T('اليوم','DAY')}</small><b>${n}</b></div>
+        <div style="flex:1;min-width:0"><b style="font-size:14px">${esc(L(d))}</b>
+          <div class="help">${date?esc(date)+' · ':''}${count?count+' '+T('جلسات','sessions'):T('لا جلسات بعد','No sessions yet')}</div></div>
+        <span class="pill ${count?'good':'orange'}">${count?T('مبني','built'):T('فارغ','empty')}</span>
+      </div>
+      ${dayTimeline(n,{why:true})}
+    </section>`;
+  }).join('');
+}
+
 function stepPlan(){
   const rd=readiness(), f=fitStats(), na=needsAgg();
   const isFile=location.protocol==='file:';
-  return `<div class="grid cols4">
+  return `<div class="grid cols4 screenonly">
       ${metric(T('القطع','Pieces'),selCount(),T('في البناء','in the build'))}
       ${metric(T('الأساسية','Core'),coreCount(),T('حد أدنى '+S.rules.coreTarget,'min '+S.rules.coreTarget))}
       ${metric(T('تغطية التحديات','Fit'),f.pct+'%',T(f.covered+' من '+f.total+' طلاب',f.covered+' of '+f.total+' students'))}
       ${metric(T('الجاهزية','Readiness'),rd.score+'%',T(rd.passed+' من '+rd.total+' فحص',rd.passed+' of '+rd.total+' checks'))}
     </div>
-    <div class="card spacer">
+    <div class="card spacer screenonly">
       <div class="row wrap" style="align-items:flex-start">
         <div>
-          <div class="eyebrow">${T('الخطة النهائية','FINAL PLAN')}</div>
+          <div class="eyebrow">${T('برنامج المعسكر','CAMP PROGRAMME')}</div>
           <h2 style="margin-top:5px">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))}</h2>
           <p class="help">${esc(L({ar:S.meta.cityAr,en:S.meta.cityEn}))} · <span dir="ltr">${esc(S.meta.start)} — ${esc(S.meta.end)}</span> · ${S.meta.students} ${T('طالبًا','students')} · ${S.meta.days.length} ${T('أيام','days')}</p>
         </div>
@@ -1785,10 +1917,19 @@ function stepPlan(){
         ? T('افتح الملف من الرابط المنشور (GitHub Pages) ليعمل رابط المشاركة؛ محليًا استخدم «تصدير JSON».','Open the file from the published URL (GitHub Pages) for share links to work; locally use “Export JSON”.')
         : T('من يفتح هذا الرابط يرى نفس الخطة على متصفحه، ويمكنه تعديل نسخته.','Whoever opens this link sees the same plan in their browser and can edit their copy.')}</p>
     </div>
-    <div class="card spacer">
-      <h2>${T('الخطة يوماً بيوم','Day-by-day plan')}</h2>
-      <div style="margin-top:6px">${planDays()}</div>
+    <div class="printonly printcover">
+      <div class="row" style="align-items:flex-start">
+        <div>
+          <div class="eyebrow">${T('أكاديمية النخبة · برنامج المعسكر','ELITE ACADEMY · CAMP PROGRAMME')}</div>
+          <h1 style="margin-top:4px">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))}</h1>
+          <p class="help">${esc(L({ar:S.meta.cityAr,en:S.meta.cityEn}))} · <span dir="ltr">${esc(S.meta.start)} — ${esc(S.meta.end)}</span> · ${S.meta.days.length} ${T('أيام','days')} · ${selCount()} ${T('مكوّنًا','components')}</p>
+        </div>
+        <div style="text-align:center"><b style="font-size:22px">${rd.score}%</b><div class="help">${T('الجاهزية','Readiness')}</div></div>
+      </div>
     </div>
+    <div class="row spacer noprint" style="gap:8px"><h2 style="font-size:16px">${T('البرنامج اليومي','Daily programme')}</h2>
+      <span class="help">${T('خط زمني لكل يوم من الفجر إلى النوم، والمكوّنات موزّعة على جلساته.','A timeline for every day from dawn to sleep, with components placed in its sessions.')}</span></div>
+    <div class="spacer">${programSection()}</div>
     <div class="grid cols2 spacer">
       <div class="card">
         <h2>${T('متطلبات التجهيز','Prep requirements')}</h2>
@@ -1820,7 +1961,7 @@ function pageBuilder(){
       <div class="eyebrow">${T('ابنِ معسكرك قطعة قطعة','BUILD YOUR CAMP, BRICK BY BRICK')}</div>
       <h1>${T('منشئ المعسكر','Camp builder')}</h1>
       <p class="muted" style="font-size:12.5px;margin-top:2px">${esc(campName(activeCamp()))} · ${fmtRange(S.meta.start,S.meta.end)}</p>
-      <p class="muted" style="font-size:13px;margin-top:4px">${T('اختر اللوح، ثم القطع، ثم ركّبها على الأيام — واختم بخطة جاهزة للمشاركة.','Pick the baseplate, choose bricks, snap them onto days, and finish with a shareable plan.')}</p>
+      <p class="muted" style="font-size:13px;margin-top:4px">${T('اختر الأساس، ركّب المكوّنات، وزّعها على الأيام — واختم ببرنامج يومي جاهز للمشاركة.','Pick the foundation, choose components, snap them onto days, and finish with a shareable programme.')}</p>
     </div>
     <div class="actions">
       <button class="small" data-act="go:camps">← ${T('كل المعسكرات','All camps')}</button>
@@ -2183,17 +2324,17 @@ const closeModal=()=>{const m=$('#modal');if(m.open)m.close()};
 
 function guideModal(){
   const steps=lang==='ar'?[
-    ['01','اضبط اللوح','أيام المعسكر وفئته العمرية وأسماء الأيام. هذه القاعدة التي ستبني عليها.'],
-    ['02','اختر القطع','سبعون برنامجًا في ستة مسارات. اختر ما يخدم هذا المعسكر فقط — لا تفرغ المكتبة كلها في البناء.'],
-    ['03','ركّبها على الأيام','اسحب القطعة إلى اليوم المناسب، أو اضغطها ثم اضغط اليوم. ثلاث قطع في اليوم أكثر ما يُنصح به.'],
-    ['04','افحص التماسك','هل يوجد قيم؟ هل كل مسار ممثل؟ هل كل يوم مبني؟ وهل يخدم اختيارك تحديات الطلاب؟'],
-    ['05','سلّم الخطة','اطبعها، أو صدّرها JSON، أو انسخ رابط الخطة — من يفتحه يرى نفس البناء على متصفحه.']
+    ['01','اضبط الأساس','أيام المعسكر وفئته العمرية وأسماء الأيام. هذه القاعدة التي ستبني عليها.'],
+    ['02','اختر المكوّنات','سبعون برنامجًا في ستة مسارات. اختر ما يخدم هذا المعسكر فقط — لا تفرغ المكتبة كلها في البناء.'],
+    ['03','ركّبها على الأيام','اسحب المكوّن إلى اليوم المناسب، أو اضغطه ثم اضغط اليوم. ثلاثة مكوّنات في اليوم أكثر ما يُنصح به.'],
+    ['04','وازن البناء','هل يوجد قيم؟ هل كل مسار ممثل؟ هل كل يوم مبني؟ وهل يخدم اختيارك تحديات الطلاب؟'],
+    ['05','سلّم البرنامج','برنامج يومي بخط زمني من الفجر إلى النوم. اطبعه أو صدّره أو انسخ رابط البرنامج.']
   ]:[
-    ['01','Set the baseplate','Camp days, age band and day themes. This is the base you build on.'],
-    ['02','Pick the bricks','Seventy programs across six tracks. Pick only what serves this camp.'],
-    ['03','Snap them onto days','Drag a brick to a day, or tap it then tap the day. Three bricks a day is the sweet spot.'],
-    ['04','Check the structure','Values present? Every track represented? Every day built? Does it serve the student challenges?'],
-    ['05','Hand over the plan','Print it, export JSON, or copy the plan link — whoever opens it sees the same build.']
+    ['01','Set the foundation','Camp days, age band and day themes. This is the base you build on.'],
+    ['02','Pick the components','Seventy programs across six tracks. Pick only what serves this camp.'],
+    ['03','Snap them onto days','Drag a component to a day, or tap it then tap the day. Three a day is the sweet spot.'],
+    ['04','Balance the build','Values present? Every track represented? Every day built? Does it serve the student challenges?'],
+    ['05','Hand over the programme','A daily timeline from dawn to sleep. Print it, export it, or share the link.']
   ];
   openModal(`<div class="eyebrow">${T('دليل الاستخدام','HOW IT WORKS')}</div>
     <h2 style="margin-top:6px">${T('ابنِ معسكرك قطعة قطعة','Build your camp, brick by brick')}</h2>
