@@ -177,14 +177,14 @@ td select,td input{border:1px solid var(--line);background:var(--surface);border
 
 /* ---------- lego builder ---------- */
 .stepper{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
-.st{flex:1 1 150px;display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:9px 11px;font-size:12px;text-align:start;min-width:0}
-.st b{width:22px;height:22px;border-radius:7px;background:var(--soft);display:grid;place-items:center;font-size:11px;flex:none;font-weight:800}
-.st span{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.st i{font-style:normal;color:var(--muted);font-size:10.5px;margin-inline-start:auto}
-.st.on{border-color:var(--accent);box-shadow:0 0 0 3px #f07b3a1a}
+.st{flex:1 1 148px;display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 10px 12px;font-size:12.5px;text-align:center;min-width:0}
+.st b{width:38px;height:38px;border-radius:11px;background:var(--soft);display:grid;place-items:center;font-size:15px;flex:none;font-weight:800}
+.st span{font-weight:700;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.st.on{border-color:var(--accent);background:color-mix(in srgb,var(--accentsoft) 55%,var(--surface));box-shadow:0 0 0 3px #f07b3a14}
 .st.on b{background:var(--accent);color:#22140d}
 .st.done b{background:var(--good);color:#fff}
-.st.done i{color:var(--good)}
+
 
 .plate{position:relative;border-radius:14px;background:var(--surface);border:1px solid var(--line);padding:10px;
   background-image:radial-gradient(circle at 5px 5px,var(--soft2) 2.6px,transparent 3px);background-size:18px 18px;transition:.15s}
@@ -1540,11 +1540,11 @@ function pageOutputs(){
    منشئ المعسكر — تجربة التركيب بالمكعبات
    ========================================================================== */
 const STEPS=[
-  ['الأساس','Foundation'],
-  ['المكوّنات','Components'],
-  ['التركيب','Assembly'],
-  ['التوازن','Balance'],
-  ['البرنامج','Program']
+  ['هوية المعسكر','Camp identity'],
+  ['تصميم التجربة','Experience design'],
+  ['توزيع الأنشطة','Activity distribution'],
+  ['مراجعة الخطة','Plan review'],
+  ['الجدول اليومي','Daily schedule']
 ];
 let held=null;
 
@@ -1567,8 +1567,8 @@ function brickEl(i,opts){
 function stepper(){
   return `<div class="stepper">${STEPS.map((s,k)=>{
     const n=k+1;
-    return `<button class="st ${n===S.step?'on':''} ${n<S.step?'done':''}" data-act="step:${n}">
-      <b>${n<S.step?'✓':n}</b><span>${T(s[0],s[1])}</span><i>${n===S.step?T('الآن','now'):''}</i></button>`;
+    return `<button class="st ${n===S.step?'on':''} ${n<S.step?'done':''}" data-act="step:${n}" aria-current="${n===S.step?'step':'false'}">
+      <b>${n<S.step?'✓':n}</b><span>${T(s[0],s[1])}</span></button>`;
   }).join('')}</div>`;
 }
 
@@ -1961,7 +1961,7 @@ function pageBuilder(){
       <div class="eyebrow">${T('ابنِ معسكرك قطعة قطعة','BUILD YOUR CAMP, BRICK BY BRICK')}</div>
       <h1>${T('منشئ المعسكر','Camp builder')}</h1>
       <p class="muted" style="font-size:12.5px;margin-top:2px">${esc(campName(activeCamp()))} · ${fmtRange(S.meta.start,S.meta.end)}</p>
-      <p class="muted" style="font-size:13px;margin-top:4px">${T('اختر الأساس، ركّب المكوّنات، وزّعها على الأيام — واختم ببرنامج يومي جاهز للمشاركة.','Pick the foundation, choose components, snap them onto days, and finish with a shareable programme.')}</p>
+      <p class="muted" style="font-size:13px;margin-top:4px">${T('من هوية المعسكر إلى تصميم التجربة، ثم توزيع الأنشطة، ومراجعة الخطة، وأخيرًا الجدول اليومي.','From camp identity to experience design, activity distribution, plan review, and the daily schedule.')}</p>
     </div>
     <div class="actions">
       <button class="small" data-act="go:camps">← ${T('كل المعسكرات','All camps')}</button>
@@ -2324,17 +2324,17 @@ const closeModal=()=>{const m=$('#modal');if(m.open)m.close()};
 
 function guideModal(){
   const steps=lang==='ar'?[
-    ['01','اضبط الأساس','أيام المعسكر وفئته العمرية وأسماء الأيام. هذه القاعدة التي ستبني عليها.'],
-    ['02','اختر المكوّنات','سبعون برنامجًا في ستة مسارات. اختر ما يخدم هذا المعسكر فقط — لا تفرغ المكتبة كلها في البناء.'],
-    ['03','ركّبها على الأيام','اسحب المكوّن إلى اليوم المناسب، أو اضغطه ثم اضغط اليوم. ثلاثة مكوّنات في اليوم أكثر ما يُنصح به.'],
-    ['04','وازن البناء','هل يوجد قيم؟ هل كل مسار ممثل؟ هل كل يوم مبني؟ وهل يخدم اختيارك تحديات الطلاب؟'],
-    ['05','سلّم البرنامج','برنامج يومي بخط زمني من الفجر إلى النوم. اطبعه أو صدّره أو انسخ رابط البرنامج.']
+    ['01','هوية المعسكر','الاسم والمدة والفئة العمرية وأيام المعسكر. هذه القاعدة التي ستبني عليها.'],
+    ['02','تصميم التجربة','سبعون برنامجًا في ستة مسارات. اختر المهارات والقيم التي تخدم هذا المعسكر فقط.'],
+    ['03','توزيع الأنشطة','اسحب المكوّن إلى اليوم المناسب، أو اضغطه ثم اضغط اليوم. ثلاثة في اليوم أكثر ما يُنصح به.'],
+    ['04','مراجعة الخطة','هل توجد قيم؟ هل كل مسار ممثل؟ هل كل يوم مبني؟ وهل يخدم اختيارك تحديات الطلاب؟'],
+    ['05','الجدول اليومي','خط زمني من الفجر إلى النوم، مع المبررات والمتطلبات، وطباعة صفحة لكل يوم.']
   ]:[
-    ['01','Set the foundation','Camp days, age band and day themes. This is the base you build on.'],
-    ['02','Pick the components','Seventy programs across six tracks. Pick only what serves this camp.'],
-    ['03','Snap them onto days','Drag a component to a day, or tap it then tap the day. Three a day is the sweet spot.'],
-    ['04','Balance the build','Values present? Every track represented? Every day built? Does it serve the student challenges?'],
-    ['05','Hand over the programme','A daily timeline from dawn to sleep. Print it, export it, or share the link.']
+    ['01','Camp identity','Name, dates, age band and camp days. This is the base you build on.'],
+    ['02','Experience design','Seventy programs across six tracks. Pick the skills and values that serve this camp.'],
+    ['03','Activity distribution','Drag a component to a day, or tap it then tap the day. Three a day is the sweet spot.'],
+    ['04','Plan review','Values present? Every track represented? Every day built? Does it serve the challenges?'],
+    ['05','Daily schedule','A timeline from dawn to sleep, with rationales and requirements, printed one page per day.']
   ];
   openModal(`<div class="eyebrow">${T('دليل الاستخدام','HOW IT WORKS')}</div>
     <h2 style="margin-top:6px">${T('ابنِ معسكرك قطعة قطعة','Build your camp, brick by brick')}</h2>
