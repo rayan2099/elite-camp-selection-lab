@@ -254,6 +254,24 @@ html[data-theme=dark] .plan-day .dn{background:var(--accent);color:#22140d}
 .buildbar{height:7px;border-radius:99px;background:var(--soft2);flex:1;min-width:80px;overflow:hidden}
 .buildbar>i{display:block;height:100%;background:var(--accent);border-radius:99px}
 @media(max-width:1080px){.build2,.build3{grid-template-columns:1fr}}
+
+/* ---------- camps ---------- */
+.campgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(288px,1fr));gap:14px}
+.campcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:.15s;display:flex;flex-direction:column}
+.campcard:hover{transform:translateY(-2px);box-shadow:0 14px 34px #12223a18;border-color:var(--accent)}
+.campcard.active{border-color:var(--accent);box-shadow:0 0 0 2px #f07b3a33}
+.campcover{height:74px;background:linear-gradient(130deg,var(--c1),var(--c2));padding:9px 11px;display:flex;align-items:flex-start;justify-content:space-between;position:relative;overflow:hidden}
+.campcover:after{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 5px 5px,#ffffff2b 2.6px,transparent 3px);background-size:17px 17px}
+.campcover .pill{position:relative;z-index:1;background:#fff;color:#12223a}
+.campcover svg{width:36px;height:19px;color:#fff;opacity:.9;position:relative;z-index:1}
+.campbody{padding:13px;display:flex;flex-direction:column;gap:7px;flex:1}
+.campbody h3{font-size:15px;line-height:1.4}
+.cc-metrics{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+.cc-metrics b{color:var(--fg);font-size:12px}
+.cc-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:auto;padding-top:9px;border-top:1px dashed var(--line);flex-wrap:wrap}
+.wizdots{display:flex;gap:6px;margin:12px 0 18px}
+.wizdots i{height:5px;flex:1;border-radius:99px;background:var(--soft2)}
+.wizdots i.on{background:var(--accent)}
 /* ---------- misc ---------- */
 #modal{border:none;padding:0;border-radius:16px;max-width:min(760px,94vw);width:100%;background:var(--surface);color:var(--fg);box-shadow:0 30px 90px #07101f55}
 #modal::backdrop{background:#07101f66;backdrop-filter:blur(3px)}
@@ -808,23 +826,100 @@ const DRAFT=[
  {id:'V11',pri:'core',day:6,why:'الختام يقتضي وقفة امتنان وتقدير للنعم والجهود.'}
 ];
 
+const CAMP_FIELDS=['meta','rules','selected','step','draft','prep','log','shared','students'];
+function newId(p){return (p||'c')+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
+function baseMeta(){
+  return {campAr:'معسكر جديد',campEn:'New camp',cityAr:'الرياض',cityEn:'Riyadh',start:'',end:'',
+    ageMin:10,ageMax:15,students:8,teams:4,days:DAYS_DEFAULT.map(d=>({...d}))};
+}
+function baseRules(){return {coreTarget:8,valuesMin:3,perDayMax:3,minTracks:4,coverageMin:70,requireWhy:true}}
+function makeCamp(over){
+  const base={id:newId('camp-'),createdAt:Date.now(),updatedAt:Date.now(),status:'draft',
+    meta:baseMeta(),rules:baseRules(),selected:[],step:1,draft:false,prep:{},log:[],shared:false,
+    students:STUDENTS.map(s=>({...s}))};
+  const o=over||{};
+  const out=Object.assign({},base,o);
+  out.meta=Object.assign(baseMeta(),o.meta||{});
+  out.rules=Object.assign(baseRules(),o.rules||{});
+  return out;
+}
+function seedCamps(){
+  const now=Date.now();
+  const c1=makeCamp({id:'camp-autumn',createdAt:now-86400000*4,updatedAt:now-3600000,status:'draft',draft:true,step:2,
+    meta:{campAr:'معسكر خريف النخبة',campEn:'Elite Autumn Camp',cityAr:'الرياض',cityEn:'Riyadh',start:'2026-11-22',end:'2026-11-27',ageMin:10,ageMax:15,students:8,teams:4,days:DAYS_DEFAULT.map(d=>({...d}))},
+    selected:DRAFT.map(d=>({...d,owner:'programs',approved:false,at:now})),
+    log:[{id:now,at:now,ar:'أُنشئت مسودة الاختيار',en:'Example draft created',role:'director'}]});
+  const summerDays=[
+    {ar:'الانطلاق وبناء الفريق',en:'Launch & team identity'},{ar:'المال والأعمال',en:'Money & business'},
+    {ar:'العلوم والتقنية',en:'Science & tech'},{ar:'الرياضة والتحدي',en:'Sport & challenge'},
+    {ar:'المجتمع والرحمة',en:'Community & compassion'},{ar:'الختام والاحتفال',en:'Closing & celebration'}];
+  const summerSel=[
+    {id:'L3',pri:'core',day:1,why:'بناء لغة مشتركة بين الفريق من اليوم الأول.'},
+    {id:'V4',pri:'core',day:1,why:'تثبيت قيمة التعاون مع انطلاق الفرق.'},
+    {id:'H8',pri:'support',day:2,why:'يوظّف يوم المال في إدارة المصروف والادخار.'},
+    {id:'S1',pri:'core',day:3,why:'يوم التقنية يحتاج إنتاجًا بسيطًا يفتخر به الطالب.'},
+    {id:'SP2',pri:'core',day:4,why:'الألعاب الجماعية تترجم التعاون إلى ممارسة.'},
+    {id:'V15',pri:'core',day:5,why:'الرحمة والعطف في زيارة مجتمعية ضمن يوم المجتمع.'},
+    {id:'V11',pri:'support',day:6,why:'الامتنان في الختام يربط التجربة بالأثر.'}
+  ].map(x=>({...x,owner:'programs',approved:true,at:now-86400000*3}));
+  const c2=makeCamp({id:'camp-summer',createdAt:now-86400000*40,updatedAt:now-86400000*12,status:'ready',step:5,
+    meta:{campAr:'معسكر صيف النخبة',campEn:'Elite Summer Camp',cityAr:'الرياض',cityEn:'Riyadh',start:'2026-07-05',end:'2026-07-10',ageMin:10,ageMax:14,students:24,teams:4,days:summerDays.map(d=>({...d}))},
+    rules:{coreTarget:6,valuesMin:2,perDayMax:3,minTracks:4,coverageMin:60,requireWhy:true},
+    selected:summerSel,
+    log:[{id:now-86400000*12,at:now-86400000*12,ar:'اعتُمدت الخطة',en:'Plan approved',role:'director'}]});
+  const winterDays=[
+    {ar:'الاستقبال والتعارف',en:'Welcome & introduction'},{ar:'القيم في الحياة اليومية',en:'Values in daily life'},
+    {ar:'السلامة والاعتماد على النفس',en:'Safety & independence'},{ar:'اللياقة والرياضة',en:'Fitness & sport'},
+    {ar:'رحلة تعليمية',en:'Educational trip'},{ar:'الختام',en:'Closing'}];
+  const c3=makeCamp({id:'camp-winter-25',createdAt:now-86400000*300,updatedAt:now-86400000*250,status:'archived',step:5,
+    meta:{campAr:'معسكر النخبة الشتوي ٢٠٢٥',campEn:'Elite Winter Camp 2025',cityAr:'الرياض',cityEn:'Riyadh',start:'2025-12-14',end:'2025-12-19',ageMin:10,ageMax:15,students:16,teams:3,days:winterDays.map(d=>({...d}))},
+    rules:{coreTarget:5,valuesMin:2,perDayMax:3,minTracks:3,coverageMin:50,requireWhy:false},
+    selected:[
+      {id:'L5',pri:'core',day:1,why:'الثقة بالنفس أساس الاندماج في أول يوم.'},
+      {id:'V1',pri:'core',day:2,why:'الصدق والأمانة محور يوم القيم.'},
+      {id:'H7',pri:'support',day:3,why:'السلامة الشخصية مرتبطة بالاعتماد على النفس.'},
+      {id:'SP1',pri:'core',day:4,why:'اللياقة عنصر أساسي في يوم الرياضة.'},
+      {id:'T3',pri:'core',day:5,why:'الرحلة التعليمية تربط التعلم بالواقع.'}
+    ].map(x=>({...x,owner:'programs',approved:true,at:now-86400000*260})),
+    log:[]});
+  return [c2,c3,c1];
+}
 function initial(){
-  return {
-    version:3, role:'director', lang:'ar', theme:'light', page:'builder', step:1, draft:true,
-    meta:{campAr:'معسكر خريف النخبة',campEn:'Elite Autumn Camp',cityAr:'الرياض',cityEn:'Riyadh',
-      start:'2026-11-22',end:'2026-11-27',ageMin:10,ageMax:15,students:8,teams:4,
-      days:DAYS_DEFAULT.map(d=>({...d}))},
-    rules:{coreTarget:8,valuesMin:3,perDayMax:3,minTracks:4,coverageMin:70,requireWhy:true},
-    selected:DRAFT.map(d=>({...d,owner:'programs',approved:false,at:Date.now()})),
-    prep:{}, log:[], bank:'',
-    students:STUDENTS.map(s=>({...s}))
-  };
+  const camps=seedCamps();
+  return {version:4,role:'director',lang:'ar',theme:'light',page:'camps',
+    activeId:camps.find(c=>c.id==='camp-autumn').id,camps};
+}
+function defineActive(o){
+  CAMP_FIELDS.forEach(k=>{
+    Object.defineProperty(o,k,{
+      get(){const c=o.camps.find(x=>x.id===o.activeId)||o.camps[0];return c?c[k]:undefined},
+      set(v){const c=o.camps.find(x=>x.id===o.activeId)||o.camps[0];if(c)c[k]=v},
+      configurable:true,enumerable:false
+    });
+  });
+  return o;
+}
+function activeCamp(){return S.camps.find(c=>c.id===S.activeId)||S.camps[0]}
+function campById(id){return S.camps.find(c=>c.id===id)}
+function withCamp(id,fn){
+  const prev=S.activeId;S.activeId=id;
+  try{return fn()}finally{S.activeId=prev}
+}
+function migrate(o){
+  if(!o||typeof o!=='object')return initial();
+  if(o.version===4&&Array.isArray(o.camps)&&o.camps.length)return o;
+  if(o.meta&&Array.isArray(o.selected)){
+    const camp=makeCamp({id:'camp-migrated',createdAt:Date.now(),updatedAt:Date.now(),status:'draft',
+      meta:o.meta,rules:o.rules||baseRules(),selected:o.selected,step:o.step||1,
+      draft:!!o.draft,prep:o.prep||{},log:o.log||[],shared:!!o.shared,students:o.students||STUDENTS.map(s=>({...s}))});
+    return {version:4,role:o.role||'director',lang:o.lang||'ar',theme:o.theme||'light',page:'camps',activeId:camp.id,camps:[camp]};
+  }
+  return initial();
 }
 let S;
 try{
-  S=JSON.parse(localStorage.getItem('elite-select-v1'));
-  if(!S||S.version!==3) S=initial();
-}catch(e){ S=initial(); }
+  S=defineActive(migrate(JSON.parse(localStorage.getItem('elite-select-v1'))));
+}catch(e){ S=defineActive(initial()); }
 let lang=S.lang||'ar';
 let page=S.page||'dashboard';
 let libFilter={q:'',track:'all',field:'all',age:'all',only:false};
@@ -916,16 +1011,18 @@ function icon(name){
     target:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12Zm0 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z',
     check:'M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4Zm-1 13.4L7.6 12 6.2 13.4 11 18.2l7.2-7.2-1.4-1.4L11 15.4Z',
     export:'M12 3v10.6l3.3-3.3 1.4 1.4L12 17.4l-4.7-4.7 1.4-1.4L12 14.6V3h0ZM4 19h16v2H4z',
-    brick:'M3 8h7v3H3V8Zm11 0h7v3h-7V8ZM3 13h7v7H3v-7Zm11 0h7v7h-7v-7Z'
+    brick:'M3 8h7v3H3V8Zm11 0h7v3h-7V8ZM3 13h7v7H3v-7Zm11 0h7v7h-7v-7Z',
+    collection:'M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z'
   }[name]||'M4 4h16v16H4z';
   return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
 }
 const NAV=[
-  ['plan',[['builder','منشئ المعسكر','Camp builder'],['dashboard','لوحة التخطيط','Planning board'],['library','مكتبة البرامج','Program library'],['selection','الاختيار','Selection'],['days','خريطة الأيام','Day map']]],
+  ['plan',[['camps','المعسكرات','Camps'],['builder','منشئ المعسكر','Camp builder'],['dashboard','لوحة التخطيط','Planning board'],['library','مكتبة البرامج','Program library'],['selection','الاختيار','Selection'],['days','خريطة الأيام','Day map']]],
   ['verify',[['fit','الملاءمة مع الطلاب','Fit with students'],['readiness','فحص الجاهزية','Readiness check']]],
   ['out',[['outputs','حزمة التجهيز','Prep pack']]]
 ];
 const PAGE_TITLES={
+  camps:['المعسكرات','Camps'],
   builder:['منشئ المعسكر','Camp builder'],
   dashboard:['لوحة التخطيط','Planning board'],library:['مكتبة البرامج','Program library'],
   selection:['اختيار المهارات والقيم','Skills & values selection'],days:['خريطة الأيام','Day map'],
@@ -944,7 +1041,7 @@ function header(){
       <div><b>${T('أكاديمية النخبة','Elite Academy')}</b><small>SELECTION LAB</small></div>
     </div>
     ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({plan:'التخطيط والاختيار',verify:'التحقق',out:'المخرجات'}[g],{plan:'PLAN & SELECT',verify:'VERIFY',out:'OUTPUT'}[g])}</div>
-      ${items.map(([id,ar,en])=>`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}</button>`).join('')}
+      ${items.map(([id,ar,en])=>`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='camps'?'collection':id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}${id==='camps'?`<span class="cnt">${S.camps.length}</span>`:''}</button>`).join('')}
     </div>`).join('')}
     <div class="sidefoot">
       <span>${T('جاهزية الاختيار','Selection readiness')}</span>
@@ -957,6 +1054,7 @@ function header(){
     <button class="icon" id="hamb" data-act="menu" aria-label="menu">☰</button>
     <div class="crumb">${T('مختبر الاختيار','Selection lab')} <span class="muted">/</span> <b>${T(...PAGE_TITLES[page])}</b></div>
     <div class="toptools">
+      <button class="pill line" data-page="camps" style="max-width:230px;overflow:hidden;text-overflow:ellipsis" title="${T('كل المعسكرات','All camps')}">⌂ ${esc(campName(activeCamp()))}</button>
       <span class="pill line">${T('الدور: ','Role: ')}${L(ROLE(S.role))}</span>
       <select id="roleSel" aria-label="${T('الدور','Role')}" style="border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;font-size:12px">
         ${ROLES.map(r=>`<option value="${r.id}" ${S.role===r.id?'selected':''}>${L(r)}</option>`).join('')}
@@ -1474,11 +1572,11 @@ function stepPlate(){
         <label class="fld">${T('اسم المعسكر (عربي)','Camp name (Arabic)')}<input data-meta="campAr" value="${esc(m.campAr)}"></label>
         <label class="fld">${T('Camp name (English)','Camp name (English)')}<input data-meta="campEn" value="${esc(m.campEn)}" dir="ltr"></label>
         <label class="fld">${T('المدينة','City')}<input data-meta="cityAr" value="${esc(m.cityAr)}"></label>
+        <label class="fld">${T('عدد الفرق','Teams')}<input type="number" min="1" max="20" data-meta="teams" value="${m.teams}"></label>
         <label class="fld wide">${T('المدة (من — إلى)','Dates (from — to)')}<div class="row" style="gap:6px"><input type="date" data-meta="start" value="${esc(m.start)}" style="flex:1;min-width:0"><input type="date" data-meta="end" value="${esc(m.end)}" style="flex:1;min-width:0"></div></label>
         <label class="fld">${T('أصغر سن','Youngest')}<input type="number" min="6" max="18" data-meta="ageMin" value="${m.ageMin}"></label>
         <label class="fld">${T('أكبر سن','Oldest')}<input type="number" min="6" max="18" data-meta="ageMax" value="${m.ageMax}"></label>
-        <label class="fld">${T('عدد الطلاب','Students')}<input type="number" min="1" max="500" data-meta="students" value="${m.students}"></label>
-        <label class="fld">${T('عدد الفرق','Teams')}<input type="number" min="1" max="20" data-meta="teams" value="${m.teams}"></label>
+        <label class="fld wide">${T('عدد الطلاب','Students')}<input type="number" min="1" max="500" data-meta="students" value="${m.students}" style="max-width:160px"></label>
       </div>
     </div>
     <div class="card">
@@ -1721,9 +1819,11 @@ function pageBuilder(){
   return `<div class="pagehead"><div>
       <div class="eyebrow">${T('ابنِ معسكرك قطعة قطعة','BUILD YOUR CAMP, BRICK BY BRICK')}</div>
       <h1>${T('منشئ المعسكر','Camp builder')}</h1>
+      <p class="muted" style="font-size:12.5px;margin-top:2px">${esc(campName(activeCamp()))} · ${fmtRange(S.meta.start,S.meta.end)}</p>
       <p class="muted" style="font-size:13px;margin-top:4px">${T('اختر اللوح، ثم القطع، ثم ركّبها على الأيام — واختم بخطة جاهزة للمشاركة.','Pick the baseplate, choose bricks, snap them onto days, and finish with a shareable plan.')}</p>
     </div>
     <div class="actions">
+      <button class="small" data-act="go:camps">← ${T('كل المعسكرات','All camps')}</button>
       <button class="small" data-act="guide">${T('كيف يعمل؟','How it works')}</button>
       ${can('reset')?`<button class="small" data-act="reset">${T('ابدأ من جديد','Start over')}</button>`:''}
     </div></div>
@@ -1759,11 +1859,13 @@ function applyShared(p){
   const sel=p.s.filter(x=>ITEM(x.i)).map(x=>({id:x.i,pri:x.p==='core'?'core':'support',day:x.d||null,
     why:x.w||'',owner:'programs',approved:!!x.a,at:Date.now()}));
   if(!sel.length)throw new Error('empty plan');
-  S.selected=sel;
-  if(p.m)Object.assign(S.meta,p.m);
-  if(p.r)Object.assign(S.rules,p.r);
-  S.shared=true;S.draft=false;
-  logIt('استُلمت خطة مشتركة','Shared plan received');
+  const camp=makeCamp({id:newId('camp-'),status:'draft',step:5,selected:sel,shared:true,
+    meta:p.m||{},rules:p.r||{},
+    log:[{id:Date.now(),at:Date.now(),ar:'وصلت خطة مشتركة',en:'Shared plan received',role:S.role}]});
+  if(p.m){camp.meta=Object.assign(baseMeta(),p.m)}
+  S.camps.unshift(camp);
+  S.activeId=camp.id;
+  S.step=5;
   save();
 }
 function copyLink(){
@@ -1775,10 +1877,245 @@ function copyLink(){
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(done).catch(()=>fallbackCopy(url,done));
   else fallbackCopy(url,done);
 }
+/* ==========================================================================
+   تبويب المعسكرات — أرشيف كل المعسكرات + إنشاء معسكر جديد
+   ========================================================================== */
+let campFilter={q:'',status:'all'};
+const CAMP_STATUS={
+  draft:['قيد الإعداد','In progress','orange'],
+  ready:['جاهز للتنفيذ','Ready','good'],
+  archived:['مؤرشف','Archived','line']
+};
+const COVERS=[['#f07b3a','#c2410c'],['#168660','#0f6b4d'],['#3b7dd8','#1e4fa3'],['#8a5cf5','#5b32b8'],['#d94f5c','#a32431'],['#b8862e','#8a6320']];
+const coverOf=id=>{let h=0;for(let i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))%COVERS.length;return COVERS[h]};
+const campName=c=>L({ar:c.meta.campAr,en:c.meta.campEn});
+const campScore=id=>withCamp(id,()=>readiness().score);
+const campPieces=c=>c.selected.length;
+const campTracks=c=>new Set(c.selected.map(x=>ITEM(x.id)?ITEM(x.id).t:null).filter(Boolean)).size;
+const campDaysBuilt=c=>c.meta.days.filter((d,i)=>c.selected.some(x=>x.day===i+1)).length;
+const fmtDate=iso=>{if(!iso)return '';const d=new Date(iso+'T00:00:00');if(isNaN(d))return iso;
+  return d.toLocaleDateString(lang==='ar'?'ar-SA-u-ca-gregory-nu-latn':'en-GB',{day:'numeric',month:'short'})};
+const fmtRange=(a,b)=>{if(!a&&!b)return '—';const y=(b||a).slice(0,4);
+  return `${a?fmtDate(a):'—'} — ${b?fmtDate(b):'—'} ${y}`};
+const since=ts=>{const d=Math.floor((Date.now()-ts)/86400000);if(d<=0)return T('اليوم','today');if(d===1)return T('أمس','yesterday');
+  if(d<30)return T(`قبل ${d} يومًا`,`${d} days ago`);const m=Math.floor(d/30);return T(`قبل ${m} شهرًا`,`${m} mo ago`)};
+
+function pageCamps(){
+  const q=campFilter.q.trim().toLowerCase();
+  const list=S.camps.filter(c=>{
+    if(campFilter.status==='draft'&&c.status!=='draft')return false;
+    if(campFilter.status==='ready'&&c.status!=='ready')return false;
+    if(campFilter.status==='archived'&&c.status!=='archived')return false;
+    if(q&&!(c.meta.campAr+' '+c.meta.campEn+' '+c.meta.cityAr).toLowerCase().includes(q))return false;
+    return true;
+  }).sort((a,b)=>b.updatedAt-a.updatedAt);
+  const counts={all:S.camps.length,draft:S.camps.filter(c=>c.status==='draft').length,
+    ready:S.camps.filter(c=>c.status==='ready').length,archived:S.camps.filter(c=>c.status==='archived').length};
+  return `<div class="pagehead"><div>
+      <div class="eyebrow">${T('أرشيف المعسكرات','CAMP ARCHIVE')}</div>
+      <h1>${T('المعسكرات','Camps')}</h1>
+      <p class="muted" style="font-size:13px;margin-top:4px">${T('كل معسكراته في مكان واحد: افتح معسكرًا لمتابعة بنائه، أو أنشئ معسكرًا جديدًا من الصفر.','Every camp in one place: open one to continue building, or start a new one.')}</p>
+    </div>
+    <div class="actions"><button class="primary" data-act="newCamp">+ ${T('معسكر جديد','New camp')}</button></div></div>
+    <div class="card">
+      <div class="filters" style="margin:0">
+        <input type="search" id="campQ" placeholder="${T('ابحث باسم المعسكر أو المدينة…','Search a camp or city…')}" value="${esc(campFilter.q)}" aria-label="${T('بحث المعسكرات','Search camps')}">
+        <div class="seg">
+          ${[['all',T('الكل','All'),counts.all],['draft',T('قيد الإعداد','In progress'),counts.draft],['ready',T('جاهز','Ready'),counts.ready],['archived',T('مؤرشف','Archived'),counts.archived]]
+            .map(([id,label,n])=>`<button class="${campFilter.status===id?'on':''}" data-act="campFilter:${id}">${label} <span style="opacity:.6;font-size:11px">${n}</span></button>`).join('')}
+        </div>
+      </div>
+    </div>
+    ${list.length?`<div class="campgrid spacer">${list.map(c=>campCard(c)).join('')}</div>`
+      :`<div class="card spacer"><div class="empty" style="padding:40px">
+          <div style="font-size:15px;font-weight:700;color:var(--fg)">${T('لا معسكرات مطابقة','No matching camps')}</div>
+          <p class="help" style="margin:6px 0 14px">${T('جرّب مسح البحث أو أنشئ معسكرًا جديدًا.','Clear the search or start a new camp.')}</p>
+          <button class="primary" data-act="newCamp">+ ${T('معسكر جديد','New camp')}</button></div></div>`}
+    <div class="note spacer">◆ ${T('هذا أرشيف تجريبي لثلاثة معسكرات. كل معسكر مستقل بخطته وفريقه وأيامه، وتنتقل بينها من هنا في أي وقت.','This is a sample archive of three camps. Each camp has its own plan, team and days; switch between them here any time.')}</div>`;
+}
+
+function campCard(c){
+  const st=CAMP_STATUS[c.status]||CAMP_STATUS.draft;
+  const [c1,c2]=coverOf(c.id);
+  const score=campScore(c.id);
+  const active=c.id===S.activeId;
+  return `<article class="campcard ${active?'active':''}" data-act="openCamp:${c.id}">
+    <div class="campcover" style="--c1:${c1};--c2:${c2}">
+      <span class="pill ${st[2]}">${T(st[0],st[1])}</span>
+      <svg viewBox="0 0 92 46" aria-hidden="true"><path fill="currentColor" d="M2 40 24 6l10 16 6-9 20 27H46L34 23l-8 17H2Z"/><path fill="currentColor" opacity=".45" d="M62 40 80 12l10 28H62Z"/></svg>
+    </div>
+    <div class="campbody">
+      <div class="row" style="align-items:flex-start">
+        <h3>${esc(campName(c))}</h3>
+        ${active?`<span class="pill navy">${T('مفتوح','open')}</span>`:''}
+      </div>
+      <p class="help">${esc(L({ar:c.meta.cityAr,en:c.meta.cityEn}))} · ${fmtRange(c.meta.start,c.meta.end)}</p>
+      <div class="cc-metrics">
+        <span><b>${c.meta.days.length}</b> ${T('أيام','days')}</span>
+        <span><b>${campPieces(c)}</b> ${T('قطعة','pieces')}</span>
+        <span><b>${campTracks(c)}/6</b> ${T('مسارات','tracks')}</span>
+        <span><b>${c.meta.students}</b> ${T('طالبًا','students')}</span>
+      </div>
+      <div>
+        <div class="row" style="margin-bottom:4px"><span class="help">${T('الجاهزية','Readiness')}</span><b class="mono" style="font-size:11.5px">${score}%</b></div>
+        <div class="bar ${score>=80?'good':''}"><i style="width:${score}%"></i></div>
+      </div>
+      <div class="cc-foot">
+        <small class="muted">${T('آخر تعديل ','Updated ')}${since(c.updatedAt)}</small>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <button class="small primary" data-act="openCamp:${c.id}">${T('فتح','Open')}</button>
+          <button class="small ghost" data-act="dupCamp:${c.id}" title="${T('نسخ','Duplicate')}">⧉</button>
+          <button class="small ghost" data-act="archiveCamp:${c.id}" title="${c.status==='archived'?T('استعادة','Restore'):T('أرشفة','Archive')}">${c.status==='archived'?'↺':'▤'}</button>
+          <button class="small ghost" data-act="delCamp:${c.id}" title="${T('حذف','Delete')}">✕</button>
+        </div>
+      </div>
+    </div>
+  </article>`;
+}
+
+/* ---------- إنشاء معسكر: ثلاث خطوات ---------- */
+let wiz=null;
+function newCampModal(){
+  const d=new Date();d.setDate(d.getDate()+30);
+  const s=d.toISOString().slice(0,10);d.setDate(d.getDate()+5);
+  wiz={step:1,d:{campAr:'',campEn:'',cityAr:T('الرياض','Riyadh'),start:s,end:d.toISOString().slice(0,10),
+    ageMin:10,ageMax:15,students:8,teams:4,dayCount:6,themes:DAYS_DEFAULT.map(x=>({...x}))}};
+  renderWiz();
+}
+function renderWiz(){
+  const w=wiz,d=w.d;
+  const titles=[T('الأساسيات','Basics'),T('المدة والأيام','Dates & days'),T('المراجعة','Review')];
+  let body='';
+  if(w.step===1){
+    body=`<div class="fields">
+      <label class="fld">${T('اسم المعسكر (عربي)','Camp name (Arabic)')}<input id="wAr" value="${esc(d.campAr)}" placeholder="${T('مثال: معسكر ربيع النخبة','e.g. Elite Spring Camp')}"></label>
+      <label class="fld">${T('Camp name (English)','Camp name (English)')}<input id="wEn" value="${esc(d.campEn)}" dir="ltr" placeholder="Elite Spring Camp"></label>
+      <label class="fld">${T('المدينة','City')}<input id="wCity" value="${esc(d.cityAr)}"></label>
+      <label class="fld">${T('عدد الفرق','Teams')}<input id="wTeams" type="number" min="1" max="20" value="${d.teams}"></label>
+      <label class="fld">${T('أصغر سن','Youngest')}<input id="wAgeMin" type="number" min="6" max="18" value="${d.ageMin}"></label>
+      <label class="fld">${T('أكبر سن','Oldest')}<input id="wAgeMax" type="number" min="6" max="18" value="${d.ageMax}"></label>
+      <label class="fld wide">${T('عدد الطلاب المتوقع','Expected students')}<input id="wStudents" type="number" min="1" max="500" value="${d.students}"></label>
+    </div>`;
+  } else if(w.step===2){
+    body=`<div class="fields">
+      <label class="fld">${T('تاريخ البداية','Start date')}<input id="wStart" type="date" value="${esc(d.start)}"></label>
+      <label class="fld">${T('تاريخ النهاية','End date')}<input id="wEnd" type="date" value="${esc(d.end)}"></label>
+      <label class="fld wide">${T('عدد الأيام','Number of days')}<select id="wDays">${[3,4,5,6,7,8].map(n=>`<option value="${n}" ${d.dayCount===n?'selected':''}>${n} ${T('أيام','days')}</option>`).join('')}</select></label>
+    </div>
+    <h3 style="margin:16px 0 8px">${T('موضوعات الأيام','Day themes')}</h3>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      ${Array.from({length:d.dayCount}).map((_,i)=>`<div class="row" style="gap:8px">
+        <span class="pill">${i+1}</span>
+        <input data-wtheme="${i}" value="${esc(d.themes[i]?L(d.themes[i]):'')}" style="flex:1;border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12.5px" placeholder="${T('موضوع اليوم','Day theme')}">
+      </div>`).join('')}
+    </div>
+    <p class="help" style="margin-top:8px">${T('ستستطيع تعديلها لاحقًا من خطوة اللوح.','You can edit these later on the baseplate step.')}</p>`;
+  } else {
+    body=`<div class="note" style="margin-top:4px">
+      ${[[T('الاسم','Name'),esc(d.campAr||T('معسكر جديد','New camp'))],
+         [T('المدينة','City'),esc(d.cityAr)],
+         [T('المدة','Dates'),`<span dir="ltr">${esc(d.start)} → ${esc(d.end)}</span>`],
+         [T('الأيام','Days'),d.dayCount+' '+T('أيام','days')],
+         [T('الفئة العمرية','Ages'),`<span dir="ltr">${d.ageMin}–${d.ageMax}</span> ${T('سنة','yrs')}`],
+         [T('الطلاب والفرق','Students & teams'),`${d.students} ${T('طالبًا','students')} · ${d.teams} ${T('فرق','teams')}`]
+        ].map(([k,v])=>`<div style="display:flex;gap:10px;align-items:baseline;padding:4px 0"><span class="help" style="min-width:96px">${k}</span><b style="font-size:12.5px">${v}</b></div>`).join('')}
+    </div>
+    <div class="note orange" style="margin-top:10px">◆ ${T('سننشئ اللوح ثم ننتقل مباشرة لاختيار القطع.','We will create the baseplate and take you straight to picking bricks.')}</div>`;
+  }
+  openModal(`<div class="eyebrow">${T('معسكر جديد','NEW CAMP')}</div>
+    <h2 style="margin-top:4px">${titles[w.step-1]}</h2>
+    <div class="wizdots">${[1,2,3].map(i=>`<i class="${i<=w.step?'on':''}"></i>`).join('')}</div>
+    ${body}
+    <div class="actions" style="display:flex;justify-content:space-between;gap:8px;margin-top:18px">
+      <button data-act="close">${T('إلغاء','Cancel')}</button>
+      <div style="display:flex;gap:8px">
+        ${w.step>1?`<button data-act="wizBack">${T('السابق','Back')}</button>`:''}
+        ${w.step<3?`<button class="primary" data-act="wizNext">${T('التالي','Next')}</button>`
+                  :`<button class="primary" data-act="wizCreate">${T('أنشئ المعسكر','Create camp')}</button>`}
+      </div>
+    </div>`);
+}
+function wizCollect(){
+  const g=id=>{const el=$('#'+id);return el?el.value:''};
+  const d=wiz.d;
+  if(wiz.step===1){
+    d.campAr=g('wAr').trim();d.campEn=g('wEn').trim();d.cityAr=g('wCity').trim()||T('الرياض','Riyadh');
+    d.teams=+g('wTeams')||4;d.ageMin=+g('wAgeMin')||10;d.ageMax=+g('wAgeMax')||15;d.students=+g('wStudents')||8;
+  } else if(wiz.step===2){
+    d.start=g('wStart');d.end=g('wEnd');d.dayCount=+g('wDays')||6;
+    $$('[data-wtheme]').forEach(el=>{const i=+el.dataset.wtheme;d.themes[i]=d.themes[i]||{ar:'',en:''};d.themes[i][lang]=el.value});
+  }
+}
+function wizNext(){
+  wizCollect();
+  if(wiz.step===1&&!wiz.d.campAr.trim()){toast(T('اكتب اسم المعسكر أولًا.','Enter a camp name first.'));return}
+  wiz.step=Math.min(3,wiz.step+1);renderWiz();
+}
+function wizBack(){wizCollect();wiz.step=Math.max(1,wiz.step-1);renderWiz()}
+function wizCreate(){
+  wizCollect();
+  const d=wiz.d;
+  const days=Array.from({length:d.dayCount}).map((_,i)=>{
+    const th=d.themes[i]||{ar:'',en:''};
+    return {ar:th.ar||`${T('اليوم','Day')} ${i+1}`,en:th.en||th.ar||`Day ${i+1}`};
+  });
+  const camp=makeCamp({
+    id:newId('camp-'),status:'draft',step:2,
+    meta:{campAr:d.campAr||T('معسكر جديد','New camp'),campEn:d.campEn||d.campAr||'New camp',
+      cityAr:d.cityAr,cityEn:d.cityAr,start:d.start,end:d.end,ageMin:d.ageMin,ageMax:d.ageMax,
+      students:d.students,teams:d.teams,days},
+    log:[{id:Date.now(),at:Date.now(),ar:'أُنشئ المعسكر',en:'Camp created',role:S.role}]
+  });
+  S.camps.unshift(camp);
+  S.activeId=camp.id;
+  page='builder';S.step=2;
+  save();closeModal();render();
+  toast(T('تم إنشاء المعسكر — اختر الآن القطع.','Camp created — now pick the bricks.'));
+}
+function openCamp(id){
+  const c=campById(id);if(!c)return;
+  S.activeId=id;
+  c.updatedAt=Date.now();
+  page='builder';S.step=c.step||1;
+  save();render();
+  toast(T(`فتحت «${campName(c)}»`,`Opened “${campName(c)}”`));
+}
+function dupCamp(id){
+  const c=campById(id);if(!c)return;
+  const copy=JSON.parse(JSON.stringify(c));
+  copy.id=newId('camp-');copy.createdAt=Date.now();copy.updatedAt=Date.now();
+  copy.status='draft';copy.shared=false;
+  copy.meta.campAr=c.meta.campAr+' (نسخة)';copy.meta.campEn=c.meta.campEn+' (copy)';
+  copy.log=[{id:Date.now(),at:Date.now(),ar:'نُسخ من معسكر سابق',en:'Duplicated from a previous camp',role:S.role}];
+  S.camps.unshift(copy);save();render();
+  toast(T('أُنشئت نسخة — ستفتحها من القائمة.','Copy created — open it from the list.'));
+}
+function archiveCamp(id){
+  const c=campById(id);if(!c)return;
+  c.status=c.status==='archived'?'draft':'archived';c.updatedAt=Date.now();
+  save();render();
+  toast(c.status==='archived'?T('أُرشف المعسكر.','Camp archived.'):T('استُعيد المعسكر.','Camp restored.'));
+}
+function delCamp(id){
+  const c=campById(id);if(!c)return;
+  if(S.camps.length<=1){toast(T('لا يمكن حذف المعسكر الوحيد.','You cannot delete the only camp.'));return}
+  openModal(`<h2>${T('حذف المعسكر؟','Delete this camp?')}</h2>
+    <p class="help">${T('سيُحذف «','Will delete “')}${esc(campName(c))}${T('» بكل خطته وسجله. لا يمكن التراجع.','” with its whole plan and log. This cannot be undone.')}</p>
+    <div class="actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <button data-act="close">${T('إلغاء','Cancel')}</button>
+      <button class="danger" data-act="delCampOk:${id}">${T('حذف نهائي','Delete')}</button>
+    </div>`);
+}
+function delCampOk(id){
+  S.camps=S.camps.filter(c=>c.id!==id);
+  if(S.activeId===id)S.activeId=S.camps[0].id;
+  save();closeModal();render();
+  toast(T('حُذف المعسكر.','Camp deleted.'));
+}
 /* ============================ العرض والتنقل ============================ */
-const PAGES={builder:pageBuilder,dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
+const PAGES={camps:pageCamps,builder:pageBuilder,dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
 function render(){
-  if(!PAGES[page]) page='builder';
+  if(!PAGES[page]) page='camps';
   header();
   const container=$('#app');
   container.innerHTML=`<div class="demo noprint"><span>◈ ${T('مختبر اختيار · بيانات الطلاب تجريبية · الحفظ على هذا المتصفح فقط','Selection lab · sample student data · saved in this browser only')}</span><span>${T('اختيار لا تقييم','Select, do not assess')}</span></div>`+PAGES[page]();
@@ -1860,7 +2197,9 @@ function guideModal(){
   ];
   openModal(`<div class="eyebrow">${T('دليل الاستخدام','HOW IT WORKS')}</div>
     <h2 style="margin-top:6px">${T('ابنِ معسكرك قطعة قطعة','Build your camp, brick by brick')}</h2>
-    <p class="help" style="margin-top:6px">${T('خمس خطوات: لوح، قطع، تركيب، تماسك، خطة. اختيار لا تقييم — نقرّر ما يكتسبه الطالب قبل أن نجهّز أي نشاط.','Five steps: baseplate, bricks, assembly, stability, plan. Selection, not assessment.')}</p>
+    <p class="help" style="margin-top:6px">${T('تبدأ من تبويب «المعسكرات»: تفتح معسكرًا سابقًا أو تنشئ جديدًا في ثلاث خطوات (الاسم، المدة، المراجعة) ثم تنتقل مباشرة لاختيار القطع.','Start from the Camps tab: open a previous camp or create one in three quick steps, then go straight to picking bricks.')}</p>
+    <div class="note" style="margin-top:10px"><b style="font-size:12.5px">⌂ ${T('المعسكرات','Camps')}</b>
+      <p class="help">${T('كل معسكر مستقل بخطته وأيامه وفريقه. من البطاقة تفتح المعسكر أو تنسخه أو تؤرشفه.','Each camp has its own plan, days and team. From the card you can open, duplicate or archive it.')}</p></div>
     <div class="spacer">${steps.map(([n,t,d])=>`<div class="step" style="align-items:flex-start;margin-bottom:8px"><b>${n}</b><span><b style="font-size:12.5px">${t}</b><br><span class="help">${d}</span></span></div>`).join('')}</div>
     <div class="note orange" style="margin-top:12px"><b>${T('حدود الأداة','Scope')}</b>
       <p class="help" style="margin-top:4px">${T('لا تقيس الطالب ولا تصدر أحكامًا عليه، ولا تتصل بخادم. كل البيانات تُحفظ في هذا المتصفح فقط، والطلاب الثمانية بيانات تجريبية.','It does not measure or judge students and makes no network calls. Everything is stored in this browser only, and the eight student records are sample data.')}</p></div>
@@ -2165,6 +2504,17 @@ document.addEventListener('click',e=>{
       S.selected.forEach(x=>{if(x.day===n)x.day=null;else if(x.day>n)x.day=x.day-1});
       logIt('حُذف يوم من المعسكر','Day removed');save();render()},
     copyLink:()=>copyLink(),
+    newCamp:()=>newCampModal(),
+    wizNext:()=>wizNext(),
+    wizBack:()=>wizBack(),
+    wizCreate:()=>wizCreate(),
+    openCamp:()=>openCamp(arg),
+    dupCamp:()=>dupCamp(arg),
+    archiveCamp:()=>archiveCamp(arg),
+    delCamp:()=>delCamp(arg),
+    delCampOk:()=>delCampOk(arg),
+    campFilter:()=>{campFilter.status=arg;render()},
+
     reset:()=>{
       if(!can('reset'))return;
       S.selected=[];S.prep={};S.draft=false;logIt('صُفّر الاختيار','Selection cleared');save();render();toast(T('صُفّرت الخطة.','Plan cleared.'));},
@@ -2178,6 +2528,8 @@ document.addEventListener('click',e=>{
 document.addEventListener('input',e=>{
   const t=e.target;
   if(t.id==='q'){libFilter.q=t.value;renderLib()}
+  if(t.id==='campQ'){campFilter.q=t.value;render();const el=$('#campQ');if(el){el.focus();try{el.setSelectionRange(el.value.length,el.value.length)}catch(e){}}}
+  if(t.id==='wDays'){wizCollect();wiz.d.dayCount=+t.value;renderWiz();return}
   if(t.id==='pkQ'){const q=t.value.toLowerCase();$$('#pkList [data-pk]').forEach(r=>{const i=ITEM(r.dataset.pk);r.style.display=(L({ar:i.ar,en:i.en})+' '+L(i.goal)).toLowerCase().includes(q)?'':'none'})}
 });
 document.addEventListener('change',e=>{
