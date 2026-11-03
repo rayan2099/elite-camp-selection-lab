@@ -137,6 +137,10 @@ label.fld textarea{resize:vertical;min-height:70px;line-height:1.6}
 html[data-theme=dark] .seg button.on{background:var(--accent);color:#22140d}
 
 /* ---------- library ---------- */
+.custom-checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:7px;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--soft);max-height:190px;overflow:auto;width:100%}
+.custom-checks label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:400;color:var(--fg);cursor:pointer;line-height:1.5}
+.custom-checks input{accent-color:var(--accent);flex:none}
+
 .libgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
 .libcard{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:15px;display:flex;flex-direction:column;gap:10px;position:relative;transition:.15s;border-inline-start:3px solid var(--tc,var(--line))}
 .libcard:hover{box-shadow:0 10px 26px #12223a10;transform:translateY(-1px)}
@@ -308,7 +312,7 @@ html[data-theme=dark] .daynum{background:var(--accent);color:#22140d}
 /* ---------- misc ---------- */
 #modal{border:none;padding:0;border-radius:16px;max-width:min(760px,94vw);width:100%;background:var(--surface);color:var(--fg);box-shadow:0 30px 90px #07101f55}
 #modal::backdrop{background:#07101f66;backdrop-filter:blur(3px)}
-#modal .inner{padding:22px}
+#modal .inner{padding:22px;max-height:88vh;overflow:auto}
 #modal .x{position:absolute;inset-inline-end:14px;top:12px;width:32px;height:32px;display:grid;place-items:center;border:none;border-radius:50%;background:var(--soft);font-size:14px;color:var(--muted);padding:0;line-height:1}
 #toasts{position:fixed;inset-inline-end:20px;bottom:20px;z-index:80;display:flex;flex-direction:column;gap:8px}
 .toast{background:var(--navy);color:#fff;padding:10px 15px;border-radius:10px;font-size:12.5px;box-shadow:0 12px 30px #07101f55;animation:pop .25s ease}
@@ -879,7 +883,7 @@ const ROLES=[
  {id:'field',ar:'مشرف ميداني',en:'Field supervisor'}
 ];
 const CAPS={
- director:['select','approve','brief','reset','export'],
+ director:['select','approve','brief','reset','export','catalog'],
  programs:['select','brief','export'],
  values:['select','approve','export'],
  field:['export']
@@ -957,7 +961,7 @@ function seedCamps(){
 }
 function initial(){
   const camps=seedCamps();
-  return {version:4,role:'director',lang:'ar',theme:'light',page:'camps',
+  return {version:4,customPrograms:[],role:'director',lang:'ar',theme:'light',page:'camps',
     activeId:camps.find(c=>c.id==='camp-autumn').id,camps};
 }
 function defineActive(o){
@@ -978,12 +982,12 @@ function withCamp(id,fn){
 }
 function migrate(o){
   if(!o||typeof o!=='object')return initial();
-  if(o.version===4&&Array.isArray(o.camps)&&o.camps.length)return o;
+  if(o.version===4&&Array.isArray(o.camps)&&o.camps.length){if(!Array.isArray(o.customPrograms))o.customPrograms=[];return o;}
   if(o.meta&&Array.isArray(o.selected)){
     const camp=makeCamp({id:'camp-migrated',createdAt:Date.now(),updatedAt:Date.now(),status:'draft',
       meta:o.meta,rules:o.rules||baseRules(),selected:o.selected,step:o.step||1,
       draft:!!o.draft,prep:o.prep||{},log:o.log||[],shared:!!o.shared,students:o.students||STUDENTS.map(s=>({...s}))});
-    return {version:4,role:o.role||'director',lang:o.lang||'ar',theme:o.theme||'light',page:'camps',activeId:camp.id,camps:[camp]};
+    return {version:4,customPrograms:Array.isArray(o.customPrograms)?o.customPrograms:[],role:o.role||'director',lang:o.lang||'ar',theme:o.theme||'light',page:'camps',activeId:camp.id,camps:[camp]};
   }
   return initial();
 }
@@ -991,6 +995,18 @@ let S;
 try{
   S=defineActive(migrate(JSON.parse(localStorage.getItem('elite-select-v1'))));
 }catch(e){ S=defineActive(initial()); }
+/* User-created programs are stored once per browser and used across all camps. */
+function registerCustomPrograms(programs){
+  if(!Array.isArray(programs))return;
+  programs.forEach(i=>{
+    if(!i || typeof i.id!=='string' || !i.id.startsWith('CUSTOM-') || !TRACK(i.t) || !FIELDS[i.t+'.'+i.f])return;
+    if(!Array.isArray(i.ages)||i.ages.length!==2||!Array.isArray(i.need)||!Array.isArray(i.tags)||!Array.isArray(i.ph))return;
+    const idx=LIB.findIndex(x=>x.id===i.id);
+    if(idx>=0){if(LIB[idx].custom)LIB[idx]=i;}
+    else LIB.push(i);
+  });
+}
+registerCustomPrograms(S.customPrograms);
 let lang=S.lang||'ar';
 let page=S.page||'dashboard';
 let libFilter={q:'',track:'all',field:'all',age:'all',only:false};
@@ -1139,7 +1155,7 @@ function header(){
 /* Guidance stays relevant to the current screen without affecting stored data. */
 const MANAGER_GUIDES={
  dashboard:[['ماذا تعرض هذه الصفحة؟','What this page shows'],['تلخّص البرامج المختارة والشروط غير المستوفاة. ابدأ بفقرة «الخطوة التالية» لمعالجة أهم نقص.','This is a summary of programs and unmet checks. Start with Next steps to resolve the most important gap.'],['النسب مرتبطة بقواعد التخطيط ومطابقة وسوم الاحتياجات، ولا تثبت الجاهزية التشغيلية أو أثر البرامج.','Percentages describe planning checks and matching need tags; they do not establish operational readiness or learning outcomes.']],
- library:[['كيف تختار برنامجًا؟','How to select a program'],['استخدم فلاتر المسار والفئة العمرية، ثم افتح التفاصيل لمعرفة الهدف والمتطلبات قبل الإضافة.','Filter by track and age; open program details to review its goal and requirements before adding.'],['مستوى التجهيز من 1 إلى 3 تقدير نسبي لصعوبة التحضير، وليس عدد ساعات أو تكلفة مالية.','Preparation level 1–3 is a relative estimate, not an hour or financial cost figure.']],
+ library:[['كيف تختار أو تنشئ برنامجًا؟','How to select or create a program'],['استخدم «إنشاء برنامج جديد» لإضافة برنامج للمكتبة، أو صفِّ البرامج الحالية حسب المسار والعمر وافتح التفاصيل قبل الاختيار.','Filter by track and age; open program details to review its goal and requirements before adding.'],['مستوى التجهيز من 1 إلى 3 تقدير نسبي لصعوبة التحضير، وليس عدد ساعات أو تكلفة مالية.','Preparation level 1–3 is a relative estimate, not an hour or financial cost figure.']],
  selection:[['كيف تُحدّد الأولوية؟','How to set priority'],['اجعل «أساسي» للبرنامج الرئيسي و«مساند» للبرنامج الذي يدعم تجربة أخرى. اكتب مبررًا مرتبطًا بهدف أو احتياج، ثم حدّد اليوم.','Choose Core for a main program and Supporting for one that complements another; record the reason and assign a day.'],['إضافة برنامج لا تعني اعتماده. المبرر المكتوب وثيقة قرار تساعد في المراجعة.','Adding a program does not approve it. The written rationale records the decision for review.']],
  days:[['كيف توزّع الأيام؟','How to allocate days'],['وزّع البرامج على الأيام يدويًا أو استخدم التوزيع الآلي ثم راجع ترتيبه بنفسك.','Assign programs manually or use automatic allocation, then review the proposed arrangement yourself.'],['الرقم في كل يوم هو عدد البرامج مقارنة بالحد المسموح؛ وليس مجموع ساعات التنفيذ.','The daily count compares programs with the configured limit; it is not the total number of hours.']],
  fit:[['كيف تقرأ المواءمة؟','How to read alignment'],['راجع محاور الاحتياج غير المغطاة وأضف برامج مناسبة بعد النظر في ظروف الطلاب الفعلية.','Review uncovered needs and select suitable programs based on students’ real circumstances.'],['النسبة ناتجة عن تطابق الوسوم لا قياس نمو الطالب. بيانات الطلاب المعروضة تجريبية.','The score is tag-matching, not a measure of student growth. Displayed student records are samples.']],
@@ -1244,9 +1260,10 @@ const time=ts=>new Date(ts).toLocaleString(lang==='ar'?'ar-SA-u-ca-gregory-nu-la
 /* ============================ ٢ · المكتبة ============================ */
 function pageLibrary(){
   return pageHead('مكتبة البرامج','Program library',
-    'كل ما اعتمدته الأكاديمية في ستة مسارات؛ اختر ما يخدم هذا المعسكر فقط.',
-    'Everything the academy has approved across six tracks. Pick only what serves this camp.',
-    `<button data-act="go:selection">${T('عرض الاختيار','View selection')} (${selCount()})</button>`)
+    'استعرض برامج الأكاديمية وأضف برامج جديدة عند الحاجة، ثم اختر البرامج التي تخدم أهداف المعسكر.',
+    'Browse existing programs, create additional ones, and select those serving camp goals.',
+    `${can('catalog')?`<button class="primary" data-act="newProgram">+ ${T('إنشاء برنامج جديد','Create new program')}</button>`:''}<button data-act="go:selection">${T('البرامج المختارة','Selected programs')} (${selCount()})</button>`)
+  +`<div class="note" style="margin-bottom:14px"><b>${T('إضافة برنامج للمكتبة','Adding a program to the library')}</b><p class="help">${T('أنشئ برنامجًا جديدًا مع هدف ومسار وأعمار ومتطلبات واضحة؛ سيبقى متاحًا في المكتبة لجميع المعسكرات على هذا المتصفح. أنشئه أولًا ثم اختر «أضف إلى الخطة» لإدراجه في المعسكر الحالي.','Create a program with a clear goal, track, ages and requirements. It will remain available to all camps in this browser. After saving, use Add to plan for the current camp.')}</p></div>`
   +`<div class="card">
       <div class="filters" style="margin:0">
         <input type="search" id="q" placeholder="${T('ابحث باسم البرنامج أو الهدف…','Search a program or goal…')}" value="${esc(libFilter.q)}">
@@ -1256,7 +1273,7 @@ function pageLibrary(){
         <label class="pill line" style="cursor:pointer;gap:7px"><input type="checkbox" id="fOnly" ${libFilter.only?'checked':''} style="margin:0"> ${T('المختار فقط','Selected only')}</label>
       </div>
       <div class="row" style="margin-top:12px"><span class="help">${T('النتائج: ','Results: ')}<b id="libCount">0</b></span>
-        <span class="help">${T('المختار من المكتبة: ','Picked: ')}<b>${selCount()}</b></span></div>
+        <span class="help">${T('أضافتها الإدارة: ','Custom programs: ')}<b>${S.customPrograms.length}</b> · ${T('في الخطة: ','In plan: ')}<b>${selCount()}</b></span></div>
     </div>
     <div class="libgrid spacer" id="libGrid"></div>`;
 }
@@ -1278,7 +1295,7 @@ function libList(){
 function libCard(i){
   const on=isSel(i.id), t=TRACK(i.t);
   return `<article class="libcard ${on?'on':''}" style="--tc:${t.color}">
-    <div class="meta"><span class="trackchip" style="--tc:${t.color}"><i></i>${L(t)}</span><span class="trackchip">${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))}</span></div>
+    <div class="meta"><span class="trackchip" style="--tc:${t.color}"><i></i>${L(t)}</span><span class="trackchip">${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))}</span>${i.custom?`<span class="pill orange">${T('أضيف بواسطة الإدارة','Admin-created')}</span>`:''}</div>
     <div class="ttl">${esc(L({ar:i.ar,en:i.en}))}</div>
     <div class="goal">${esc(L(i.goal))}</div>
     <div class="meta">
@@ -1288,6 +1305,7 @@ function libCard(i){
     </div>
     <div class="foot">
       <button class="small" data-act="item:${i.id}">${T('التفاصيل','Details')}</button>
+      ${i.custom&&can('catalog')?`<button class="small" data-act="editProgram:${i.id}">${T('تعديل','Edit')}</button><button class="small danger" data-act="deleteProgram:${i.id}">${T('حذف','Delete')}</button>`:''}
       ${can('select')?`<button class="small ${on?'':'primary'}" data-act="${on?'unpick':'pick'}:${i.id}">${on?T('إزالة من الخطة','Remove'):T('أضف إلى الخطة','Add to plan')}</button>`:`<span class="help">${T('عرض فقط','View only')}</span>`}
     </div>
   </article>`;
@@ -1721,7 +1739,7 @@ function stepBricks(){
       <div class="row wrap"><h2>${T('البرامج المتاحة','Available programs')}</h2>
         <div class="seg">${[['all',T('الكل','All')]].concat(TRACKS.map(t=>[t.id,L(t)])).map(([id,label])=>
           `<button class="${track===id?'on':''}" data-act="bin:${id}">${label}</button>`).join('')}</div></div>
-      <p class="help" style="margin:6px 0 12px">${T('أضف البرامج المناسبة إلى خطتك، ثم وزّعها على الأيام في الخطوة التالية.','Tap a brick to add it to your tray, then snap it onto a day in the next step.')}</p>
+      <p class="help" style="margin:6px 0 12px">${T('أضف البرامج المناسبة إلى خطتك، ثم وزّعها على الأيام في الخطوة التالية.','Choose suitable programs for this camp, then allocate them in the next step.')}</p>${can('catalog')?`<button class="small" data-act="newProgram" style="margin-bottom:12px">+ ${T('إنشاء برنامج وإضافته للمكتبة','Create a library program')}</button>`:''}
       <div class="bins">
         ${pool.map(i=>{const t=TRACK(i.t);return `<div class="bin" style="--bc:${t.color}">
           <span class="program-icon">${uiIcon(TRACKICON[i.t])}</span>
@@ -2054,7 +2072,8 @@ function encodePlan(){
     m:{campAr:S.meta.campAr,campEn:S.meta.campEn,cityAr:S.meta.cityAr,cityEn:S.meta.cityEn,
        start:S.meta.start,end:S.meta.end,ageMin:S.meta.ageMin,ageMax:S.meta.ageMax,students:S.meta.students,teams:S.meta.teams,days:S.meta.days},
     r:S.rules,
-    s:S.selected.map(x=>({i:x.id,p:x.pri,d:x.day||0,w:x.why||'',a:x.approved?1:0}))
+    s:S.selected.map(x=>({i:x.id,p:x.pri,d:x.day||0,w:x.why||'',a:x.approved?1:0})),
+    customPrograms:S.customPrograms.filter(i=>S.selected.some(x=>x.id===i.id))
   };
   const bytes=new TextEncoder().encode(JSON.stringify(p));
   let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));
@@ -2068,8 +2087,15 @@ function decodePlan(str){
 function shareUrl(){
   return location.origin+location.pathname+'#plan='+encodePlan();
 }
+function mergeImportedCustomPrograms(items){
+  if(!Array.isArray(items))return;
+  if(!Array.isArray(S.customPrograms))S.customPrograms=[];
+  const valid=items.filter(i=>i&&i.custom===true&&typeof i.id==='string'&&i.id.startsWith('CUSTOM-')&&TRACK(i.t)&&FIELDS[i.t+'.'+i.f]&&Array.isArray(i.ages)&&Array.isArray(i.tags)&&Array.isArray(i.need)&&Array.isArray(i.ph)&&i.goal&&typeof i.ar==='string');
+  valid.forEach(i=>{if(!S.customPrograms.some(x=>x.id===i.id)){S.customPrograms.push(i);registerCustomPrograms([i])}});
+}
 function applyShared(p){
   if(!p||!Array.isArray(p.s))throw new Error('bad plan');
+  mergeImportedCustomPrograms(p.customPrograms);
   const sel=p.s.filter(x=>ITEM(x.i)).map(x=>({id:x.i,pri:x.p==='core'?'core':'support',day:x.d||null,
     why:x.w||'',owner:'programs',approved:!!x.a,at:Date.now()}));
   if(!sel.length)throw new Error('empty plan');
@@ -2404,13 +2430,13 @@ const closeModal=()=>{const m=$('#modal');if(m.open)m.close()};
 function guideModal(){
   const steps=lang==='ar'?[
     ['01','هوية المعسكر','الاسم والمدة والفئة العمرية وأيام المعسكر. هذه القاعدة التي ستبني عليها.'],
-    ['02','اختيار البرامج','سبعون برنامجًا في ستة مسارات. اختر المهارات والقيم التي تخدم هذا المعسكر فقط.'],
+    ['02','اختيار البرامج','اختر من البرامج المتاحة في ستة مسارات، ويمكن للمدير إضافة برامج جديدة إلى المكتبة.'],
     ['03','توزيع البرامج','اسحب البرنامج إلى اليوم المناسب، أو اضغطه ثم اضغط اليوم. ثلاثة في اليوم أكثر ما يُنصح به.'],
     ['04','مراجعة الخطة','هل توجد قيم؟ هل كل مسار ممثل؟ هل كل يوم مبني؟ وهل يخدم اختيارك تحديات الطلاب؟'],
     ['05','معاينة الجدول','خط زمني من الفجر إلى النوم، مع المبررات والمتطلبات، وطباعة صفحة لكل يوم.']
   ]:[
     ['01','Camp identity','Name, dates, age band and camp days. This is the base you build on.'],
-    ['02','Select programs','Seventy programs across six tracks. Pick the skills and values that serve this camp.'],
+    ['02','Select programs','Select from six program tracks; the director can also add new programs to the library.'],
     ['03','Allocate programs','Drag a component to a day, or tap it then tap the day. Three a day is the sweet spot.'],
     ['04','Plan review','Values present? Every track represented? Every day built? Does it serve the challenges?'],
     ['05','Preview schedule','A timeline from dawn to sleep, with rationales and requirements, printed one page per day.']
@@ -2462,6 +2488,89 @@ function saveBrief(){
   S.meta.days.forEach((d,i)=>{d.ar=g('dayAr'+i)||d.ar;d.en=g('dayEn'+i)||d.en});
   logIt('تحديث بيانات المعسكر','Updated camp brief');
   save();closeModal();render();
+}
+/* ============================ إدارة مكتبة البرامج ============================ */
+function customProgramFields(track){
+  return Object.entries(FIELDS).filter(([key])=>key.startsWith(track+'.'));
+}
+function customProgramModal(id){
+  if(!can('catalog'))return toast(T('إدارة مكتبة البرامج متاحة لمدير المعسكر فقط.','Only the camp director can manage the library.'));
+  const existing=id?ITEM(id):null;
+  if(id&&(!existing||!existing.custom))return;
+  const i=existing||{ar:'',en:'',t:'lead',f:'thinking',ages:[10,15],load:2,goal:{ar:'',en:''},need:[],tags:[],ph:[['',''],['',''],['','']]};
+  const name=T('إنشاء برنامج جديد','Create new program');
+  openModal(`<div class="eyebrow">${T('إدارة مكتبة البرامج','LIBRARY MANAGEMENT')}</div>
+    <h2 style="margin-top:4px">${existing?T('تعديل البرنامج','Edit program'):name}</h2>
+    <p class="help" style="margin:8px 0 14px">${T('أدخل اسمًا واضحًا وهدفًا قابلًا للملاحظة. سيُحفظ البرنامج في المكتبة لجميع معسكرات هذا المتصفح، ولن يُضاف تلقائيًا إلى خطة المعسكر.','Use a clear name and an observable goal. The program will be saved to this browser’s library for all camps, but will not be added to the current camp automatically.')}</p>
+    <div class="fields">
+      <label class="fld">${T('اسم البرنامج بالعربية *','Arabic program name *')}<input id="cpAr" maxlength="100" required value="${esc(i.ar)}" placeholder="${T('مثال: مهارات حل النزاعات','e.g. Conflict resolution skills')}"></label>
+      <label class="fld">${T('الاسم بالإنجليزية (اختياري)','English name (optional)')}<input id="cpEn" maxlength="100" dir="ltr" value="${esc(i.en||'')}"></label>
+      <label class="fld">${T('المسار *','Track *')}<select id="cpTrack">${TRACKS.map(t=>`<option value="${t.id}" ${t.id===i.t?'selected':''}>${L(t)}</option>`).join('')}</select></label>
+      <label class="fld">${T('المجال ضمن المسار *','Field within track *')}<select id="cpField">${customProgramFields(i.t).map(([key,val])=>`<option value="${key.split('.')[1]}" ${key===i.t+'.'+i.f?'selected':''}>${T(val[0],val[1])}</option>`).join('')}</select></label>
+      <label class="fld wide">${T('الهدف التعليمي أو التربوي *','Learning / development objective *')}<textarea id="cpGoal" required maxlength="500" placeholder="${T('ماذا سيتمكن الطالب من تطبيقه أو إظهاره بعد البرنامج؟','What will students be able to demonstrate after this program?')}">${esc(i.goal.ar)}</textarea></label>
+      <label class="fld">${T('الحد الأدنى للعمر','Minimum age')}<input type="number" id="cpAgeMin" min="6" max="18" value="${i.ages[0]}"></label>
+      <label class="fld">${T('الحد الأعلى للعمر','Maximum age')}<input type="number" id="cpAgeMax" min="6" max="18" value="${i.ages[1]}"></label>
+      <label class="fld wide">${T('مستوى التجهيز','Preparation level')}<select id="cpLoad"><option value="1" ${i.load===1?'selected':''}>1 — ${T('بسيط','Low')}</option><option value="2" ${i.load===2?'selected':''}>2 — ${T('متوسط','Medium')}</option><option value="3" ${i.load===3?'selected':''}>3 — ${T('مرتفع','High')}</option></select><span class="help">${T('تقدير نسبي للجهد، وليس عدد ساعات أو تكلفة.','Relative preparation effort, not hours or cost.')}</span></label>
+      <label class="fld wide">${T('المعرفة والمهارات المستهدفة (اختياري)','Targeted needs / skills (optional)')}<span class="help">${T('اختر وسومًا دقيقة فقط؛ تُستخدم في المطابقة الأولية مع احتياجات الطلاب.','Select only applicable tags; they inform the preliminary student-needs match.')}</span>
+        <span class="custom-checks">${Object.entries(TAGNAMES).map(([key,val])=>`<label><input type="checkbox" data-custom-tag="${key}" ${i.tags.includes(key)?'checked':''}> ${T(val[0],val[1])}</label>`).join('')}</span></label>
+      <label class="fld wide">${T('متطلبات التشغيل والتجهيز','Operational and preparation needs')}<span class="help">${T('حدّد ما يجب توفيره قبل تنفيذ البرنامج.','Identify resources required before delivery.')}</span>
+        <span class="custom-checks">${Object.entries(NEEDS).map(([key,val])=>`<label><input type="checkbox" data-custom-need="${key}" ${i.need.includes(key)?'checked':''}> ${T(val[0],val[1])}</label>`).join('')}</span></label>
+      <label class="fld wide">${T('1. التهيئة والتعلّم','1. Introduction and learning')}<textarea id="cpPh1" maxlength="500" placeholder="${T('كيف تبدأ التجربة؟','How will it start?')}">${esc(i.ph[0]?.[0]||'')}</textarea></label>
+      <label class="fld wide">${T('2. الممارسة والتطبيق','2. Practice and application')}<textarea id="cpPh2" maxlength="500" placeholder="${T('كيف يطبّق الطالب ما تعلّمه؟','How will students apply learning?')}">${esc(i.ph[1]?.[0]||'')}</textarea></label>
+      <label class="fld wide">${T('3. المخرجات وإظهار الأثر','3. Outputs and demonstration')}<textarea id="cpPh3" maxlength="500" placeholder="${T('كيف يُظهر الطالب ما أنجزه؟','How can students demonstrate their work?')}">${esc(i.ph[2]?.[0]||'')}</textarea></label>
+    </div>
+    <div class="note" style="margin-top:12px">${T('مهم: إضافة برنامج إلى المكتبة لا تعني اعتماده أو التحقق من سلامته. المدير مسؤول عن مراجعة ملاءمة العمر والمحتوى والمتطلبات.','Important: Saving to the library does not approve or certify a program. The director must verify age suitability, content and requirements.')}</div>
+    <div class="actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap">
+      <button data-act="close">${T('إلغاء','Cancel')}</button>
+      <button class="primary" data-act="saveCustomProgram${id?':'+id:''}">${existing?T('حفظ التعديلات','Save changes'):T('حفظ في مكتبة البرامج','Save to library')}</button>
+    </div>`);
+}
+function refreshCustomFields(){
+  const track=$('#cpTrack')?.value;
+  const field=$('#cpField');if(!track||!field)return;
+  field.innerHTML=customProgramFields(track).map(([key,val])=>`<option value="${key.split('.')[1]}">${T(val[0],val[1])}</option>`).join('');
+}
+function saveCustomProgram(id){
+  if(!can('catalog'))return;
+  const v=n=>($('#'+n)?.value||'').trim();
+  const ar=v('cpAr'),en=v('cpEn')||ar,goal=v('cpGoal'),t=v('cpTrack'),f=v('cpField');
+  const min=Number(v('cpAgeMin')),max=Number(v('cpAgeMax')),load=Number(v('cpLoad'));
+  if(ar.length<3||goal.length<10)return toast(T('أدخل اسم برنامج من 3 أحرف على الأقل وهدفًا واضحًا من 10 أحرف على الأقل.','Enter a program name of at least 3 characters and a goal of at least 10.'));
+  if(!TRACK(t)||!FIELDS[t+'.'+f])return toast(T('اختر مسارًا ومجالًا صحيحين.','Select a valid track and field.'));
+  if(!Number.isInteger(min)||!Number.isInteger(max)||min<6||max>18||min>max)return toast(T('تأكد من أن الأعمار بين 6 و18 وأن الحد الأدنى لا يتجاوز الأعلى.','Ages must be between 6 and 18, with minimum not greater than maximum.'));
+  if(![1,2,3].includes(load))return toast(T('اختر مستوى تجهيز صحيحًا.','Choose a valid preparation level.'));
+  if(LIB.some(x=>x.id!==id&&x.ar.trim().toLowerCase()===ar.toLowerCase()))return toast(T('يوجد برنامج بهذا الاسم في المكتبة.','A program with this name already exists.'));
+  const original=id?ITEM(id):null;
+  if(id&&(!original||!original.custom))return;
+  const item={id:id||newId('CUSTOM-'),custom:true,t,f,ar,en,ages:[min,max],load,
+    goal:{ar:goal,en:goal},
+    need:$$('[data-custom-need]:checked').map(x=>x.dataset.customNeed),
+    tags:$$('[data-custom-tag]:checked').map(x=>x.dataset.customTag),
+    ph:[1,2,3].map(n=>{const x=v('cpPh'+n);return [x,x]})};
+  if(!Array.isArray(S.customPrograms))S.customPrograms=[];
+  const pos=S.customPrograms.findIndex(x=>x.id===item.id);
+  if(pos>=0)S.customPrograms[pos]=item;else S.customPrograms.push(item);
+  registerCustomPrograms([item]);
+  logIt(id?`تحديث البرنامج المضاف: ${ar}`:`إضافة برنامج للمكتبة: ${ar}`,id?`Updated custom program: ${en}`:`Created library program: ${en}`);
+  save();closeModal();libFilter.q='';libFilter.only=false;libFilter.track=t;libFilter.field='all';page='library';render();
+  toast(id?T('حُفظت التعديلات.','Program updated.'):T('حُفظ البرنامج في المكتبة. يمكنك إضافته الآن إلى خطة المعسكر.','Program saved to the library. You can now add it to this camp.'));
+}
+function deleteCustomProgram(id){
+  if(!can('catalog'))return;
+  const i=ITEM(id);if(!i?.custom)return;
+  const used=S.camps.filter(c=>c.selected.some(x=>x.id===id));
+  if(used.length)return toast(T(`البرنامج مستخدم في ${used.length} معسكر/معسكرات. أزله من خططها أولًا قبل حذف تعريفه من المكتبة.`,`This program is used by ${used.length} camp(s). Remove it from those plans before deleting it from the library.`));
+  openModal(`<h2>${T('حذف البرنامج من المكتبة؟','Delete program from library?')}</h2>
+    <p class="help" style="margin:8px 0">${esc(i.ar)} — ${T('سيُحذف تعريف هذا البرنامج من مكتبة المتصفح. هذا الإجراء لا يمكن التراجع عنه.','Its definition will be removed from this browser library. This cannot be undone.')}</p>
+    <div class="actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button data-act="close">${T('إلغاء','Cancel')}</button><button class="danger" data-act="confirmDeleteProgram:${id}">${T('تأكيد الحذف','Confirm deletion')}</button></div>`);
+}
+function confirmDeleteProgram(id){
+  if(!can('catalog'))return;
+  const i=ITEM(id);if(!i?.custom||S.camps.some(c=>c.selected.some(x=>x.id===id)))return;
+  S.customPrograms=S.customPrograms.filter(x=>x.id!==id);
+  const pos=LIB.findIndex(x=>x.id===id);if(pos>=0)LIB.splice(pos,1);
+  logIt(`حُذف برنامج من المكتبة: ${i.ar}`,`Deleted library program: ${i.en}`);
+  save();closeModal();render();toast(T('حُذف البرنامج من المكتبة.','Program deleted from library.'));
 }
 function itemModal(id){
   const i=ITEM(id),t=TRACK(i.t),on=isSel(id);
@@ -2535,7 +2644,7 @@ function download(name,content,type){
 function packData(){
   return {
     camp:{ar:S.meta.campAr,en:S.meta.campEn,city:S.meta.cityAr,start:S.meta.start,end:S.meta.end,ageMin:S.meta.ageMin,ageMax:S.meta.ageMax,students:S.meta.students,days:S.meta.days},
-    rules:S.rules,readiness:readiness().score,
+    rules:S.rules,readiness:readiness().score,customPrograms:S.customPrograms.filter(i=>S.selected.some(x=>x.id===i.id)),
     selection:[...S.selected].sort((a,b)=>(a.day||9)-(b.day||9)).map(x=>{const i=ITEM(x.id);return {
       day:x.day,programAr:i.ar,programEn:i.en,track:L(TRACK(i.t)),field:L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}),
       priority:x.pri,rationale:x.why||'',approved:!!x.approved,
@@ -2547,6 +2656,7 @@ function packData(){
   };
 }
 function parsePlan(obj){
+  mergeImportedCustomPrograms(obj&&obj.customPrograms);
   const mapAr=new Map(LIB.map(i=>[i.ar,i.id]));
   const mapEn=new Map(LIB.map(i=>[i.en,i.id]));
   if(!obj||!Array.isArray(obj.selection))throw new Error('no selection');
@@ -2695,6 +2805,11 @@ document.addEventListener('click',e=>{
     guide:()=>guideModal(),
     saveBrief:()=>saveBrief(),
     item:()=>itemModal(arg),
+    newProgram:()=>customProgramModal(),
+    editProgram:()=>customProgramModal(arg),
+    saveCustomProgram:()=>saveCustomProgram(arg||null),
+    deleteProgram:()=>deleteCustomProgram(arg),
+    confirmDeleteProgram:()=>confirmDeleteProgram(arg),
     pick:()=>{pick(arg)},
     unpick:()=>{unpick(arg)},
     edit:()=>{closeModal();editModal(arg)},
@@ -2754,6 +2869,7 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('change',e=>{
   const t=e.target;
+  if(t.id==='cpTrack'){refreshCustomFields();return}
   if(t.id==='fTrack'){libFilter.track=t.value;libFilter.field='all';render();return}
   if(t.id==='fField'){libFilter.field=t.value;render();return}
   if(t.id==='fAge'){libFilter.age=t.value;render();return}
