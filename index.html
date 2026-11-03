@@ -328,6 +328,34 @@ html[data-theme=dark] .daynum{background:var(--accent);color:#22140d}
 .matrix .cell.l2{background:#f07b3a55;color:#7a3711}
 .matrix .cell.l3{background:var(--accent);color:#22140d}
 
+
+/* Clean professional program cards and compact responsive builder stats */
+.ui-line-icon{display:block;width:19px;height:19px;flex:none}
+.bar-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 14px;align-items:center;padding:13px 15px;overflow:visible}
+.build-stat{display:flex;align-items:center;gap:7px;min-width:0;flex-wrap:wrap;line-height:1.4}
+.build-stat-label{font-size:11.5px;line-height:1.5;min-width:0;color:var(--muted)}
+.build-stat b{font-size:19px;margin-inline-start:auto;color:var(--fg);white-space:nowrap;direction:ltr;unicode-bidi:isolate}
+.build-stat-icon{color:var(--accent);background:var(--accentsoft);border-radius:9px;width:31px;height:31px;display:grid;place-items:center;flex:none}
+.build-stat-icon .ui-line-icon{width:17px;height:17px}
+.bar-strip .buildbar{grid-column:1/-1;width:100%;height:7px;margin:0;min-width:0}
+.bin{padding:14px;gap:9px;overflow:hidden;border-radius:13px;background:var(--surface);border-inline-start:3px solid var(--bc);min-height:173px}
+.bin .ttl{font-size:13px;line-height:1.5;font-weight:800;padding:0;overflow-wrap:anywhere}
+.bin .program-icon{display:grid;place-items:center;align-self:flex-start;flex:none;width:37px;height:37px;border-radius:10px;background:color-mix(in srgb,var(--bc) 12%,var(--surface));color:var(--bc)}
+.bin .program-icon svg{width:20px;height:20px}
+.bin .row{gap:6px;flex-wrap:wrap;align-items:center}
+.bin .studs,.brick .studs{display:none!important}
+.brick{margin-top:0;box-shadow:none;border:1px solid color-mix(in srgb,var(--bc) 75%,#fff);display:flex;align-items:center;flex-wrap:wrap;gap:5px 8px;min-height:43px;cursor:grab}
+.brick .brick-symbol{display:inline-grid;place-items:center;flex:none;background:#ffffff26;border-radius:6px;width:26px;height:26px}
+.brick .brick-symbol svg{width:16px;height:16px}
+.brick b{flex:1;min-width:100px;overflow-wrap:anywhere}
+.brick .meta{flex-basis:100%;margin-top:0}
+.brick.mini{margin-top:4px;min-height:31px;padding:4px 6px}
+.brick.mini .brick-symbol{width:19px;height:19px}
+.brick.mini .brick-symbol svg{width:13px;height:13px}
+.tray .brick{margin-top:0}
+@media(max-width:1150px){.bar-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:580px){.bar-strip{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 8px}.build-stat{align-items:flex-start}.build-stat b{width:100%;margin-inline-start:37px}.build-stat-label{font-size:10.5px}.bin{min-height:150px}}
+
 @media print{
   @page{size:A4;margin:12mm}
   body{background:#fff}
@@ -1548,17 +1576,30 @@ const STEPS=[
 ];
 let held=null;
 
-const TRACKICON={lead:'◆',values:'❖',life:'●',stem:'▲',sport:'■',trips:'✈'};
+const TRACKICON={lead:'user-round',values:'heart-handshake',life:'lightbulb',stem:'flask-conical',sport:'activity',trips:'map'};
+function uiIcon(name){
+  const paths={
+    'layers':'<path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 17l9 5 9-5"/>',
+    'calendar':'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/>',
+    'compass':'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.5 5-5 2.5 2.5-5 5-2.5Z"/>',
+    'clipboard':'<rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="m9 14 2 2 4-4"/>',
+    'user-round':'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    'heart-handshake':'<path d="M12 21s-8-4.8-8-10a4 4 0 0 1 7-2.5A4 4 0 0 1 18 11c0 5.2-6 10-6 10Z"/><path d="m9 13 2 2 4-4"/>',
+    'lightbulb':'<path d="M9 18h6M10 21h4M9 14a7 7 0 1 1 6 0l-1 3h-4l-1-3Z"/>',
+    'flask-conical':'<path d="M9 3h6M10 3v7L4 19a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-6-9V3M7.5 16h9"/>',
+    'activity':'<path d="M2 12h4l3-8 6 16 3-8h4"/>',
+    'map':'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6ZM9 3v15M15 6v15"/>'
+  };
+  return `<svg class="ui-line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.layers}</svg>`;
+}
 
 function brickEl(i,opts){
   opts=opts||{};
   const t=TRACK(i.t);
-  const n=Math.min(4,(i.load||2)+1);
-  const studs=Array.from({length:n}).map(()=>'<i></i>').join('');
   const sub=opts.sub||'';
   const drag=opts.drag===false?'false':'true';
   return `<div class="brick ${opts.mini?'mini':''} ${held===i.id?'held':''}" style="--bc:${t.color}" draggable="${drag}" data-brick="${i.id}" title="${esc(L({ar:i.ar,en:i.en}))}">
-    <div class="studs">${studs}</div>
+    <span class="brick-symbol">${uiIcon(TRACKICON[i.t])}</span>
     <b>${esc(L({ar:i.ar,en:i.en}))}</b>
     ${sub?`<div class="meta">${sub}</div>`:''}
   </div>`;
@@ -1576,11 +1617,11 @@ function buildStrip(){
   const rd=readiness();
   const filled=S.meta.days.filter((d,i)=>dayLoad(i+1)>0).length;
   return `<div class="bar-strip">
-    <span>${T('البرامج','Programs')}<b>${selCount()}</b></span>
-    <span>${T('أيام أُضيفت لها برامج','Days with programs')}<b>${filled}/${S.meta.days.length}</b></span>
-    <span>${T('مسار','Tracks')}<b>${trackCovered()}/6</b></span>
-    <span>${T('اكتمال التخطيط','Planning completion')}<b>${rd.score}%</b></span>
-    <span class="buildbar"><i style="width:${rd.score}%"></i></span>
+    <span class="build-stat"><span class="build-stat-icon">${uiIcon('layers')}</span><span class="build-stat-label">${T('البرامج المختارة','Selected programs')}</span><b dir="ltr">${selCount()}</b></span>
+    <span class="build-stat"><span class="build-stat-icon">${uiIcon('calendar')}</span><span class="build-stat-label">${T('أيام تم تخطيطها','Planned days')}</span><b dir="ltr">${filled}/${S.meta.days.length}</b></span>
+    <span class="build-stat"><span class="build-stat-icon">${uiIcon('compass')}</span><span class="build-stat-label">${T('المسارات المشمولة','Tracks covered')}</span><b dir="ltr">${trackCovered()}/6</b></span>
+    <span class="build-stat"><span class="build-stat-icon">${uiIcon('clipboard')}</span><span class="build-stat-label">${T('استيفاء شروط الخطة','Planning criteria met')}</span><b dir="ltr">${rd.score}%</b></span>
+    <span class="buildbar" role="progressbar" aria-valuenow="${rd.score}" aria-valuemin="0" aria-valuemax="100"><i style="width:${rd.score}%"></i></span>
   </div>`;
 }
 function builderFooter(){
@@ -1652,20 +1693,20 @@ function stepBricks(){
       <p class="help" style="margin:6px 0 12px">${T('أضف البرامج المناسبة إلى خطتك، ثم وزّعها على الأيام في الخطوة التالية.','Tap a brick to add it to your tray, then snap it onto a day in the next step.')}</p>
       <div class="bins">
         ${pool.map(i=>{const t=TRACK(i.t);return `<div class="bin" style="--bc:${t.color}">
-          <div class="studs">${Array.from({length:Math.min(4,(i.load||2)+1)}).map(()=>'<i></i>').join('')}</div>
-          <div class="ttl" style="margin-top:8px">${esc(L({ar:i.ar,en:i.en}))}</div>
+          <span class="program-icon">${uiIcon(TRACKICON[i.t])}</span>
+          <div class="ttl">${esc(L({ar:i.ar,en:i.en}))}</div>
           <div class="sub">${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))}</div>
-          <div class="sub">${i.ages[0]}–${i.ages[1]} ${T('سنة','yrs')} · ${T('التجهيز','preparation')} ${i.load}/3</div>
+          <div class="sub">${i.ages[0]}–${i.ages[1]} ${T('سنة','yrs')} · ${T('مستوى التجهيز','Prep level')} ${i.load}/3</div>
           <div class="row"><span class="trackchip" style="--tc:${t.color}"><i></i>${L(t.short)}</span>
             <button class="small primary" data-act="add:${i.id}">${T('+ أضف','+ Add')}</button></div>
-        </div>`}).join('')||`<div class="empty" style="grid-column:1/-1">${T('لا قطع متاحة في هذا المسار — كلها مختارة.','No bricks left in this track — all picked.')}</div>`}
+        </div>`}).join('')||`<div class="empty" style="grid-column:1/-1">${T('أُضيفت جميع برامج هذا المسار إلى الخطة.','All programs in this track are already selected.')}</div>`}
       </div>
     </div>
     <div>
       <div class="card">
         <div class="row"><h2>${T('البرامج غير الموزّعة','Unassigned programs')}</h2><span class="pill orange">${tray.length}</span></div>
         <p class="help" style="margin:6px 0 10px">${T('البرامج المختارة التي لم يُحدد لها يوم بعد.','Bricks not yet snapped to a day.')}</p>
-        ${tray.length?tray.slice(0,8).map(x=>brickEl(ITEM(x.id),{sub:`<span>${T('بانتظار التركيب','waiting')}</span>`})).join(''):`<div class="empty">${T('الصندوق فارغ.','Tray is empty.')}</div>`}
+        ${tray.length?tray.slice(0,8).map(x=>brickEl(ITEM(x.id),{sub:`<span>${T('لم يُحدّد له يوم','Not yet assigned')}</span>`})).join(''):`<div class="empty">${T('لا توجد برامج تنتظر التوزيع.','No unassigned programs.')}</div>`}
         ${tray.length>8?`<p class="help">+ ${tray.length-8}</p>`:''}
         <button class="small" data-act="step:3" style="margin-top:10px">${T('انتقل لتوزيع البرامج ←','Allocate programs ←')}</button>
       </div>
@@ -1673,8 +1714,8 @@ function stepBricks(){
         <h2 style="font-size:14px">${T('تنوع المسارات المختارة','Selected-track mix')}</h2>
         ${TRACKS.map(t=>`<div class="row" style="padding:3px 0"><span style="font-size:12px">${L(t)}</span><b class="mono" style="font-size:12px">${trackCount(t.id)}</b></div>`).join('')}
         <hr class="sep">
-        <div class="row"><span class="help">${T('مثبّتة','placed')}</span><b class="mono">${placed.length}</b></div>
-        <div class="row"><span class="help">${T('بانتظار','waiting')}</span><b class="mono">${tray.length}</b></div>
+        <div class="row"><span class="help">${T('موزّعة على الأيام','Assigned to days')}</span><b class="mono">${placed.length}</b></div>
+        <div class="row"><span class="help">${T('غير موزّعة','Unassigned')}</span><b class="mono">${tray.length}</b></div>
       </div>
     </div>
   </div>`;
@@ -1688,7 +1729,7 @@ function stepAssemble(){
     <div class="row wrap"><h2>${T('برامج تنتظر التوزيع','Programs awaiting allocation')}</h2>
       <span class="help">${T('اسحب البرنامج إلى اليوم المناسب، أو حدّده ثم اضغط على اليوم.','Drag a brick onto a day, or tap it then tap the day.')}</span></div>
     <div class="tray" style="margin-top:12px" data-plate="0">
-      ${tray.length?tray.map(x=>brickEl(ITEM(x.id),{sub:`<span>${T('اسحبني','drag me')}</span>`})).join(''):`<div class="empty">${T('كل القطع مثبّتة — البناء جاهز للمراجعة.','All bricks placed — ready to check.')}</div>`}
+      ${tray.length?tray.map(x=>brickEl(ITEM(x.id),{sub:`<span>${T('اسحب لتوزيعه','Drag to assign')}</span>`})).join(''):`<div class="empty">${T('جميع البرامج موزّعة على الأيام، ويمكنك مراجعة الخطة.','All programs are assigned to days. Review the plan next.')}</div>`}
     </div>
   </div>
   <div class="grid cols3 spacer">
@@ -1696,19 +1737,19 @@ function stepAssemble(){
       return `<section class="plate ${held?'armed':''}" data-plate="${n}">
         <div class="phead"><div><b>${T('اليوم','Day')} ${n}</b><small>${esc(L(d))}</small></div>
           <span class="pill ${over?'bad':''}">${items.length}/${max}</span></div>
-        <div class="pbody" data-hint="${T('ضع القطعة هنا','drop here')}">
+        <div class="pbody" data-hint="${T('ضع البرنامج هنا','Drop program here')}">
           ${items.map(x=>{const it=ITEM(x.id);const t=TRACK(it.t);return `<div class="brick" style="--bc:${t.color}" draggable="true" data-brick="${it.id}">
-              <div class="studs">${Array.from({length:Math.min(4,(it.load||2)+1)}).map(()=>'<i></i>').join('')}</div>
+              <span class="brick-symbol">${uiIcon(TRACKICON[it.t])}</span>
               <b>${esc(L({ar:it.ar,en:it.en}))}</b>
               <div class="meta"><span>${x.pri==='core'?T('أساسي','core'):T('مساند','support')}</span><span>${esc(L(t.short))}</span></div>
             </div>`}).join('')}
         </div>
-        ${items.length<max?`<button class="small" data-act="pickday:${n}" style="margin-top:8px">${T('+ قطعة','+ Brick')}</button>`:''}
+        ${items.length<max?`<button class="small" data-act="pickday:${n}" style="margin-top:8px">${T('+ إضافة برنامج','+ Add program')}</button>`:''}
       </section>`}).join('')}
   </div>
   <div class="row spacer" style="gap:8px;flex-wrap:wrap">
     <button data-act="autoplan">${T('توزيع البرامج تلقائيًا','Auto-allocate programs')}</button>
-    ${tray.length?`<span class="pill orange">${tray.length} ${T('قطعة في الصندوق','in tray')}</span>`:''}
+    ${tray.length?`<span class="pill orange">${tray.length} ${T('برامج غير موزّعة','unassigned programs')}</span>`:''}
     <span class="help" style="margin-inline-start:auto">${T('الحد لكل يوم: ','Max per day: ')}${max}</span>
   </div>`;
 }
