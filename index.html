@@ -112,7 +112,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
 
 /* ---------- forms ---------- */
 label.fld{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:var(--muted);min-width:0}
-label.fld input,label.fld select,label.fld textarea{font-weight:400;color:var(--fg);border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;font-size:13.5px;width:100%}
+label.fld input,label.fld select,label.fld textarea{min-width:0;font-weight:400;color:var(--fg);border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;font-size:13.5px;width:100%}
 label.fld input:focus,label.fld select:focus,label.fld textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
 label.fld textarea{resize:vertical;min-height:70px;line-height:1.6}
 .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -120,7 +120,7 @@ label.fld textarea{resize:vertical;min-height:70px;line-height:1.6}
 .filters{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}
 .filters input[type=search]{flex:1;min-width:180px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 12px;font-size:13px}
 .filters select{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 10px;font-size:13px}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface)}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface)}
 .seg button{border:none;border-radius:0;padding:7px 12px;font-size:12.5px;background:transparent}
 .seg button+button{border-inline-start:1px solid var(--line)}
 .seg button.on{background:var(--navy);color:#fff;font-weight:700}
@@ -174,6 +174,86 @@ td select,td input{border:1px solid var(--line);background:var(--surface);border
 .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
 .ring .val{position:absolute;inset:0;display:grid;place-items:center;font-size:20px;font-weight:800}
 
+
+/* ---------- lego builder ---------- */
+.stepper{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.st{flex:1 1 150px;display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:9px 11px;font-size:12px;text-align:start;min-width:0}
+.st b{width:22px;height:22px;border-radius:7px;background:var(--soft);display:grid;place-items:center;font-size:11px;flex:none;font-weight:800}
+.st span{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st i{font-style:normal;color:var(--muted);font-size:10.5px;margin-inline-start:auto}
+.st.on{border-color:var(--accent);box-shadow:0 0 0 3px #f07b3a1a}
+.st.on b{background:var(--accent);color:#22140d}
+.st.done b{background:var(--good);color:#fff}
+.st.done i{color:var(--good)}
+
+.plate{position:relative;border-radius:14px;background:var(--surface);border:1px solid var(--line);padding:10px;
+  background-image:radial-gradient(circle at 5px 5px,var(--soft2) 2.6px,transparent 3px);background-size:18px 18px;transition:.15s}
+.plate.drop{border-color:var(--accent);box-shadow:0 0 0 3px #f07b3a22;background-color:var(--accentsoft)}
+.plate .phead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:6px 9px;margin-bottom:8px}
+.plate .phead b{font-size:12.5px;display:block;line-height:1.4}
+.plate .phead small{color:var(--muted);font-size:10.5px}
+.plate .pbody{min-height:96px;display:flex;flex-direction:column;gap:2px}
+.plate.armed{border-color:var(--accent);border-style:dashed}
+.plate.armed .pbody:after{content:attr(data-hint);display:block;text-align:center;color:var(--muted);font-size:11px;padding:16px 0}
+
+.brick{position:relative;color:#fff;border-radius:8px;padding:8px 11px 7px;font-size:12px;line-height:1.45;cursor:grab;background:var(--bc);
+  box-shadow:0 3px 0 rgba(0,0,0,.18), inset 0 -2px 0 rgba(0,0,0,.12);margin-top:11px;user-select:none;transition:transform .12s}
+.brick:hover{transform:translateY(-1px)}
+.brick:active{cursor:grabbing}
+.brick .studs{position:absolute;top:-5px;inset-inline-start:9px;display:flex;gap:4px;pointer-events:none}
+.brick .studs i{width:9px;height:9px;border-radius:50%;background:var(--bc);filter:brightness(1.16);box-shadow:inset 0 -1px 0 rgba(0,0,0,.18)}
+.brick b{font-weight:700}
+.brick .meta{font-size:10px;opacity:.9;margin-top:2px;display:flex;gap:8px;flex-wrap:wrap}
+.brick .meta span{white-space:nowrap}
+.brick.held{outline:3px solid #fff;outline-offset:-3px;transform:translateY(-3px) rotate(-1.5deg);box-shadow:0 8px 18px rgba(0,0,0,.28)}
+.brick.mini{padding:4px 8px 3px;font-size:10px;margin-top:8px;border-radius:6px}
+.brick.mini .studs i{width:6px;height:6px}
+.brick.ghost{opacity:.45;filter:grayscale(.25)}
+
+.tray{border:1px dashed var(--line);background:var(--soft);border-radius:14px;padding:12px;display:flex;gap:10px;flex-wrap:wrap;align-content:flex-start;min-height:86px}
+.tray .brick{margin-top:10px;flex:0 0 auto;max-width:200px}
+.tray .empty{width:100%;text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
+
+.bins{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:10px}
+.bin{position:relative;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.bin .ttl{font-size:12px;font-weight:700;line-height:1.45;padding-top:6px}
+.bin .sub{font-size:10.5px;color:var(--muted)}
+.bin .row{margin-top:auto}
+.bin .studs{position:absolute;top:-1px;inset-inline-start:10px;display:flex;gap:4px}
+.bin .studs i{width:8px;height:8px;border-radius:50%;background:var(--bc)}
+
+.struct{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;align-items:end;min-height:170px}
+.struct .col{display:flex;flex-direction:column;justify-content:flex-end;gap:3px}
+.struct .col .brick{margin-top:6px}
+.struct .lbl{text-align:center;font-size:10px;color:var(--muted);margin-top:6px}
+
+.checklg{display:flex;flex-direction:column;gap:8px}
+.cg{display:flex;gap:10px;align-items:flex-start;background:var(--soft);border-radius:10px;padding:10px 12px;border:1px solid transparent}
+.cg.ok{background:#16866010;border-color:#16866030}
+.cg.no{background:#c2410c0d;border-color:#c2410c30}
+.cg .led{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:12px;flex:none;background:var(--surface)}
+.cg.ok .led{color:var(--good)}
+.cg.no .led{color:var(--warn)}
+.cg b{font-size:12.5px}
+.cg p{margin:0;font-size:11px;color:var(--muted)}
+
+.plan-day{display:grid;grid-template-columns:64px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.plan-day:last-child{border-bottom:none}
+.plan-day .dn{background:var(--navy);color:#fff;border-radius:10px;display:grid;place-items:center;height:44px;font-weight:800;font-size:12px}
+html[data-theme=dark] .plan-day .dn{background:var(--accent);color:#22140d}
+.plan-brick{display:grid;grid-template-columns:4px 1fr;gap:10px;background:var(--soft);border-radius:9px;padding:8px 10px;margin-bottom:6px}
+.plan-brick i{background:var(--bc);border-radius:3px}
+.plan-brick .why{font-size:11px;color:var(--muted);line-height:1.6;margin-top:2px}
+.sharebox{display:flex;gap:8px;align-items:center;margin-top:10px}
+.sharebox input{flex:1;min-width:0;border:1px solid var(--line);background:var(--soft);border-radius:8px;padding:8px 10px;font-size:11.5px;direction:ltr}
+
+.build2{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
+.build3{display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start}
+.bar-strip{display:flex;gap:16px;flex-wrap:wrap;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:9px 14px;font-size:11.5px;color:var(--muted);margin-bottom:16px}
+.bar-strip b{color:var(--fg);font-size:14px;margin-inline-start:4px;font-variant-numeric:tabular-nums}
+.buildbar{height:7px;border-radius:99px;background:var(--soft2);flex:1;min-width:80px;overflow:hidden}
+.buildbar>i{display:block;height:100%;background:var(--accent);border-radius:99px}
+@media(max-width:1080px){.build2,.build3{grid-template-columns:1fr}}
 /* ---------- misc ---------- */
 #modal{border:none;padding:0;border-radius:16px;max-width:min(760px,94vw);width:100%;background:var(--surface);color:var(--fg);box-shadow:0 30px 90px #07101f55}
 #modal::backdrop{background:#07101f66;backdrop-filter:blur(3px)}
@@ -730,7 +810,7 @@ const DRAFT=[
 
 function initial(){
   return {
-    version:3, role:'director', lang:'ar', theme:'light', page:'dashboard', draft:true,
+    version:3, role:'director', lang:'ar', theme:'light', page:'builder', step:1, draft:true,
     meta:{campAr:'معسكر خريف النخبة',campEn:'Elite Autumn Camp',cityAr:'الرياض',cityEn:'Riyadh',
       start:'2026-11-22',end:'2026-11-27',ageMin:10,ageMax:15,students:8,teams:4,
       days:DAYS_DEFAULT.map(d=>({...d}))},
@@ -835,16 +915,18 @@ function icon(name){
     calendar:'M7 2v2H4v18h16V4h-3V2h-2v2H9V2H7Zm11 8v10H6V10h12Z',
     target:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12Zm0 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z',
     check:'M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4Zm-1 13.4L7.6 12 6.2 13.4 11 18.2l7.2-7.2-1.4-1.4L11 15.4Z',
-    export:'M12 3v10.6l3.3-3.3 1.4 1.4L12 17.4l-4.7-4.7 1.4-1.4L12 14.6V3h0ZM4 19h16v2H4z'
+    export:'M12 3v10.6l3.3-3.3 1.4 1.4L12 17.4l-4.7-4.7 1.4-1.4L12 14.6V3h0ZM4 19h16v2H4z',
+    brick:'M3 8h7v3H3V8Zm11 0h7v3h-7V8ZM3 13h7v7H3v-7Zm11 0h7v7h-7v-7Z'
   }[name]||'M4 4h16v16H4z';
   return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
 }
 const NAV=[
-  ['plan',[['dashboard','لوحة التخطيط','Planning board'],['library','مكتبة البرامج','Program library'],['selection','الاختيار','Selection'],['days','خريطة الأيام','Day map']]],
+  ['plan',[['builder','منشئ المعسكر','Camp builder'],['dashboard','لوحة التخطيط','Planning board'],['library','مكتبة البرامج','Program library'],['selection','الاختيار','Selection'],['days','خريطة الأيام','Day map']]],
   ['verify',[['fit','الملاءمة مع الطلاب','Fit with students'],['readiness','فحص الجاهزية','Readiness check']]],
   ['out',[['outputs','حزمة التجهيز','Prep pack']]]
 ];
 const PAGE_TITLES={
+  builder:['منشئ المعسكر','Camp builder'],
   dashboard:['لوحة التخطيط','Planning board'],library:['مكتبة البرامج','Program library'],
   selection:['اختيار المهارات والقيم','Skills & values selection'],days:['خريطة الأيام','Day map'],
   fit:['الملاءمة مع تحديات الطلاب','Fit with student challenges'],readiness:['فحص الجاهزية','Readiness check'],
@@ -862,7 +944,7 @@ function header(){
       <div><b>${T('أكاديمية النخبة','Elite Academy')}</b><small>SELECTION LAB</small></div>
     </div>
     ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({plan:'التخطيط والاختيار',verify:'التحقق',out:'المخرجات'}[g],{plan:'PLAN & SELECT',verify:'VERIFY',out:'OUTPUT'}[g])}</div>
-      ${items.map(([id,ar,en])=>`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}</button>`).join('')}
+      ${items.map(([id,ar,en])=>`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}</button>`).join('')}
     </div>`).join('')}
     <div class="sidefoot">
       <span>${T('جاهزية الاختيار','Selection readiness')}</span>
@@ -899,7 +981,7 @@ function pageDashboard(){
   return pageHead('لوحة التخطيط','Planning board',
     'نحدّد ما نريد أن يكتسبه الطالب في هذا المعسكر قبل أن نجهّز أي نشاط.',
     'Decide what students should gain before preparing any activity.',
-    `<button class="primary" data-act="go:library">${T('ابدأ من المكتبة','Start from the library')}</button>
+    `<button class="primary" data-act="go:builder">${T('افتح المنشئ','Open the builder')}</button>
      <button data-act="brief">${T('بيانات المعسكر','Camp brief')}</button>`)
   +`${S.draft?`<div class="note orange" style="margin-bottom:16px">◆ <b>${T('مسودة أولية:','Starting draft:')}</b> ${T('عشرة برامج موزّعة على ستة أيام كمثال. عدّلها كما تريد، أو','ten programs across six days as an example. Edit them, or')}
       <button class="small" data-act="reset" ${can('reset')?'':'disabled'} style="margin-inline-start:6px">${T('صفّر الخطة','Clear the plan')}</button></div>`:''}
@@ -1323,10 +1405,380 @@ function pageOutputs(){
     </div>
     <p class="help" style="margin-top:18px">${T('حدود الأداة: اختيار وصفي داخلي لا يُعد تقييمًا علميًا معياريًا للطالب، والحفظ على هذا المتصفح فقط.','Scope: an internal descriptive selection, not a standardised student assessment. Data is stored in this browser only.')}</p>`;
 }
+/* ==========================================================================
+   منشئ المعسكر — تجربة التركيب بالمكعبات
+   ========================================================================== */
+const STEPS=[
+  ['اللوح','Baseplate'],
+  ['القطع','Bricks'],
+  ['التركيب','Assembly'],
+  ['التماسك','Stability'],
+  ['الخطة','Plan']
+];
+let held=null;
+
+const TRACKICON={lead:'◆',values:'❖',life:'●',stem:'▲',sport:'■',trips:'✈'};
+
+function brickEl(i,opts){
+  opts=opts||{};
+  const t=TRACK(i.t);
+  const n=Math.min(4,(i.load||2)+1);
+  const studs=Array.from({length:n}).map(()=>'<i></i>').join('');
+  const sub=opts.sub||'';
+  const drag=opts.drag===false?'false':'true';
+  return `<div class="brick ${opts.mini?'mini':''} ${held===i.id?'held':''}" style="--bc:${t.color}" draggable="${drag}" data-brick="${i.id}" title="${esc(L({ar:i.ar,en:i.en}))}">
+    <div class="studs">${studs}</div>
+    <b>${esc(L({ar:i.ar,en:i.en}))}</b>
+    ${sub?`<div class="meta">${sub}</div>`:''}
+  </div>`;
+}
+
+function stepper(){
+  return `<div class="stepper">${STEPS.map((s,k)=>{
+    const n=k+1;
+    return `<button class="st ${n===S.step?'on':''} ${n<S.step?'done':''}" data-act="step:${n}">
+      <b>${n<S.step?'✓':n}</b><span>${T(s[0],s[1])}</span><i>${n===S.step?T('الآن','now'):''}</i></button>`;
+  }).join('')}</div>`;
+}
+
+function buildStrip(){
+  const rd=readiness();
+  const filled=S.meta.days.filter((d,i)=>dayLoad(i+1)>0).length;
+  return `<div class="bar-strip">
+    <span>${T('القطع','Pieces')}<b>${selCount()}</b></span>
+    <span>${T('أيام مبنية','Days built')}<b>${filled}/${S.meta.days.length}</b></span>
+    <span>${T('مسار','Tracks')}<b>${trackCovered()}/6</b></span>
+    <span>${T('جاهزية','Readiness')}<b>${rd.score}%</b></span>
+    <span class="buildbar"><i style="width:${rd.score}%"></i></span>
+  </div>`;
+}
+function builderFooter(){
+  const n=S.step;
+  return `<div class="row" style="margin-top:18px;gap:8px;flex-wrap:wrap">
+    <button data-act="step:${n-1}" ${n===1?'disabled':''}>${T('→ السابق','← Back')}</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${n<5?`<button class="primary" data-act="step:${n+1}">${T('التالي: ','Next: ')}${T(STEPS[n][0],STEPS[n][1])}</button>`
+           :`<button class="primary" data-act="copyLink">${T('نسخ رابط الخطة','Copy plan link')}</button><button data-act="print">${T('طباعة','Print')}</button>`}
+    </div>
+  </div>`;
+}
+
+/* ---------- ١ · اللوح ---------- */
+function stepPlate(){
+  const m=S.meta;
+  return `<div class="grid cols2">
+    <div class="card">
+      <h2>${T('هوية المعسكر','Camp identity')}</h2>
+      <p class="help" style="margin:6px 0 12px">${T('هذه هي القاعدة التي سنبني عليها. غيّرها في أي وقت.','This is the base we build on. Change it any time.')}</p>
+      <div class="fields">
+        <label class="fld">${T('اسم المعسكر (عربي)','Camp name (Arabic)')}<input data-meta="campAr" value="${esc(m.campAr)}"></label>
+        <label class="fld">${T('Camp name (English)','Camp name (English)')}<input data-meta="campEn" value="${esc(m.campEn)}" dir="ltr"></label>
+        <label class="fld">${T('المدينة','City')}<input data-meta="cityAr" value="${esc(m.cityAr)}"></label>
+        <label class="fld wide">${T('المدة (من — إلى)','Dates (from — to)')}<div class="row" style="gap:6px"><input type="date" data-meta="start" value="${esc(m.start)}" style="flex:1;min-width:0"><input type="date" data-meta="end" value="${esc(m.end)}" style="flex:1;min-width:0"></div></label>
+        <label class="fld">${T('أصغر سن','Youngest')}<input type="number" min="6" max="18" data-meta="ageMin" value="${m.ageMin}"></label>
+        <label class="fld">${T('أكبر سن','Oldest')}<input type="number" min="6" max="18" data-meta="ageMax" value="${m.ageMax}"></label>
+        <label class="fld">${T('عدد الطلاب','Students')}<input type="number" min="1" max="500" data-meta="students" value="${m.students}"></label>
+        <label class="fld">${T('عدد الفرق','Teams')}<input type="number" min="1" max="20" data-meta="teams" value="${m.teams}"></label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><h2>${T('قاعدة الأيام','Day baseplate')}</h2><span class="pill">${m.days.length} ${T('أيام','days')}</span></div>
+      <p class="help" style="margin:6px 0 12px">${T('كل مربّع هنا سيحمل قطع اليوم: برامجه وقيمه.','Each square will hold that day’s bricks.')}</p>
+      <div class="plate" style="background-image:none;background:var(--soft)">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px">
+          ${m.days.map((d,i)=>`<div style="background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px;text-align:center">
+            <div style="width:26px;height:26px;border-radius:50%;background:var(--accentsoft);color:#a8501c;display:grid;place-items:center;margin:0 auto 5px;font-weight:800;font-size:11px">${i+1}</div>
+            <div style="font-size:10.5px;line-height:1.4;min-height:29px">${esc(L(d))}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+      <hr class="sep">
+      <div class="row"><b style="font-size:12.5px">${T('تعديل موضوعات الأيام','Edit day themes')}</b>
+        <button class="small" data-act="addDay">${T('+ يوم','+ Day')}</button></div>
+      <div class="spacer" style="display:flex;flex-direction:column;gap:6px">
+        ${m.days.map((d,i)=>`<div class="row" style="gap:6px">
+          <span class="pill">${i+1}</span>
+          <input data-daytheme="${i}" value="${esc(L(d))}" style="flex:1;border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12.5px">
+          <button class="small ghost" data-act="delDay:${i+1}" ${m.days.length<=3?'disabled':''} aria-label="${T('حذف اليوم','Delete day')}">✕</button>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>
+  <div class="note orange spacer">◆ <b>${T('قاعدة اللعب:','Rule of thumb:')}</b> ${T('٦ أيام × ٢–٣ قطع = بين ١٢ و ١٨ قطعة. أكثر من ذلك يشتّت الطالب ويكسر البناء.','6 days × 2–3 bricks = 12–18 pieces. More than that scatters the build.')}</div>`;
+}
+
+/* ---------- ٢ · القطع ---------- */
+function stepBricks(){
+  const track=S.binTrack||'all';
+  const pool=LIB.filter(i=>(track==='all'||i.t===track)&&!isSel(i.id));
+  const tray=S.selected.filter(x=>!x.day);
+  const placed=S.selected.filter(x=>x.day);
+  return `<div class="build2">
+    <div class="card">
+      <div class="row wrap"><h2>${T('صندوق القطع','Brick bins')}</h2>
+        <div class="seg">${[['all',T('الكل','All')]].concat(TRACKS.map(t=>[t.id,L(t)])).map(([id,label])=>
+          `<button class="${track===id?'on':''}" data-act="bin:${id}">${label}</button>`).join('')}</div></div>
+      <p class="help" style="margin:6px 0 12px">${T('اضغط على أي قطعة لإضافتها إلى صندوقك، ثم ركّبها على الأيام في الخطوة التالية.','Tap a brick to add it to your tray, then snap it onto a day in the next step.')}</p>
+      <div class="bins">
+        ${pool.map(i=>{const t=TRACK(i.t);return `<div class="bin" style="--bc:${t.color}">
+          <div class="studs">${Array.from({length:Math.min(4,(i.load||2)+1)}).map(()=>'<i></i>').join('')}</div>
+          <div class="ttl" style="margin-top:8px">${esc(L({ar:i.ar,en:i.en}))}</div>
+          <div class="sub">${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))}</div>
+          <div class="sub">${i.ages[0]}–${i.ages[1]} ${T('سنة','yrs')} · ${T('حمل','load')} ${i.load}/3</div>
+          <div class="row"><span class="trackchip" style="--tc:${t.color}"><i></i>${L(t.short)}</span>
+            <button class="small primary" data-act="add:${i.id}">${T('+ أضف','+ Add')}</button></div>
+        </div>`}).join('')||`<div class="empty" style="grid-column:1/-1">${T('لا قطع متاحة في هذا المسار — كلها مختارة.','No bricks left in this track — all picked.')}</div>`}
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="row"><h2>${T('صندوقك','Your tray')}</h2><span class="pill orange">${tray.length}</span></div>
+        <p class="help" style="margin:6px 0 10px">${T('القطع التي لم تُثبَّت بعد على يوم.','Bricks not yet snapped to a day.')}</p>
+        ${tray.length?tray.slice(0,8).map(x=>brickEl(ITEM(x.id),{sub:`<span>${T('بانتظار التركيب','waiting')}</span>`})).join(''):`<div class="empty">${T('الصندوق فارغ.','Tray is empty.')}</div>`}
+        ${tray.length>8?`<p class="help">+ ${tray.length-8}</p>`:''}
+        <button class="small" data-act="step:3" style="margin-top:10px">${T('ركّبها الآن ←','Assemble now ←')}</button>
+      </div>
+      <div class="card spacer">
+        <h2 style="font-size:14px">${T('ميزان البناء','Build balance')}</h2>
+        ${TRACKS.map(t=>`<div class="row" style="padding:3px 0"><span style="font-size:12px">${L(t)}</span><b class="mono" style="font-size:12px">${trackCount(t.id)}</b></div>`).join('')}
+        <hr class="sep">
+        <div class="row"><span class="help">${T('مثبّتة','placed')}</span><b class="mono">${placed.length}</b></div>
+        <div class="row"><span class="help">${T('بانتظار','waiting')}</span><b class="mono">${tray.length}</b></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- ٣ · التركيب ---------- */
+function stepAssemble(){
+  const tray=S.selected.filter(x=>!x.day);
+  const max=S.rules.perDayMax;
+  return `<div class="card">
+    <div class="row wrap"><h2>${T('صندوق القطع','Tray')}</h2>
+      <span class="help">${T('اسحب القطعة إلى اليوم، أو اضغطها ثم اضغط اليوم.','Drag a brick onto a day, or tap it then tap the day.')}</span></div>
+    <div class="tray" style="margin-top:12px" data-plate="0">
+      ${tray.length?tray.map(x=>brickEl(ITEM(x.id),{sub:`<span>${T('اسحبني','drag me')}</span>`})).join(''):`<div class="empty">${T('كل القطع مثبّتة — البناء جاهز للمراجعة.','All bricks placed — ready to check.')}</div>`}
+    </div>
+  </div>
+  <div class="grid cols3 spacer">
+    ${S.meta.days.map((d,i)=>{const n=i+1,items=S.selected.filter(x=>x.day===n),over=items.length>max;
+      return `<section class="plate ${held?'armed':''}" data-plate="${n}">
+        <div class="phead"><div><b>${T('اليوم','Day')} ${n}</b><small>${esc(L(d))}</small></div>
+          <span class="pill ${over?'bad':''}">${items.length}/${max}</span></div>
+        <div class="pbody" data-hint="${T('ضع القطعة هنا','drop here')}">
+          ${items.map(x=>{const it=ITEM(x.id);const t=TRACK(it.t);return `<div class="brick" style="--bc:${t.color}" draggable="true" data-brick="${it.id}">
+              <div class="studs">${Array.from({length:Math.min(4,(it.load||2)+1)}).map(()=>'<i></i>').join('')}</div>
+              <b>${esc(L({ar:it.ar,en:it.en}))}</b>
+              <div class="meta"><span>${x.pri==='core'?T('أساسي','core'):T('مساند','support')}</span><span>${esc(L(t.short))}</span></div>
+            </div>`}).join('')}
+        </div>
+        ${items.length<max?`<button class="small" data-act="pickday:${n}" style="margin-top:8px">${T('+ قطعة','+ Brick')}</button>`:''}
+      </section>`}).join('')}
+  </div>
+  <div class="row spacer" style="gap:8px;flex-wrap:wrap">
+    <button data-act="autoplan">${T('توزيع تلقائي','Auto-distribute')}</button>
+    ${tray.length?`<span class="pill orange">${tray.length} ${T('قطعة في الصندوق','in tray')}</span>`:''}
+    <span class="help" style="margin-inline-start:auto">${T('الحد لكل يوم: ','Max per day: ')}${max}</span>
+  </div>`;
+}
+
+/* ---------- ٤ · التماسك ---------- */
+function suggestions(){
+  const out=[];
+  if(valuesCount()<S.rules.valuesMin){
+    LIB.filter(i=>i.t==='values'&&!isSel(i.id)).slice(0,2).forEach(i=>out.push({i,why:T('لترسيخ قيم في البناء','to anchor values')}));
+  }
+  TRACKS.forEach(t=>{ if(!trackCount(t.id)){const c=LIB.find(i=>i.t===t.id&&!isSel(i.id)); if(c)out.push({i:c,why:T('مسار فارغ من البناء','empty track')});} });
+  if(unassigned()){const u=S.selected.find(x=>!x.day); if(u)out.push({i:ITEM(u.id),why:T('قطعة بلا يوم','unplaced brick')});}
+  return out.slice(0,4);
+}
+function stepStability(){
+  const rd=readiness(), sg=suggestions();
+  const maxH=Math.max(1,...S.meta.days.map((d,i)=>dayLoad(i+1)));
+  return `<div class="build3">
+    <div class="card">
+      <div class="row"><h2>${T('قوة التماسك','Structure strength')}</h2><span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}%</span></div>
+      <div class="statline" style="margin:10px 0 14px"><span>${T('مستوفى','met')} <b>${rd.passed}</b></span><span>${T('معلّق','open')} <b>${rd.total-rd.passed}</b></span></div>
+      <div class="checklg">
+        ${rd.checks.map(c=>`<div class="cg ${c.ok?'ok':'no'}"><div class="led">${c.ok?'✓':'!'}</div>
+          <div style="flex:1"><b>${T(c.ar,c.en)}</b><p>${esc(c.note||'')}</p></div>
+          ${!c.ok&&c.fix?`<button class="small" data-act="go:${c.fix}">${T('إصلاح','Fix')}</button>`:''}</div>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="row"><h2>${T('شكل البناء','The build')}</h2><span class="pill">${selCount()} ${T('قطعة','pieces')}</span></div>
+        <p class="help" style="margin:6px 0 10px">${T('كل عمود يوم؛ البناء المتماسك لا يميل ولا يفرغ.','Each column is a day; a sound build neither tilts nor empties.')}</p>
+        <div class="struct">
+          ${S.meta.days.map((d,i)=>{const n=i+1,items=S.selected.filter(x=>x.day===n);
+            return `<div class="col">
+              ${items.slice(0,4).map(x=>{const it=ITEM(x.id);return brickEl(it,{mini:true,drag:false})}).join('')}
+              ${items.length>4?`<div class="lbl">+${items.length-4}</div>`:''}
+              ${!items.length?`<div class="lbl" style="color:var(--bad)">${T('فراغ','gap')}</div>`:''}
+              <div class="lbl">${T('يوم','D')} ${n}</div>
+            </div>`}).join('')}
+        </div>
+      </div>
+      ${sg.length?`<div class="card spacer"><div class="row"><h2>${T('قطع مقترحة لتماسك أفضل','Bricks to steady the build')}</h2><span class="pill orange">${sg.length}</span></div>
+        <div class="spacer">${sg.map(s=>`<div class="row" style="padding:7px 0;border-bottom:1px dashed var(--line)">
+          <div style="flex:1"><b style="font-size:12.5px">${esc(L({ar:s.i.ar,en:s.i.en}))}</b><div class="help">${esc(L(TRACK(s.i.t)))} · ${esc(s.why)}</div></div>
+          <button class="small primary" data-act="add:${s.i.id}">${T('+ أضف','+ Add')}</button></div>`).join('')}</div></div>`:`<div class="note good spacer" style="background:#16866010">✓ ${T('كل المسارات ممثلة والبناء متوازن.','All tracks represented and the build is balanced.')}</div>`}
+      ${unassigned()?`<div class="note orange spacer">! ${T(`${unassigned()} قطعة ما زالت في الصندوق.`,`${unassigned()} bricks still in the tray.`)}
+        <button class="small" data-act="step:3" style="margin-inline-start:8px">${T('ركّبها','Place them')}</button></div>`:''}
+    </div>
+  </div>`;
+}
+
+/* ---------- ٥ · الخطة ---------- */
+function planDays(){
+  return S.meta.days.map((d,i)=>{
+    const n=i+1,items=S.selected
+      .filter(x=>x.day===n)
+      .sort((a,b)=>(a.pri==='core'?0:1)-(b.pri==='core'?0:1));
+    return `<div class="plan-day">
+      <div class="dn">${T('يوم','D')}<br>${n}</div>
+      <div>
+        <div class="row" style="margin-bottom:8px;justify-content:flex-start;gap:10px"><b style="font-size:13.5px">${esc(L(d))}</b>
+          <span class="pill ${items.length?'':'bad'}">${items.length} ${T('قطع','pieces')}</span></div>
+        ${items.length?items.map(x=>{const it=ITEM(x.id),t=TRACK(it.t);return `<div class="plan-brick" style="--bc:${t.color}">
+            <i></i>
+            <div>
+              <div class="row" style="gap:8px;justify-content:flex-start"><b style="font-size:12.5px">${esc(L({ar:it.ar,en:it.en}))}</b>
+                <span class="pill ${x.pri==='core'?'orange':''}">${x.pri==='core'?T('أساسي','core'):T('مساند','support')}</span></div>
+              <div class="why">${esc(x.why||T('لم يُكتب مبرر بعد.','No rationale yet.'))}</div>
+              <div class="tagcloud" style="margin-top:4px">
+                <span class="trackchip" style="--tc:${t.color}"><i></i>${esc(L(t.short))}</span>
+                ${it.need.map(k=>`<span class="pill line">${esc(L({ar:NEEDS[k][0],en:NEEDS[k][1]}))}</span>`).join('')}
+              </div>
+            </div></div>`}).join(''):`<p class="help">${T('لا قطع — هذا اليوم غير مبني بعد.','No bricks — this day is unbuilt.')}</p>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+function stepPlan(){
+  const rd=readiness(), f=fitStats(), na=needsAgg();
+  const isFile=location.protocol==='file:';
+  return `<div class="grid cols4">
+      ${metric(T('القطع','Pieces'),selCount(),T('في البناء','in the build'))}
+      ${metric(T('الأساسية','Core'),coreCount(),T('حد أدنى '+S.rules.coreTarget,'min '+S.rules.coreTarget))}
+      ${metric(T('تغطية التحديات','Fit'),f.pct+'%',T(f.covered+' من '+f.total+' طلاب',f.covered+' of '+f.total+' students'))}
+      ${metric(T('الجاهزية','Readiness'),rd.score+'%',T(rd.passed+' من '+rd.total+' فحص',rd.passed+' of '+rd.total+' checks'))}
+    </div>
+    <div class="card spacer">
+      <div class="row wrap" style="align-items:flex-start">
+        <div>
+          <div class="eyebrow">${T('الخطة النهائية','FINAL PLAN')}</div>
+          <h2 style="margin-top:5px">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))}</h2>
+          <p class="help">${esc(L({ar:S.meta.cityAr,en:S.meta.cityEn}))} · <span dir="ltr">${esc(S.meta.start)} — ${esc(S.meta.end)}</span> · ${S.meta.students} ${T('طالبًا','students')} · ${S.meta.days.length} ${T('أيام','days')}</p>
+        </div>
+        <span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}% ${T('جاهزية','ready')}</span>
+      </div>
+      <div class="sharebox">
+        <input readonly id="planUrl" value="${esc(isFile?'#':shareUrl())}" dir="ltr" aria-label="${T('رابط الخطة','Plan link')}">
+        <button class="small" data-act="copyLink">${T('نسخ','Copy')}</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <button class="primary" data-act="copyLink">${T('نسخ رابط الخطة','Copy plan link')}</button>
+        <button data-act="exportJson">${T('تصدير JSON','Export JSON')}</button>
+        <button data-act="copySummary">${T('نسخ ملخص','Copy summary')}</button>
+        <button data-act="print">${T('طباعة','Print')}</button>
+      </div>
+      <p class="help" style="margin-top:8px">${isFile
+        ? T('افتح الملف من الرابط المنشور (GitHub Pages) ليعمل رابط المشاركة؛ محليًا استخدم «تصدير JSON».','Open the file from the published URL (GitHub Pages) for share links to work; locally use “Export JSON”.')
+        : T('من يفتح هذا الرابط يرى نفس الخطة على متصفحه، ويمكنه تعديل نسخته.','Whoever opens this link sees the same plan in their browser and can edit their copy.')}</p>
+    </div>
+    <div class="card spacer">
+      <h2>${T('الخطة يوماً بيوم','Day-by-day plan')}</h2>
+      <div style="margin-top:6px">${planDays()}</div>
+    </div>
+    <div class="grid cols2 spacer">
+      <div class="card">
+        <h2>${T('متطلبات التجهيز','Prep requirements')}</h2>
+        ${na.length?`<div class="spacer">${na.map(([k,n])=>`<div class="row" style="padding:6px 0;border-bottom:1px dashed var(--line)">
+          <span style="font-size:12.5px">${esc(L({ar:NEEDS[k][0],en:NEEDS[k][1]}))}</span><b class="mono">${n}</b></div>`).join('')}</div>`:`<p class="help">${T('لا متطلبات.','None.')}</p>`}
+        <p class="help" style="margin-top:10px">${T('القائمة مولّدة من القطع المختارة فقط؛ لا تجهيز لما لم تختره.','Generated from selected bricks only; nothing extra to prepare.')}</p>
+      </div>
+      <div class="card">
+        <h2>${T('الاعتماد','Sign-off')}</h2>
+        <div class="note" style="margin-top:10px">
+          <div class="row" style="padding:6px 0"><span class="help">${T('مدير المعسكر','Camp director')}</span><b>${S.role==='director'?esc(L(ROLE('director'))):'—'}</b></div>
+          <div class="row" style="padding:6px 0"><span class="help">${T('قائد البرامج','Programs lead')}</span><b>${esc(roleNameOf('programs'))}</b></div>
+          <div class="row" style="padding:6px 0"><span class="help">${T('مسؤول القيم','Values lead')}</span><b>${esc(roleNameOf('values'))}</b></div>
+          <div class="row" style="padding:6px 0"><span class="help">${T('التاريخ','Date')}</span><b dir="ltr">${new Date().toLocaleDateString('en-GB')}</b></div>
+        </div>
+        <div class="actions spacer" style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="primary" data-act="approveAll" ${can('approve')?'':'disabled'}>${T('اعتماد الخطة','Approve plan')}</button>
+          <button data-act="copySummary">${T('نسخ ملخص للواتساب','Copy WhatsApp summary')}</button>
+        </div>
+      </div>
+    </div>`;
+}
+const roleNameOf=r=>{const x=ROLES.find(y=>y.id===r);return x?L(x):'—'};
+
+function pageBuilder(){
+  if(!S.step||S.step<1||S.step>5)S.step=1;
+  const step=S.step;
+  return `<div class="pagehead"><div>
+      <div class="eyebrow">${T('ابنِ معسكرك قطعة قطعة','BUILD YOUR CAMP, BRICK BY BRICK')}</div>
+      <h1>${T('منشئ المعسكر','Camp builder')}</h1>
+      <p class="muted" style="font-size:13px;margin-top:4px">${T('اختر اللوح، ثم القطع، ثم ركّبها على الأيام — واختم بخطة جاهزة للمشاركة.','Pick the baseplate, choose bricks, snap them onto days, and finish with a shareable plan.')}</p>
+    </div>
+    <div class="actions">
+      <button class="small" data-act="guide">${T('كيف يعمل؟','How it works')}</button>
+      ${can('reset')?`<button class="small" data-act="reset">${T('ابدأ من جديد','Start over')}</button>`:''}
+    </div></div>
+    ${S.shared?`<div class="note orange" style="margin-bottom:14px">↗ <b>${T('خطة مشتركة:','Shared plan:')}</b> ${T('وصلتك من زميل. عدّلها بحرية — ستبقى نسختك في متصفحك.','received from a colleague. Edit freely — your copy stays in your browser.')}</div>`:''}
+    ${stepper()}
+    ${step>1?buildStrip():''}
+    ${{1:stepPlate,2:stepBricks,3:stepAssemble,4:stepStability,5:stepPlan}[step]()}
+    ${builderFooter()}`;
+}
+
+/* ---------- رابط المشاركة ---------- */
+function encodePlan(){
+  const p={v:2,
+    m:{campAr:S.meta.campAr,campEn:S.meta.campEn,cityAr:S.meta.cityAr,cityEn:S.meta.cityEn,
+       start:S.meta.start,end:S.meta.end,ageMin:S.meta.ageMin,ageMax:S.meta.ageMax,students:S.meta.students,teams:S.meta.teams,days:S.meta.days},
+    r:S.rules,
+    s:S.selected.map(x=>({i:x.id,p:x.pri,d:x.day||0,w:x.why||'',a:x.approved?1:0}))
+  };
+  const bytes=new TextEncoder().encode(JSON.stringify(p));
+  let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decodePlan(str){
+  const bin=atob(str.replace(/-/g,'+').replace(/_/g,'/'));
+  const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+function shareUrl(){
+  return location.origin+location.pathname+'#plan='+encodePlan();
+}
+function applyShared(p){
+  if(!p||!Array.isArray(p.s))throw new Error('bad plan');
+  const sel=p.s.filter(x=>ITEM(x.i)).map(x=>({id:x.i,pri:x.p==='core'?'core':'support',day:x.d||null,
+    why:x.w||'',owner:'programs',approved:!!x.a,at:Date.now()}));
+  if(!sel.length)throw new Error('empty plan');
+  S.selected=sel;
+  if(p.m)Object.assign(S.meta,p.m);
+  if(p.r)Object.assign(S.rules,p.r);
+  S.shared=true;S.draft=false;
+  logIt('استُلمت خطة مشتركة','Shared plan received');
+  save();
+}
+function copyLink(){
+  const url=shareUrl();
+  if(location.protocol==='file:'){toast(T('روابط المشاركة تعمل من النسخة المنشورة على الإنترنت.','Share links work from the published online version.'));return}
+  const done=()=>{toast(T('نُسخ رابط الخطة — أرسله لمن تريد.','Plan link copied — send it anywhere.'));openModal(`<h2>${T('رابط الخطة','Plan link')}</h2>
+    <p class="help">${T('يفتح نفس البناء عند أي شخص، ويستطيع تعديل نسخته.','Opens the same build for anyone, and they can edit their copy.')}</p>
+    <div class="sharebox"><input readonly value="${esc(url)}" dir="ltr"><button class="small" data-act="close">${T('تم','Done')}</button></div>`);};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(done).catch(()=>fallbackCopy(url,done));
+  else fallbackCopy(url,done);
+}
 /* ============================ العرض والتنقل ============================ */
-const PAGES={dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
+const PAGES={builder:pageBuilder,dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
 function render(){
-  if(!PAGES[page]) page='dashboard';
+  if(!PAGES[page]) page='builder';
   header();
   const container=$('#app');
   container.innerHTML=`<div class="demo noprint"><span>◈ ${T('مختبر اختيار · بيانات الطلاب تجريبية · الحفظ على هذا المتصفح فقط','Selection lab · sample student data · saved in this browser only')}</span><span>${T('اختيار لا تقييم','Select, do not assess')}</span></div>`+PAGES[page]();
@@ -1346,12 +1798,11 @@ function renderLib(){
 function pick(id,silent){
   if(!can('select')){toast(T('هذا الإجراء غير متاح لدورك.','This action is not available for your role.'));return}
   if(isSel(id))return;
-  const it=ITEM(id),loads=S.meta.days.map((d,i)=>({d:i+1,n:dayLoad(i+1)})).sort((a,b)=>a.n-b.n);
-  const day=loads.length?loads[0].d:1;
-  S.selected.push({id,pri:'support',day,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
-  logIt(`أُضيف للخطة: ${it.ar}`,`Added to plan: ${it.en}`);
+  const it=ITEM(id);
+  S.selected.push({id,pri:'support',day:null,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
+  logIt(`أُضيف إلى صندوق القطع: ${it.ar}`,`Added to tray: ${it.en}`);
   save();
-  if(!silent){toast(T(`أُضيف «${it.ar}» إلى خطة اليوم ${day}`,`Added “${it.en}” to day ${day}`));render()}
+  if(!silent){toast(T(`«${it.ar}» في صندوق القطع — ركّبه على يوم`,`“${it.en}” is in the tray — snap it to a day`));render()}
   else render();
 }
 function unpick(id){
@@ -1395,24 +1846,26 @@ const closeModal=()=>{const m=$('#modal');if(m.open)m.close()};
 
 function guideModal(){
   const steps=lang==='ar'?[
-    ['01','اختر من المكتبة','ستون برنامجًا في ستة مسارات. لا تختر كل شيء: اختر ما يخدم هذا المعسكر وفئته العمرية.'],
-    ['02','اكتب سبب كل اختيار','لكل برنامج: أولوية (أساسي/مساند)، يوم، ومبرر مكتوب. الاختيار بلا سبب يصبح تجهيزًا بلا هدف.'],
-    ['03','راجع الملاءمة','هل يخدم اختيارك التحديات التي أعلنتها الأسر؟ الفجوة تعني أن الخطة تحتاج مراجعة، لا الطالب.'],
-    ['04','افحص ثم سلّم','استوفِ شروط الجاهزية، ثم صدّر «ورقة الاختيار» لفريق التنفيذ: ماذا اخترنا، لماذا، وأين.']
+    ['01','اضبط اللوح','أيام المعسكر وفئته العمرية وأسماء الأيام. هذه القاعدة التي ستبني عليها.'],
+    ['02','اختر القطع','سبعون برنامجًا في ستة مسارات. اختر ما يخدم هذا المعسكر فقط — لا تفرغ المكتبة كلها في البناء.'],
+    ['03','ركّبها على الأيام','اسحب القطعة إلى اليوم المناسب، أو اضغطها ثم اضغط اليوم. ثلاث قطع في اليوم أكثر ما يُنصح به.'],
+    ['04','افحص التماسك','هل يوجد قيم؟ هل كل مسار ممثل؟ هل كل يوم مبني؟ وهل يخدم اختيارك تحديات الطلاب؟'],
+    ['05','سلّم الخطة','اطبعها، أو صدّرها JSON، أو انسخ رابط الخطة — من يفتحه يرى نفس البناء على متصفحه.']
   ]:[
-    ['01','Pick from the library','Sixty programs across six tracks. Do not pick everything: pick what serves this camp and its age band.'],
-    ['02','Write the reason','For every program: priority, day and a written rationale. A pick without a reason is preparation without a purpose.'],
-    ['03','Review the fit','Does your selection serve the challenges families declared? A gap means the plan needs revision, not the student.'],
-    ['04','Check, then hand over','Meet the readiness conditions, then export the selection sheet for the delivery team.']
+    ['01','Set the baseplate','Camp days, age band and day themes. This is the base you build on.'],
+    ['02','Pick the bricks','Seventy programs across six tracks. Pick only what serves this camp.'],
+    ['03','Snap them onto days','Drag a brick to a day, or tap it then tap the day. Three bricks a day is the sweet spot.'],
+    ['04','Check the structure','Values present? Every track represented? Every day built? Does it serve the student challenges?'],
+    ['05','Hand over the plan','Print it, export JSON, or copy the plan link — whoever opens it sees the same build.']
   ];
   openModal(`<div class="eyebrow">${T('دليل الاستخدام','HOW IT WORKS')}</div>
-    <h2 style="margin-top:6px">${T('أداة اختيار، لا أداة تقييم','A selection tool, not an assessment')}</h2>
-    <p class="help" style="margin-top:6px">${T('نستخدمها في مرحلة التخطيط وتجهيز المعسكر: نقرّر ما نريد أن يكتسبه الطالب، قبل أن نجهّز أي نشاط.','Used while planning and preparing the camp: decide what students should gain before preparing any activity.')}</p>
+    <h2 style="margin-top:6px">${T('ابنِ معسكرك قطعة قطعة','Build your camp, brick by brick')}</h2>
+    <p class="help" style="margin-top:6px">${T('خمس خطوات: لوح، قطع، تركيب، تماسك، خطة. اختيار لا تقييم — نقرّر ما يكتسبه الطالب قبل أن نجهّز أي نشاط.','Five steps: baseplate, bricks, assembly, stability, plan. Selection, not assessment.')}</p>
     <div class="spacer">${steps.map(([n,t,d])=>`<div class="step" style="align-items:flex-start;margin-bottom:8px"><b>${n}</b><span><b style="font-size:12.5px">${t}</b><br><span class="help">${d}</span></span></div>`).join('')}</div>
     <div class="note orange" style="margin-top:12px"><b>${T('حدود الأداة','Scope')}</b>
       <p class="help" style="margin-top:4px">${T('لا تقيس الطالب ولا تصدر أحكامًا عليه، ولا تتصل بخادم. كل البيانات تُحفظ في هذا المتصفح فقط، والطلاب الثمانية بيانات تجريبية.','It does not measure or judge students and makes no network calls. Everything is stored in this browser only, and the eight student records are sample data.')}</p></div>
     <div class="actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
-      <button data-act="go:library" class="primary">${T('ابدأ بالمكتبة','Start with the library')}</button>
+      <button data-act="step:1" class="primary">${T('ابدأ باللوح','Start with the baseplate')}</button>
       <button data-act="close">${T('إغلاق','Close')}</button>
     </div>`);
 }
@@ -1619,8 +2072,54 @@ function exportCsv(){
   download('elite-camp-selection.csv',csv,'text/csv;charset=utf-8');toast(T('صُدّر ملف CSV.','CSV exported.'));
 }
 
+
+function addBrick(id){
+  if(!can('select'))return toast(T('هذا الإجراء غير متاح لدورك.','Not available for your role.'));
+  if(isSel(id))return toast(T('القطعة في صندوقك بالفعل.','Already in your tray.'));
+  const it=ITEM(id);
+  S.selected.push({id,pri:'support',day:null,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
+  logIt(`أُضيف إلى صندوق القطع: ${it.ar}`,`Added to tray: ${it.en}`);
+  save();render();toast(T(`«${it.ar}» أُضيفت إلى الصندوق`,`“${it.en}” added to the tray`));
+}
+function placeBrick(id,day){
+  const x=S.selected.find(s=>s.id===id);if(!x)return;
+  x.day=day>0?day:null;held=null;
+  const it=ITEM(id);
+  logIt(day>0?`ثُبّتت «${it.ar}» في اليوم ${day}`:`أُعيدت «${it.ar}» إلى الصندوق`,day>0?`“${it.en}” snapped to day ${day}`:`“${it.en}” returned to tray`);
+  save();render();
+  toast(day>0?T(`ثُبّتت في اليوم ${day}`,`Snapped to day ${day}`):T('أُعيدت إلى الصندوق','Returned to tray'));
+}
+document.addEventListener('dragstart',e=>{
+  const b=e.target.closest('[data-brick]');if(!b)return;
+  held=b.dataset.brick;
+  try{e.dataTransfer.setData('text/plain',held);e.dataTransfer.effectAllowed='move'}catch(err){}
+  b.classList.add('ghost');
+});
+document.addEventListener('dragend',e=>{
+  const b=e.target.closest('[data-brick]');if(b)b.classList.remove('ghost');
+  document.querySelectorAll('.plate.drop').forEach(p=>p.classList.remove('drop'));
+});
+document.addEventListener('dragover',e=>{
+  const p=e.target.closest('[data-plate]');if(!p)return;
+  e.preventDefault();try{e.dataTransfer.dropEffect='move'}catch(err){}
+  document.querySelectorAll('.plate.drop').forEach(x=>{if(x!==p)x.classList.remove('drop')});
+  p.classList.add('drop');
+});
+document.addEventListener('drop',e=>{
+  const p=e.target.closest('[data-plate]');if(!p)return;
+  e.preventDefault();
+  let id=held;try{id=e.dataTransfer.getData('text/plain')||held}catch(err){}
+  if(id)placeBrick(id,+p.dataset.plate);
+});
+
 /* ============================ الأحداث ============================ */
 document.addEventListener('click',e=>{
+  if(page==='builder'&&S.step===3){
+    const br=e.target.closest('.tray [data-brick], .plate [data-brick]');
+    if(br){e.preventDefault();const id=br.dataset.brick;held=(held===id?null:id);render();return}
+    const pl=e.target.closest('[data-plate]');
+    if(pl&&held){e.preventDefault();placeBrick(held,+pl.dataset.plate);return}
+  }
   const nav=e.target.closest('[data-page]');
   if(nav){page=nav.dataset.page;if(window.innerWidth<860)$('#sidebar').classList.remove('open');render();return}
   const pickHere=e.target.closest('[data-pickhere]');
@@ -1658,6 +2157,14 @@ document.addEventListener('click',e=>{
     doImport:()=>doImport(),
     copySummary:()=>copySummary(),
     exportCsv:()=>exportCsv(),
+    step:()=>{const n=Math.max(1,Math.min(5,+arg||1));S.step=n;save();render()},
+    add:()=>{addBrick(arg)},
+    bin:()=>{S.binTrack=arg||'all';render()},
+    addDay:()=>{if(S.meta.days.length>=8)return toast(T('٨ أيام كافية لمعسكر.','Eight days is enough.'));S.meta.days.push({ar:'يوم جديد',en:'New day'});logIt('أُضيف يوم للمعسكر','Day added');save();render()},
+    delDay:()=>{const n=+arg;if(S.meta.days.length<=3)return;S.meta.days.splice(n-1,1);
+      S.selected.forEach(x=>{if(x.day===n)x.day=null;else if(x.day>n)x.day=x.day-1});
+      logIt('حُذف يوم من المعسكر','Day removed');save();render()},
+    copyLink:()=>copyLink(),
     reset:()=>{
       if(!can('reset'))return;
       S.selected=[];S.prep={};S.draft=false;logIt('صُفّر الاختيار','Selection cleared');save();render();toast(T('صُفّرت الخطة.','Plan cleared.'));},
@@ -1681,6 +2188,10 @@ document.addEventListener('change',e=>{
   if(t.id==='fOnly'){libFilter.only=t.checked;render();return}
   if(t.id==='importFile'){readImport(t.files&&t.files[0]);t.value='';return}
   if(t.id==='roleSel'){S.role=t.value;logIt(`تبديل الدور إلى ${ROLE(t.value).ar}`,`Role switched to ${ROLE(t.value).en}`);save();render();return}
+  const dm=t.closest('[data-meta]');
+  if(dm){S.meta[dm.dataset.meta]=(t.type==='number')?+t.value:t.value;save();return}
+  const dt=t.closest('[data-daytheme]');
+  if(dt){const i=+dt.dataset.daytheme;if(S.meta.days[i]){S.meta.days[i][lang]=t.value;save();render()}return}
   const ed=t.closest('[data-edit]');
   if(ed){const [k,id]=ed.dataset.edit.split(':');patch(id,k,t.value);if(k!=='why')render();return}
   const ru=t.closest('[data-rule]');
@@ -1696,8 +2207,14 @@ document.addEventListener('keydown',e=>{
 
 /* ============================ البدء ============================ */
 (function boot(){
+  const raw=location.hash||'';
+  if(raw.indexOf('#plan=')===0){
+    try{applyShared(decodePlan(raw.slice(6)));page='builder';S.step=5;S.shared=true;}
+    catch(e){toast(T('رابط الخطة غير صالح أو ناقص.','The plan link is invalid or incomplete.'))}
+  }
   const h=(location.hash||'').replace('#','');
-  if(h&&PAGES[h])page=h;
+  if(raw.indexOf('#plan=')!==0&&h&&PAGES[h])page=h;
+  if(!S.step)S.step=1;
   if(!S.log.length){logIt('أُنشئت مسودة الاختيار','Example draft created');save()}
   if(!S.seenGuide&&!location.hash){S.seenGuide=true;setTimeout(()=>{if(!$('#modal').open)guideModal()},400)}
   render();
