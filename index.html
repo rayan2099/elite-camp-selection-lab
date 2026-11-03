@@ -420,6 +420,58 @@ html[data-theme=dark] .daynum{background:var(--accent);color:#22140d}
   #topbar{padding:9px 14px}
   .crumb{display:none}
 }
+
+/* ---------- Executive A4 print design: Daily program preview ---------- */
+.print-day-masthead,.print-camp-title,.print-day-context,.print-section-label,.print-day-foot{display:none}
+@media print{
+  @page{size:A4 portrait;margin:9mm 11mm 10mm}
+  html,body{background:#fff!important;color:#10233f!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  #app{padding:0!important;max-width:none!important}
+  .printcover,.print-supplement,.admin-guide,.admin-guidance{display:none!important}
+  .dayblock{display:block!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;break-inside:avoid-page;page-break-inside:avoid;min-height:0!important}
+  .dayblock.pbreak{break-before:page;page-break-before:always}
+  .dayblock .print-day-masthead{display:flex!important;justify-content:space-between;align-items:center;gap:10mm;border-bottom:1px solid #cfd9e5;padding:0 0 3mm;margin-bottom:4mm}
+  .print-brand{display:flex;gap:3mm;align-items:center}
+  .print-brand-mark{width:10mm;height:10mm;border-radius:3mm;background:#112b4a;color:#ff873f;display:grid;place-items:center;font-size:20px;font-weight:900}
+  .print-brand strong{display:block;font-size:11pt;line-height:1.35;color:#10233f}
+  .print-brand small{display:block;font-size:7.3pt;letter-spacing:.05em;color:#677d98}
+  .print-document-tag{font-size:7pt;font-weight:700;letter-spacing:.02em;color:#87481f;background:#fff0e3;border:1px solid #f9d9c0;border-radius:5px;padding:1.5mm 3mm;white-space:nowrap}
+  .dayblock .print-camp-title{display:block!important;color:#526780;font-size:9pt;font-weight:700;margin:0 0 2mm}
+  .dayblock .daybar{padding:3mm 3.5mm!important;margin:0!important;gap:3mm!important;align-items:center!important;background:#112b4a!important;border:0!important;border-radius:3mm;color:#fff!important;break-inside:avoid}
+  .dayblock .daynum{min-width:16mm;height:16mm;display:grid;align-content:center;background:#f5823c!important;color:#192536!important;padding:1.2mm 2mm!important;border-radius:2mm}
+  .dayblock .daynum small{font-size:6.5pt;opacity:.85;color:#192536!important}
+  .dayblock .daynum b{font-size:17pt;line-height:1.1}
+  .dayblock .daybar>div:nth-child(2)>b{font-size:13pt!important;color:#fff!important;line-height:1.4!important}
+  .dayblock .daybar .help{font-size:8pt!important;color:#d9e6f4!important}
+  .dayblock .daybar .pill{border:1px solid #8aa0b9;background:#ffffff19!important;color:#fff!important;font-size:7.5pt}
+  .dayblock .print-day-context{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:2mm;margin:3mm 0 4mm}
+  .print-day-context>div{border:1px solid #dbe4ed;background:#f4f7fa;border-radius:2mm;padding:2mm 3mm;min-width:0}
+  .print-day-context span{display:block;font-size:6.5pt;color:#60758c;margin-bottom:1mm}
+  .print-day-context b{display:block;color:#17324e;font-size:8.5pt;line-height:1.4;overflow-wrap:anywhere}
+  .dayblock .print-section-label{display:flex!important;align-items:center;justify-content:space-between;border-bottom:1.4px solid #dfebf5;padding-bottom:2mm;margin:1mm 0 2mm}
+  .print-section-label b{font-size:9pt;color:#142b47}
+  .print-section-label span{font-size:7pt;color:#697d91}
+  .dayblock .tl{--tl-time:30mm!important;margin:0!important;display:flex!important;flex-direction:column;gap:0!important}
+  .dayblock .tl:before{display:none!important}
+  .dayblock .tlrow{display:grid!important;grid-template-columns:30mm 9mm minmax(0,1fr)!important;gap:2mm!important;align-items:center!important;border-bottom:1px solid #e5ebf2;padding:1.5mm 2mm!important;min-height:8.2mm!important;break-inside:avoid!important;page-break-inside:avoid!important}
+  .dayblock .tlrow:nth-child(even){background:#f7f9fc!important}
+  .dayblock .tlrow.prog{background:#fff9f3!important}
+  .dayblock .tltime{direction:ltr;text-align:center;padding:0!important;font-size:8pt!important;font-weight:750;color:#233d5b!important;white-space:nowrap}
+  .dayblock .tldot{display:grid!important;place-items:center!important;width:7.3mm!important;height:7.3mm!important;border-radius:2mm!important;background:#e9eff6!important;color:#385a79!important;box-shadow:none!important}
+  .dayblock .tlrow.prog .tldot{background:#ffe6d3!important;color:#bd5b20!important}
+  .dayblock .tldot svg{width:4.4mm!important;height:4.4mm!important}
+  .dayblock .tlbody{padding:0!important;display:flex!important;align-items:center;flex-wrap:wrap;gap:1mm 2mm;min-width:0}
+  .dayblock .tlbody>b{font-size:8.5pt!important;line-height:1.35;color:#17304e!important;margin:0;min-width:24mm}
+  .dayblock .tlprog{padding:1mm 2mm!important;margin:0!important;display:flex!important;flex-wrap:wrap;gap:0.8mm 2mm!important;max-width:100%!important;border:0!important;border-inline-start:2px solid var(--bc)!important;background:#fff!important;border-radius:1.5mm;box-shadow:0 0 0 1px #e9edf2 inset}
+  .dayblock .tlname{font-size:8pt!important;line-height:1.3;color:#17304e!important}
+  .dayblock .tlmeta{font-size:6.8pt!important;line-height:1.3;color:#697c91!important}
+  .dayblock .tlwhy{font-size:7pt!important;line-height:1.45;color:#5e7184!important}
+  .dayblock .tlhint{font-size:7pt!important;color:#9ba7b7!important}
+  .dayblock .print-day-foot{display:flex!important;align-items:flex-start;justify-content:space-between;gap:6mm;border-top:1px solid #cbd9e7;margin-top:4mm;padding:2mm 0 0;color:#62758b;font-size:7pt;line-height:1.5}
+  .print-day-foot span{max-width:150mm}
+  .print-day-foot b{white-space:nowrap;color:#17304e}
+}
+
 </style>
 </head>
 <body>
@@ -1963,14 +2015,29 @@ function programSection(){
     const date=(()=>{if(!S.meta.start)return '';const s=new Date(S.meta.start+'T00:00:00');if(isNaN(s))return '';
       s.setDate(s.getDate()+i);return s.toLocaleDateString(lang==='ar'?'ar-SA-u-ca-gregory-nu-latn':'en-GB',{weekday:'long',day:'numeric',month:'long'})})();
     return `<section class="card dayblock ${i>0?'pbreak':''}">
-      <div class="printonly pheadline">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))} · ${esc(S.meta.start)} — ${esc(S.meta.end)}</div>
+      <div class="printonly print-day-masthead">
+        <div class="print-brand"><span class="print-brand-mark">◆</span><span><strong>${T('أكاديمية النخبة','ELITE ACADEMY')}</strong><small>${T('برنامج المعسكر اليومي','DAILY CAMP PROGRAM')}</small></span></div>
+        <div class="print-document-tag">${T('نسخة للمراجعة والتنسيق','PLANNING COPY')}</div>
+      </div>
+      <div class="printonly print-camp-title">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))}</div>
       <div class="daybar">
         <div class="daynum"><small>${T('اليوم','DAY')}</small><b>${n}</b></div>
         <div style="flex:1;min-width:0"><b style="font-size:14px">${esc(L(d))}</b>
-          <div class="help">${date?esc(date)+' · ':''}${count?count+' '+T('جلسات','sessions'):T('لا جلسات بعد','No sessions yet')}</div></div>
+          <div class="help">${date?esc(date)+' · ':''}${count?count+' '+T('برامج مختارة','selected programs'):T('لا برامج مختارة بعد','No selected programs yet')}</div></div>
         <span class="pill ${count?'good':'orange'}">${count?T('توجد برامج','has programs'):T('بلا برامج','no programs')}</span>
       </div>
+      <div class="printonly print-day-context">
+        <div><span>${T('المدينة','Location')}</span><b>${esc(L({ar:S.meta.cityAr,en:S.meta.cityEn}))}</b></div>
+        <div><span>${T('التاريخ','Date')}</span><b>${date?esc(date):'—'}</b></div>
+        <div><span>${T('البرامج المخططة','Planned programs')}</span><b>${count}</b></div>
+        <div><span>${T('اليوم من المعسكر','Day in camp')}</span><b>${n} / ${S.meta.days.length}</b></div>
+      </div>
+      <div class="printonly print-section-label"><b>${T('التسلسل الزمني للأنشطة','ACTIVITY TIMELINE')}</b><span>${T('الوقت / الفعالية / البرنامج','Time / Activity / Program')}</span></div>
       ${dayTimeline(n,{why:true})}
+      <div class="printonly print-day-foot">
+        <span>${T('تنبيه: الجدول مقترح. راجع أوقات الصلاة والتنقلات والأنشطة والمرافق قبل التنفيذ.','Draft schedule: verify prayer, travel, activity and venue times before delivery.')}</span>
+        <b>${T('اليوم','Day')} ${n} / ${S.meta.days.length}</b>
+      </div>
     </section>`;
   }).join('');
 }
@@ -2020,12 +2087,12 @@ function stepPlan(){
     <div class="row spacer noprint" style="gap:8px"><h2 style="font-size:16px">${T('معاينة البرنامج اليومي','Daily program preview')}</h2>
       <span class="help">${T('معاينة أولية لجدول يومي مبني على قالب ثابت؛ راجع أوقات الصلاة والجلسات والأنشطة قبل التنفيذ.','A preview based on a fixed template. Verify prayer times, sessions and activities before use.')}</span></div>
     <div class="spacer">${programSection()}</div>
-    <div class="grid cols2 spacer">
+    <div class="grid cols2 spacer print-supplement">
       <div class="card">
         <h2>${T('متطلبات التجهيز','Prep requirements')}</h2>
         ${na.length?`<div class="spacer">${na.map(([k,n])=>`<div class="row" style="padding:6px 0;border-bottom:1px dashed var(--line)">
           <span style="font-size:12.5px">${esc(L({ar:NEEDS[k][0],en:NEEDS[k][1]}))}</span><b class="mono">${n}</b></div>`).join('')}</div>`:`<p class="help">${T('لا متطلبات.','None.')}</p>`}
-        <p class="help" style="margin-top:10px">${T('القائمة مولّدة من القطع المختارة فقط؛ لا تجهيز لما لم تختره.','Generated from selected bricks only; nothing extra to prepare.')}</p>
+        <p class="help" style="margin-top:10px">${T('تُستخرج المتطلبات من البرامج المختارة فقط، ويجب التأكد من توفرها قبل التنفيذ.','Requirements come from selected programs and must be verified before delivery.')}</p>
       </div>
       <div class="card">
         <h2>${T('الاعتماد','Sign-off')}</h2>
