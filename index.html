@@ -44,6 +44,16 @@ small{font-size:12px}
 .demo{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-size:11.5px;color:var(--muted);margin-bottom:16px}
 .demo span:last-child{color:var(--accent);font-weight:700;letter-spacing:.02em}
 
+/* ---------- contextual manager guidance ---------- */
+.admin-guide{background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid var(--accent);border-radius:12px;padding:12px 15px;margin:0 0 17px;box-shadow:var(--shadow);font-size:12.5px}
+.admin-guide-row{display:flex;gap:10px;align-items:flex-start}
+.admin-guide-icon{width:23px;height:23px;flex:none;background:var(--accentsoft);color:var(--warn);border-radius:50%;display:grid;place-items:center;font-weight:800}
+.admin-guide b{font-size:13px}.admin-guide p{color:var(--muted);margin:3px 0 0;line-height:1.8}
+.admin-guide details{margin-top:9px;padding-top:8px;border-top:1px solid var(--line)}
+.admin-guide summary{cursor:pointer;color:var(--fg);font-size:12px;font-weight:700}
+.admin-guide:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+@media print{.admin-guide{display:none!important}}
+
 /* ---------- layout ---------- */
 #shell{display:grid;grid-template-columns:268px 1fr;min-height:100vh}
 #sidebar{position:sticky;top:0;height:100vh;overflow:auto;background:var(--surface);border-inline-start:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:18px}
@@ -1126,10 +1136,31 @@ function header(){
     </div>`;
 }
 
+/* Guidance stays relevant to the current screen without affecting stored data. */
+const MANAGER_GUIDES={
+ dashboard:[['ماذا تعرض هذه الصفحة؟','What this page shows'],['تلخّص البرامج المختارة والشروط غير المستوفاة. ابدأ بفقرة «الخطوة التالية» لمعالجة أهم نقص.','This is a summary of programs and unmet checks. Start with Next steps to resolve the most important gap.'],['النسب مرتبطة بقواعد التخطيط ومطابقة وسوم الاحتياجات، ولا تثبت الجاهزية التشغيلية أو أثر البرامج.','Percentages describe planning checks and matching need tags; they do not establish operational readiness or learning outcomes.']],
+ library:[['كيف تختار برنامجًا؟','How to select a program'],['استخدم فلاتر المسار والفئة العمرية، ثم افتح التفاصيل لمعرفة الهدف والمتطلبات قبل الإضافة.','Filter by track and age; open program details to review its goal and requirements before adding.'],['مستوى التجهيز من 1 إلى 3 تقدير نسبي لصعوبة التحضير، وليس عدد ساعات أو تكلفة مالية.','Preparation level 1–3 is a relative estimate, not an hour or financial cost figure.']],
+ selection:[['كيف تُحدّد الأولوية؟','How to set priority'],['اجعل «أساسي» للبرنامج الرئيسي و«مساند» للبرنامج الذي يدعم تجربة أخرى. اكتب مبررًا مرتبطًا بهدف أو احتياج، ثم حدّد اليوم.','Choose Core for a main program and Supporting for one that complements another; record the reason and assign a day.'],['إضافة برنامج لا تعني اعتماده. المبرر المكتوب وثيقة قرار تساعد في المراجعة.','Adding a program does not approve it. The written rationale records the decision for review.']],
+ days:[['كيف توزّع الأيام؟','How to allocate days'],['وزّع البرامج على الأيام يدويًا أو استخدم التوزيع الآلي ثم راجع ترتيبه بنفسك.','Assign programs manually or use automatic allocation, then review the proposed arrangement yourself.'],['الرقم في كل يوم هو عدد البرامج مقارنة بالحد المسموح؛ وليس مجموع ساعات التنفيذ.','The daily count compares programs with the configured limit; it is not the total number of hours.']],
+ fit:[['كيف تقرأ المواءمة؟','How to read alignment'],['راجع محاور الاحتياج غير المغطاة وأضف برامج مناسبة بعد النظر في ظروف الطلاب الفعلية.','Review uncovered needs and select suitable programs based on students’ real circumstances.'],['النسبة ناتجة عن تطابق الوسوم لا قياس نمو الطالب. بيانات الطلاب المعروضة تجريبية.','The score is tag-matching, not a measure of student growth. Displayed student records are samples.']],
+ readiness:[['كيف تفسّر نتيجة الفحص؟','How to interpret the check'],['اضغط «معالجة» بجوار كل شرط غير مستوفى، ثم راجع المحتوى والمتطلبات قبل الاعتماد.','Select Fix beside each unmet condition, then review the content and requirements before approval.'],['النسبة = الشروط المستوفاة ÷ جميع شروط التخطيط. حتى 100% لا يثبت سلامة الموقع أو التصاريح أو جاهزية المشرفين.','The percentage is passed checks divided by all planning checks. Even 100% does not verify venue safety, permits or staff readiness.']],
+ outputs:[['كيف تختار طريقة المشاركة؟','How to share'],['استخدم PDF للقراءة والطباعة، وJSON لنقل الخطة إلى جهاز آخر، وCSV للتحليل. احتفظ بنسخة JSON قبل الاستيراد.','Use PDF for reading, JSON to transfer a plan, and CSV for analysis. Keep a JSON backup before importing.'],['الملفات ليست تعاونًا لحظيًا؛ الاستيراد قد يستبدل البرامج الحالية، لذلك راجع المعاينة قبل التأكيد.','Files are not real-time collaboration; importing can replace the current program selection. Review the preview before confirming.']]
+};
+function guideBox(g){
+ if(!g)return '';
+ return `<section class="admin-guide" aria-label="${T('إرشادات المدير','Manager instructions')}"><div class="admin-guide-row"><span class="admin-guide-icon" aria-hidden="true">i</span><div><b>${T(...g[0])}</b><p>${T(...g[1])}</p></div></div><details><summary>${T('ماذا تعني المؤشرات والتنبيهات؟','What do the numbers and alerts mean?')}</summary><p>${T(...g[2])}</p></details></section>`;
+}
+const BUILD_GUIDES=[
+ [['المرحلة 1: بيانات المعسكر','Step 1: Camp details'],['راجع اسم المعسكر والمدينة والأعمار والمدة، ثم حدّد موضوع كل يوم. تأكد أن تاريخ النهاية بعد البداية.','Check the name, city, ages and dates, then give each day a theme. The end date should follow the start.'],['هذه البيانات تبني الخطة فقط؛ لا تسجّل حضورًا أو حجزًا للمرافق.','These details structure the plan only; they do not book facilities or record attendance.']],
+ [['المرحلة 2: اختيار البرامج','Step 2: Select programs'],['اختر الأنشطة التي تناسب الأعمار والأهداف وإمكانات التنفيذ، ثم انتقل إلى توزيعها.','Choose age-appropriate programs aligned with objectives and delivery capacity, then allocate them.'],['البرنامج المختار لا يُعد موزّعًا أو معتمدًا تلقائيًا.','A selected program is not automatically scheduled or approved.']],
+ [['المرحلة 3: توزيع البرامج','Step 3: Allocate programs'],['اسحب البرنامج إلى اليوم المطلوب، أو اضغط البرنامج ثم اليوم. راجع النتائج بعد التوزيع الآلي.','Drag a program to a day, or click the program then the day. Review any automatic allocation.'],['التوزيع الآلي اقتراح أولي لا يراعي بالضرورة التوقيت الفعلي أو تنقلات الطلاب.','Automatic allocation is a draft suggestion; it may not account for actual timing or transport.']],
+ [['المرحلة 4: مراجعة الخطة','Step 4: Review plan'],['عالج كل شرط ناقص من زر «إصلاح»، ثم اطلب مراجعة بشرية للمحتوى قبل الاعتماد.','Use Fix for outstanding checks, then arrange a human review before approval.'],['النسبة هنا خاصة بمعايير التخطيط، وليست تصريحًا بالتشغيل أو شهادة سلامة.','The percentage covers planning rules only, not operational permission or a safety certification.']],
+ [['المرحلة 5: معاينة الجدول','Step 5: Preview schedule'],['راجع كل فترة زمنية والبرنامج المرتبط بها قبل الطباعة أو الإرسال إلى المشرفين.','Review every time slot and its allocated program before printing or sharing with supervisors.'],['الجدول مبني على قالب؛ تحتاج أوقات الصلاة والنقل والوجبات إلى مراجعة وفق المكان والتاريخ.','The timetable uses a template; prayer, travel and meal times need checking for the date and venue.']]
+];
 function pageHead(titleAr,titleEn,descAr,descEn,actions=''){
   return `<div class="pagehead"><div><div class="eyebrow">${T('تخطيط المعسكر','CAMP PLANNING')}</div>
     <h1>${T(titleAr,titleEn)}</h1><p class="muted" style="font-size:13px;margin-top:4px">${T(descAr,descEn)}</p></div>
-    <div class="actions">${actions}</div></div>`;
+    <div class="actions">${actions}</div></div>${guideBox(MANAGER_GUIDES[page])}`;
 }
 
 /* ============================ ١ · لوحة التخطيط ============================ */
@@ -1465,7 +1496,7 @@ function pageReadiness(){
     <div class="card spacer">
       <div class="row"><h2>${T('متطلبات التجهيز المترتبة على الاختيار','Prep requirements implied by the selection')}</h2>
         <span class="pill line">${T('مولّدة تلقائيًا','Auto-generated')}</span></div>
-      <p class="help" style="margin:6px 0 12px">${T('لا نجهّز ما لم نختره. هذه القائمة هي جسر الاختيار إلى الميدان.','We prepare only what we picked. This list is the bridge from selection to the field.')}</p>
+      <p class="help" style="margin:6px 0 12px">${T('عيّن مسؤولًا لكل متطلب. ضع علامة «جاهز» بعد التأكد من توفيره فعليًا، لا بمجرد ظهوره في القائمة.','Assign a person to each requirement and mark Ready only after verifying it is actually available.')}</p>
       ${na.length?`<div class="tablewrap"><table><thead><tr><th>${T('المتطلب','Requirement')}</th><th>${T('البرامج','Programs')}</th><th>${T('المسؤول','Owner')}</th><th>${T('الحالة','Status')}</th></tr></thead><tbody>
         ${na.map(([k,n])=>`<tr><td><b>${esc(L({ar:NEEDS[k][0],en:NEEDS[k][1]}))}</b></td>
           <td><span class="pill">${n}</span></td>
@@ -1761,7 +1792,7 @@ function suggestions(){
     LIB.filter(i=>i.t==='values'&&!isSel(i.id)).slice(0,2).forEach(i=>out.push({i,why:T('لترسيخ قيم في البناء','to anchor values')}));
   }
   TRACKS.forEach(t=>{ if(!trackCount(t.id)){const c=LIB.find(i=>i.t===t.id&&!isSel(i.id)); if(c)out.push({i:c,why:T('مسار فارغ من البناء','empty track')});} });
-  if(unassigned()){const u=S.selected.find(x=>!x.day); if(u)out.push({i:ITEM(u.id),why:T('قطعة بلا يوم','unplaced brick')});}
+  if(unassigned()){const u=S.selected.find(x=>!x.day); if(u)out.push({i:ITEM(u.id),why:T('برنامج غير موزّع','unassigned program')});}
   return out.slice(0,4);
 }
 function stepStability(){
@@ -1791,11 +1822,11 @@ function stepStability(){
             </div>`}).join('')}
         </div>
       </div>
-      ${sg.length?`<div class="card spacer"><div class="row"><h2>${T('قطع مقترحة لتماسك أفضل','Bricks to steady the build')}</h2><span class="pill orange">${sg.length}</span></div>
+      ${sg.length?`<div class="card spacer"><div class="row"><h2>${T('برامج مقترحة لتحسين التغطية','Suggested programs to improve coverage')}</h2><span class="pill orange">${sg.length}</span></div>
         <div class="spacer">${sg.map(s=>`<div class="row" style="padding:7px 0;border-bottom:1px dashed var(--line)">
           <div style="flex:1"><b style="font-size:12.5px">${esc(L({ar:s.i.ar,en:s.i.en}))}</b><div class="help">${esc(L(TRACK(s.i.t)))} · ${esc(s.why)}</div></div>
           <button class="small primary" data-act="add:${s.i.id}">${T('+ أضف','+ Add')}</button></div>`).join('')}</div></div>`:`<div class="note good spacer" style="background:#16866010">✓ ${T('لا توجد توصيات إضافية وفق المعايير الحالية؛ راجع قائمة الشروط قبل الاعتماد.','No further suggestions under current criteria; review outstanding checks before approval.')}</div>`}
-      ${unassigned()?`<div class="note orange spacer">! ${T(`${unassigned()} قطعة ما زالت في الصندوق.`,`${unassigned()} bricks still in the tray.`)}
+      ${unassigned()?`<div class="note orange spacer">! ${T(`${unassigned()} برنامجًا لم يُوزَّع بعد.`,`${unassigned()} programs remain unassigned.`)}
         <button class="small" data-act="step:3" style="margin-inline-start:8px">${T('ركّبها','Place them')}</button></div>`:''}
     </div>
   </div>`;
@@ -1942,7 +1973,7 @@ function stepPlan(){
           <h2 style="margin-top:5px">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))}</h2>
           <p class="help">${esc(L({ar:S.meta.cityAr,en:S.meta.cityEn}))} · <span dir="ltr">${esc(S.meta.start)} — ${esc(S.meta.end)}</span> · ${S.meta.students} ${T('طالبًا','students')} · ${S.meta.days.length} ${T('أيام','days')}</p>
         </div>
-        <span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}% ${T('جاهزية','ready')}</span>
+        <span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}% ${T('استيفاء الشروط','checks met')}</span>
       </div>
       <div class="sharebox">
         <input readonly id="planUrl" value="${esc(isFile?'#':shareUrl())}" dir="ltr" aria-label="${T('رابط مشاركة نسخة الخطة','Shareable plan-copy link')}">
@@ -1963,7 +1994,7 @@ function stepPlan(){
         <div>
           <div class="eyebrow">${T('أكاديمية النخبة · برنامج المعسكر','ELITE ACADEMY · CAMP PROGRAMME')}</div>
           <h1 style="margin-top:4px">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))}</h1>
-          <p class="help">${esc(L({ar:S.meta.cityAr,en:S.meta.cityEn}))} · <span dir="ltr">${esc(S.meta.start)} — ${esc(S.meta.end)}</span> · ${S.meta.days.length} ${T('أيام','days')} · ${selCount()} ${T('مكوّنًا','components')}</p>
+          <p class="help">${esc(L({ar:S.meta.cityAr,en:S.meta.cityEn}))} · <span dir="ltr">${esc(S.meta.start)} — ${esc(S.meta.end)}</span> · ${S.meta.days.length} ${T('أيام','days')} · ${selCount()} ${T('برنامجًا','programs')}</p>
         </div>
         <div style="text-align:center"><b style="font-size:22px">${rd.score}%</b><div class="help">${T('اكتمال التخطيط','Planning completion')}</div></div>
       </div>
@@ -1999,7 +2030,7 @@ function pageBuilder(){
   if(!S.step||S.step<1||S.step>5)S.step=1;
   const step=S.step;
   return `<div class="pagehead"><div>
-      <div class="eyebrow">${T('ابنِ معسكرك قطعة قطعة','BUILD YOUR CAMP, BRICK BY BRICK')}</div>
+      <div class="eyebrow">${T('صمّم خطة معسكرك خطوة بخطوة','DESIGN YOUR CAMP STEP BY STEP')}</div>
       <h1>${T('تصميم المعسكر','Design camp')}</h1>
       <p class="muted" style="font-size:12.5px;margin-top:2px">${esc(campName(activeCamp()))} · ${fmtRange(S.meta.start,S.meta.end)}</p>
       <p class="muted" style="font-size:13px;margin-top:4px">${T('حدّد بيانات المعسكر، واختر البرامج، ووزّعها على الأيام، ثم راجع الخطة وعاين الجدول المقترح.','Set camp details, select programs, allocate them to days, review the plan and preview the proposed schedule.')}</p>
@@ -2011,6 +2042,7 @@ function pageBuilder(){
     </div></div>
     ${S.shared?`<div class="note orange" style="margin-bottom:14px">↗ <b>${T('خطة مشتركة:','Shared plan:')}</b> ${T('وصلتك من زميل. عدّلها بحرية — ستبقى نسختك في متصفحك.','received from a colleague. Edit freely — your copy stays in your browser.')}</div>`:''}
     ${stepper()}
+    ${guideBox(BUILD_GUIDES[step-1])}
     ${step>1?buildStrip():''}
     ${{1:stepPlate,2:stepBricks,3:stepAssemble,4:stepStability,5:stepPlan}[step]()}
     ${builderFooter()}`;
@@ -2099,6 +2131,7 @@ function pageCamps(){
       <p class="muted" style="font-size:13px;margin-top:4px">${T('جميع معسكراتك في مكان واحد: افتح معسكرًا لمتابعة بنائه، أو أنشئ معسكرًا جديدًا من الصفر.','Every camp in one place: open one to continue building, or start a new one.')}</p>
     </div>
     <div class="actions"><button class="primary" data-act="newCamp">+ ${T('معسكر جديد','New camp')}</button></div></div>
+    ${guideBox([['اختيار المعسكر المناسب','Choose the right camp'],['افتح معسكرًا قائمًا لاستكماله أو أنشئ معسكرًا جديدًا. النسخ ينتج نسخة مستقلة، والأرشفة لا تحذف الخطة.','Open an existing camp or create a new one. Duplicate creates an independent copy; archive does not delete it.'],['البيانات محفوظة في متصفحك الحالي، ولا تتزامن تلقائيًا مع فريقك.','Data is stored in this browser and does not automatically sync with your team.']])}
     <div class="card">
       <div class="filters" style="margin:0">
         <input type="search" id="campQ" placeholder="${T('ابحث باسم المعسكر أو المدينة…','Search a camp or city…')}" value="${esc(campFilter.q)}" aria-label="${T('بحث المعسكرات','Search camps')}">
@@ -2202,11 +2235,16 @@ function renderWiz(){
          [T('الطلاب والفرق','Students & teams'),`${d.students} ${T('طالبًا','students')} · ${d.teams} ${T('فرق','teams')}`]
         ].map(([k,v])=>`<div style="display:flex;gap:10px;align-items:baseline;padding:4px 0"><span class="help" style="min-width:96px">${k}</span><b style="font-size:12.5px">${v}</b></div>`).join('')}
     </div>
-    <div class="note orange" style="margin-top:10px">◆ ${T('سننشئ اللوح ثم ننتقل مباشرة لاختيار القطع.','We will create the baseplate and take you straight to picking bricks.')}</div>`;
+    <div class="note orange" style="margin-top:10px">◆ ${T('سيُنشأ المعسكر كمسودة قابلة للتعديل، ثم يمكنك اختيار البرامج وتوزيعها.','An editable draft will be created; you can then select and allocate programs.')}</div>`;
   }
   openModal(`<div class="eyebrow">${T('معسكر جديد','NEW CAMP')}</div>
     <h2 style="margin-top:4px">${titles[w.step-1]}</h2>
     <div class="wizdots">${[1,2,3].map(i=>`<i class="${i<=w.step?'on':''}"></i>`).join('')}</div>
+    ${guideBox([
+      [['أدخل البيانات الأساسية','Enter basics'],['اكتب اسمًا واضحًا وحدّد الطلاب والفرق والفئة العمرية. يجب ألا يزيد العمر الأدنى على الأعلى.','Enter a clear name, student count, teams, and age range; minimum age cannot exceed maximum.'],['يمكن تعديل هذه البيانات بعد الإنشاء.','These values can be edited later.']],
+      [['حدّد المدة وعناوين الأيام','Set dates and themes'],['اختر التواريخ وعدد الأيام وأعطِ كل يوم عنوانًا يعبّر عن هدفه، وتأكد من توافق المدة مع عدد الأيام.','Choose dates and day count, then title each day based on its objective. Make sure the date range covers the number of days.'],['عنوان اليوم ليس جدولًا زمنيًا.','A day title is not an hourly schedule.']],
+      [['راجع قبل الإنشاء','Review before creation'],['تأكد من الاسم والتواريخ والأعمار، ثم أنشئ المسودة وانتقل لاختيار البرامج.','Verify the name, dates and ages, then create the draft and select programs.'],['إنشاء المسودة لا يعني اعتمادها أو بدء تشغيل المعسكر.','Creating a draft does not approve or launch the camp.']]
+    ][w.step-1])}
     ${body}
     <div class="actions" style="display:flex;justify-content:space-between;gap:8px;margin-top:18px">
       <button data-act="close">${T('إلغاء','Cancel')}</button>
@@ -2378,7 +2416,7 @@ function guideModal(){
     ['05','Preview schedule','A timeline from dawn to sleep, with rationales and requirements, printed one page per day.']
   ];
   openModal(`<div class="eyebrow">${T('دليل الاستخدام','HOW IT WORKS')}</div>
-    <h2 style="margin-top:6px">${T('ابنِ معسكرك قطعة قطعة','Build your camp, brick by brick')}</h2>
+    <h2 style="margin-top:6px">${T('صمّم خطة معسكرك خطوة بخطوة','Build your camp, brick by brick')}</h2>
     <p class="help" style="margin-top:6px">${T('تبدأ من تبويب «المعسكرات»: تفتح معسكرًا سابقًا أو تنشئ جديدًا في ثلاث خطوات (الاسم، المدة، المراجعة) ثم تنتقل مباشرة لاختيار القطع.','Start from the Camps tab: open a previous camp or create one in three quick steps, then go straight to picking bricks.')}</p>
     <div class="note" style="margin-top:10px"><b style="font-size:12.5px">⌂ ${T('إدارة المعسكرات','Manage camps')}</b>
       <p class="help">${T('كل معسكر مستقل بخطته وأيامه وفريقه. من البطاقة تفتح المعسكر أو تنسخه أو تؤرشفه.','Each camp has its own plan, days and team. From the card you can open, duplicate or archive it.')}</p></div>
@@ -2386,7 +2424,7 @@ function guideModal(){
     <div class="note orange" style="margin-top:12px"><b>${T('حدود الأداة','Scope')}</b>
       <p class="help" style="margin-top:4px">${T('لا تقيس الطالب ولا تصدر أحكامًا عليه، ولا تتصل بخادم. كل البيانات تُحفظ في هذا المتصفح فقط، والطلاب الثمانية بيانات تجريبية.','It does not measure or judge students and makes no network calls. Everything is stored in this browser only, and the eight student records are sample data.')}</p></div>
     <div class="actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
-      <button data-act="step:1" class="primary">${T('ابدأ باللوح','Start with the baseplate')}</button>
+      <button data-act="step:1" class="primary">${T('ابدأ بهوية المعسكر','Start with the baseplate')}</button>
       <button data-act="close">${T('إغلاق','Close')}</button>
     </div>`);
 }
