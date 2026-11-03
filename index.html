@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>أكاديمية النخبة | مختبر اختيار المهارات والقيم</title>
+<title>أكاديمية النخبة | منصة تخطيط المعسكرات</title>
 <style>
 :root{
   --bg:#f4f6f9;--surface:#fff;--soft:#eef2f7;--soft2:#e7edf5;--fg:#12223a;--muted:#64748b;
@@ -1050,17 +1050,17 @@ function icon(name){
   return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
 }
 const NAV=[
-  ['plan',[['camps','المعسكرات','Camps'],['builder','منشئ المعسكر','Camp builder'],['dashboard','لوحة التخطيط','Planning board'],['library','مكتبة البرامج','Program library'],['selection','الاختيار','Selection'],['days','خريطة الأيام','Day map']]],
-  ['verify',[['fit','الملاءمة مع الطلاب','Fit with students'],['readiness','فحص الجاهزية','Readiness check']]],
-  ['out',[['outputs','حزمة التجهيز','Prep pack']]]
+  ['plan',[['camps','إدارة المعسكرات','Manage camps'],['builder','تصميم المعسكر','Design camp'],['dashboard','ملخص الخطة','Plan overview'],['library','مكتبة البرامج','Program library'],['selection','البرامج المختارة','Selected programs'],['days','توزيع البرامج على الأيام','Daily program allocation']]],
+  ['verify',[['fit','مواءمة احتياجات الطلاب','Student needs alignment'],['readiness','مراجعة اكتمال الخطة','Plan completeness review']]],
+  ['out',[['outputs','ملفات الخطة والتجهيز','Plan & preparation files']]]
 ];
 const PAGE_TITLES={
-  camps:['المعسكرات','Camps'],
-  builder:['منشئ المعسكر','Camp builder'],
-  dashboard:['لوحة التخطيط','Planning board'],library:['مكتبة البرامج','Program library'],
-  selection:['اختيار المهارات والقيم','Skills & values selection'],days:['خريطة الأيام','Day map'],
-  fit:['الملاءمة مع تحديات الطلاب','Fit with student challenges'],readiness:['فحص الجاهزية','Readiness check'],
-  outputs:['حزمة التجهيز','Prep pack']
+  camps:['إدارة المعسكرات','Manage camps'],
+  builder:['تصميم المعسكر','Design camp'],
+  dashboard:['ملخص الخطة','Plan overview'],library:['مكتبة البرامج','Program library'],
+  selection:['البرامج المختارة','Selected programs'],days:['توزيع البرامج على الأيام','Daily program allocation'],
+  fit:['مواءمة احتياجات الطلاب','Student needs alignment'],readiness:['مراجعة اكتمال الخطة','Plan completeness review'],
+  outputs:['ملفات الخطة والتجهيز','Plan & preparation files']
 };
 
 function header(){
@@ -1071,23 +1071,23 @@ function header(){
   $('#sidebar').innerHTML=`
     <div class="brand">
       <svg viewBox="0 0 92 46" aria-hidden="true"><path fill="currentColor" d="M2 40 24 6l10 16 6-9 20 27H46L34 23l-8 17H2Z"/><path fill="currentColor" opacity=".45" d="M62 40 80 12l10 28H62Z"/></svg>
-      <div><b>${T('أكاديمية النخبة','Elite Academy')}</b><small>SELECTION LAB</small></div>
+      <div><b>${T('أكاديمية النخبة','Elite Academy')}</b><small>CAMP PLANNER</small></div>
     </div>
-    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({plan:'التخطيط والاختيار',verify:'التحقق',out:'المخرجات'}[g],{plan:'PLAN & SELECT',verify:'VERIFY',out:'OUTPUT'}[g])}</div>
+    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({plan:'التخطيط',verify:'مراجعة الخطة',out:'التجهيز والمشاركة'}[g],{plan:'PLANNING',verify:'PLAN REVIEW',out:'PREPARE & SHARE'}[g])}</div>
       ${items.map(([id,ar,en])=>`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='camps'?'collection':id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}${id==='camps'?`<span class="cnt">${S.camps.length}</span>`:''}</button>`).join('')}
     </div>`).join('')}
     <div class="sidefoot">
-      <span>${T('جاهزية الاختيار','Selection readiness')}</span>
+      <span>${T('اكتمال شروط الخطة','Plan checks completed')}</span>
       <b dir="ltr" style="text-align:start">${rd.passed}/${rd.total} · ${rd.score}%</b>
       <div class="bar ${rd.score>=80?'good':''}" style="margin-top:7px"><i style="width:${rd.score}%"></i></div>
-      <p style="margin-top:9px">${T('نختار أولًا… ثم نجهّز.','Select first. Prepare after.')}</p>
+      <p style="margin-top:9px">${T('مؤشر لمراجعة الخطة، وليس جاهزية التنفيذ الميداني.','Planning checks only, not operational readiness.')}</p>
     </div>`;
 
   $('#topbar').innerHTML=`
     <button class="icon" id="hamb" data-act="menu" aria-label="menu">☰</button>
-    <div class="crumb">${T('مختبر الاختيار','Selection lab')} <span class="muted">/</span> <b>${T(...PAGE_TITLES[page])}</b></div>
+    <div class="crumb">${T('تخطيط المعسكرات','Camp planning')} <span class="muted">/</span> <b>${T(...PAGE_TITLES[page])}</b></div>
     <div class="toptools">
-      <button class="pill line" data-page="camps" style="max-width:230px;overflow:hidden;text-overflow:ellipsis" title="${T('كل المعسكرات','All camps')}">⌂ ${esc(campName(activeCamp()))}</button>
+      <button class="pill line" data-page="camps" style="max-width:230px;overflow:hidden;text-overflow:ellipsis" title="${T('قائمة المعسكرات','Camp list')}">⌂ ${esc(campName(activeCamp()))}</button>
       <span class="pill line">${T('الدور: ','Role: ')}${L(ROLE(S.role))}</span>
       <select id="roleSel" aria-label="${T('الدور','Role')}" style="border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;font-size:12px">
         ${ROLES.map(r=>`<option value="${r.id}" ${S.role===r.id?'selected':''}>${L(r)}</option>`).join('')}
@@ -1099,7 +1099,7 @@ function header(){
 }
 
 function pageHead(titleAr,titleEn,descAr,descEn,actions=''){
-  return `<div class="pagehead"><div><div class="eyebrow">${T('مرحلة التخطيط والتجهيز','PLANNING & PREPARATION')}</div>
+  return `<div class="pagehead"><div><div class="eyebrow">${T('تخطيط المعسكر','CAMP PLANNING')}</div>
     <h1>${T(titleAr,titleEn)}</h1><p class="muted" style="font-size:13px;margin-top:4px">${T(descAr,descEn)}</p></div>
     <div class="actions">${actions}</div></div>`;
 }
@@ -1109,18 +1109,18 @@ function pageDashboard(){
   const rd=readiness(), f=fitStats(), m=S.meta, days=m.days.length;
   const na=needsAgg();
   const top=rd.checks.filter(c=>!c.ok).slice(0,3);
-  return pageHead('لوحة التخطيط','Planning board',
-    'نحدّد ما نريد أن يكتسبه الطالب في هذا المعسكر قبل أن نجهّز أي نشاط.',
+  return pageHead('ملخص الخطة','Plan overview',
+    'نظرة سريعة على البرامج المختارة وتوزيعها وارتباطها باحتياجات الطلاب وشروط اكتمال الخطة.',
     'Decide what students should gain before preparing any activity.',
-    `<button class="primary" data-act="go:builder">${T('افتح المنشئ','Open the builder')}</button>
+    `<button class="primary" data-act="go:builder">${T('متابعة تصميم المعسكر','Continue camp design')}</button>
      <button data-act="brief">${T('بيانات المعسكر','Camp brief')}</button>`)
   +`${S.draft?`<div class="note orange" style="margin-bottom:16px">◆ <b>${T('مسودة أولية:','Starting draft:')}</b> ${T('عشرة برامج موزّعة على ستة أيام كمثال. عدّلها كما تريد، أو','ten programs across six days as an example. Edit them, or')}
-      <button class="small" data-act="reset" ${can('reset')?'':'disabled'} style="margin-inline-start:6px">${T('صفّر الخطة','Clear the plan')}</button></div>`:''}
+      <button class="small" data-act="reset" ${can('reset')?'':'disabled'} style="margin-inline-start:6px">${T('إفراغ البرامج المختارة','Clear selected programs')}</button></div>`:''}
   <div class="grid cols4">
     ${metric(T('برامج مختارة','Selected programs'),selCount(),T(`من ${LIB.length} في المكتبة`,`of ${LIB.length} in the library`))}
     ${metric(T('برامج أساسية','Core programs'),`${T(coreCount()+' من '+S.rules.coreTarget, coreCount()+' of '+S.rules.coreTarget)}`,T('الحد المتفق عليه','Agreed target'))}
-    ${metric(T('تغطية تحديات الطلاب','Challenge coverage'),f.pct+'%',T(`${f.covered} من ${f.total} طلاب`,`${f.covered} of ${f.total} students`))}
-    ${metric(T('جاهزية الاختيار','Selection readiness'),rd.score+'%',T(`${rd.passed} من ${rd.total} فحوص`,`${rd.passed} of ${rd.total} checks`))}
+    ${metric(T('تغطية الاحتياجات المعلنة','Declared needs coverage'),f.pct+'%',T(`${f.covered} من ${f.total} طلاب`,`${f.covered} of ${f.total} students`))}
+    ${metric(T('اكتمال شروط الخطة','Plan checks completed'),rd.score+'%',T(`${rd.passed} من ${rd.total} فحوص`,`${rd.passed} of ${rd.total} checks`))}
   </div>
   <div class="grid cols2 spacer">
     <div class="card">
@@ -1138,7 +1138,7 @@ function pageDashboard(){
       <div class="help">${T('الأيام: ','Days: ')}${m.days.map((d,i)=>`${i+1}. ${esc(L(d))}`).join(' · ')}</div>
     </div>
     <div class="card">
-      <div class="row"><h2>${T('جاهزية الاختيار','Selection readiness')}</h2><span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}%</span></div>
+      <div class="row"><h2>${T('اكتمال شروط الخطة','Plan checks completed')}</h2><span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}%</span></div>
       <div class="row" style="align-items:center;margin-top:12px;justify-content:flex-start;gap:18px">
         ${ring(rd.score)}
         <div style="flex:1;min-width:0">
@@ -1150,7 +1150,7 @@ function pageDashboard(){
   </div>
   <div class="grid cols2 spacer">
     <div class="card">
-      <h2>${T('التوازن بين المسارات','Balance across tracks')}</h2>
+      <h2>${T('توزيع البرامج حسب المسار','Programs by track')}</h2>
       <p class="help" style="margin:6px 0 14px">${T('ستة مسارات في الوثيقة المعتمدة؛ الاختيار الجيد لا يترك مسارًا فارغًا.','Six approved tracks; a sound selection leaves none empty.')}</p>
       ${TRACKS.map(t=>{const n=trackCount(t.id),pct=Math.round(n/Math.max(1,selCount())*100);return `
         <div style="margin-bottom:11px">
@@ -1159,7 +1159,7 @@ function pageDashboard(){
         </div>`}).join('')}
     </div>
     <div class="card">
-      <div class="row"><h2>${T('التالية في التخطيط','Next in planning')}</h2><span class="pill line">${T('آلي','Auto')}</span></div>
+      <div class="row"><h2>${T('خطوات استكمال الخطة','Next planning actions')}</h2><span class="pill line">${T('تحديث تلقائي','Updated automatically')}</span></div>
       ${top.length?top.map(c=>`<div class="listrow" style="border-bottom:1px solid var(--line);padding:11px 0">
         <div class="row"><b style="font-size:13px">${T(c.ar,c.en)}</b>${c.fix?`<button class="small" data-act="go:${c.fix}">${T('معالجة','Fix')}</button>`:''}</div>
         <p class="help">${esc(c.note||'')}</p></div>`).join(''):`<div class="note" style="margin-top:12px"><b>${T('الخطة مكتملة الشروط.','All checks pass.')}</b><p class="help">${T('يمكنك الانتقال إلى حزمة التجهيز وطباعة ورقة الاختيار.','Move to the prep pack and print the selection sheet.')}</p></div>`}
@@ -1169,7 +1169,7 @@ function pageDashboard(){
     </div>
   </div>
   <div class="card spacer">
-    <div class="row"><h2>${T('آخر قرارات الاختيار','Latest selection decisions')}</h2><span class="pill line">${S.log.length} ${T('حدث','events')}</span></div>
+    <div class="row"><h2>${T('سجل تعديلات الخطة','Plan change history')}</h2><span class="pill line">${S.log.length} ${T('حدث','events')}</span></div>
     ${S.log.slice(0,5).map(l=>`<div class="pv"><small class="muted mono">${time(l.at)}</small><span style="flex:1">${esc(L(l))}</span><span class="pill line">${L(ROLE(l.role))}</span></div>`).join('')||`<div class="empty">${T('سيُسجّل هنا كل تعديل على الاختيار.','Every selection change will be logged here.')}</div>`}
   </div>`;
 }
@@ -1224,7 +1224,7 @@ function libCard(i){
     <div class="goal">${esc(L(i.goal))}</div>
     <div class="meta">
       <span class="pill">${i.ages[0]}–${i.ages[1]} ${T('سنة','yrs')}</span>
-      <span class="pill">${T('حمل','Load')} ${i.load}/3</span>
+      <span class="pill">${T('مستوى التجهيز','Preparation level')} ${i.load}/3</span>
       <span class="pill">${i.need.length} ${T('متطلب','needs')}</span>
     </div>
     <div class="foot">
@@ -1238,7 +1238,7 @@ function libCard(i){
 function pageSelection(){
   const rd=readiness();
   const ro=!can('select');
-  return pageHead('اختيار المهارات والقيم','Skills & values selection',
+  return pageHead('البرامج المختارة','Selected programs',
     'لكل اختيار: أولوية، يوم، وسبب مكتوب. لا نضيف برنامجًا لا نعرف لماذا اخترناه.',
     'Every pick carries a priority, a day and a written reason.',
     `${can('select')?`<button data-act="go:days">${T('توزيع الأيام','Day map')}</button>`:''}<button class="primary" data-act="go:library">${can('select')?T('+ أضف من المكتبة','+ Add from library'):T('المكتبة','Library')}</button>`)
@@ -1277,8 +1277,8 @@ function pageSelection(){
           <button class="primary" data-act="go:library">${T('فتح المكتبة','Open library')}</button></div>`}
     </div>
     <div class="grid cols2 spacer">
-      <div class="card"><h2>${T('قواعد الاختيار','Selection rules')}</h2>
-        <p class="help" style="margin-top:6px">${T('تُطبَّق هذه القواعد تلقائيًا في فحص الجاهزية.','These rules drive the readiness check.')}</p>
+      <div class="card"><h2>${T('معايير اكتمال الخطة','Plan completion criteria')}</h2>
+        <p class="help" style="margin-top:6px">${T('تُستخدم هذه المعايير لحساب اكتمال خطة البرامج، ولا تعني جاهزية التشغيل الميداني.','These criteria evaluate program-plan completeness, not operational readiness.')}</p>
         <div class="fields spacer">
           <label class="fld">${T('الحد الأدنى للبرامج الأساسية','Minimum core programs')}<input type="number" min="1" max="40" value="${S.rules.coreTarget}" data-rule="coreTarget" style="max-width:120px" ${can('brief')?'':'disabled'}></label>
           <label class="fld">${T('الحد الأدنى لبرامج القيم','Minimum values programs')}<input type="number" min="0" max="20" value="${S.rules.valuesMin}" data-rule="valuesMin" style="max-width:120px" ${can('brief')?'':'disabled'}></label>
@@ -1287,7 +1287,7 @@ function pageSelection(){
           <label class="fld wide">${T('أدنى نسبة تغطية لتحديات الطلاب (%)','Minimum student-challenge coverage (%)')}<input type="number" min="0" max="100" value="${S.rules.coverageMin}" data-rule="coverageMin" style="max-width:120px" ${can('brief')?'':'disabled'}></label>
         </div>
       </div>
-      <div class="card"><h2>${T('توزيع الأولويات','Priority mix')}</h2>
+      <div class="card"><h2>${T('البرامج الأساسية والمساندة','Core and supporting programs')}</h2>
         ${S.selected.length?`<div class="grid cols2" style="margin-top:12px;gap:12px">
           <div><div class="help">${T('أساسي','Core')}</div><div class="big mono">${coreCount()}</div><div class="bar good" style="margin-top:6px"><i style="width:${coreCount()/selCount()*100}%"></i></div></div>
           <div><div class="help">${T('مساند','Support')}</div><div class="big mono">${selCount()-coreCount()}</div><div class="bar" style="margin-top:6px"><i style="width:${(selCount()-coreCount())/selCount()*100}%"></i></div></div>
@@ -1314,11 +1314,11 @@ function lockedView(){
 /* ============================ ٤ · خريطة الأيام ============================ */
 function pageDays(){
   const ro=!can('select');
-  return pageHead('خريطة الأيام','Day map',
-    'نوزّع المختار على أيام المعسكر، فنرى الحمل اليومي قبل أن نرى الجدول.',
+  return pageHead('توزيع البرامج على الأيام','Daily program allocation',
+    'حدّد اليوم المناسب لكل برنامج، وراجع عدد البرامج في كل يوم قبل معاينة الجدول.',
     'Distribute the selection across camp days to see daily load before the timetable.',
     `${ro?'':`<button data-act="go:selection">${T('قائمة الاختيار','Selection list')}</button>
-     <button class="primary" data-act="autoplan">${T('توزيع تلقائي','Auto-distribute')}</button>`}`)
+     <button class="primary" data-act="autoplan">${T('توزيع البرامج تلقائيًا','Auto-allocate programs')}</button>`}`)
   +`${ro?viewOnly():''}<div class="days">
     ${S.meta.days.map((d,i)=>{const n=i+1,items=S.selected.filter(x=>x.day===n),over=items.length>S.rules.perDayMax;
       return `<section class="daycol ${over?'over':''}">
@@ -1341,28 +1341,28 @@ function pageDays(){
 /* ============================ ٥ · الملاءمة ============================ */
 function pageFit(){
   const f=fitStats(), tags=tagCoverage();
-  return pageHead('الملاءمة مع تحديات الطلاب','Fit with student challenges',
-    'لا نقيس الطالب؛ نسأل: هل يخدم اختيارُنا التحديات التي أعلنتها الأسر؟',
-    'We are not measuring students. We ask whether the selection serves the family-agreed challenges.',
+  return pageHead('مواءمة احتياجات الطلاب','Student needs alignment',
+    'مواءمة أولية تعتمد على تطابق وسوم البرامج مع الاحتياجات المدخلة؛ وليست تقييمًا فرديًا أو قياسًا لأثر البرنامج.',
+    'An initial tag-based match between selected programs and recorded needs—not an individual assessment or outcome measure.',
     `<button data-act="go:library">${T('تعديل الاختيار','Adjust selection')}</button>`)
   +`<div class="grid cols3">
       <div class="card" style="display:flex;gap:16px;align-items:center">
         ${ring(f.pct)}
-        <div><div class="help">${T('تغطية التحديات','Challenge coverage')}</div>
+        <div><div class="help">${T('تغطية الاحتياجات','Needs coverage')}</div>
           <div class="big mono"><span dir="ltr">${f.covered}/${f.total}</span></div>
           <p class="help">${T('طالب لديه برنامج مختار يخدم أحد تحدّييه على الأقل.','Students with at least one selected program serving a challenge.')}</p></div>
       </div>
-      <div class="card metric"><div class="label">${T('تحديات غير مغطاة','Uncovered challenges')}</div>
+      <div class="card metric"><div class="label">${T('محاور احتياج غير مغطاة','Uncovered needs themes')}</div>
         <div class="value mono">${tags.filter(t=>!t.items.length).length}</div><div class="sub">${T(`من ${tags.length} محورًا`,`of ${tags.length} themes`)}</div></div>
-      <div class="card metric"><div class="label">${T('أكثر برنامج يخدم الطلاب','Highest-fit program')}</div>
+      <div class="card metric"><div class="label">${T('البرنامج الأكثر ارتباطًا بالاحتياجات','Program with most needs matches')}</div>
         <div class="value" style="font-size:15px;line-height:1.5">${(()=>{const r=S.selected.map(x=>{const it=ITEM(x.id);const n=S.students.filter(s=>it.tags.some(t=>s.tags.includes(t))).length;return{it,n}}).sort((a,b)=>b.n-a.n)[0];return r?`${esc(L({ar:r.it.ar,en:r.it.en}))}`:T('لا تتوفر بيانات','No data')})()}</div>
         <div class="sub">${T('بحسب وسوم التحديات','By challenge tags')}</div></div>
     </div>
     <div class="card spacer">
-      <div class="row"><h2>${T('الطلاب وتحدياتهم','Students & their challenges')}</h2><span class="pill line">${T('بيانات تجريبية','Sample data')}</span></div>
+      <div class="row"><h2>${T('الطلاب واحتياجات التطوير','Students & development needs')}</h2><span class="pill line">${T('بيانات تجريبية','Sample data')}</span></div>
       <div class="tablewrap" style="margin-top:12px"><table><thead><tr>
         <th>${T('الطالب','Student')}</th><th>${T('الفريق','Team')}</th><th>${T('التحدي الأول','First challenge')}</th><th>${T('التحدي الثاني','Second challenge')}</th>
-        <th>${T('البرامج التي تخدمه','Serving programs')}</th><th>${T('الحالة','Status')}</th></tr></thead><tbody>
+        <th>${T('البرامج المرتبطة باحتياجاته','Programs matching needs')}</th><th>${T('الحالة','Status')}</th></tr></thead><tbody>
         ${f.per.map(({st,matches})=>`<tr>
           <td><b>${esc(L({ar:st.ar,en:st.en}))}</b><div class="help">${st.age} ${T('سنة','yrs')}</div></td>
           <td>${esc(L(TEAMS.find(t=>t.id===st.team)||{ar:'—',en:'—'}))}</td>
@@ -1374,7 +1374,7 @@ function pageFit(){
       </tbody></table></div>
     </div>
     <div class="grid cols2 spacer">
-      <div class="card"><h2>${T('تغطية محاور التحديات','Challenge theme coverage')}</h2>
+      <div class="card"><h2>${T('تغطية محاور الاحتياج','Needs-theme coverage')}</h2>
         <p class="help" style="margin:6px 0 12px">${T('كل محور يمثل حاجة أعلنتها الأسر؛ الفجوة تعني أن الخطة لا تخدمه.','Each theme is a declared family need; a gap means the plan does not serve it.')}</p>
         ${tags.map(t=>`<div class="pv"><span style="flex:1">${esc(tagName(t.tag))} <small class="muted">(${t.students.length})</small></span>
           ${t.items.length?`<span class="pill good">${t.items.length} ${T('برنامج','programs')}</span>`:`<span class="pill bad">${T('فجوة','gap')}</span>`}</div>`).join('')}
@@ -1401,16 +1401,16 @@ const tagName=t=>TAGNAMES[t]?L({ar:TAGNAMES[t][0],en:TAGNAMES[t][1]}):t;
 /* ============================ ٦ · الجاهزية ============================ */
 function pageReadiness(){
   const rd=readiness(), na=needsAgg();
-  return pageHead('فحص الجاهزية','Readiness check',
-    'الاختيار يصبح قرارًا عندما تُستوفى شروطه وتُعرف متطلباته.',
-    'A selection becomes a decision when its conditions are met and needs are known.',
-    `<button data-act="go:outputs">${T('حزمة التجهيز','Prep pack')}</button>
+  return pageHead('مراجعة اكتمال الخطة','Plan completeness review',
+    'راجع شروط اكتمال خطة البرامج قبل الاعتماد. لا يشمل هذا الفحص سلامة الموقع أو التصاريح أو الجاهزية التشغيلية.',
+    'Review program-planning checks before approval. This does not assess venue safety, permits or operational readiness.',
+    `<button data-act="go:outputs">${T('ملفات الخطة والتجهيز','Plan & preparation files')}</button>
      <button class="primary" data-act="print">${T('طباعة ورقة الاختيار','Print selection sheet')}</button>`)
   +`<div class="grid cols2" style="align-items:start">
       <div class="card">
         <div style="display:flex;gap:18px;align-items:center">
           ${ring(rd.score)}
-          <div><div class="help">${T('الفحص الآلي','Automated check')}</div>
+          <div><div class="help">${T('الفحص الآلي لشروط التخطيط','Automated planning checks')}</div>
             <div class="big mono"><span dir="ltr">${rd.passed}/${rd.total}</span></div>
             <p class="help">${T('شرطًا مستوفيًا من قواعد الاختيار المعلنة.','conditions met from the declared rules.')}</p>
             <button class="small" data-act="go:selection" style="margin-top:6px">${T('تعديل القواعد','Edit rules')}</button></div>
@@ -1422,11 +1422,11 @@ function pageReadiness(){
           <span>${T('معتمد','Approved')} <b>${T(S.selected.filter(x=>x.approved).length+' من '+selCount(), S.selected.filter(x=>x.approved).length+' of '+selCount())}</b></span>
         </div>
         <div class="note ${rd.score>=80?'':'orange'}" style="margin-top:12px">
-          <b style="font-size:12.5px">${rd.score>=80?T('الاختيار جاهز للاعتماد','Ready for approval'):T('الاختيار غير جاهز بعد','Not ready yet')}</b>
-          <p class="help" style="margin-top:3px">${rd.score>=80?T('استُوفي الحد المطلوب؛ ارفعه للاعتماد الرسمي.','Threshold met; send it for formal approval.'):T('أكمل الشروط المعلّمة في القائمة المجاورة.','Complete the flagged conditions in the list.')}</p>
+          <b style="font-size:12.5px">${rd.score>=80?T('استُوفيت غالبية معايير التخطيط','Most planning checks passed'):T('معايير تخطيط غير مكتملة','Planning checks outstanding')}</b>
+          <p class="help" style="margin-top:3px">${rd.score>=80?T('اجتازت الخطة حد المراجعة الآلية؛ يلزم التحقق البشري من الشروط المتبقية قبل الاعتماد.','The automated threshold was met; outstanding checks still require human review before sign-off.'):T('أكمل الشروط المعلّمة في القائمة المجاورة.','Complete the flagged conditions in the list.')}</p>
         </div>
       </div>
-      <div class="card"><h2>${T('قائمة الشروط','Condition list')}</h2>
+      <div class="card"><h2>${T('معايير المراجعة','Review criteria')}</h2>
         <div class="checks" style="margin-top:6px">
         ${rd.checks.map(c=>`<div class="check"><div class="ic ${c.ok?'ok':'no'}">${c.ok?'✓':'!'}</div>
           <div style="flex:1"><b>${T(c.ar,c.en)}</b><p>${esc(c.note||'')}</p></div>
@@ -1446,10 +1446,10 @@ function pageReadiness(){
       </tbody></table></div>`:`<div class="empty">${T('لا متطلبات لأن الخطة فارغة.','No requirements yet because the plan is empty.')}</div>`}
     </div>
     <div class="grid cols2 spacer">
-      <div class="card"><h2>${T('لوحة قرار التجهيز','Preparation decision')}</h2>
+      <div class="card"><h2>${T('قرار اعتماد البرامج','Program approval decision')}</h2>
         <div class="note" style="margin-top:10px">
-          <b>${rd.score>=80?T('جاهز للاعتماد','Ready to approve'):T('غير جاهز للاعتماد بعد','Not ready yet')}</b>
-          <p class="help" style="margin-top:6px">${rd.score>=80?T('استُوفي الحد المطلوب من الشروط؛ يمكن رفع الاختيار للاعتماد الرسمي.','The required threshold is met; the selection can go for formal approval.'):T('أكمل الشروط المعلّمة قبل رفع الاختيار للاعتماد.','Complete the flagged conditions before formal approval.')}</p>
+          <b>${rd.score>=80?T('اجتاز حد مراجعة الخطة','Planning review threshold met'):T('تحتاج الخطة إلى استكمال','Plan needs further work')}</b>
+          <p class="help" style="margin-top:6px">${rd.score>=80?T('اجتازت الخطة الحد الآلي للمراجعة، لكن نسبة الاكتمال لا تثبت الجاهزية التشغيلية.','The automated review threshold is met, but the score does not establish operational readiness.'):T('أكمل الشروط المعلّمة قبل رفع الاختيار للاعتماد.','Complete the flagged conditions before formal approval.')}</p>
         </div>
         <div class="actions spacer" style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="primary" data-act="approveAll" ${can('approve')?'':'disabled'}>${T('اعتماد الاختيار بالكامل','Approve the whole selection')}</button>
@@ -1457,14 +1457,14 @@ function pageReadiness(){
         </div>
         <p class="help" style="margin-top:10px">${T('الاعتماد قرار إداري داخل هذا الملف؛ لا يغني عن توقيع جهة الإشراف.','Approval here is an in-file admin mark; it does not replace official sign-off.')}</p>
       </div>
-      <div class="card"><h2>${T('أثر الاختيار على الميزانية والوقت','Impact on time and budget')}</h2>
+      <div class="card"><h2>${T('عبء تجهيز البرامج وتوزيعها','Program preparation load and allocation')}</h2>
         <p class="help" style="margin:6px 0 12px">${T('تقدير وصفي لعبء التجهيز لا لتكلفة مالية دقيقة.','A descriptive preparation-load estimate, not a cost figure.')}</p>
         ${S.meta.days.map((d,i)=>{const n=dayLoad(i+1);return `<div class="pv"><span style="flex:1">${T('اليوم','Day')} ${i+1} · ${esc(L(d))}</span>
           <span class="bar" style="width:110px"><i style="width:${Math.min(100,n/Math.max(1,S.rules.perDayMax)*100)}%;background:${n>S.rules.perDayMax?'var(--bad)':'var(--accent)'}"></i></span>
           <small class="muted mono">${n}</small></div>`}).join('')}
         <hr class="sep">
-        <div class="statline"><span>${T('إجمالي الخبرات','Total experiences')} <b>${S.selected.reduce((a,x)=>a+(ITEM(x.id)?ITEM(x.id).load:0),0)}</b></span>
-          <span>${T('حمل ثقيل','Heavy load')} <b>${S.selected.filter(x=>ITEM(x.id)&&ITEM(x.id).load===3).length}</b></span></div>
+        <div class="statline"><span>${T('إجمالي نقاط عبء التجهيز','Total preparation points')} <b>${S.selected.reduce((a,x)=>a+(ITEM(x.id)?ITEM(x.id).load:0),0)}</b></span>
+          <span>${T('برامج عالية المتطلبات','High-preparation programs')} <b>${S.selected.filter(x=>ITEM(x.id)&&ITEM(x.id).load===3).length}</b></span></div>
       </div>
     </div>`;
 }
@@ -1472,9 +1472,9 @@ function pageReadiness(){
 /* ============================ ٧ · حزمة التجهيز ============================ */
 function pageOutputs(){
   const rd=readiness();
-  return pageHead('حزمة التجهيز','Prep pack',
-    'ورقة اختيار واحدة تسلّم لفريق التنفيذ: ماذا اخترنا، لماذا، وأين.',
-    'One selection sheet for the delivery team: what we picked, why and where.',
+  return pageHead('ملفات الخطة والتجهيز','Plan & preparation files',
+    'ملخص البرامج المختارة، ومتطلبات التجهيز، وملفات مشاركة الخطة وتصديرها.',
+    'Selected programs, preparation needs, and options to export and share the plan.',
     `<button data-act="print" class="primary">${T('طباعة / PDF','Print / PDF')}</button>
      <button data-act="exportJson">${T('تصدير الخطة','Export plan')}</button>
      <button data-act="importClick">${T('استيراد خطة','Import plan')}</button>
@@ -1488,20 +1488,20 @@ function pageOutputs(){
           <h1 style="font-size:20px;margin-top:4px">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))}</h1>
           <p class="help">${esc(L({ar:S.meta.cityAr,en:S.meta.cityEn}))} · <span dir="ltr">${esc(S.meta.start)} — ${esc(S.meta.end)}</span> · ${S.meta.students} ${T('طالبًا','students')} · ${selCount()} ${T('برنامجًا','programs')}</p>
         </div>
-        <div style="text-align:center"><b style="font-size:22px">${readiness().score}%</b><div class="help">${T('جاهزية الاختيار','Readiness')}</div></div>
+        <div style="text-align:center"><b style="font-size:22px">${readiness().score}%</b><div class="help">${T('اكتمال شروط الخطة','Readiness')}</div></div>
       </div>
     </div>
     <div class="card screenonly">
-      <div class="row"><div><div class="eyebrow">${T('وثيقة الاختيار','SELECTION RECORD')}</div>
+      <div class="row"><div><div class="eyebrow">${T('ملخص البرامج المعتمدة','PROGRAM SELECTION SUMMARY')}</div>
         <h2 style="margin-top:6px">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))}</h2>
         <p class="help">${esc(L({ar:S.meta.cityAr,en:S.meta.cityEn}))} · <span dir="ltr">${esc(S.meta.start)} — ${esc(S.meta.end)}</span> · ${S.meta.students} ${T('طالبًا','students')} · ${S.meta.days.length} ${T('أيام','days')}</p></div>
-        <div style="text-align:center">${ring(rd.score)}<div class="help" style="text-align:center">${T('جاهزية الاختيار','Readiness')}</div></div>
+        <div style="text-align:center">${ring(rd.score)}<div class="help" style="text-align:center">${T('اكتمال شروط الخطة','Readiness')}</div></div>
       </div>
       <hr class="sep">
       <div class="statline"><span>${T('برامج','Programs')} <b>${selCount()}</b></span><span>${T('أساسي','Core')} <b>${coreCount()}</b></span><span>${T('قيم','Values')} <b>${valuesCount()}</b></span><span>${T('مسارات','Tracks')} <b>${trackCovered()}</b></span><span>${T('معتمد','Approved')} <b>${S.selected.filter(x=>x.approved).length}</b></span></div>
     </div>
     <div class="card spacer">
-      <h2>${T('جدول الاختيار','Selection table')}</h2>
+      <h2>${T('قائمة البرامج حسب اليوم','Programs by day')}</h2>
       ${S.selected.length?`<div class="tablewrap" style="margin-top:12px"><table><thead><tr>
         <th>${T('اليوم','Day')}</th><th>${T('البرنامج','Program')}</th><th>${T('المسار / المجال','Track / field')}</th><th>${T('الأولوية','Priority')}</th>
         <th>${T('مبرر الاختيار','Rationale')}</th><th>${T('المتطلبات','Needs')}</th></tr></thead><tbody>
@@ -1519,7 +1519,7 @@ function pageOutputs(){
         ${S.meta.days.map((d,i)=>{const items=S.selected.filter(x=>x.day===i+1);return items.length?`<div style="margin:10px 0"><b style="font-size:12.5px">${T('اليوم','Day')} ${i+1} · ${esc(L(d))}</b>
           <div class="tagcloud" style="margin-top:5px">${items.map(x=>`<span class="pill">${esc(L({ar:ITEM(x.id).ar,en:ITEM(x.id).en}))}</span>`).join('')}</div></div>`:''}).join('')||`<p class="help">${T('لا توزيع بعد.','No distribution yet.')}</p>`}
       </div>
-      <div class="card keep"><h2>${T('سجل القرار','Decision log')}</h2>
+      <div class="card keep"><h2>${T('سجل التعديلات والاعتمادات','Changes & approvals')}</h2>
         <div style="max-height:330px;overflow:auto;margin-top:8px">
         ${S.log.map(l=>`<div class="pv"><small class="muted mono">${time(l.at)}</small><span style="flex:1;font-size:12px">${esc(L(l))}</span><small class="muted">${L(ROLE(l.role))}</small></div>`).join('')||`<div class="empty">${T('فارغ','Empty')}</div>`}
         </div>
@@ -1541,10 +1541,10 @@ function pageOutputs(){
    ========================================================================== */
 const STEPS=[
   ['هوية المعسكر','Camp identity'],
-  ['تصميم التجربة','Experience design'],
-  ['توزيع الأنشطة','Activity distribution'],
-  ['مراجعة الخطة','Plan review'],
-  ['الجدول اليومي','Daily schedule']
+  ['اختيار البرامج','Select programs'],
+  ['توزيع البرامج','Allocate programs'],
+  ['مراجعة الخطة','Review plan'],
+  ['معاينة الجدول','Preview schedule']
 ];
 let held=null;
 
@@ -1576,10 +1576,10 @@ function buildStrip(){
   const rd=readiness();
   const filled=S.meta.days.filter((d,i)=>dayLoad(i+1)>0).length;
   return `<div class="bar-strip">
-    <span>${T('القطع','Pieces')}<b>${selCount()}</b></span>
-    <span>${T('أيام مبنية','Days built')}<b>${filled}/${S.meta.days.length}</b></span>
+    <span>${T('البرامج','Programs')}<b>${selCount()}</b></span>
+    <span>${T('أيام أُضيفت لها برامج','Days with programs')}<b>${filled}/${S.meta.days.length}</b></span>
     <span>${T('مسار','Tracks')}<b>${trackCovered()}/6</b></span>
-    <span>${T('جاهزية','Readiness')}<b>${rd.score}%</b></span>
+    <span>${T('اكتمال التخطيط','Planning completion')}<b>${rd.score}%</b></span>
     <span class="buildbar"><i style="width:${rd.score}%"></i></span>
   </div>`;
 }
@@ -1589,7 +1589,7 @@ function builderFooter(){
     <button data-act="step:${n-1}" ${n===1?'disabled':''}>${T('→ السابق','← Back')}</button>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       ${n<5?`<button class="primary" data-act="step:${n+1}">${T('التالي: ','Next: ')}${T(STEPS[n][0],STEPS[n][1])}</button>`
-           :`<button class="primary" data-act="copyLink">${T('نسخ رابط الخطة','Copy plan link')}</button><button data-act="print">${T('طباعة','Print')}</button>`}
+           :`<button class="primary" data-act="copyLink">${T('نسخ رابط مشاركة الخطة','Copy plan sharing link')}</button><button data-act="print">${T('طباعة','Print')}</button>`}
     </div>
   </div>`;
 }
@@ -1607,14 +1607,14 @@ function stepPlate(){
         <label class="fld">${T('المدينة','City')}<input data-meta="cityAr" value="${esc(m.cityAr)}"></label>
         <label class="fld">${T('عدد الفرق','Teams')}<input type="number" min="1" max="20" data-meta="teams" value="${m.teams}"></label>
         <label class="fld wide">${T('المدة (من — إلى)','Dates (from — to)')}<div class="row" style="gap:6px"><input type="date" data-meta="start" value="${esc(m.start)}" style="flex:1;min-width:0"><input type="date" data-meta="end" value="${esc(m.end)}" style="flex:1;min-width:0"></div></label>
-        <label class="fld">${T('أصغر سن','Youngest')}<input type="number" min="6" max="18" data-meta="ageMin" value="${m.ageMin}"></label>
-        <label class="fld">${T('أكبر سن','Oldest')}<input type="number" min="6" max="18" data-meta="ageMax" value="${m.ageMax}"></label>
+        <label class="fld">${T('الحد الأدنى للعمر','Minimum age')}<input type="number" min="6" max="18" data-meta="ageMin" value="${m.ageMin}"></label>
+        <label class="fld">${T('الحد الأعلى للعمر','Maximum age')}<input type="number" min="6" max="18" data-meta="ageMax" value="${m.ageMax}"></label>
         <label class="fld wide">${T('عدد الطلاب','Students')}<input type="number" min="1" max="500" data-meta="students" value="${m.students}" style="max-width:160px"></label>
       </div>
     </div>
     <div class="card">
-      <div class="row"><h2>${T('قاعدة الأيام','Day baseplate')}</h2><span class="pill">${m.days.length} ${T('أيام','days')}</span></div>
-      <p class="help" style="margin:6px 0 12px">${T('كل مربّع هنا سيحمل قطع اليوم: برامجه وقيمه.','Each square will hold that day’s bricks.')}</p>
+      <div class="row"><h2>${T('أيام المعسكر','Camp days')}</h2><span class="pill">${m.days.length} ${T('أيام','days')}</span></div>
+      <p class="help" style="margin:6px 0 12px">${T('كل يوم يجمع البرامج التي ستُنفّذ ضمن موضوعه.','Each square will hold that day’s bricks.')}</p>
       <div class="plate" style="background-image:none;background:var(--soft)">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px">
           ${m.days.map((d,i)=>`<div style="background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px;text-align:center">
@@ -1624,7 +1624,7 @@ function stepPlate(){
         </div>
       </div>
       <hr class="sep">
-      <div class="row"><b style="font-size:12.5px">${T('تعديل موضوعات الأيام','Edit day themes')}</b>
+      <div class="row"><b style="font-size:12.5px">${T('تعديل عنوان كل يوم','Edit each day title')}</b>
         <button class="small" data-act="addDay">${T('+ يوم','+ Day')}</button></div>
       <div class="spacer" style="display:flex;flex-direction:column;gap:6px">
         ${m.days.map((d,i)=>`<div class="row" style="gap:6px">
@@ -1635,7 +1635,7 @@ function stepPlate(){
       </div>
     </div>
   </div>
-  <div class="note orange spacer">◆ <b>${T('قاعدة اللعب:','Rule of thumb:')}</b> ${T('٦ أيام × ٢–٣ قطع = بين ١٢ و ١٨ قطعة. أكثر من ذلك يشتّت الطالب ويكسر البناء.','6 days × 2–3 bricks = 12–18 pieces. More than that scatters the build.')}</div>`;
+  <div class="note orange spacer">◆ <b>${T('توصية للتخطيط:','Planning guidance:')}</b> ${T('لستة أيام، ابدأ ببرنامجين إلى ثلاثة برامج لكل يوم، ثم راجع المدة والقدرة التشغيلية قبل اعتماد التوزيع.','6 days × 2–3 bricks = 12–18 pieces. More than that scatters the build.')}</div>`;
 }
 
 /* ---------- ٢ · القطع ---------- */
@@ -1646,16 +1646,16 @@ function stepBricks(){
   const placed=S.selected.filter(x=>x.day);
   return `<div class="build2">
     <div class="card">
-      <div class="row wrap"><h2>${T('صندوق المكوّنات','Component bins')}</h2>
+      <div class="row wrap"><h2>${T('البرامج المتاحة','Available programs')}</h2>
         <div class="seg">${[['all',T('الكل','All')]].concat(TRACKS.map(t=>[t.id,L(t)])).map(([id,label])=>
           `<button class="${track===id?'on':''}" data-act="bin:${id}">${label}</button>`).join('')}</div></div>
-      <p class="help" style="margin:6px 0 12px">${T('اضغط على أي قطعة لإضافتها إلى صندوقك، ثم ركّبها على الأيام في الخطوة التالية.','Tap a brick to add it to your tray, then snap it onto a day in the next step.')}</p>
+      <p class="help" style="margin:6px 0 12px">${T('أضف البرامج المناسبة إلى خطتك، ثم وزّعها على الأيام في الخطوة التالية.','Tap a brick to add it to your tray, then snap it onto a day in the next step.')}</p>
       <div class="bins">
         ${pool.map(i=>{const t=TRACK(i.t);return `<div class="bin" style="--bc:${t.color}">
           <div class="studs">${Array.from({length:Math.min(4,(i.load||2)+1)}).map(()=>'<i></i>').join('')}</div>
           <div class="ttl" style="margin-top:8px">${esc(L({ar:i.ar,en:i.en}))}</div>
           <div class="sub">${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))}</div>
-          <div class="sub">${i.ages[0]}–${i.ages[1]} ${T('سنة','yrs')} · ${T('حمل','load')} ${i.load}/3</div>
+          <div class="sub">${i.ages[0]}–${i.ages[1]} ${T('سنة','yrs')} · ${T('التجهيز','preparation')} ${i.load}/3</div>
           <div class="row"><span class="trackchip" style="--tc:${t.color}"><i></i>${L(t.short)}</span>
             <button class="small primary" data-act="add:${i.id}">${T('+ أضف','+ Add')}</button></div>
         </div>`}).join('')||`<div class="empty" style="grid-column:1/-1">${T('لا قطع متاحة في هذا المسار — كلها مختارة.','No bricks left in this track — all picked.')}</div>`}
@@ -1663,14 +1663,14 @@ function stepBricks(){
     </div>
     <div>
       <div class="card">
-        <div class="row"><h2>${T('صندوقك','Your tray')}</h2><span class="pill orange">${tray.length}</span></div>
-        <p class="help" style="margin:6px 0 10px">${T('القطع التي لم تُثبَّت بعد على يوم.','Bricks not yet snapped to a day.')}</p>
+        <div class="row"><h2>${T('البرامج غير الموزّعة','Unassigned programs')}</h2><span class="pill orange">${tray.length}</span></div>
+        <p class="help" style="margin:6px 0 10px">${T('البرامج المختارة التي لم يُحدد لها يوم بعد.','Bricks not yet snapped to a day.')}</p>
         ${tray.length?tray.slice(0,8).map(x=>brickEl(ITEM(x.id),{sub:`<span>${T('بانتظار التركيب','waiting')}</span>`})).join(''):`<div class="empty">${T('الصندوق فارغ.','Tray is empty.')}</div>`}
         ${tray.length>8?`<p class="help">+ ${tray.length-8}</p>`:''}
-        <button class="small" data-act="step:3" style="margin-top:10px">${T('ركّبها الآن ←','Assemble now ←')}</button>
+        <button class="small" data-act="step:3" style="margin-top:10px">${T('انتقل لتوزيع البرامج ←','Allocate programs ←')}</button>
       </div>
       <div class="card spacer">
-        <h2 style="font-size:14px">${T('ميزان البناء','Build balance')}</h2>
+        <h2 style="font-size:14px">${T('تنوع المسارات المختارة','Selected-track mix')}</h2>
         ${TRACKS.map(t=>`<div class="row" style="padding:3px 0"><span style="font-size:12px">${L(t)}</span><b class="mono" style="font-size:12px">${trackCount(t.id)}</b></div>`).join('')}
         <hr class="sep">
         <div class="row"><span class="help">${T('مثبّتة','placed')}</span><b class="mono">${placed.length}</b></div>
@@ -1685,8 +1685,8 @@ function stepAssemble(){
   const tray=S.selected.filter(x=>!x.day);
   const max=S.rules.perDayMax;
   return `<div class="card">
-    <div class="row wrap"><h2>${T('صندوق المكوّنات','Tray')}</h2>
-      <span class="help">${T('اسحب القطعة إلى اليوم، أو اضغطها ثم اضغط اليوم.','Drag a brick onto a day, or tap it then tap the day.')}</span></div>
+    <div class="row wrap"><h2>${T('برامج تنتظر التوزيع','Programs awaiting allocation')}</h2>
+      <span class="help">${T('اسحب البرنامج إلى اليوم المناسب، أو حدّده ثم اضغط على اليوم.','Drag a brick onto a day, or tap it then tap the day.')}</span></div>
     <div class="tray" style="margin-top:12px" data-plate="0">
       ${tray.length?tray.map(x=>brickEl(ITEM(x.id),{sub:`<span>${T('اسحبني','drag me')}</span>`})).join(''):`<div class="empty">${T('كل القطع مثبّتة — البناء جاهز للمراجعة.','All bricks placed — ready to check.')}</div>`}
     </div>
@@ -1707,7 +1707,7 @@ function stepAssemble(){
       </section>`}).join('')}
   </div>
   <div class="row spacer" style="gap:8px;flex-wrap:wrap">
-    <button data-act="autoplan">${T('توزيع تلقائي','Auto-distribute')}</button>
+    <button data-act="autoplan">${T('توزيع البرامج تلقائيًا','Auto-allocate programs')}</button>
     ${tray.length?`<span class="pill orange">${tray.length} ${T('قطعة في الصندوق','in tray')}</span>`:''}
     <span class="help" style="margin-inline-start:auto">${T('الحد لكل يوم: ','Max per day: ')}${max}</span>
   </div>`;
@@ -1728,7 +1728,7 @@ function stepStability(){
   const maxH=Math.max(1,...S.meta.days.map((d,i)=>dayLoad(i+1)));
   return `<div class="build3">
     <div class="card">
-      <div class="row"><h2>${T('توازن البناء','Build balance')}</h2><span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}%</span></div>
+      <div class="row"><h2>${T('نتيجة مراجعة الخطة','Plan review results')}</h2><span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}%</span></div>
       <div class="statline" style="margin:10px 0 14px"><span>${T('مستوفى','met')} <b>${rd.passed}</b></span><span>${T('معلّق','open')} <b>${rd.total-rd.passed}</b></span></div>
       <div class="checklg">
         ${rd.checks.map(c=>`<div class="cg ${c.ok?'ok':'no'}"><div class="led">${c.ok?'✓':'!'}</div>
@@ -1738,8 +1738,8 @@ function stepStability(){
     </div>
     <div>
       <div class="card">
-        <div class="row"><h2>${T('شكل البناء','The build')}</h2><span class="pill">${selCount()} ${T('قطعة','pieces')}</span></div>
-        <p class="help" style="margin:6px 0 10px">${T('كل عمود يوم؛ البناء المتماسك لا يميل ولا يفرغ.','Each column is a day; a sound build neither tilts nor empties.')}</p>
+        <div class="row"><h2>${T('توزيع البرامج بصريًا','Visual program distribution')}</h2><span class="pill">${selCount()} ${T('برنامج','programs')}</span></div>
+        <p class="help" style="margin:6px 0 10px">${T('يوضح كل عمود عدد البرامج المختارة ليوم واحد.','Each column is a day; a sound build neither tilts nor empties.')}</p>
         <div class="struct">
           ${S.meta.days.map((d,i)=>{const n=i+1,items=S.selected.filter(x=>x.day===n);
             return `<div class="col">
@@ -1753,7 +1753,7 @@ function stepStability(){
       ${sg.length?`<div class="card spacer"><div class="row"><h2>${T('قطع مقترحة لتماسك أفضل','Bricks to steady the build')}</h2><span class="pill orange">${sg.length}</span></div>
         <div class="spacer">${sg.map(s=>`<div class="row" style="padding:7px 0;border-bottom:1px dashed var(--line)">
           <div style="flex:1"><b style="font-size:12.5px">${esc(L({ar:s.i.ar,en:s.i.en}))}</b><div class="help">${esc(L(TRACK(s.i.t)))} · ${esc(s.why)}</div></div>
-          <button class="small primary" data-act="add:${s.i.id}">${T('+ أضف','+ Add')}</button></div>`).join('')}</div></div>`:`<div class="note good spacer" style="background:#16866010">✓ ${T('كل المسارات ممثلة والبناء متوازن.','All tracks represented and the build is balanced.')}</div>`}
+          <button class="small primary" data-act="add:${s.i.id}">${T('+ أضف','+ Add')}</button></div>`).join('')}</div></div>`:`<div class="note good spacer" style="background:#16866010">✓ ${T('لا توجد توصيات إضافية وفق المعايير الحالية؛ راجع قائمة الشروط قبل الاعتماد.','No further suggestions under current criteria; review outstanding checks before approval.')}</div>`}
       ${unassigned()?`<div class="note orange spacer">! ${T(`${unassigned()} قطعة ما زالت في الصندوق.`,`${unassigned()} bricks still in the tray.`)}
         <button class="small" data-act="step:3" style="margin-inline-start:8px">${T('ركّبها','Place them')}</button></div>`:''}
     </div>
@@ -1878,7 +1878,7 @@ function programSection(){
         <div class="daynum"><small>${T('اليوم','DAY')}</small><b>${n}</b></div>
         <div style="flex:1;min-width:0"><b style="font-size:14px">${esc(L(d))}</b>
           <div class="help">${date?esc(date)+' · ':''}${count?count+' '+T('جلسات','sessions'):T('لا جلسات بعد','No sessions yet')}</div></div>
-        <span class="pill ${count?'good':'orange'}">${count?T('مبني','built'):T('فارغ','empty')}</span>
+        <span class="pill ${count?'good':'orange'}">${count?T('توجد برامج','has programs'):T('بلا برامج','no programs')}</span>
       </div>
       ${dayTimeline(n,{why:true})}
     </section>`;
@@ -1889,10 +1889,10 @@ function stepPlan(){
   const rd=readiness(), f=fitStats(), na=needsAgg();
   const isFile=location.protocol==='file:';
   return `<div class="grid cols4 screenonly">
-      ${metric(T('القطع','Pieces'),selCount(),T('في البناء','in the build'))}
+      ${metric(T('البرامج','Programs'),selCount(),T('في البناء','in the build'))}
       ${metric(T('الأساسية','Core'),coreCount(),T('حد أدنى '+S.rules.coreTarget,'min '+S.rules.coreTarget))}
       ${metric(T('تغطية التحديات','Fit'),f.pct+'%',T(f.covered+' من '+f.total+' طلاب',f.covered+' of '+f.total+' students'))}
-      ${metric(T('الجاهزية','Readiness'),rd.score+'%',T(rd.passed+' من '+rd.total+' فحص',rd.passed+' of '+rd.total+' checks'))}
+      ${metric(T('اكتمال التخطيط','Planning completion'),rd.score+'%',T(rd.passed+' من '+rd.total+' فحص',rd.passed+' of '+rd.total+' checks'))}
     </div>
     <div class="card spacer screenonly">
       <div class="row wrap" style="align-items:flex-start">
@@ -1904,11 +1904,11 @@ function stepPlan(){
         <span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}% ${T('جاهزية','ready')}</span>
       </div>
       <div class="sharebox">
-        <input readonly id="planUrl" value="${esc(isFile?'#':shareUrl())}" dir="ltr" aria-label="${T('رابط الخطة','Plan link')}">
+        <input readonly id="planUrl" value="${esc(isFile?'#':shareUrl())}" dir="ltr" aria-label="${T('رابط مشاركة نسخة الخطة','Shareable plan-copy link')}">
         <button class="small" data-act="copyLink">${T('نسخ','Copy')}</button>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-        <button class="primary" data-act="copyLink">${T('نسخ رابط الخطة','Copy plan link')}</button>
+        <button class="primary" data-act="copyLink">${T('نسخ رابط مشاركة الخطة','Copy plan sharing link')}</button>
         <button data-act="exportJson">${T('تصدير JSON','Export JSON')}</button>
         <button data-act="copySummary">${T('نسخ ملخص','Copy summary')}</button>
         <button data-act="print">${T('طباعة','Print')}</button>
@@ -1924,11 +1924,11 @@ function stepPlan(){
           <h1 style="margin-top:4px">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))}</h1>
           <p class="help">${esc(L({ar:S.meta.cityAr,en:S.meta.cityEn}))} · <span dir="ltr">${esc(S.meta.start)} — ${esc(S.meta.end)}</span> · ${S.meta.days.length} ${T('أيام','days')} · ${selCount()} ${T('مكوّنًا','components')}</p>
         </div>
-        <div style="text-align:center"><b style="font-size:22px">${rd.score}%</b><div class="help">${T('الجاهزية','Readiness')}</div></div>
+        <div style="text-align:center"><b style="font-size:22px">${rd.score}%</b><div class="help">${T('اكتمال التخطيط','Planning completion')}</div></div>
       </div>
     </div>
-    <div class="row spacer noprint" style="gap:8px"><h2 style="font-size:16px">${T('البرنامج اليومي','Daily programme')}</h2>
-      <span class="help">${T('خط زمني لكل يوم من الفجر إلى النوم، والمكوّنات موزّعة على جلساته.','A timeline for every day from dawn to sleep, with components placed in its sessions.')}</span></div>
+    <div class="row spacer noprint" style="gap:8px"><h2 style="font-size:16px">${T('معاينة البرنامج اليومي','Daily program preview')}</h2>
+      <span class="help">${T('معاينة أولية لجدول يومي مبني على قالب ثابت؛ راجع أوقات الصلاة والجلسات والأنشطة قبل التنفيذ.','A preview based on a fixed template. Verify prayer times, sessions and activities before use.')}</span></div>
     <div class="spacer">${programSection()}</div>
     <div class="grid cols2 spacer">
       <div class="card">
@@ -1959,12 +1959,12 @@ function pageBuilder(){
   const step=S.step;
   return `<div class="pagehead"><div>
       <div class="eyebrow">${T('ابنِ معسكرك قطعة قطعة','BUILD YOUR CAMP, BRICK BY BRICK')}</div>
-      <h1>${T('منشئ المعسكر','Camp builder')}</h1>
+      <h1>${T('تصميم المعسكر','Design camp')}</h1>
       <p class="muted" style="font-size:12.5px;margin-top:2px">${esc(campName(activeCamp()))} · ${fmtRange(S.meta.start,S.meta.end)}</p>
-      <p class="muted" style="font-size:13px;margin-top:4px">${T('من هوية المعسكر إلى تصميم التجربة، ثم توزيع الأنشطة، ومراجعة الخطة، وأخيرًا الجدول اليومي.','From camp identity to experience design, activity distribution, plan review, and the daily schedule.')}</p>
+      <p class="muted" style="font-size:13px;margin-top:4px">${T('حدّد بيانات المعسكر، واختر البرامج، ووزّعها على الأيام، ثم راجع الخطة وعاين الجدول المقترح.','Set camp details, select programs, allocate them to days, review the plan and preview the proposed schedule.')}</p>
     </div>
     <div class="actions">
-      <button class="small" data-act="go:camps">← ${T('كل المعسكرات','All camps')}</button>
+      <button class="small" data-act="go:camps">← ${T('قائمة المعسكرات','Camp list')}</button>
       <button class="small" data-act="guide">${T('كيف يعمل؟','How it works')}</button>
       ${can('reset')?`<button class="small" data-act="reset">${T('ابدأ من جديد','Start over')}</button>`:''}
     </div></div>
@@ -2012,7 +2012,7 @@ function applyShared(p){
 function copyLink(){
   const url=shareUrl();
   if(location.protocol==='file:'){toast(T('روابط المشاركة تعمل من النسخة المنشورة على الإنترنت.','Share links work from the published online version.'));return}
-  const done=()=>{toast(T('نُسخ رابط الخطة — أرسله لمن تريد.','Plan link copied — send it anywhere.'));openModal(`<h2>${T('رابط الخطة','Plan link')}</h2>
+  const done=()=>{toast(T('نُسخ رابط الخطة — أرسله لمن تريد.','Plan link copied — send it anywhere.'));openModal(`<h2>${T('رابط مشاركة نسخة الخطة','Shareable plan-copy link')}</h2>
     <p class="help">${T('يفتح نفس البناء عند أي شخص، ويستطيع تعديل نسخته.','Opens the same build for anyone, and they can edit their copy.')}</p>
     <div class="sharebox"><input readonly value="${esc(url)}" dir="ltr"><button class="small" data-act="close">${T('تم','Done')}</button></div>`);};
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(done).catch(()=>fallbackCopy(url,done));
@@ -2053,9 +2053,9 @@ function pageCamps(){
   const counts={all:S.camps.length,draft:S.camps.filter(c=>c.status==='draft').length,
     ready:S.camps.filter(c=>c.status==='ready').length,archived:S.camps.filter(c=>c.status==='archived').length};
   return `<div class="pagehead"><div>
-      <div class="eyebrow">${T('أرشيف المعسكرات','CAMP ARCHIVE')}</div>
-      <h1>${T('المعسكرات','Camps')}</h1>
-      <p class="muted" style="font-size:13px;margin-top:4px">${T('كل معسكراته في مكان واحد: افتح معسكرًا لمتابعة بنائه، أو أنشئ معسكرًا جديدًا من الصفر.','Every camp in one place: open one to continue building, or start a new one.')}</p>
+      <div class="eyebrow">${T('إدارة المعسكرات','MANAGE CAMPS')}</div>
+      <h1>${T('إدارة المعسكرات','Manage camps')}</h1>
+      <p class="muted" style="font-size:13px;margin-top:4px">${T('جميع معسكراتك في مكان واحد: افتح معسكرًا لمتابعة بنائه، أو أنشئ معسكرًا جديدًا من الصفر.','Every camp in one place: open one to continue building, or start a new one.')}</p>
     </div>
     <div class="actions"><button class="primary" data-act="newCamp">+ ${T('معسكر جديد','New camp')}</button></div></div>
     <div class="card">
@@ -2093,12 +2093,12 @@ function campCard(c){
       <p class="help">${esc(L({ar:c.meta.cityAr,en:c.meta.cityEn}))} · ${fmtRange(c.meta.start,c.meta.end)}</p>
       <div class="cc-metrics">
         <span><b>${c.meta.days.length}</b> ${T('أيام','days')}</span>
-        <span><b>${campPieces(c)}</b> ${T('قطعة','pieces')}</span>
+        <span><b>${campPieces(c)}</b> ${T('برنامج','programs')}</span>
         <span><b>${campTracks(c)}/6</b> ${T('مسارات','tracks')}</span>
         <span><b>${c.meta.students}</b> ${T('طالبًا','students')}</span>
       </div>
       <div>
-        <div class="row" style="margin-bottom:4px"><span class="help">${T('الجاهزية','Readiness')}</span><b class="mono" style="font-size:11.5px">${score}%</b></div>
+        <div class="row" style="margin-bottom:4px"><span class="help">${T('اكتمال التخطيط','Planning completion')}</span><b class="mono" style="font-size:11.5px">${score}%</b></div>
         <div class="bar ${score>=80?'good':''}"><i style="width:${score}%"></i></div>
       </div>
       <div class="cc-foot">
@@ -2125,7 +2125,7 @@ function newCampModal(){
 }
 function renderWiz(){
   const w=wiz,d=w.d;
-  const titles=[T('الأساسيات','Basics'),T('المدة والأيام','Dates & days'),T('المراجعة','Review')];
+  const titles=[T('بيانات المعسكر','Camp details'),T('التواريخ وأيام المعسكر','Dates & camp days'),T('مراجعة البيانات','Review details')];
   let body='';
   if(w.step===1){
     body=`<div class="fields">
@@ -2133,8 +2133,8 @@ function renderWiz(){
       <label class="fld">${T('Camp name (English)','Camp name (English)')}<input id="wEn" value="${esc(d.campEn)}" dir="ltr" placeholder="Elite Spring Camp"></label>
       <label class="fld">${T('المدينة','City')}<input id="wCity" value="${esc(d.cityAr)}"></label>
       <label class="fld">${T('عدد الفرق','Teams')}<input id="wTeams" type="number" min="1" max="20" value="${d.teams}"></label>
-      <label class="fld">${T('أصغر سن','Youngest')}<input id="wAgeMin" type="number" min="6" max="18" value="${d.ageMin}"></label>
-      <label class="fld">${T('أكبر سن','Oldest')}<input id="wAgeMax" type="number" min="6" max="18" value="${d.ageMax}"></label>
+      <label class="fld">${T('الحد الأدنى للعمر','Minimum age')}<input id="wAgeMin" type="number" min="6" max="18" value="${d.ageMin}"></label>
+      <label class="fld">${T('الحد الأعلى للعمر','Maximum age')}<input id="wAgeMax" type="number" min="6" max="18" value="${d.ageMax}"></label>
       <label class="fld wide">${T('عدد الطلاب المتوقع','Expected students')}<input id="wStudents" type="number" min="1" max="500" value="${d.students}"></label>
     </div>`;
   } else if(w.step===2){
@@ -2143,7 +2143,7 @@ function renderWiz(){
       <label class="fld">${T('تاريخ النهاية','End date')}<input id="wEnd" type="date" value="${esc(d.end)}"></label>
       <label class="fld wide">${T('عدد الأيام','Number of days')}<select id="wDays">${[3,4,5,6,7,8].map(n=>`<option value="${n}" ${d.dayCount===n?'selected':''}>${n} ${T('أيام','days')}</option>`).join('')}</select></label>
     </div>
-    <h3 style="margin:16px 0 8px">${T('موضوعات الأيام','Day themes')}</h3>
+    <h3 style="margin:16px 0 8px">${T('عناوين الأيام','Day titles')}</h3>
     <div style="display:flex;flex-direction:column;gap:6px">
       ${Array.from({length:d.dayCount}).map((_,i)=>`<div class="row" style="gap:8px">
         <span class="pill">${i+1}</span>
@@ -2259,7 +2259,7 @@ function render(){
   if(!PAGES[page]) page='camps';
   header();
   const container=$('#app');
-  container.innerHTML=`<div class="demo noprint"><span>◈ ${T('مختبر اختيار · بيانات الطلاب تجريبية · الحفظ على هذا المتصفح فقط','Selection lab · sample student data · saved in this browser only')}</span><span>${T('اختيار لا تقييم','Select, do not assess')}</span></div>`+PAGES[page]();
+  container.innerHTML=`<div class="demo noprint"><span>◈ ${T('نموذج تخطيط تجريبي · بيانات الطلاب افتراضية · الحفظ على هذا المتصفح فقط','Planning prototype · sample student data · saved in this browser only')}</span><span>${T('مواءمة تخطيطية وليست تقييمًا للطالب','Planning alignment, not student assessment')}</span></div>`+PAGES[page]();
   if(page==='library'){renderLib();}
   S.page=page;S.lang=lang;save();
   try{history.replaceState(null,'','#'+page)}catch(e){}
@@ -2325,21 +2325,21 @@ const closeModal=()=>{const m=$('#modal');if(m.open)m.close()};
 function guideModal(){
   const steps=lang==='ar'?[
     ['01','هوية المعسكر','الاسم والمدة والفئة العمرية وأيام المعسكر. هذه القاعدة التي ستبني عليها.'],
-    ['02','تصميم التجربة','سبعون برنامجًا في ستة مسارات. اختر المهارات والقيم التي تخدم هذا المعسكر فقط.'],
-    ['03','توزيع الأنشطة','اسحب المكوّن إلى اليوم المناسب، أو اضغطه ثم اضغط اليوم. ثلاثة في اليوم أكثر ما يُنصح به.'],
+    ['02','اختيار البرامج','سبعون برنامجًا في ستة مسارات. اختر المهارات والقيم التي تخدم هذا المعسكر فقط.'],
+    ['03','توزيع البرامج','اسحب البرنامج إلى اليوم المناسب، أو اضغطه ثم اضغط اليوم. ثلاثة في اليوم أكثر ما يُنصح به.'],
     ['04','مراجعة الخطة','هل توجد قيم؟ هل كل مسار ممثل؟ هل كل يوم مبني؟ وهل يخدم اختيارك تحديات الطلاب؟'],
-    ['05','الجدول اليومي','خط زمني من الفجر إلى النوم، مع المبررات والمتطلبات، وطباعة صفحة لكل يوم.']
+    ['05','معاينة الجدول','خط زمني من الفجر إلى النوم، مع المبررات والمتطلبات، وطباعة صفحة لكل يوم.']
   ]:[
     ['01','Camp identity','Name, dates, age band and camp days. This is the base you build on.'],
-    ['02','Experience design','Seventy programs across six tracks. Pick the skills and values that serve this camp.'],
-    ['03','Activity distribution','Drag a component to a day, or tap it then tap the day. Three a day is the sweet spot.'],
+    ['02','Select programs','Seventy programs across six tracks. Pick the skills and values that serve this camp.'],
+    ['03','Allocate programs','Drag a component to a day, or tap it then tap the day. Three a day is the sweet spot.'],
     ['04','Plan review','Values present? Every track represented? Every day built? Does it serve the challenges?'],
-    ['05','Daily schedule','A timeline from dawn to sleep, with rationales and requirements, printed one page per day.']
+    ['05','Preview schedule','A timeline from dawn to sleep, with rationales and requirements, printed one page per day.']
   ];
   openModal(`<div class="eyebrow">${T('دليل الاستخدام','HOW IT WORKS')}</div>
     <h2 style="margin-top:6px">${T('ابنِ معسكرك قطعة قطعة','Build your camp, brick by brick')}</h2>
     <p class="help" style="margin-top:6px">${T('تبدأ من تبويب «المعسكرات»: تفتح معسكرًا سابقًا أو تنشئ جديدًا في ثلاث خطوات (الاسم، المدة، المراجعة) ثم تنتقل مباشرة لاختيار القطع.','Start from the Camps tab: open a previous camp or create one in three quick steps, then go straight to picking bricks.')}</p>
-    <div class="note" style="margin-top:10px"><b style="font-size:12.5px">⌂ ${T('المعسكرات','Camps')}</b>
+    <div class="note" style="margin-top:10px"><b style="font-size:12.5px">⌂ ${T('إدارة المعسكرات','Manage camps')}</b>
       <p class="help">${T('كل معسكر مستقل بخطته وأيامه وفريقه. من البطاقة تفتح المعسكر أو تنسخه أو تؤرشفه.','Each camp has its own plan, days and team. From the card you can open, duplicate or archive it.')}</p></div>
     <div class="spacer">${steps.map(([n,t,d])=>`<div class="step" style="align-items:flex-start;margin-bottom:8px"><b>${n}</b><span><b style="font-size:12.5px">${t}</b><br><span class="help">${d}</span></span></div>`).join('')}</div>
     <div class="note orange" style="margin-top:12px"><b>${T('حدود الأداة','Scope')}</b>
@@ -2360,12 +2360,12 @@ function briefModal(){
       <label class="fld">${T('Camp name (English)','Camp name (English)')}<input id="bCampEn" value="${esc(m.campEn)}" dir="ltr"></label>
       <label class="fld">${T('المدينة','City')}<input id="bCity" value="${esc(m.cityAr)}"></label>
       <label class="fld">${T('المدة','Dates')}<div class="row" style="gap:6px"><input id="bStart" type="date" value="${esc(m.start)}"><input id="bEnd" type="date" value="${esc(m.end)}"></div></label>
-      <label class="fld">${T('أصغر سن','Youngest')}<input id="bAgeMin" type="number" min="6" max="18" value="${m.ageMin}"></label>
-      <label class="fld">${T('أكبر سن','Oldest')}<input id="bAgeMax" type="number" min="6" max="18" value="${m.ageMax}"></label>
+      <label class="fld">${T('الحد الأدنى للعمر','Minimum age')}<input id="bAgeMin" type="number" min="6" max="18" value="${m.ageMin}"></label>
+      <label class="fld">${T('الحد الأعلى للعمر','Maximum age')}<input id="bAgeMax" type="number" min="6" max="18" value="${m.ageMax}"></label>
       <label class="fld">${T('عدد الطلاب','Students')}<input id="bStudents" type="number" min="1" max="500" value="${m.students}"></label>
       <label class="fld">${T('عدد الفرق','Teams')}<input id="bTeams" type="number" min="1" max="20" value="${m.teams}"></label>
     </div>
-    <h3 style="margin:18px 0 8px">${T('موضوعات الأيام','Day themes')}</h3>
+    <h3 style="margin:18px 0 8px">${T('عناوين الأيام','Day titles')}</h3>
     ${m.days.map((d,i)=>`<div class="row" style="margin-bottom:6px;gap:8px"><span class="pill">${i+1}</span>
       <input id="dayAr${i}" value="${esc(d.ar)}" style="flex:1;border:1px solid var(--line);border-radius:7px;padding:6px 9px">
       <input id="dayEn${i}" value="${esc(d.en)}" dir="ltr" style="flex:1;border:1px solid var(--line);border-radius:7px;padding:6px 9px"></div>`).join('')}
@@ -2392,7 +2392,7 @@ function itemModal(id){
   openModal(`<div class="row" style="align-items:flex-start;padding-inline-end:44px">
       <div><span class="trackchip" style="--tc:${t.color}"><i></i>${L(t)}</span>
         <h2 style="margin-top:8px">${esc(L({ar:i.ar,en:i.en}))}</h2>
-        <p class="help">${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))} · ${i.ages[0]}–${i.ages[1]} ${T('سنة','yrs')} · ${T('حمل','Load')} ${i.load}/3</p></div>
+        <p class="help">${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))} · ${i.ages[0]}–${i.ages[1]} ${T('سنة','yrs')} · ${T('مستوى التجهيز','Preparation level')} ${i.load}/3</p></div>
       <span class="pill ${on?'good':'line'}">${on?T('في الخطة','In plan'):T('غير مختار','Not selected')}</span>
     </div>
     <div class="note" style="margin-top:14px"><b>${T('الهدف','Goal')}</b><p>${esc(L(i.goal))}</p></div>
@@ -2528,7 +2528,7 @@ function summaryText(){
   const un=S.selected.filter(x=>!x.day);
   if(un.length){lines.push('');lines.push(T('غير موزّع:','Unassigned:')+' '+un.map(x=>L({ar:ITEM(x.id).ar,en:ITEM(x.id).en})).join('، '));}
   lines.push('');
-  lines.push(T('الجاهزية: ','Readiness: ')+readiness().score+'% · '+T('المعتمد: ','Approved: ')+S.selected.filter(x=>x.approved).length+'/'+selCount());
+  lines.push(T('اكتمال شروط الخطة: ','Planning checks: ')+readiness().score+'% · '+T('المعتمد: ','Approved: ')+S.selected.filter(x=>x.approved).length+'/'+selCount());
   return lines.join('\n');
 }
 function copySummary(){
