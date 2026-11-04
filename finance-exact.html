@@ -37,6 +37,23 @@ html.finance-embedded .cat .micro{font-size:10px}
 @media(max-width:800px){.fx-figures{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 .fin-reference-wrap{margin:20px 0;border:1px dashed var(--line);background:#f9fbfe;border-radius:12px;padding:12px}.fin-reference-wrap>summary{font-size:12px;font-weight:800;color:#45668e;cursor:pointer;padding:5px}.fin-reference-wrap .fx-intelligence{margin-top:12px}
+
+/* Embedded camp financial workflows are inline rather than viewport-centered iframe modals. */
+html.finance-embedded .modal-shell{position:static;inset:auto;background:transparent;z-index:auto;padding:0;margin:14px 0;align-items:stretch;justify-content:stretch}
+html.finance-embedded .modal-shell.open{display:block}
+html.finance-embedded .modal-shell .modal{width:100%;max-width:none;max-height:none;overflow:visible;border:1px solid #bfd1ed;border-radius:14px;box-shadow:0 5px 20px #1125430a;padding:22px}
+html.finance-embedded .modal-shell .modal h2{font-size:18px}
+.finance-step-guide{border:1px solid var(--line);background:#fff;border-radius:12px;padding:16px;margin:14px 0}
+.finance-step-guide h3{font-size:15px;margin:0 0 7px}
+.finance-step-guide .details{font-size:12px;color:var(--muted);line-height:1.9}
+.finance-step-guide ol{margin:10px 0;padding-inline-start:24px;font-size:12px;line-height:1.9}
+.finance-step-guide a{color:#245bc8;text-decoration:none}
+.finance-step-guide .actions{margin:11px 0 0}
+.finance-flow-current{border-color:#7299e6!important;box-shadow:0 0 0 2px #dfe9ff!important}
+.finance-entry-heading{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.finance-step-guide:target{outline:2px solid #98b8ee;scroll-margin-top:24px}
+@media(max-width:600px){html.finance-embedded .modal-shell .modal{padding:14px}.finance-step-guide{padding:12px}}
+
 /* Practical per-camp financial entry */
 .finance-workflow{margin:18px 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .finance-workflow .flow-step{border:1px solid var(--line);background:#fff;padding:15px;border-radius:12px;min-width:0}
@@ -58,9 +75,13 @@ html.finance-embedded .cat .micro{font-size:10px}
 </style><script>if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('finance-embedded');</script></head><body><aside><div class="brand">✦ أكاديمية النخبة</div><p class="desc">منصة إدارة المعسكرات</p><nav><a href="#overview">◫ &nbsp; نظرة عامة</a><a href="#categories">▦ &nbsp; التصنيفات المالية</a><a href="#expenses" class="active">▣ &nbsp; إدارة المصروفات</a><a href="#revenues">◈ &nbsp; الإيرادات والتسعير</a><a href="#analysis">▤ &nbsp; التحليل والتقارير</a></nav><div class="side-note">💡 كل مصروف له حالة مستقلة: تقديري، ملتزم به، أو مدفوع فعلياً؛ لضمان تقارير مالية دقيقة.</div></aside><main>
 <div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="resetBtn">↺ تحميل نموذج تجريبي</button><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="backupBtn">نسخة احتياطية</button><button class="btn" id="fullReportBtn">تقرير المعسكر</button><button class="btn" id="restoreBtn">استعادة نسخة</button><input id="restoreFile" type="file" accept=".json,application/json" hidden><button class="btn primary" id="addBtn">＋ إضافة مصروف</button></div></header>
 <div class="banner" id="financeCampBanner">ⓘ هذه نسخة تفاعلية تجريبية. جميع المبالغ الأولية افتراضية ويمكن تعديلها؛ يتم حفظ التغييرات داخل هذا المتصفح فقط.</div><div class="finance-notice">تنبيه: هذه أداة تشغيل محلية داخل متصفحك، وليست نظاماً محاسبياً سحابياً. لا تُرسل البيانات تلقائياً لأي حساب آخر. احفظ نسخة احتياطية بعد إدخال المعاملات، ولا تُسجّل أي دفعة قبل التحقق من حدوثها فعلياً.</div><section class="panel" id="financeQuickTemplates" style="margin:14px 0"><div class="panel-header"><div><h2>إضافة مصروف من قالب جاهز</h2><p class="fx-note">اختر بنداً، ثم أدخل الكميات والأسعار الحقيقية. القوالب لا تُضيف أي مبالغ افتراضية.</p></div></div><div class="filters" id="presetButtons"></div></section><div class="finance-workflow" id="financeWorkflow">
-<div class="flow-step"><b>١ · إعداد ميزانية المعسكر</b><p>أضف بنود السكن والوجبات والنقل والرحلات وحدد طريقة الحساب والجهة الموردة.</p><button class="btn primary sm" id="startExpense">＋ إضافة بند مالي</button></div>
-<div class="flow-step"><b>٢ · متابعة الالتزامات والمدفوعات</b><p>سجّل الحجز أو العقد كالتزام، ثم أثبت المدفوعات فعلياً مع التاريخ والمرجع.</p><button class="btn sm" id="jumpExpenses">مراجعة سجل المصروفات</button></div>
-<div class="flow-step"><b>٣ · التسجيل والتحصيل</b><p>حدّد العدد والسعر المتوقع ثم سجّل مبالغ التحصيل الفعلية بدلاً من خلطها بالتوقعات.</p><button class="btn sm" id="addCollection">＋ تسجيل تحصيل</button></div>
+<div class="flow-step"><b>١ · إعداد ميزانية المعسكر</b><p>أدخل تكلفة السكن والوجبات والنقل والرحلات والمورد وطريقة الحساب. تبدأ كل البنود بمبالغك الفعلية وليس بيانات تجريبية.</p><button type="button" class="btn primary sm" id="startExpense">＋ فتح نموذج المصروف</button><button type="button" class="btn sm" id="showExpenseGuide">عرض التفاصيل</button></div>
+<div class="flow-step"><b>٢ · متابعة الالتزامات والمدفوعات</b><p>حوّل عرض السعر إلى التزام، وسجّل المبلغ المدفوع على دفعات بتاريخ ومرجع واضح. تابع الرصيد المتبقي لكل مورد.</p><button type="button" class="btn sm" id="jumpExpenses">فتح سجل المصروفات والدفعات</button><button type="button" class="btn sm" id="showPaymentsGuide">عرض التفاصيل</button></div>
+<div class="flow-step"><b>٣ · التسجيل والتحصيل</b><p>حدد الطلاب المتوقعين ورسومهم، ثم سجّل المبلغ الذي تم تحصيله فعلاً، مع اسم الدافع وتاريخ التحصيل ورقم العملية.</p><button type="button" class="btn sm" id="addCollection">＋ فتح نموذج التحصيل</button><button type="button" class="btn sm" id="showCollectionGuide">عرض التفاصيل</button></div>
+</div><div id="financeStepGuides" hidden>
+<section class="finance-step-guide" id="expenseStepGuide"><div class="finance-entry-heading"><h3>١ · تفاصيل إعداد ميزانية المعسكر</h3><button type="button" class="btn sm" data-close-guide>إخفاء التفاصيل</button></div><p class="details">ابدأ بتسجيل جميع التكاليف المتوقعة قبل بداية المعسكر، وميّز بين التقدير، والالتزام التعاقدي، والمبلغ المدفوع بالفعل.</p><ol><li>اختر تصنيفاً: السكن، الوجبات، الحافلات، الوقود، الرحلات، الكادر أو المستلزمات.</li><li>حدّد طريقة الحساب: مبلغ ثابت، كمية × سعر، أيام × تكلفة، أو أشخاص × أيام × تكلفة.</li><li>أدخل السعر والكمية والجهة الموردة وتاريخ الاستحقاق ومرجع عرض السعر أو الفاتورة.</li><li>اختر الحالة: «تقديري» قبل الاتفاق، أو «ملتزم به» بعد الحجز أو العقد، أو «مدفوع» فقط بعد السداد الحقيقي.</li><li>احفظ البند، ثم عدله لاحقاً أو سجّل دفعات المورد من سجل المصروفات.</li></ol><div class="actions"><button type="button" class="btn primary" id="guideNewExpense">＋ إدخال مصروف الآن</button><button type="button" class="btn" id="guideShowTemplates">القوالب السريعة</button></div></section>
+<section class="finance-step-guide" id="paymentsStepGuide"><div class="finance-entry-heading"><h3>٢ · تفاصيل إدارة الالتزامات والمدفوعات</h3><button type="button" class="btn sm" data-close-guide>إخفاء التفاصيل</button></div><p class="details">سجل المصروفات هو مرجع متابعة الموردين، وليس مجرد إجمالي للتكاليف.</p><ol><li>افتح سجل المصروفات وتأكد من وجود بند للمورد.</li><li>إذا كانت الخدمة محجوزة ولم تُدفع، عدّل حالة البند إلى «ملتزم به» وأضف تاريخ الاستحقاق.</li><li>اضغط «تسجيل دفعة» على البند المطلوب وحدد مبلغ الدفعة وتاريخها وطريقة السداد ومرجعها.</li><li>كرر تسجيل الدفعات الجزئية حتى اكتمال السداد؛ سيبقى الرصيد المتبقي واضحاً.</li><li>لتصحيح دفعة خاطئة استخدم «عرض الدفعات ← إلغاء الدفعة» مع الاحتفاظ بأثر التصحيح في السجل.</li></ol><div class="actions"><button type="button" class="btn primary" id="guideJumpExpenses">الانتقال لسجل المصروفات</button></div></section>
+<section class="finance-step-guide" id="collectionsStepGuide"><div class="finance-entry-heading"><h3>٣ · تفاصيل رسوم الطلاب والتحصيل</h3><button type="button" class="btn sm" data-close-guide>إخفاء التفاصيل</button></div><p class="details">الإيراد المتوقع لا يعني أن المبلغ دخل حساب المعسكر. افصل التخطيط عن التحصيل الفعلي.</p><ol><li>حدد العدد المتوقع للطلاب ورسوم الاشتراك لكل طالب في قسم الإيرادات والتسعير.</li><li>إذا وجدت رعاية متوقعة أضفها إلى خانة الإيرادات المتوقعة، ولا تعتبرها محصلة بعد.</li><li>عند استلام دفعة فعلياً اضغط «تسجيل تحصيل» واختر «رسوم الطلاب» أو «رعاية / إيراد إضافي».</li><li>أدخل المبلغ والتاريخ واسم الدافع والمرجع ثم احفظ العملية.</li><li>راجع سجل التحصيل وصافي النقدية المسجل، واستخدم تقرير المعسكر لتصدير السجلات.</li></ol><div class="actions"><button type="button" class="btn primary" id="guideNewCollection">＋ تسجيل تحصيل فعلي</button><button type="button" class="btn" id="guideRevenueSettings">إعداد عدد الطلاب ورسومهم</button></div></section>
 </div><div class="quicknav"><a href="#categories">التصنيفات العشرة</a><a href="#expenses">المصروفات</a><a href="#revenues">إيرادات الطلاب</a><a href="#analysis">مؤشرات القرار</a></div>
 <section class="stats" style="margin-top:18px"><div class="stat" style="--accent:#376de4"><div class="stitle">الميزانية التقديرية</div><div class="num" id="estimated">—</div><div class="help">إجمالي البنود المخططة</div></div><div class="stat" style="--accent:#12a67a"><div class="stitle">المصروف الفعلي المدفوع</div><div class="num" id="actual">—</div><div class="help">المدفوع فقط دون الالتزامات</div></div><div class="stat" style="--accent:#e5a146"><div class="stitle">الإيرادات المتوقعة</div><div class="num" id="revenuesStat">—</div><div class="help">رسوم المشاركين + إيرادات أخرى</div></div><div class="stat" style="--accent:#725ad9"><div class="stitle">الفائض / العجز المتوقع</div><div class="num" id="profit">—</div><div class="help">الإيرادات المتوقعة − المصروفات التقديرية</div></div></section>
 <div class="mid"><div class="panel"><div class="panel-header"><h2>سلامة الميزانية والسيولة</h2><small>مؤشرات تشغيلية</small></div><div class="between"><b>المبالغ المدفوعة من الميزانية التقديرية</b><b id="progressLabel">—</b></div><div class="progress" style="margin-top:11px"><span id="globalProgress" style="width:0"></span></div><div class="metric-line"><span>الالتزامات غير المدفوعة: <b id="committed">—</b></span><span>المتبقي بعد الالتزامات: <b id="remaining">—</b></span><span>الاحتياطي غير المستخدم: <b id="reserve">—</b></span></div><div class="callout" id="budgetAdvice">أضف المصروفات للبدء في تحليل الميزانية.</div></div><div class="panel"><div class="panel-header"><h2>توزيع التكاليف حسب الفئة</h2><small>أعلى 5 فئات</small></div><div class="chartlist" id="chart"></div></div></div>
@@ -252,19 +273,60 @@ $('auditBody').innerHTML=state.audit.length?state.audit.slice(0,80).map(a=>'<tr>
 const breakEven=n(state.fee)>0?Math.ceil(f.estimated/n(state.fee)):null;$('breakEven').value=breakEven===null?'—':breakEven+' طالب (تقديري)';$('alerts').textContent=f.actual+f.committed>f.estimated?'⚠ المدفوع والملتزم به يتجاوزان الميزانية.':f.profit<0?'⚠ عدد الطلاب أو سعر الاشتراك لا يغطيان المصروفات الحالية.':'✓ لا توجد تجاوزات إجمالية ظاهرة. راجع جودة تقديرات البنود قبل اعتماد الميزانية.';
 }
 $('filters').addEventListener('click',e=>{let b=e.target.closest('button[data-filter]');if(!b)return;filter=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));render()});[['studentCount','students'],['studentFee','fee'],['otherRevenue','otherRevenue'],['reservePct','reservePct']].forEach(([id,k])=>$(id).addEventListener('input',e=>{if(!guardBudget())return;state[k]=n(e.target.value);save();render()}));
-function modal(on){$('modalShell').classList.toggle('open',on)}function catmodal(on){$('catModal').classList.toggle('open',on)}function refreshCats(){let current=$('itemCat').value;$('itemCat').innerHTML=state.categories.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if(state.categories.some(x=>x.id===current))$('itemCat').value=current;else if(selectedCat)$('itemCat').value=selectedCat}
+/* Inline interaction inside the long embedded finance iframe. */
+function financeBringIntoView(target){
+ if(!target)return;
+ try{
+  if(window.self!==window.parent){
+   const frame=window.frameElement;
+   if(frame&&window.parent.document){
+    const parentY=window.parent.scrollY;
+    const y=parentY+frame.getBoundingClientRect().top+target.getBoundingClientRect().top-95;
+    window.parent.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+    return;
+   }
+  }
+ }catch(e){}
+ target.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function financeShowGuide(which){
+ const container=$('financeStepGuides');
+ container.hidden=false;
+ for(const section of container.children)section.hidden=section.id!==which;
+ financeBringIntoView($(which));
+}
+function financeShowEntry(id){
+ const shell=$(id);
+ if(!shell||!document.documentElement.classList.contains('finance-embedded'))return;
+ const near=$('financeStepGuides');
+ near.insertAdjacentElement('afterend',shell);
+ financeBringIntoView(shell);
+}
+document.querySelectorAll('[data-close-guide]').forEach(b=>b.onclick=()=>{
+ $('financeStepGuides').hidden=true;
+});
+$('showExpenseGuide').onclick=()=>financeShowGuide('expenseStepGuide');
+$('showPaymentsGuide').onclick=()=>financeShowGuide('paymentsStepGuide');
+$('showCollectionGuide').onclick=()=>financeShowGuide('collectionsStepGuide');
+$('guideNewExpense').onclick=()=>newItem();
+$('guideShowTemplates').onclick=()=>financeBringIntoView($('financeQuickTemplates'));
+$('guideJumpExpenses').onclick=()=>financeBringIntoView($('expenses'));
+$('guideNewCollection').onclick=()=>openCollection();
+$('guideRevenueSettings').onclick=()=>financeBringIntoView($('revenues'));
+
+function modal(on){$('modalShell').classList.toggle('open',on);if(on)financeShowEntry('modalShell')}function catmodal(on){$('catModal').classList.toggle('open',on);if(on)financeShowEntry('catModal')}function refreshCats(){let current=$('itemCat').value;$('itemCat').innerHTML=state.categories.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if(state.categories.some(x=>x.id===current))$('itemCat').value=current;else if(selectedCat)$('itemCat').value=selectedCat}
 
 let editingExpenseId=null,paymentExpenseId=null;
 const localDay=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
 function newItem(category){
- if(!guardBudget())return;
+ if(!guardBudget())return false;
  editingExpenseId=null;refreshCats();
  $('modalTitle').textContent='إضافة بند مالي';
  $('itemName').value='';$('calcMethod').value='unit';$('itemStatus').value='estimated';
  $('itemQty').value=1;$('itemDays').value=1;$('unitPrice').value=0;$('extraCost').value=0;$('paidValue').value=0;
  $('itemVendor').value='';$('itemDue').value='';$('itemRef').value='';$('itemNotes').value='';
  if(category&&state.categories.some(x=>x.id===category))$('itemCat').value=category;
- updateCalc();modal(true);$('itemName').focus();
+ updateCalc();modal(true);$('itemName').focus();return true;
 }
 function editItem(id){
  if(!guardBudget())return;
@@ -329,7 +391,7 @@ function openPayment(id){
  $('paymentTitle').textContent='تسجيل دفعة: '+x.name;
  $('paymentHint').textContent='المدفوع سابقاً: '+sar(x.paid)+' · المتبقي من التقديري: '+sar(Math.max(0,x.amount-n(x.paid)))+' — أضف دفعة جديدة فقط.';
  $('paymentAmount').value='';$('paymentDate').value=localDay();$('paymentReference').value='';
- $('paymentShell').classList.add('open');$('paymentAmount').focus();
+ $('paymentShell').classList.add('open');financeShowEntry('paymentShell');$('paymentAmount').focus();
 }
 $('paymentSave').onclick=()=>{
  const x=state.items.find(row=>row.id===paymentExpenseId);
@@ -350,7 +412,7 @@ $('paymentShell').addEventListener('click',e=>{if(e.target===$('paymentShell'))$
 function openCollection(){
  $('collectionType').value='tuition';$('collectionAmount').value='';$('collectionDate').value=localDay();
  $('collectionPayer').value='';$('collectionRef').value='';
- $('collectionShell').classList.add('open');$('collectionAmount').focus();
+ $('collectionShell').classList.add('open');financeShowEntry('collectionShell');$('collectionAmount').focus();
 }
 $('collectionSave').onclick=()=>{
  const raw=$('collectionAmount').value,amount=Number(raw);
@@ -366,7 +428,7 @@ $('collectionCancel').onclick=()=>$('collectionShell').classList.remove('open');
 $('collectionShell').addEventListener('click',e=>{if(e.target===$('collectionShell'))$('collectionShell').classList.remove('open')});
 $('addBtn').onclick=()=>newItem();$('addBtn2').onclick=()=>newItem();
 $('startExpense').onclick=()=>newItem();
-$('jumpExpenses').onclick=()=>$('expenses').scrollIntoView({behavior:'smooth'});
+$('jumpExpenses').onclick=()=>{financeShowGuide('paymentsStepGuide');financeBringIntoView($('expenses'))};
 $('addCollection').onclick=openCollection;$('addCollection2').onclick=openCollection;
 $('closeModal').onclick=$('cancelItem').onclick=()=>modal(false);
 $('modalShell').onclick=e=>{if(e.target===$('modalShell'))modal(false)};
@@ -458,7 +520,7 @@ $('presetButtons').innerHTML=FINANCE_PRESETS.map((p,i)=>
  '<button type="button" class="btn sm" data-preset="'+i+'">+ '+p.name+'</button>').join('');
 document.querySelectorAll('[data-preset]').forEach(button=>button.onclick=()=>{
  const p=FINANCE_PRESETS[+button.dataset.preset];if(!p)return;
- newItem(p.cat);$('itemName').value=p.name;$('calcMethod').value=p.method;
+ if(!newItem(p.cat))return;$('itemName').value=p.name;$('calcMethod').value=p.method;
  updateCalc();
 });
 
