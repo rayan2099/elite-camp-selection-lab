@@ -138,20 +138,172 @@ if(financeScoped){
  document.getElementById('financeCampBanner').textContent='الميزانية الخاصة بمعسكر «'+(financeCampName||financeCampId)+'». لكل معسكر مصروفاته وإيراداته المستقلة، محفوظة محلياً في هذا المتصفح فقط. تبدأ الميزانية دون معاملات حتى تُدخلها. أما تقديرات 2027 فمرجعية ولا تُضاف للمعسكر تلقائياً.';
 }
 
-const $=id=>document.getElementById(id);const n=x=>Math.max(0,Number(x)||0);const fmt=x=>Math.round(x).toLocaleString('en-US');const sar=x=>fmt(x)+' ر.س';const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));const save=()=>localStorage.setItem(financeStoreKey,JSON.stringify(state));const amountFor=(id)=>state.items.filter(x=>x.cat===id).reduce((a,x)=>a+x.amount,0);const actualFor=(id)=>state.items.filter(x=>x.cat===id).reduce((a,x)=>a+n(x.paid),0);
-function figures(){const base=state.items.filter(x=>x.cat!=='reserve').reduce((a,x)=>a+x.amount,0),reserve=base*n(state.reservePct)/100,explicitReserve=amountFor('reserve'),estimated=base+reserve+explicitReserve,actual=state.items.reduce((a,x)=>a+n(x.paid),0),committed=state.items.filter(x=>x.status==='committed').reduce((a,x)=>a+x.amount-n(x.paid),0),revenue=n(state.students)*n(state.fee)+n(state.otherRevenue);return {base,reserve,explicitReserve,estimated,actual,committed,revenue,profit:revenue-estimated,remaining:estimated-actual-committed}};
+const $=id=>document.getElementById(id);const n=x=>Math.max(0,Number(x)||0);const fmt=x=>Math.round(x).toLocaleString('en-US');const sar=x=>fmt(x)+' ر.س';const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));const save=()=>{try{localStorage.setItem(financeStoreKey,JSON.stringify(state));}catch(e){alert('تعذّر حفظ البيانات محلياً. صدّر CSV واحفظ نسخة احتياطية.');}};
+if(!Array.isArray(state.collections))state.collections=[];
+const receiptTotal=kind=>state.collections.filter(x=>x.kind===kind).reduce((sum,x)=>sum+n(x.amount),0);
+const actualTuition=()=>n(state.collected)+receiptTotal('tuition');
+const actualOtherRevenue=()=>receiptTotal('other');
+const amountFor=(id)=>state.items.filter(x=>x.cat===id).reduce((a,x)=>a+x.amount,0);const actualFor=(id)=>state.items.filter(x=>x.cat===id).reduce((a,x)=>a+n(x.paid),0);
+function figures(){const base=state.items.filter(x=>x.cat!=='reserve').reduce((a,x)=>a+x.amount,0),reserve=base*n(state.reservePct)/100,explicitReserve=amountFor('reserve'),estimated=base+reserve+explicitReserve,actual=state.items.reduce((a,x)=>a+n(x.paid),0),committed=state.items.filter(x=>x.status==='committed').reduce((a,x)=>a+x.amount-n(x.paid),0),revenue=n(state.students)*n(state.fee)+n(state.otherRevenue),actualRevenue=actualTuition()+actualOtherRevenue();return {base,reserve,explicitReserve,estimated,actual,committed,revenue,actualRevenue,profit:revenue-estimated,remaining:estimated-actual-committed}};
 function render(){const f=figures();$('estimated').textContent=sar(f.estimated);$('actual').textContent=sar(f.actual);$('revenuesStat').textContent=sar(f.revenue);$('profit').textContent=sar(f.profit);$('profit').style.color=f.profit<0?'var(--red)':'var(--navy)';$('progressLabel').textContent=(f.estimated?((f.actual/f.estimated)*100).toFixed(1):0)+'%';$('globalProgress').style.width=Math.min(100,f.estimated?f.actual/f.estimated*100:0)+'%';$('committed').textContent=sar(f.committed);$('remaining').textContent=sar(f.remaining);$('reserve').textContent=sar(f.reserve+f.explicitReserve);$('budgetAdvice').textContent=f.remaining<0?'تنبيه: المدفوعات والالتزامات تتجاوز الميزانية المقدرة. راجع بنود الإنفاق.':f.profit<0?'تنبيه: التكاليف المقدرة تتجاوز الإيرادات المتوقعة. راجع التسعير أو خفض التكاليف.':'الوضع الحالي: التكاليف المتوقعة مغطاة بالإيرادات المتوقعة. راجع الالتزامات والتحصيل بانتظام.';
 const data=state.categories.map(c=>({...c,value:amountFor(c.id)+(c.id==='reserve'?f.reserve:0),paid:actualFor(c.id)}));let sorted=[...data].sort((a,b)=>b.value-a.value);let max=sorted[0]?.value||1;$('chart').innerHTML=sorted.slice(0,5).map(c=>`<div class="chartrow"><span>${esc(c.name)}</span><div class="bar"><i style="background:${c.color};width:${Math.min(100,c.value/max*100)}%"></i></div><span class="v">${fmt(c.value)}</span></div>`).join('');$('categoryGrid').innerHTML=data.map(c=>`<article class="cat ${selectedCat===c.id?'selected':''}" data-cat="${esc(c.id)}" style="--tone:${c.color};--tint:${c.color}17"><div class="symbol">${c.icon}</div><h3>${esc(c.name)}</h3><div class="micro">${esc(c.desc)}</div><div class="money">${sar(c.value)}</div><div class="between"><span class="count">${state.items.filter(i=>i.cat===c.id).length} بنود</span><span class="count">${c.value?Math.round(c.paid/c.value*100):0}% مدفوع</span></div><div class="progress"><span style="width:${c.value?Math.min(100,c.paid/c.value*100):0}%"></span></div></article>`).join('');document.querySelectorAll('.cat').forEach(e=>e.onclick=()=>{selectedCat=selectedCat===e.dataset.cat?null:e.dataset.cat;render();$('expenses').scrollIntoView({behavior:'smooth',block:'start'})});
-const rows=state.items.filter(x=>(filter==='all'||x.status===filter)&&(!selectedCat||x.cat===selectedCat));$('expensesBody').innerHTML=rows.length?rows.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(state.categories.find(c=>c.id===x.cat)?.name||'مخصص')}</td><td>${fmt(x.amount)}</td><td>${fmt(n(x.paid))}</td><td><span class="pill ${x.status}">${{estimated:'تقديري',committed:'ملتزم به',paid:'مدفوع'}[x.status]}</span></td><td><button class="del" data-del="${esc(x.id)}" title="حذف المصروف">×</button></td></tr>`).join(''):`<tr><td colspan="6"><div class="empty">لا توجد بنود مطابقة. اضغط «إضافة مصروف» لإنشاء بند جديد.</div></td></tr>`;document.querySelectorAll('[data-del]').forEach(e=>e.onclick=()=>{if(confirm('هل تريد حذف هذا المصروف؟')){state.items=state.items.filter(x=>x.id!==e.dataset.del);save();render()}});
-['studentCount','studentFee','collectedFees','otherRevenue','reservePct'].forEach((id)=>{const v={studentCount:state.students,studentFee:state.fee,collectedFees:state.collected,otherRevenue:state.otherRevenue,reservePct:state.reservePct}[id];if(document.activeElement!==$(id))$(id).value=v});$('expectedRevenue').textContent=sar(f.revenue);$('revenueSummary').textContent=`${fmt(state.students)} طالب × ${sar(state.fee)} + إيرادات أخرى ${sar(state.otherRevenue)}`;$('reserveAmount').value=fmt(f.reserve);$('costPerStudent').textContent=state.students?sar(f.estimated/state.students):'—';$('margin').textContent=f.revenue?((f.profit/f.revenue)*100).toFixed(1)+'%':'—';$('obligated').textContent=sar(f.actual+f.committed);$('cashflow').textContent=sar(n(state.collected)+n(state.otherRevenue)-f.actual);$('cashNet').value=fmt(n(state.collected)+n(state.otherRevenue)-f.actual);
+const rows=state.items.filter(x=>(filter==='all'||x.status===filter)&&(!selectedCat||x.cat===selectedCat));
+$('expenseGettingStarted').hidden=state.items.length>0;
+$('expensesBody').innerHTML=rows.length?rows.map(x=>{
+ const paid=n(x.paid),remaining=Math.max(0,n(x.amount)-paid);
+ const label=x.status==='estimated'?'تقديري':x.status==='committed'?'ملتزم به':remaining>0?'مدفوع جزئيًا':'مدفوع';
+ const vendor=x.vendor?'المورد: '+esc(x.vendor):'';
+ const details=[vendor,x.due?'التاريخ: '+esc(x.due):'',x.ref?'المرجع: '+esc(x.ref):'',x.notes?esc(x.notes):''].filter(Boolean).join(' · ');
+ return \`<tr><td><b>\${esc(x.name)}</b>\${details?'<div class="fin-meta">'+details+'</div>':''}</td>
+ <td>\${esc(state.categories.find(c=>c.id===x.cat)?.name||'مخصص')}</td>
+ <td>\${fmt(x.amount)}</td><td><b>\${fmt(paid)}</b><div class="fin-meta">المتبقي: \${fmt(remaining)}</div></td>
+ <td><span class="pill \${x.status}">\${label}</span></td>
+ <td><div class="fin-row-actions"><button data-edit="\${esc(x.id)}">تعديل</button><button data-pay="\${esc(x.id)}">تسجيل دفعة</button><button class="del" data-del="\${esc(x.id)}">حذف</button></div></td></tr>\`;
+}).join(''):'<tr><td colspan="6"><div class="empty">لا توجد بنود مطابقة. أضف مصروفًا أو غيّر الفلتر.</div></td></tr>';
+document.querySelectorAll('[data-edit]').forEach(el=>el.onclick=()=>editItem(el.dataset.edit));
+document.querySelectorAll('[data-pay]').forEach(el=>el.onclick=()=>openPayment(el.dataset.pay));
+document.querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{
+ const item=state.items.find(x=>x.id===el.dataset.del);
+ if(item&&confirm('حذف بند «'+item.name+'» وجميع دفعاته المسجلة؟ لا يمكن التراجع.')){
+  state.items=state.items.filter(x=>x.id!==el.dataset.del);save();render();
+ }
+});
+$('collectionsBody').innerHTML=state.collections.length?state.collections.slice().reverse().map(x=>
+ \`<tr><td>\${esc(x.date||'—')}</td><td>\${x.kind==='tuition'?'رسوم الطلاب':'إيراد آخر'}</td><td>\${esc(x.payer||'—')}</td><td>\${sar(x.amount)}\${x.ref?'<div class="fin-meta">مرجع: '+esc(x.ref)+'</div>':''}</td><td><button class="del" data-collection-del="\${esc(x.id)}">حذف</button></td></tr>\`
+).join(''):'<tr><td colspan="5" class="empty">لا توجد عمليات تحصيل مسجلة بعد.</td></tr>';
+document.querySelectorAll('[data-collection-del]').forEach(el=>el.onclick=()=>{
+ if(confirm('هل تريد حذف عملية التحصيل المسجلة؟')){state.collections=state.collections.filter(x=>x.id!==el.dataset.collectionDel);save();render();}
+});
+['studentCount','studentFee','collectedFees','otherRevenue','reservePct'].forEach((id)=>{const v={studentCount:state.students,studentFee:state.fee,collectedFees:actualTuition(),otherRevenue:state.otherRevenue,reservePct:state.reservePct}[id];if(document.activeElement!==$(id))$(id).value=v});$('expectedRevenue').textContent=sar(f.revenue);$('revenueSummary').textContent=`${fmt(state.students)} طالب × ${sar(state.fee)} + إيرادات أخرى ${sar(state.otherRevenue)}`;$('reserveAmount').value=fmt(f.reserve);$('costPerStudent').textContent=state.students?sar(f.estimated/state.students):'—';$('margin').textContent=f.revenue?((f.profit/f.revenue)*100).toFixed(1)+'%':'—';$('obligated').textContent=sar(f.actual+f.committed);$('cashflow').textContent=sar(f.actualRevenue-f.actual);$('cashNet').value=fmt(f.actualRevenue-f.actual);
 // Simplified break-even: estimated total / per-student fee, where expenses depend on entered planning quantity.
 const breakEven=n(state.fee)>0?Math.ceil(f.estimated/n(state.fee)):null;$('breakEven').value=breakEven===null?'—':breakEven+' طالب (تقديري)';$('alerts').textContent=f.actual+f.committed>f.estimated?'⚠ المدفوع والملتزم به يتجاوزان الميزانية.':f.profit<0?'⚠ عدد الطلاب أو سعر الاشتراك لا يغطيان المصروفات الحالية.':'✓ لا توجد تجاوزات إجمالية ظاهرة. راجع جودة تقديرات البنود قبل اعتماد الميزانية.';
 }
-$('filters').addEventListener('click',e=>{let b=e.target.closest('button[data-filter]');if(!b)return;filter=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));render()});[['studentCount','students'],['studentFee','fee'],['collectedFees','collected'],['otherRevenue','otherRevenue'],['reservePct','reservePct']].forEach(([id,k])=>$(id).addEventListener('input',e=>{state[k]=n(e.target.value);save();render()}));
+$('filters').addEventListener('click',e=>{let b=e.target.closest('button[data-filter]');if(!b)return;filter=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));render()});[['studentCount','students'],['studentFee','fee'],['otherRevenue','otherRevenue'],['reservePct','reservePct']].forEach(([id,k])=>$(id).addEventListener('input',e=>{state[k]=n(e.target.value);save();render()}));
 function modal(on){$('modalShell').classList.toggle('open',on)}function catmodal(on){$('catModal').classList.toggle('open',on)}function refreshCats(){let current=$('itemCat').value;$('itemCat').innerHTML=state.categories.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if(state.categories.some(x=>x.id===current))$('itemCat').value=current;else if(selectedCat)$('itemCat').value=selectedCat}
-function newItem(){refreshCats();$('itemName').value='';$('calcMethod').value='unit';$('itemStatus').value='estimated';$('itemQty').value=1;$('itemDays').value=1;$('unitPrice').value=0;$('extraCost').value=0;$('paidValue').value=0;updateCalc();modal(true)}
-function updateCalc(){const m=$('calcMethod').value,status=$('itemStatus').value;$('qtyField').style.display=m==='fixed'||m==='day'?'none':'flex';$('daysField').style.display=m==='day'||m==='personday'?'flex':'none';$('paidField').style.display=status==='paid'?'flex':'none';let mult=m==='fixed'?1:m==='day'?n($('itemDays').value):m==='personday'?n($('itemQty').value)*n($('itemDays').value):n($('itemQty').value);let val=mult*n($('unitPrice').value)+n($('extraCost').value);$('itemTotal').textContent=sar(val);$('formulaText').textContent=({unit:'الكمية × السعر + المصاريف الإضافية',personday:'عدد الأشخاص × عدد الأيام × السعر + المصاريف الإضافية',day:'عدد الأيام × السعر + المصاريف الإضافية',fixed:'المبلغ الثابت + المصاريف الإضافية'})[m];return val}
-['calcMethod','itemStatus','itemQty','itemDays','unitPrice','extraCost'].forEach(id=>$(id).addEventListener('input',updateCalc));$('saveItem').onclick=()=>{let name=$('itemName').value.trim(),amount=updateCalc(),status=$('itemStatus').value;if(!name){alert('أدخل اسم المصروف.');return}let paid=status==='paid'?n($('paidValue').value):0;if(status==='paid'&&paid===0){alert('أدخل المبلغ المدفوع فعلياً.');return}state.items.unshift({id:'i'+Date.now()+Math.random().toString(36).slice(2),name,cat:$('itemCat').value,amount,paid,status});save();modal(false);render()};$('addBtn').onclick=newItem;$('addBtn2').onclick=newItem;$('closeModal').onclick=$('cancelItem').onclick=()=>modal(false);$('modalShell').onclick=e=>{if(e.target===$('modalShell'))modal(false)};$('customCatBtn').onclick=()=>catmodal(true);$('cancelCat').onclick=()=>catmodal(false);$('catModal').onclick=e=>{if(e.target===$('catModal'))catmodal(false)};$('saveCat').onclick=()=>{let name=$('catName').value.trim();if(!name){alert('أدخل اسم التصنيف.');return}state.categories.push({id:'custom-'+Date.now(),name,icon:'▣',desc:$('catDesc').value.trim()||'بنود مالية مخصصة',formula:'حسب تعريف المصروف',color:'#6475ae'});$('catName').value='';$('catDesc').value='';save();catmodal(false);render()};$('resetBtn').onclick=()=>{if(confirm('تحميل النموذج التجريبي سيستبدل جميع البنود المالية الحالية لهذا المعسكر بأرقام افتراضية. هل تريد المتابعة؟')){state=DEFAULT();selectedCat=null;filter='all';save();render()}};
+
+let editingExpenseId=null,paymentExpenseId=null;
+const localDay=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
+function newItem(category){
+ editingExpenseId=null;refreshCats();
+ $('modalTitle').textContent='إضافة بند مالي';
+ $('itemName').value='';$('calcMethod').value='unit';$('itemStatus').value='estimated';
+ $('itemQty').value=1;$('itemDays').value=1;$('unitPrice').value=0;$('extraCost').value=0;$('paidValue').value=0;
+ $('itemVendor').value='';$('itemDue').value='';$('itemRef').value='';$('itemNotes').value='';
+ if(category&&state.categories.some(x=>x.id===category))$('itemCat').value=category;
+ updateCalc();modal(true);$('itemName').focus();
+}
+function editItem(id){
+ const x=state.items.find(row=>row.id===id);if(!x)return;
+ editingExpenseId=x.id;refreshCats();
+ $('modalTitle').textContent='تعديل البند المالي';
+ $('itemName').value=x.name||'';$('itemCat').value=x.cat;
+ $('calcMethod').value=x.method||'fixed';$('itemStatus').value=x.status||'estimated';
+ $('itemQty').value=x.qty??1;$('itemDays').value=x.days??1;
+ $('unitPrice').value=x.unitPrice??x.amount??0;$('extraCost').value=x.extra??0;
+ $('paidValue').value=n(x.paid);$('itemVendor').value=x.vendor||'';
+ $('itemDue').value=x.due||'';$('itemRef').value=x.ref||'';$('itemNotes').value=x.notes||'';
+ updateCalc();modal(true);
+}
+function updateCalc(){
+ const m=$('calcMethod').value,status=$('itemStatus').value,editing=!!editingExpenseId;
+ $('qtyField').style.display=m==='fixed'||m==='day'?'none':'flex';
+ $('daysField').style.display=m==='day'||m==='personday'?'flex':'none';
+ $('paidField').style.display=status==='paid'&&!editing?'flex':'none';
+ let mult=m==='fixed'?1:m==='day'?n($('itemDays').value):m==='personday'?n($('itemQty').value)*n($('itemDays').value):n($('itemQty').value);
+ const val=mult*n($('unitPrice').value)+n($('extraCost').value);
+ $('itemTotal').textContent=sar(val);
+ $('formulaText').textContent=({unit:'الكمية × السعر + المصاريف الإضافية',personday:'الأشخاص × الأيام × السعر + المصاريف الإضافية',day:'الأيام × السعر + المصاريف الإضافية',fixed:'التكلفة الثابتة + المصاريف الإضافية'})[m];
+ return val;
+}
+['calcMethod','itemStatus','itemQty','itemDays','unitPrice','extraCost'].forEach(id=>$(id).addEventListener('input',updateCalc));
+$('saveItem').onclick=()=>{
+ const name=$('itemName').value.trim(),amount=updateCalc(),status=$('itemStatus').value;
+ if(!name){alert('اكتب اسم البند المالي.');return;}
+ if(!Number.isFinite(amount)||amount<=0){alert('أدخل تكلفة تقديرية أكبر من صفر.');return;}
+ const initialPaid=!editingExpenseId&&status==='paid'?n($('paidValue').value):0;
+ if(status==='paid'&&!editingExpenseId&&initialPaid<=0){alert('سجّل المبلغ المدفوع فعلياً.');return;}
+ if(editingExpenseId){
+  const x=state.items.find(row=>row.id===editingExpenseId);if(!x)return;
+  if(n(x.paid)>0&&status==='estimated'){alert('لا يمكن إعادة بند له مدفوعات فعلية إلى «تقديري».');return;}
+  Object.assign(x,{name,cat:$('itemCat').value,amount,
+   status:n(x.paid)>0?'paid':status,method:$('calcMethod').value,
+   qty:n($('itemQty').value),days:n($('itemDays').value),
+   unitPrice:n($('unitPrice').value),extra:n($('extraCost').value),
+   vendor:$('itemVendor').value.trim(),due:$('itemDue').value,
+   ref:$('itemRef').value.trim(),notes:$('itemNotes').value.trim()});
+ }else{
+  state.items.unshift({id:'i'+Date.now()+Math.random().toString(36).slice(2),
+   name,cat:$('itemCat').value,amount,paid:initialPaid,status,
+   method:$('calcMethod').value,qty:n($('itemQty').value),
+   days:n($('itemDays').value),unitPrice:n($('unitPrice').value),
+   extra:n($('extraCost').value),vendor:$('itemVendor').value.trim(),
+   due:$('itemDue').value,ref:$('itemRef').value.trim(),
+   notes:$('itemNotes').value.trim(),
+   payments:initialPaid?[{id:'p'+Date.now(),amount:initialPaid,date:localDay(),method:'غير محدد',ref:'دفعة أولية عند الإنشاء'}]:[]});
+ }
+ save();modal(false);render();editingExpenseId=null;
+};
+function openPayment(id){
+ const x=state.items.find(row=>row.id===id);if(!x)return;
+ paymentExpenseId=id;
+ $('paymentTitle').textContent='تسجيل دفعة: '+x.name;
+ $('paymentHint').textContent='المدفوع سابقاً: '+sar(x.paid)+' · المتبقي من التقديري: '+sar(Math.max(0,x.amount-n(x.paid)))+' — أضف دفعة جديدة فقط.';
+ $('paymentAmount').value='';$('paymentDate').value=localDay();$('paymentReference').value='';
+ $('paymentShell').classList.add('open');$('paymentAmount').focus();
+}
+$('paymentSave').onclick=()=>{
+ const x=state.items.find(row=>row.id===paymentExpenseId);
+ const raw=$('paymentAmount').value,amount=Number(raw);
+ if(!x||!raw||!Number.isFinite(amount)||amount<=0){alert('أدخل قيمة دفعة صحيحة.');return;}
+ if(!$('paymentDate').value){alert('اختر تاريخ الدفع.');return;}
+ if(!confirm('تأكيد تسجيل دفعة بقيمة '+sar(amount)+' للبند «'+x.name+'»؟'))return;
+ if(!Array.isArray(x.payments))x.payments=[];
+ x.payments.push({id:'p'+Date.now(),date:$('paymentDate').value,amount,
+  method:$('paymentMethod').value,ref:$('paymentReference').value.trim()});
+ x.paid=n(x.paid)+amount;x.status='paid';
+ save();$('paymentShell').classList.remove('open');render();
+};
+$('paymentCancel').onclick=()=>$('paymentShell').classList.remove('open');
+$('paymentShell').addEventListener('click',e=>{if(e.target===$('paymentShell'))$('paymentShell').classList.remove('open')});
+function openCollection(){
+ $('collectionType').value='tuition';$('collectionAmount').value='';$('collectionDate').value=localDay();
+ $('collectionPayer').value='';$('collectionRef').value='';
+ $('collectionShell').classList.add('open');$('collectionAmount').focus();
+}
+$('collectionSave').onclick=()=>{
+ const raw=$('collectionAmount').value,amount=Number(raw);
+ if(!raw||!Number.isFinite(amount)||amount<=0){alert('أدخل مبلغ التحصيل الصحيح.');return;}
+ if(!$('collectionDate').value){alert('أدخل تاريخ التحصيل.');return;}
+ state.collections.push({id:'c'+Date.now()+Math.random().toString(36).slice(2),
+  kind:$('collectionType').value,date:$('collectionDate').value,
+  amount,payer:$('collectionPayer').value.trim(),ref:$('collectionRef').value.trim()});
+ save();$('collectionShell').classList.remove('open');render();
+};
+$('collectionCancel').onclick=()=>$('collectionShell').classList.remove('open');
+$('collectionShell').addEventListener('click',e=>{if(e.target===$('collectionShell'))$('collectionShell').classList.remove('open')});
+$('addBtn').onclick=()=>newItem();$('addBtn2').onclick=()=>newItem();
+$('startExpense').onclick=()=>newItem();
+$('jumpExpenses').onclick=()=>$('expenses').scrollIntoView({behavior:'smooth'});
+$('addCollection').onclick=openCollection;$('addCollection2').onclick=openCollection;
+$('closeModal').onclick=$('cancelItem').onclick=()=>modal(false);
+$('modalShell').onclick=e=>{if(e.target===$('modalShell'))modal(false)};
+$('customCatBtn').onclick=()=>catmodal(true);
+$('cancelCat').onclick=()=>catmodal(false);
+$('catModal').onclick=e=>{if(e.target===$('catModal'))catmodal(false)};
+$('saveCat').onclick=()=>{
+ const name=$('catName').value.trim();
+ if(!name){alert('أدخل اسم التصنيف.');return;}
+ if(state.categories.some(c=>c.name===name)){alert('هذا التصنيف موجود بالفعل.');return;}
+ state.categories.push({id:'custom-'+Date.now(),name,icon:'▣',
+  desc:$('catDesc').value.trim()||'بنود مالية مخصصة',
+  formula:'حسب تعريف المصروف',color:'#6475ae'});
+ $('catName').value='';$('catDesc').value='';save();catmodal(false);render();
+};
+$('resetBtn').onclick=()=>{
+ if(confirm('تحميل النموذج التجريبي سيستبدل جميع البنود والتحصيلات الحالية لهذا المعسكر. نوصي بتصدير CSV أولاً. هل تريد المتابعة؟')){
+  state=DEFAULT();state.collections=[];selectedCat=null;filter='all';save();render();
+ }
+};
 $('exportBtn').onclick=()=>{let f=figures(),lines=[['الاسم','التصنيف','التكلفة التقديرية','المدفوع فعلياً','الحالة'],...state.items.map(x=>[x.name,state.categories.find(c=>c.id===x.cat)?.name||'',x.amount,x.paid,x.status]),['إجمالي تكلفة البنود','',f.base+f.explicitReserve,'',''],['مخصص الاحتياطي النسبي','',f.reserve,'',''],['الميزانية التقديرية','',f.estimated,'',''],['المصروف الفعلي','',f.actual,'',''],['الالتزامات غير المدفوعة','',f.committed,'',''],['الإيرادات المتوقعة','',f.revenue,'',''],['الفائض المتوقع','',f.profit,'','']];let csv='\ufeff'+lines.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');let url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));let a=document.createElement('a');a.href=url;a.download='elite-camp-budget-'+(financeCampId||'demo').replace(/[^a-zA-Z0-9_-]/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)};render();
 
 /* Read-only portfolio projections; never merge with actual ledger without approval. */
