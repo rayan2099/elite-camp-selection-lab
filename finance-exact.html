@@ -114,10 +114,22 @@ html.finance-embedded .modal-shell .modal h2{font-size:18px}
  .report-table-wrap{overflow:visible}
  .report-brand{break-inside:avoid}
 }
+
+/* PDF-ready report pages; typography stays readable at A4 scale. */
+.report-sheet{font-family:Tahoma,"Segoe UI",Arial,sans-serif}
+.report-sheet .report-metrics{grid-template-columns:repeat(4,minmax(0,1fr))}
+.report-sheet .report-metric b{font-size:15px}
+.report-sheet table{font-size:10.5px}
+.report-sheet td,.report-sheet th{overflow-wrap:anywhere}
+.report-sheet .report-metric,.report-sheet tr,.report-sheet h2,.report-brand,.report-note,.report-alert{break-inside:avoid;page-break-inside:avoid}
+.report-pdf-progress{font-size:11px;color:#4b6487;align-self:center}
+.report-signatures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:27px}
+.report-signatures .sign{padding:15px 0;border-top:1px solid #afbed0;font-size:11px;color:#5c6e86}
+@media print{.report-signatures{break-inside:avoid}}
 </style><script>if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('finance-embedded');</script></head><body><aside><div class="brand">✦ أكاديمية النخبة</div><p class="desc">منصة إدارة المعسكرات</p><nav><a href="#overview">◫ &nbsp; نظرة عامة</a><a href="#categories">▦ &nbsp; التصنيفات المالية</a><a href="#expenses" class="active">▣ &nbsp; إدارة المصروفات</a><a href="#revenues">◈ &nbsp; الإيرادات والتسعير</a><a href="#analysis">▤ &nbsp; التحليل والتقارير</a></nav><div class="side-note">💡 كل مصروف له حالة مستقلة: تقديري، ملتزم به، أو مدفوع فعلياً؛ لضمان تقارير مالية دقيقة.</div></aside><main>
-<div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="resetBtn">↺ تحميل نموذج تجريبي</button><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="backupBtn">نسخة احتياطية</button><button class="btn" id="fullReportBtn">تقرير المعسكر</button><button class="btn" id="restoreBtn">استعادة نسخة</button><input id="restoreFile" type="file" accept=".json,application/json" hidden></div></header>
+<div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="fullReportBtn">⬇ التقرير المالي PDF</button></div></header>
 <section class="report-sheet" id="financeReportView" hidden role="region" aria-label="التقرير المالي التنفيذي">
-<div class="report-actions"><button class="btn primary" id="printFinanceReport" type="button">طباعة / حفظ PDF</button><button class="btn" id="downloadReportCsv" type="button">تصدير البيانات التفصيلية CSV</button><button class="btn" id="closeFinanceReport" type="button">إغلاق التقرير</button></div>
+<div class="report-actions"><button class="btn primary" id="printFinanceReport" type="button">⬇ تنزيل التقرير PDF</button><button class="btn" id="downloadReportCsv" type="button">تصدير البيانات التفصيلية CSV</button><button class="btn" id="closeFinanceReport" type="button">إغلاق التقرير</button></div>
 <div id="financeReportContent"></div></section><div class="banner" id="financeCampBanner">ⓘ هذه نسخة تفاعلية تجريبية. جميع المبالغ الأولية افتراضية ويمكن تعديلها؛ يتم حفظ التغييرات داخل هذا المتصفح فقط.</div><div class="finance-notice">تنبيه: هذه أداة تشغيل محلية داخل متصفحك، وليست نظاماً محاسبياً سحابياً. لا تُرسل البيانات تلقائياً لأي حساب آخر. احفظ نسخة احتياطية بعد إدخال المعاملات، ولا تُسجّل أي دفعة قبل التحقق من حدوثها فعلياً.</div><section class="panel" id="financeQuickTemplates" style="margin:14px 0"><div class="panel-header"><div><h2>إضافة مصروف من قالب جاهز</h2><p class="fx-note">اختر بنداً، ثم أدخل الكميات والأسعار الحقيقية. القوالب لا تُضيف أي مبالغ افتراضية.</p></div></div><div class="filters" id="presetButtons"></div></section><div class="finance-workflow" id="financeWorkflow">
 <div class="flow-step"><b>١ · إعداد ميزانية المعسكر</b><p>أدخل تكلفة السكن والوجبات والنقل والرحلات والمورد وطريقة الحساب. تبدأ كل البنود بمبالغك الفعلية وليس بيانات تجريبية.</p><button type="button" class="btn primary sm" id="startExpense">＋ فتح نموذج المصروف</button><button type="button" class="btn sm" id="showExpenseGuide">عرض التفاصيل</button></div>
 <div class="flow-step"><b>٢ · متابعة الالتزامات والمدفوعات</b><p>حوّل عرض السعر إلى التزام، وسجّل المبلغ المدفوع على دفعات بتاريخ ومرجع واضح. تابع الرصيد المتبقي لكل مورد.</p><button type="button" class="btn sm" id="jumpExpenses">فتح سجل المصروفات والدفعات</button><button type="button" class="btn sm" id="showPaymentsGuide">عرض التفاصيل</button></div>
@@ -489,13 +501,6 @@ $('saveCat').onclick=()=>{
   formula:'حسب تعريف المصروف',color:'#6475ae'});
  audit('تصنيف مخصص',name);$('catName').value='';$('catDesc').value='';save();catmodal(false);render();
 };
-$('resetBtn').onclick=()=>{
- if(!guardBudget())return;
- if(confirm('تحميل النموذج التجريبي سيستبدل جميع البنود والتحصيلات الحالية لهذا المعسكر. نوصي بتصدير CSV أولاً. هل تريد المتابعة؟')){
-  state=DEFAULT();state.collections=[];state.audit=[];state.approval={status:'draft',version:0,approvedAt:null,snapshot:null};audit('تحميل بيانات تجريبية','استبدال جميع بيانات المعسكر بالنموذج التجريبي');selectedCat=null;filter='all';save();render();
- }
-};
-
 $('financeReviewButton').onclick=()=>{
  if(!guardBudget())return;
  if(!state.items.length||!n(state.students)||!n(state.fee)){alert('أكمل التكاليف وعدد الطلاب ورسوم الطالب قبل تقديم الميزانية.');return;}
@@ -585,7 +590,79 @@ function financeReportHtml(){
  +'<div class="report-note">الإيراد المتوقع للطلاب: '+money(n(state.students)*n(state.fee))+' · الرعايات والإيرادات الأخرى المتوقعة: '+money(state.otherRevenue)+' · التحصيل الطلابي المسجل: '+money(actualTuition())+' · الإيرادات الأخرى المحصلة: '+money(actualOtherRevenue())+'. قد تتضمن السجلات القديمة تحصيلات افتتاحية بلا تفاصيل فردية.</div>'
  +section('٦ · المخاطر والاستثناءات ونقاط المتابعة',['المؤشر','النتيجة','الإجراء المطلوب'],riskRows,3)
  +'<div class="report-alert">ملاحظة حوكمة: جميع سجلات النظام حالياً محلية في المتصفح. الاعتماد محلي لا يتحقق من هوية المعتمد، وسجل التعديلات غير محمي مؤسسياً. يجب مطابقة المستندات والتحصيلات والمدفوعات مع الحسابات والفواتير الأصلية قبل الاعتماد النهائي.</div>'
+ +'<div class="report-signatures"><div class="sign">أعدّه: _____________________ &nbsp; التاريخ: ____________</div><div class="sign">راجعه: _____________________ &nbsp; التاريخ: ____________</div></div>'
  +'<div class="report-footer">أكاديمية النخبة — تقرير تشغيلي آلي · إعداد إلكتروني وفق البيانات المتاحة بتاريخ '+esc(dateText)+' · يُفضّل الاحتفاظ بنسخة احتياطية من السجلات مع هذا التقرير. لا يعتمد هذا التقرير توقيعاً إلكترونياً.</div>';
+}
+
+let financePdfLoading=null;
+async function ensureFinancePdfLibrary(){
+ if(typeof window.html2pdf==='function')return;
+ if(financePdfLoading)return financePdfLoading;
+ const providers=[
+  'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
+  'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js'
+ ];
+ financePdfLoading=(async()=>{
+  for(const src of providers){
+   try{
+    await new Promise((resolve,reject)=>{
+     const script=document.createElement('script');script.src=src;script.async=true;
+     script.onload=resolve;script.onerror=()=>reject(new Error('Library unavailable'));
+     document.head.appendChild(script);
+    });
+    if(typeof window.html2pdf==='function')return;
+   }catch(e){}
+  }
+  throw new Error('لم يتم تحميل أداة إنشاء PDF. تحقق من اتصال الإنترنت أو قيود المتصفح.');
+ })();
+ try{await financePdfLoading;}finally{financePdfLoading=null}
+}
+let financePdfBusy=false;
+async function downloadFinancePdf(){
+ if(financePdfBusy)return;
+ financePdfBusy=true;
+ const buttons=[$('fullReportBtn'),$('printFinanceReport')];
+ const original=buttons.map(b=>b.textContent);
+ buttons.forEach(b=>{b.disabled=true;b.textContent='جارٍ تجهيز ملف PDF…';});
+ try{
+  $('financeReportContent').innerHTML=financeReportHtml();
+  $('financeReportView').hidden=false;
+  await ensureFinancePdfLibrary();
+  await document.fonts?.ready;
+  const clone=$('financeReportContent').cloneNode(true);
+  clone.id='financePdfExportContent';
+  const wrapper=document.createElement('div');
+  wrapper.dir='rtl';
+  wrapper.style.cssText='position:fixed;top:0;left:-12000px;width:760px;background:#fff;padding:16px;font-family:Tahoma,"Segoe UI",Arial,sans-serif;color:#142540;z-index:-1';
+  wrapper.className='report-sheet';
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+  const filename='elite-camp-financial-report-'+(financeCampId||'camp').replace(/[^a-zA-Z0-9_-]/g,'_')+'.pdf';
+  try{
+   const options={
+    margin:[10,9,12,9],filename,
+    image:{type:'jpeg',quality:0.97},
+    html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0,windowWidth:820},
+    pagebreak:{mode:['css','legacy'],avoid:['tr','.report-brand','.report-metric','.report-note','.report-alert','.report-signatures']},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true}
+   };
+   const worker=window.html2pdf().set(options).from(wrapper).toPdf();
+   const pdf=await worker.get('pdf');
+   const pages=pdf.internal.getNumberOfPages();
+   for(let page=1;page<=pages;page++){
+    pdf.setPage(page);
+    pdf.setTextColor(120,136,153);pdf.setFont('helvetica','normal');pdf.setFontSize(8);
+    pdf.text(page+' / '+pages,105,290,{align:'center'});
+   }
+   await worker.save();
+  }finally{wrapper.remove()}
+ }catch(err){
+  alert('تعذر إنشاء ملف PDF تلقائياً: '+(err?.message||String(err))+'\\nيمكنك استخدام عرض التقرير ثم الطباعة إلى PDF كخيار احتياطي.');
+  openFinanceReport();
+ }finally{
+  financePdfBusy=false;
+  buttons.forEach((b,i)=>{b.disabled=false;b.textContent=original[i]});
+ }
 }
 function openFinanceReport(){
  $('financeReportContent').innerHTML=financeReportHtml();
@@ -593,9 +670,9 @@ function openFinanceReport(){
  if(typeof financeBringIntoView==='function')financeBringIntoView($('financeReportView'));
  else $('financeReportView').scrollIntoView({behavior:'smooth',block:'start'});
 }
-$('fullReportBtn').onclick=openFinanceReport;
+$('fullReportBtn').onclick=()=>downloadFinancePdf();
 $('closeFinanceReport').onclick=()=>{$('financeReportView').hidden=true};
-$('printFinanceReport').onclick=()=>{window.focus();window.print()};
+$('printFinanceReport').onclick=()=>downloadFinancePdf();
 $('downloadReportCsv').onclick=()=>{
  const f=figures();
  const rows=[
@@ -611,29 +688,6 @@ $('downloadReportCsv').onclick=()=>{
  financeFileDownload('elite-camp-financial-report-'+(financeCampId||'demo').replace(/[^a-zA-Z0-9_-]/g,'_')+'.csv',csv,'text/csv;charset=utf-8');
 };
 $('exportAudit').onclick=()=>financeFileDownload('camp-finance-audit-'+(financeCampId||'demo')+'.json',JSON.stringify(state.audit,null,2),'application/json;charset=utf-8');
-function financeBackup(){
- const payload={schema:'elite-camp-finance-backup',version:1,campId:financeCampId||'demo',campName:financeCampName||'',
-  exportedAt:new Date().toISOString(),data:state};
- financeFileDownload('camp-finance-backup-'+(financeCampId||'demo').replace(/[^a-zA-Z0-9_-]/g,'_')+'.json',
-  JSON.stringify(payload,null,2),'application/json;charset=utf-8');
-}
-$('backupBtn').onclick=financeBackup;
-$('restoreBtn').onclick=()=>$('restoreFile').click();
-$('restoreFile').addEventListener('change',async e=>{
- const file=e.target.files?.[0];e.target.value='';if(!file)return;
- try{
-  if(file.size>5000000)throw Error('الملف أكبر من الحد المسموح (5 ميجابايت).');
-  const backup=JSON.parse(await file.text());
-  if(backup.schema!=='elite-camp-finance-backup'||backup.version!==1||
-     !backup.data||!Array.isArray(backup.data.items)||!Array.isArray(backup.data.categories)||
-     !Array.isArray(backup.data.collections)||backup.campId!==(financeCampId||'demo')){
-    throw Error('ملف النسخة الاحتياطية غير صالح أو يخص معسكراً مختلفاً.');
-  }
-  if(!confirm('استعادة النسخة ستستبدل كل البيانات المالية الحالية لهذا المعسكر. احفظ نسخة من الوضع الحالي أولاً. هل تريد المتابعة؟'))return;
-  state=backup.data;if(!Array.isArray(state.audit))state.audit=[];if(!state.approval)state.approval={status:'draft',version:0,approvedAt:null,snapshot:null};save();filter='all';selectedCat=null;render();
-  alert('تمت استعادة البيانات المالية لهذا المعسكر.');
- }catch(err){alert('تعذرت استعادة الملف: '+err.message)}
-});
 $('presetButtons').innerHTML=FINANCE_PRESETS.map((p,i)=>
  '<button type="button" class="btn sm" data-preset="'+i+'">+ '+p.name+'</button>').join('');
 document.querySelectorAll('[data-preset]').forEach(button=>button.onclick=()=>{
