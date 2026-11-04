@@ -2731,11 +2731,12 @@ const FIN_TEMPLATES=[
  ['التصوير والتسويق','Media and marketing','marketing','خدمة','service']
 ];
 function finState(){
- const c=activeCamp();if(!c.finance||typeof c.finance!=='object')c.finance={rows:[],reservePct:10,expectedStudents:0,fee:0};
+ const c=activeCamp();if(!c.finance||typeof c.finance!=='object')c.finance={rows:[],reservePct:10,expectedStudents:0,fee:0,actualTuitionReceived:0};
  const d=c.finance;if(!Array.isArray(d.rows))d.rows=[];
  if(!Number.isFinite(+d.reservePct))d.reservePct=10;
  if(!Number.isFinite(+d.expectedStudents))d.expectedStudents=0;
  if(!Number.isFinite(+d.fee))d.fee=0;
+ if(!Number.isFinite(+d.actualTuitionReceived))d.actualTuitionReceived=0;
  return d;
 }
 const finNumber=(v)=>{const n=Number(v);return Number.isFinite(n)&&n>=0?n:0};
@@ -2749,7 +2750,7 @@ function finCalc(d){
  const reserve=plannedCosts*finNumber(d.reservePct)/100;
  const forecastTuition=finNumber(d.expectedStudents)*finNumber(d.fee);
  const forecastOther=revenues.reduce((a,x)=>a+finTotal(x,'plan'),0);
- const actualRevenue=revenues.reduce((a,x)=>a+finTotal(x,'actual'),0);
+ const actualRevenue=revenues.reduce((a,x)=>a+finTotal(x,'actual'),0)+finNumber(d.actualTuitionReceived);
  return {costs,revenues,plannedCosts,actualCosts,reserve,budget:plannedCosts+reserve,
   forecastTuition,forecastOther,forecastRevenue:forecastTuition+forecastOther,
   actualRevenue,forecastBalance:forecastTuition+forecastOther-plannedCosts-reserve,
@@ -2797,7 +2798,7 @@ function finRemove(id){
 }
 function finSetting(key,value){
  if(!finPermission())return;
- if(!['expectedStudents','fee','reservePct'].includes(key))return;
+ if(!['expectedStudents','fee','reservePct','actualTuitionReceived'].includes(key))return;
  if(value===''||!Number.isFinite(Number(value))||Number(value)<0||(+value>100&&key==='reservePct')){toast(T('أدخل قيمة صحيحة.','Enter a valid amount.'));render();return}
  finState()[key]=finNumber(value);save();render();
 }
@@ -2805,7 +2806,7 @@ function finExport(){
  const d=finState(),m=S.meta,tot=finCalc(d);
  const rows=[['type','category','name','unit','estimated_qty','estimated_unit_price_SAR','estimated_total_SAR','actual_qty','actual_unit_price_SAR','actual_total_SAR','notes']];
  d.rows.forEach(x=>rows.push([x.kind,finCategory(x.category),x.name,x.unit,x.planQty,x.planUnit,finTotal(x,'plan'),x.actualQty,x.actualUnit,finTotal(x,'actual'),x.note||'']));
- rows.push(['SUMMARY','','Expected enrolled students','',d.expectedStudents],['SUMMARY','','Fee per student SAR','',d.fee],['SUMMARY','','Estimated costs SAR','',tot.plannedCosts],['SUMMARY','','Estimated reserve SAR','',tot.reserve],['SUMMARY','','Estimated revenue SAR','',tot.forecastRevenue],['SUMMARY','','Estimated balance SAR','',tot.forecastBalance],['SUMMARY','','Actual costs SAR','',tot.actualCosts],['SUMMARY','','Actual recorded revenue SAR','',tot.actualRevenue],['SUMMARY','','Actual recorded balance SAR','',tot.actualBalance]);
+ rows.push(['SUMMARY','','Expected enrolled students','',d.expectedStudents],['SUMMARY','','Fee per student SAR','',d.fee],['SUMMARY','','Estimated costs SAR','',tot.plannedCosts],['SUMMARY','','Estimated reserve SAR','',tot.reserve],['SUMMARY','','Estimated revenue SAR','',tot.forecastRevenue],['SUMMARY','','Estimated balance SAR','',tot.forecastBalance],['SUMMARY','','Actual costs SAR','',tot.actualCosts],['SUMMARY','','Actual tuition received SAR','',d.actualTuitionReceived],['SUMMARY','','Actual recorded revenue SAR','',tot.actualRevenue],['SUMMARY','','Actual recorded balance SAR','',tot.actualBalance]);
  const csv='\uFEFF'+rows.map(row=>row.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\n');
  download('elite-camp-finance-'+(m.start||'draft')+'.csv',csv,'text/csv;charset=utf-8');
 }
@@ -2837,7 +2838,8 @@ function pageFinance(){
   +'</div>'
   +'<div class="fin-cols"><section class="fin-card"><h2>'+T('إيرادات الاشتراكات','Student registration revenue')+'</h2><p class="fin-help">'+T('أدخل عدد الطلاب المتوقع تحصيل رسومهم ورسوم الاشتراك للفرد. لا تُحسب رسوم الطلاب مرة ثانية ضمن الإيرادات الأخرى.','Enter expected paying students and fee per student. Do not duplicate tuition in other income.')+'</p>'
   +'<div class="fin-grid"><label>'+T('عدد الطلاب المتوقع سدادهم','Expected paying students')+'<input type="number" min="0" step="1" data-fin-setting="expectedStudents" value="'+d.expectedStudents+'" '+(readonly?'disabled':'')+'></label>'
-  +'<label>'+T('رسوم الاشتراك لكل طالب (ر.س)','Fee per student (SAR)')+'<input type="number" min="0" step="0.01" data-fin-setting="fee" value="'+d.fee+'" '+(readonly?'disabled':'')+'></label></div>'
+  +'<label>'+T('رسوم الاشتراك لكل طالب (ر.س)','Fee per student (SAR)')+'<input type="number" min="0" step="0.01" data-fin-setting="fee" value="'+d.fee+'" '+(readonly?'disabled':'')+'></label>'
+  +'<label class="full">'+T('رسوم الطلاب المحصّلة فعليًا حتى الآن (ر.س)','Actual tuition received (SAR)')+'<input type="number" min="0" step="0.01" data-fin-setting="actualTuitionReceived" value="'+d.actualTuitionReceived+'" '+(readonly?'disabled':'')+'></label></div>'
   +'<div class="fin-note">'+T('إجمالي الاشتراكات المتوقع: ','Expected registration revenue: ')+'<b>'+finMoney(t.forecastTuition)+'</b>'
   +'<p>'+T('الإيرادات الأخرى المتوقعة: ','Other expected income: ')+finMoney(t.forecastOther)+'</p></div></section>'
   +'<section class="fin-card"><h2>'+T('الاحتياطي ونقطة التعادل','Reserve and break-even')+'</h2><p class="fin-help">'+T('الاحتياطي نسبة مستقلة من التكاليف التقديرية؛ لا يُسجل كمصروف فعلي إلا عند دفعه ضمن بند فعلي.','Reserve is a forecast allowance and is not counted as actual spending.')+'</p>'
@@ -2851,7 +2853,7 @@ function pageFinance(){
   +'<section class="fin-card"><h2>'+T('الإيرادات الأخرى','Other revenues')+'</h2><p class="fin-help">'+T('مثل دعم الجهات الراعية والتبرعات والإيرادات غير المرتبطة برسوم التسجيل.','Examples: sponsorships, grants, and non-tuition revenue.')+'</p>'+asRows(t.revenues,'revenue')+'</section>'
   +'<section class="fin-card"><h2>'+T('المراجعة المالية قبل الاعتماد','Financial review before approval')+'</h2>'
   +'<div class="fin-cols"><div class="fin-note">'+T('الفرق بين المصروف الفعلي المسجّل والتقديري (دون الاحتياطي): ','Recorded actual costs minus estimated line costs (excluding reserve): ')+'<b class="'+(actualGap>0?'fin-bad':'fin-good')+'">'+finMoney(actualGap)+'</b><br>'+T('قد تكون الفروقات غير مكتملة إذا لم تُسجل جميع المصروفات.','Differences may be incomplete until all actual spending is entered.')+'</div>'
-  +'<div class="fin-note">'+T('صافي التدفق الفعلي المسجّل: ','Net recorded actual cash flow: ')+'<b class="'+(t.actualBalance<0?'fin-bad':'fin-good')+'">'+finMoney(t.actualBalance)+'</b><br>'+T('الإيرادات الفعلية تُضاف يدويًا ضمن «الإيرادات الأخرى». رقم الاشتراكات أعلاه توقع فقط وليس تحصيلًا فعليًا.','Actual revenue is recorded manually in other income. Estimated tuition is not counted as cash received.')+'</div></div>'
+  +'<div class="fin-note">'+T('صافي التدفق الفعلي المسجّل: ','Net recorded actual cash flow: ')+'<b class="'+(t.actualBalance<0?'fin-bad':'fin-good')+'">'+finMoney(t.actualBalance)+'</b><br>'+T('التحصيل الفعلي يشمل رسوم الطلاب المحصّلة والإيرادات الأخرى الفعلية؛ ولا يشمل توقعات الاشتراكات.','Actual cash flow includes received tuition and actual other income, not forecast registration revenue.')+'</div></div>'
   +'<p class="fin-help">'+T('قبل الإقرار بالميزانية: تحقّق من أعداد المشاركين والوجبات والليالي والرحلات، والضرائب والرسوم النظامية والتأمين والفواتير. لا تُحسب الضريبة تلقائيًا، ويمكن إضافتها كبند مستقل.','Before approval verify participant counts, meals, nights, trips, taxes, fees, insurance and invoices. Taxes are not automatically calculated; add them as a separate item.')+'</p>'
   +'</section></div>';
 }
