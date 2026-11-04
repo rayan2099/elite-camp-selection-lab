@@ -137,6 +137,11 @@ label.fld textarea{resize:vertical;min-height:70px;line-height:1.6}
 html[data-theme=dark] .seg button.on{background:var(--accent);color:#22140d}
 
 /* ---------- library ---------- */
+.custom-add-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.custom-add-row input{flex:1;min-width:170px;min-height:40px;border:1px solid var(--line);border-radius:9px;padding:8px 11px;background:var(--surface);color:var(--fg);font:inherit;font-weight:400}
+.custom-add-row input:focus{outline:2px solid var(--accent)}
+.custom-add-row button{border-color:var(--accent);color:var(--fg);font-weight:750;min-height:40px;background:var(--accentsoft)}
+.custom-add-row button:hover{background:var(--accent);color:#22140d}
 /* Accessible, responsive selection tiles for program skills and requirements */
 .custom-option-section{display:flex;flex-direction:column;gap:8px;min-width:0}
 .custom-option-title{font-size:13px;font-weight:800;color:var(--fg)}
@@ -1238,7 +1243,7 @@ function seedCamps(){
 }
 function initial(){
   const camps=seedCamps();
-  return {version:4,customPrograms:[],role:'director',lang:'ar',theme:'light',page:'camps',
+  return {version:4,customPrograms:[],customLabels:{tags:{},needs:{}},role:'director',lang:'ar',theme:'light',page:'camps',
     activeId:camps.find(c=>c.id==='camp-autumn').id,camps};
 }
 function defineActive(o){
@@ -1259,12 +1264,12 @@ function withCamp(id,fn){
 }
 function migrate(o){
   if(!o||typeof o!=='object')return initial();
-  if(o.version===4&&Array.isArray(o.camps)&&o.camps.length){if(!Array.isArray(o.customPrograms))o.customPrograms=[];return o;}
+  if(o.version===4&&Array.isArray(o.camps)&&o.camps.length){if(!Array.isArray(o.customPrograms))o.customPrograms=[];if(!o.customLabels||typeof o.customLabels!=='object')o.customLabels={tags:{},needs:{}};return o;}
   if(o.meta&&Array.isArray(o.selected)){
     const camp=makeCamp({id:'camp-migrated',createdAt:Date.now(),updatedAt:Date.now(),status:'draft',
       meta:o.meta,rules:o.rules||baseRules(),selected:o.selected,step:o.step||1,
       draft:!!o.draft,prep:o.prep||{},log:o.log||[],shared:!!o.shared,students:o.students||STUDENTS.map(s=>({...s}))});
-    return {version:4,customPrograms:Array.isArray(o.customPrograms)?o.customPrograms:[],role:o.role||'director',lang:o.lang||'ar',theme:o.theme||'light',page:'camps',activeId:camp.id,camps:[camp]};
+    return {version:4,customPrograms:Array.isArray(o.customPrograms)?o.customPrograms:[],customLabels:{tags:{},needs:{}},role:o.role||'director',lang:o.lang||'ar',theme:o.theme||'light',page:'camps',activeId:camp.id,camps:[camp]};
   }
   return initial();
 }
@@ -1771,6 +1776,19 @@ const TAGNAMES={
   positivity:['الإيجابية','Positivity'],communication:['التواصل','Communication'],independence:['الاستقلالية','Independence'],
   decision:['اتخاذ القرار','Decision making'],publicspeaking:['التحدث أمام الجمهور','Public speaking'],leadership:['القيادة','Leadership']
 };
+
+/* User-created program tags are shared across the camp program library in this browser. */
+function applyCustomLabels(){
+ const data=S.customLabels||{};
+ for(const [kind,dictionary] of [['tags',TAGNAMES],['needs',NEEDS]]){
+  const saved=data[kind]||{};
+  for(const [key,label] of Object.entries(saved)){
+   if(!key.startsWith('user-'+kind+'-')||typeof label!=='string'||!label.trim())continue;
+   dictionary[key]=[label,label];
+  }
+ }
+}
+applyCustomLabels();
 const tagName=t=>TAGNAMES[t]?L({ar:TAGNAMES[t][0],en:TAGNAMES[t][1]}):t;
 
 /* ============================ ٦ · الجاهزية ============================ */
@@ -3254,9 +3272,15 @@ function customProgramModal(id){
       <label class="fld">${T('الحد الأعلى للعمر','Maximum age')}<input type="number" id="cpAgeMax" min="6" max="18" value="${i.ages[1]}"></label>
       <label class="fld wide">${T('مستوى التجهيز','Preparation level')}<select id="cpLoad"><option value="1" ${i.load===1?'selected':''}>1 — ${T('بسيط','Low')}</option><option value="2" ${i.load===2?'selected':''}>2 — ${T('متوسط','Medium')}</option><option value="3" ${i.load===3?'selected':''}>3 — ${T('مرتفع','High')}</option></select><span class="help">${T('تقدير نسبي للجهد، وليس عدد ساعات أو تكلفة.','Relative preparation effort, not hours or cost.')}</span></label>
       <div class="fld wide custom-option-section"><span class="custom-option-title">${T('المعرفة والمهارات المستهدفة (اختياري)','Targeted needs / skills (optional)')}</span><span class="help">${T('اختر وسومًا دقيقة فقط؛ تُستخدم في المطابقة الأولية مع احتياجات الطلاب.','Select only applicable tags; they inform the preliminary student-needs match.')}</span>
-        <div class="custom-checks">${Object.entries(TAGNAMES).map(([key,val])=>`<label><input type="checkbox" data-custom-tag="${key}" ${i.tags.includes(key)?'checked':''}><span class="option-text">${T(val[0],val[1])}</span></label>`).join('')}</div></div>
+        <div class="custom-checks">${Object.entries(TAGNAMES).map(([key,val])=>`<label><input type="checkbox" data-custom-tag="${key}" ${i.tags.includes(key)?'checked':''}><span class="option-text">${T(val[0],val[1])}</span></label>`).join('')}</div><div class="custom-add-row">
+          <input id="cpNewTag" maxlength="48" autocomplete="off" placeholder="${T('اكتب وسماً جديداً، مثل: التفكير النقدي','New skill tag, e.g. Critical thinking')}" aria-label="${T('اسم وسم المهارة الجديد','New skill tag')}" />
+          <button type="button" class="small" data-act="addCustomLabel:tags">+ ${T('إضافة وسم','Add tag')}</button>
+        </div></div>
       <div class="fld wide custom-option-section"><span class="custom-option-title">${T('متطلبات التشغيل والتجهيز','Operational and preparation needs')}</span><span class="help">${T('حدّد ما يجب توفيره قبل تنفيذ البرنامج.','Identify resources required before delivery.')}</span>
-        <div class="custom-checks">${Object.entries(NEEDS).map(([key,val])=>`<label><input type="checkbox" data-custom-need="${key}" ${i.need.includes(key)?'checked':''}><span class="option-text">${T(val[0],val[1])}</span></label>`).join('')}</div></div>
+        <div class="custom-checks">${Object.entries(NEEDS).map(([key,val])=>`<label><input type="checkbox" data-custom-need="${key}" ${i.need.includes(key)?'checked':''}><span class="option-text">${T(val[0],val[1])}</span></label>`).join('')}</div><div class="custom-add-row">
+          <input id="cpNewNeed" maxlength="48" autocomplete="off" placeholder="${T('أضف متطلباً، مثل: مختبر علوم','New requirement, e.g. Science lab')}" aria-label="${T('اسم المتطلب الجديد','New requirement')}" />
+          <button type="button" class="small" data-act="addCustomLabel:needs">+ ${T('إضافة وسم','Add tag')}</button>
+        </div></div>
       <label class="fld wide">${T('1. التهيئة والتعلّم','1. Introduction and learning')}<textarea id="cpPh1" maxlength="500" placeholder="${T('كيف تبدأ التجربة؟','How will it start?')}">${esc(i.ph[0]?.[0]||'')}</textarea></label>
       <label class="fld wide">${T('2. الممارسة والتطبيق','2. Practice and application')}<textarea id="cpPh2" maxlength="500" placeholder="${T('كيف يطبّق الطالب ما تعلّمه؟','How will students apply learning?')}">${esc(i.ph[1]?.[0]||'')}</textarea></label>
       <label class="fld wide">${T('3. المخرجات وإظهار الأثر','3. Outputs and demonstration')}<textarea id="cpPh3" maxlength="500" placeholder="${T('كيف يُظهر الطالب ما أنجزه؟','How can students demonstrate their work?')}">${esc(i.ph[2]?.[0]||'')}</textarea></label>
@@ -3267,6 +3291,37 @@ function customProgramModal(id){
       <button class="primary" data-act="saveCustomProgram${id?':'+id:''}">${existing?T('حفظ التعديلات','Save changes'):T('حفظ في مكتبة البرامج','Save to library')}</button>
     </div>`);
 }
+function addCustomLabel(kind){
+ if(!can('catalog'))return;
+ const isTag=kind==='tags',isNeed=kind==='needs';
+ if(!isTag&&!isNeed)return;
+ const input=$(isTag?'#cpNewTag':'#cpNewNeed');
+ const group=input?.previousElementSibling;
+ const dict=isTag?TAGNAMES:NEEDS;
+ const value=input?.value.trim().replace(/\\s+/g,' ');
+ if(!input||!group||!value)return toast(T('أدخل اسم الوسم أولاً.','Enter a tag name first.'));
+ if(value.length<2||value.length>48)return toast(T('اسم الوسم يجب أن يتراوح بين حرفين و48 حرفاً.','Tag must be 2–48 characters.'));
+ const norm=x=>String(x).normalize('NFKC').replace(/[\u064B-\u065F\u0640]/g,'').trim().toLocaleLowerCase();
+ const found=Object.keys(dict).find(k=>norm(dict[k][0])===norm(value)||norm(dict[k][1])===norm(value));
+ if(found){
+  const existing=Array.from(group.querySelectorAll('input[type="checkbox"]')).find(el=>(isTag?el.dataset.customTag:el.dataset.customNeed)===found);
+  if(existing){existing.checked=true;existing.closest('label')?.scrollIntoView({block:'nearest',behavior:'smooth'});}
+  input.value='';
+  return toast(T('الوسم موجود مسبقاً وتم تحديده.','Existing tag selected.'));
+ }
+ const key='user-'+kind+'-'+newId('');
+ if(!S.customLabels)S.customLabels={tags:{},needs:{}};
+ if(!S.customLabels[kind])S.customLabels[kind]={};
+ S.customLabels[kind][key]=value;
+ dict[key]=[value,value];
+ const label=document.createElement('label'),checkbox=document.createElement('input'),textNode=document.createElement('span');
+ checkbox.type='checkbox';checkbox.checked=true;checkbox.dataset[isTag?'customTag':'customNeed']=key;
+ textNode.className='option-text';textNode.textContent=value;
+ label.append(checkbox,textNode);group.append(label);
+ input.value='';save();
+ toast(T('أُضيف الوسم واختير للبرنامج الحالي.','Tag added and selected for this program.'));
+}
+
 function refreshCustomFields(){
   const track=$('#cpTrack')?.value;
   const field=$('#cpField');if(!track||!field)return;
@@ -3560,6 +3615,7 @@ document.addEventListener('click',e=>{
     saveBrief:()=>saveBrief(),
     item:()=>itemModal(arg),
     newProgram:()=>customProgramModal(),
+    addCustomLabel:()=>addCustomLabel(arg),
     editProgram:()=>customProgramModal(arg),
     saveCustomProgram:()=>saveCustomProgram(arg||null),
     deleteProgram:()=>deleteCustomProgram(arg),
