@@ -633,7 +633,7 @@ async function downloadFinancePdf(){
   clone.id='financePdfExportContent';
   const wrapper=document.createElement('div');
   wrapper.dir='rtl';
-  wrapper.style.cssText='position:fixed;top:0;left:-12000px;width:760px;background:#fff;padding:16px;font-family:Tahoma,"Segoe UI",Arial,sans-serif;color:#142540;z-index:-1';
+  wrapper.style.cssText='position:fixed;top:0;left:0;width:760px;background:#fff;padding:16px;font-family:Tahoma,"Segoe UI",Arial,sans-serif;color:#142540;z-index:-1;pointer-events:none';
   wrapper.className='report-sheet';
   wrapper.appendChild(clone);
   document.body.appendChild(wrapper);
