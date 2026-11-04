@@ -73,7 +73,7 @@ html.finance-embedded .modal-shell .modal h2{font-size:18px}
 .finance-notice{background:#fff8ed;border:1px solid #f2debc;padding:12px;border-radius:9px;color:#775323;font-size:11px;line-height:1.8;margin:9px 0}
 @media(max-width:900px){.finance-workflow{grid-template-columns:1fr}}
 </style><script>if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('finance-embedded');</script></head><body><aside><div class="brand">✦ أكاديمية النخبة</div><p class="desc">منصة إدارة المعسكرات</p><nav><a href="#overview">◫ &nbsp; نظرة عامة</a><a href="#categories">▦ &nbsp; التصنيفات المالية</a><a href="#expenses" class="active">▣ &nbsp; إدارة المصروفات</a><a href="#revenues">◈ &nbsp; الإيرادات والتسعير</a><a href="#analysis">▤ &nbsp; التحليل والتقارير</a></nav><div class="side-note">💡 كل مصروف له حالة مستقلة: تقديري، ملتزم به، أو مدفوع فعلياً؛ لضمان تقارير مالية دقيقة.</div></aside><main>
-<div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="resetBtn">↺ تحميل نموذج تجريبي</button><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="backupBtn">نسخة احتياطية</button><button class="btn" id="fullReportBtn">تقرير المعسكر</button><button class="btn" id="restoreBtn">استعادة نسخة</button><input id="restoreFile" type="file" accept=".json,application/json" hidden><button class="btn primary" id="addBtn">＋ إضافة مصروف</button></div></header>
+<div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="resetBtn">↺ تحميل نموذج تجريبي</button><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="backupBtn">نسخة احتياطية</button><button class="btn" id="fullReportBtn">تقرير المعسكر</button><button class="btn" id="restoreBtn">استعادة نسخة</button><input id="restoreFile" type="file" accept=".json,application/json" hidden></div></header>
 <div class="banner" id="financeCampBanner">ⓘ هذه نسخة تفاعلية تجريبية. جميع المبالغ الأولية افتراضية ويمكن تعديلها؛ يتم حفظ التغييرات داخل هذا المتصفح فقط.</div><div class="finance-notice">تنبيه: هذه أداة تشغيل محلية داخل متصفحك، وليست نظاماً محاسبياً سحابياً. لا تُرسل البيانات تلقائياً لأي حساب آخر. احفظ نسخة احتياطية بعد إدخال المعاملات، ولا تُسجّل أي دفعة قبل التحقق من حدوثها فعلياً.</div><section class="panel" id="financeQuickTemplates" style="margin:14px 0"><div class="panel-header"><div><h2>إضافة مصروف من قالب جاهز</h2><p class="fx-note">اختر بنداً، ثم أدخل الكميات والأسعار الحقيقية. القوالب لا تُضيف أي مبالغ افتراضية.</p></div></div><div class="filters" id="presetButtons"></div></section><div class="finance-workflow" id="financeWorkflow">
 <div class="flow-step"><b>١ · إعداد ميزانية المعسكر</b><p>أدخل تكلفة السكن والوجبات والنقل والرحلات والمورد وطريقة الحساب. تبدأ كل البنود بمبالغك الفعلية وليس بيانات تجريبية.</p><button type="button" class="btn primary sm" id="startExpense">＋ فتح نموذج المصروف</button><button type="button" class="btn sm" id="showExpenseGuide">عرض التفاصيل</button></div>
 <div class="flow-step"><b>٢ · متابعة الالتزامات والمدفوعات</b><p>حوّل عرض السعر إلى التزام، وسجّل المبلغ المدفوع على دفعات بتاريخ ومرجع واضح. تابع الرصيد المتبقي لكل مورد.</p><button type="button" class="btn sm" id="jumpExpenses">فتح سجل المصروفات والدفعات</button><button type="button" class="btn sm" id="showPaymentsGuide">عرض التفاصيل</button></div>
@@ -197,7 +197,7 @@ $('financeReopenButton').hidden=!locked;
 $('financeApprovalGuidance').textContent=locked?'ثُبتت التقديرات حتى إعادة الفتح.':approval.status==='review'?'بانتظار اعتماد الميزانية بعد المراجعة.':'أدخل المصروفات وتوقعات التسجيل ثم أرسل للمراجعة.';
 $('financeApprovalNotice').textContent=locked?'سجّل المدفوعات والتحصيلات حسب حدوثها. هذا الاعتماد محلي وليس صلاحية موثّقة.':'لا يعتمد هذا الإجراء على حساب مستخدم موثّق. يجب تأكيد الموافقات خارج النظام.';
 ['studentCount','studentFee','otherRevenue','reservePct'].forEach(id=>$(id).disabled=locked);
-['addBtn','addBtn2','startExpense','customCatBtn'].forEach(id=>$(id).disabled=locked);
+['addBtn2','startExpense','customCatBtn'].forEach(id=>$(id).disabled=locked);
 const today=new Date().toISOString().slice(0,10);
 const due=state.items.filter(x=>x.due&&x.due<today&&x.status!=='estimated'&&n(x.amount)>n(x.paid));
 const refs=state.items.filter(x=>x.status!=='estimated'&&!x.ref);
@@ -426,7 +426,7 @@ $('collectionSave').onclick=()=>{
 };
 $('collectionCancel').onclick=()=>$('collectionShell').classList.remove('open');
 $('collectionShell').addEventListener('click',e=>{if(e.target===$('collectionShell'))$('collectionShell').classList.remove('open')});
-$('addBtn').onclick=()=>newItem();$('addBtn2').onclick=()=>newItem();
+$('addBtn2').onclick=()=>newItem();
 $('startExpense').onclick=()=>newItem();
 $('jumpExpenses').onclick=()=>{financeShowGuide('paymentsStepGuide');financeBringIntoView($('expenses'))};
 $('addCollection').onclick=openCollection;$('addCollection2').onclick=openCollection;
