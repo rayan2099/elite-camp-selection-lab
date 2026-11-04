@@ -2012,7 +2012,9 @@ function stepPlate(){
 let binSearchQuery='';
 function stepBricks(){
   const track=S.binTrack||'all';
-  const pool=LIB.filter(i=>(track==='all'||i.t===track)&&!isSel(i.id)&&(!libSearchNormalize(binSearchQuery)||libSearchNormalize(binSearchQuery).split(/\s+/).every(token=>libSearchNormalize(libSearchText(i)).includes(token))));
+  const pool=LIB.filter(i=>(track==='all'||i.t===track)&&!isSel(i.id));
+  const binTerms=libSearchNormalize(binSearchQuery).split(/\s+/).filter(Boolean);
+  const matchingCount=pool.filter(i=>binTerms.every(token=>libSearchNormalize(libSearchText(i)).includes(token))).length;
   const tray=S.selected.filter(x=>!x.day);
   const placed=S.selected.filter(x=>x.day);
   return `<div class="build2">
@@ -2023,7 +2025,7 @@ function stepBricks(){
       <p class="help" style="margin:6px 0 12px">${T('أضف البرامج المناسبة إلى خطتك، ثم وزّعها على الأيام في الخطوة التالية.','Choose suitable programs for this camp, then allocate them in the next step.')}</p>${can('catalog')?`<button class="small" data-act="newProgram" style="margin-bottom:12px">+ ${T('إنشاء برنامج وإضافته للمكتبة','Create a library program')}</button>`:''}
       <div style="margin:10px 0 13px"><input type="search" id="binSearch" autocomplete="off" spellcheck="false" value="${esc(binSearchQuery)}" placeholder="${T('ابحث بجزء من اسم البرنامج أو الهدف أو الوصف…','Search any part of a program name, goal or description…')}" aria-label="${T('البحث في البرامج المتاحة','Search available programs')}" style="width:100%;padding:10px 13px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--fg)"><p class="help" style="margin-top:5px">${T('تظهر النتائج فوراً حتى عند كتابة حرفين من منتصف الكلمة.','Results update instantly, including partial words.')}</p></div>
       <div class="bins" id="binSearchResults">
-        ${pool.map(i=>{const t=TRACK(i.t);return `<div class="bin" data-bin-search="${esc(libSearchNormalize(libSearchText(i)))}" style="--bc:${t.color}">
+        ${pool.map(i=>{const t=TRACK(i.t);return `<div class="bin" data-bin-search="${esc(libSearchNormalize(libSearchText(i)))}" ${binTerms.every(token=>libSearchNormalize(libSearchText(i)).includes(token))?'':'hidden'} style="--bc:${t.color}">
           <span class="program-icon">${uiIcon(TRACKICON[i.t])}</span>
           <div class="ttl">${esc(L({ar:i.ar,en:i.en}))}</div>
           <div class="sub">${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))}</div>
@@ -2031,6 +2033,7 @@ function stepBricks(){
           <div class="row"><span class="trackchip" style="--tc:${t.color}"><i></i>${L(t.short)}</span>
             <button class="small primary" data-act="add:${i.id}">${T('+ أضف','+ Add')}</button></div>
         </div>`}).join('')||`<div class="empty" style="grid-column:1/-1">${T('أُضيفت جميع برامج هذا المسار إلى الخطة.','All programs in this track are already selected.')}</div>`}
+        <div class="empty" id="binSearchEmpty" ${matchingCount?'hidden':''}>${T('لا توجد برامج تطابق البحث. جرّب جزءاً آخر من الكلمة.','No matching programs. Try another part of the word.')}</div>
       </div>
     </div>
     <div>
