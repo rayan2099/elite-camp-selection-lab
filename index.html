@@ -1828,14 +1828,14 @@ function pageReadiness(){
       </div>
     </div>
     <div class="card spacer">
-      <div class="row"><h2>${T('متطلبات التجهيز المترتبة على الاختيار','Prep requirements implied by the selection')}</h2>
-        <span class="pill line">${T('مولّدة تلقائيًا','Auto-generated')}</span></div>
-      <p class="help" style="margin:6px 0 12px">${T('عيّن مسؤولًا لكل متطلب. ضع علامة «جاهز» بعد التأكد من توفيره فعليًا، لا بمجرد ظهوره في القائمة.','Assign a person to each requirement and mark Ready only after verifying it is actually available.')}</p>
-      ${na.length?`<div class="tablewrap"><table><thead><tr><th>${T('المتطلب','Requirement')}</th><th>${T('البرامج','Programs')}</th><th>${T('المسؤول','Owner')}</th><th>${T('الحالة','Status')}</th></tr></thead><tbody>
+      <div class="row"><h2>${T('جاهزية المعسكر ومتطلبات التشغيل','Camp operational readiness and requirements')}</h2>
+        <span class="pill line">${T('مستخرجة من البرامج','From programs')}</span></div>
+      <p class="help" style="margin:6px 0 12px">${T('تابع جميع متطلبات تشغيل المعسكر، وحدّد المسؤول عن كل متطلب، وتأكد من جاهزيته قبل بدء التنفيذ. يمكنك إضافة متطلبات جديدة حسب احتياجات المعسكر.','Track all operational requirements, assign an owner and verify readiness before delivery. You can add camp-specific requirements.')}</p>
+      ${na.length?`<div class="tablewrap"><table><thead><tr><th>${T('المتطلب التشغيلي','Operational requirement')}</th><th>${T('البرامج المرتبطة','Related programs')}</th><th>${T('المسؤول عن التنفيذ','Responsible owner')}</th><th>${T('حالة الجاهزية','Readiness')}</th></tr></thead><tbody>
         ${na.map(([k,n])=>`<tr><td><b>${esc(L({ar:NEEDS[k][0],en:NEEDS[k][1]}))}</b></td>
           <td><span class="pill">${n}</span></td>
           <td><input data-prep="owner:${k}" value="${esc((S.prep[k]||{}).owner||'')}" placeholder="${T('اسم المسؤول','Owner name')}" style="width:150px"></td>
-          <td><label class="pill ${((S.prep[k]||{}).done)?'good':'line'}" style="cursor:pointer"><input type="checkbox" data-prep="done:${k}" ${((S.prep[k]||{}).done)?'checked':''} style="margin:0"> ${((S.prep[k]||{}).done)?T('جاهز','Ready'):T('قيد التجهيز','In progress')}</label></td></tr>`).join('')}
+          <td><label class="pill ${((S.prep[k]||{}).done)?'good':'line'}" style="cursor:pointer"><input type="checkbox" data-prep="done:${k}" ${((S.prep[k]||{}).done)?'checked':''} style="margin:0"> ${((S.prep[k]||{}).done)?T('جاهز للتنفيذ','Ready for delivery'):T('جارٍ التجهيز','In preparation')}</label></td></tr>`).join('')}
       </tbody></table></div>`:`<div class="empty">${T('لا متطلبات لأن الخطة فارغة.','No requirements yet because the plan is empty.')}</div>`}
     </div>
     <div class="grid cols2 spacer">
