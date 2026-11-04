@@ -92,7 +92,7 @@ html.finance-embedded .cat .micro{font-size:10px}
 </section></details><section id="categories"><div class="section-title"><div><h2>التصنيفات المالية العشرة</h2><p>اضغط على أي تصنيف لمراجعة بنوده أو إضافة مصروف جديد إليه.</p></div><button class="btn sm" id="customCatBtn">＋ إنشاء تصنيف مخصص</button></div><div class="categories" id="categoryGrid"></div></section>
 <section class="grid2" id="expenses"><div class="panel"><div class="panel-header"><div><h2>سجل المصروفات التفصيلي</h2><p class="sub" style="font-size:12px">تتبع كل بند من التقدير حتى الدفع</p></div><button class="btn primary sm" id="addBtn2">＋ مصروف جديد</button></div><div class="filters" id="filters"><button class="filter active" data-filter="all">جميع البنود</button><button class="filter" data-filter="estimated">تقديري</button><button class="filter" data-filter="committed">ملتزم به</button><button class="filter" data-filter="paid">مدفوع</button></div><div class="finance-empty-warning" id="expenseGettingStarted" hidden>لم تُسجّل أي بنود بعد. ابدأ ببند واحد مثل «إقامة الطلاب» أو «استئجار الحافلة»، ويمكنك تعديله لاحقاً.</div><div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>البند</th><th>التصنيف</th><th>التقديري</th><th>المدفوع</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody id="expensesBody"</tbody></table></div></div><div class="panel" id="revenues"><div class="panel-header"><h2>الإيرادات والتسعير</h2><span class="tag">حساب فوري</span></div><div class="form-grid"><label class="field">عدد الطلاب المتوقع<input id="studentCount" type="number" min="0"></label><label class="field">رسوم الاشتراك للطالب (ر.س)<input id="studentFee" type="number" min="0"></label><label class="field">الرسوم المحصلة فعلياً (ر.س)<input id="collectedFees" type="number" min="0" readonly title="تُحسب من سجل التحصيل"></label><label class="field">إيرادات / رعايات إضافية متوقعة (ر.س)<input id="otherRevenue" type="number" min="0"></label></div><div class="finance-ledger"><div class="between"><b>سجل التحصيل الفعلي</b><button class="btn sm" id="addCollection2">＋ تحصيل جديد</button></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>النوع</th><th>الدافع</th><th>المبلغ</th><th>الإجراء</th></tr></thead><tbody id="collectionsBody"></tbody></table></div></div><div class="summary-box"><span class="small">إجمالي الإيرادات المتوقعة</span><strong id="expectedRevenue">—</strong><span class="small" id="revenueSummary">—</span></div><div class="divider"></div><div class="panel-header"><h2>نقطة التعادل</h2><span class="tag">مؤشر قرار</span></div><div class="form-grid"><label class="field">الطلاب المطلوبون للتعادل<input id="breakEven" readonly></label><label class="field">صافي التحصيل المسجل<input id="cashNet" readonly></label></div><p class="small" style="margin-top:12px">تحسب نقطة التعادل وفق التكاليف الثابتة والتكاليف المتغيرة لكل طالب؛ عند تعذر تحديدها بدقة يُستخدم تقدير مبسط ويُشار إليه.</p></div></section>
 <section id="analysis" class="grid2"><div class="panel"><div class="panel-header"><h2>مؤشرات الأداء واتخاذ القرار</h2><span class="tag">تتحدث تلقائياً</span></div><div class="form-grid"><div class="summary-box" style="margin:0"><span class="small">التكلفة التقديرية للطالب</span><strong id="costPerStudent">—</strong></div><div class="summary-box" style="margin:0"><span class="small">هامش الفائض المتوقع</span><strong id="margin">—</strong></div><div class="summary-box" style="margin:0"><span class="small">إجمالي الالتزامات + المدفوع</span><strong id="obligated">—</strong></div><div class="summary-box" style="margin:0"><span class="small">الفائض النقدي المسجل</span><strong id="cashflow">—</strong></div></div></div><div class="panel"><div class="panel-header"><h2>الاحتياطي والافتراضات</h2><small>الإعدادات المالية</small></div><div class="form-grid"><label class="field">نسبة الاحتياطي (%)<input id="reservePct" type="number" min="0" max="100"></label><label class="field">مخصص احتياطي معتمد (ر.س)<input id="reserveAmount" readonly></label></div><p class="small">يُحتسب الاحتياطي من تكلفة البنود غير الاحتياطية. أي مبلغ احتياطي لا يُعد مصروفاً مدفوعاً إلا عند تسجيل عملية دفع فعلية من بند مرتبط.</p><div class="callout warn" id="alerts" style="margin-top:16px">—</div></div></section>
-<section class="panel finance-ledger" id="financeReadiness"><div class="panel-header"><div><h2>جاهزية الملف المالي</h2><p class="fx-note">مؤشرات اكتمال الإدخال للتحضير والمراجعة، وليست اعتماداً محاسبياً.</p></div><span class="tag" id="financeCompletion">—</span></div><div id="financeChecklist"></div></section>
+<section class="panel finance-ledger" id="financeApproval"><div class="panel-header"><div><h2>مراجعة واعتماد الميزانية</h2><p class="fx-note">اعتماد تشغيلي محلي لا يمثل توقيعاً محاسبياً موثقاً.</p></div><span class="tag" id="financeApprovalStatus">مسودة</span></div><div class="finance-workflow"><div class="flow-step"><b>نسخة الميزانية الحالية</b><strong id="financeApprovalTotal">—</strong><p id="financeApprovalVersion">لم تعتمد بعد</p></div><div class="flow-step"><b>مراجعة التكاليف والإيرادات</b><p id="financeApprovalGuidance">راجع جميع البنود قبل الاعتماد.</p><button class="btn sm" id="financeReviewButton">إرسال للمراجعة</button></div><div class="flow-step"><b>اعتماد / إعادة فتح</b><p>تثبيت التقديرات بعد الاعتماد، مع السماح بتسجيل المدفوعات والتحصيل.</p><button class="btn primary sm" id="financeApproveButton">اعتماد الميزانية</button><button class="btn sm" id="financeReopenButton" hidden>إعادة فتح الميزانية</button></div></div><div class="callout" id="financeApprovalNotice">هذا إجراء محلي، ولا يثبت هوية المعتمد.</div></section><section class="panel finance-ledger" id="financeOperations"><div class="panel-header"><div><h2>المتابعات والالتزامات المالية</h2><p class="fx-note">مهام مشتقة من بيانات المعسكر الفعلية.</p></div><span class="tag" id="financeTasksCount">—</span></div><div id="financeTasks"></div></section><section class="panel finance-ledger" id="financeReadiness"><div class="panel-header"><div><h2>جاهزية الملف المالي</h2><p class="fx-note">مؤشرات اكتمال الإدخال للتحضير والمراجعة، وليست اعتماداً محاسبياً.</p></div><span class="tag" id="financeCompletion">—</span></div><div id="financeChecklist"></div></section>
 <section class="panel finance-ledger" id="financeAudit"><div class="panel-header"><div><h2>سجل الحركة والمراجعة المالية</h2><p class="fx-note">آخر التعديلات والتسجيلات والتصحيحات لهذا المعسكر فقط (بحد أقصى 500 عملية). السجل محلي وغير محمي من التلاعب، فلا يُعد سجل تدقيق محاسبياً معتمداً.</p></div><button class="btn sm" id="exportAudit">تصدير سجل الحركة</button></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>العملية</th><th>التفاصيل</th></tr></thead><tbody id="auditBody"></tbody></table></div></section>
 <p class="footer">أكاديمية النخبة • نموذج أولي مستقل للإدارة المالية • تخزين محلي في المتصفح • جميع القيم الأولية لأغراض العرض وليست بيانات تشغيلية معتمدة</p></main>
 <div class="modal-shell" id="modalShell" role="dialog" aria-modal="true"><div class="modal fin-entry-modal"><div class="between"><div><h2 id="modalTitle">إضافة مصروف</h2><p class="sub">حدد التصنيف وطريقة الحساب وحالة الصرف.</p></div><button class="btn sm" id="closeModal">✕ إغلاق</button></div><div class="form-grid"><label class="field">اسم المصروف<input id="itemName" placeholder="مثال: استئجار حافلات"></label><label class="field">التصنيف<select id="itemCat"></select></label><label class="field">طريقة الاحتساب<select id="calcMethod"><option value="unit">الكمية × سعر الوحدة</option><option value="personday">الأشخاص × الأيام × السعر</option><option value="day">عدد الأيام × التكلفة اليومية</option><option value="fixed">مبلغ ثابت</option></select></label><label class="field">حالة المصروف<select id="itemStatus"><option value="estimated">تقديري</option><option value="committed">ملتزم به (غير مدفوع)</option><option value="paid">مدفوع</option></select></label><label class="field" id="qtyField">الكمية / عدد الأشخاص<input id="itemQty" type="number" min="0" value="1"></label><label class="field" id="daysField" style="display:none">عدد الأيام<input id="itemDays" type="number" min="0" value="1"></label><label class="field">السعر / تكلفة الوحدة (ر.س)<input id="unitPrice" type="number" min="0" value="0"></label><label class="field">مصاريف إضافية ثابتة (ر.س)<input id="extraCost" type="number" min="0" value="0"></label><label class="field">المورّد / المستفيد<input id="itemVendor" maxlength="120" placeholder="اسم الفندق أو شركة النقل"></label>
@@ -155,13 +155,40 @@ if(financeScoped){
 const $=id=>document.getElementById(id);const n=x=>Math.max(0,Number(x)||0);const fmt=x=>Math.round(x).toLocaleString('en-US');const sar=x=>fmt(x)+' ر.س';const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));const save=()=>{try{localStorage.setItem(financeStoreKey,JSON.stringify(state));}catch(e){alert('تعذّر حفظ البيانات محلياً. صدّر CSV واحفظ نسخة احتياطية.');}};
 if(!Array.isArray(state.collections))state.collections=[];
 if(!Array.isArray(state.audit))state.audit=[];
+if(!state.approval||typeof state.approval!=='object')state.approval={status:'draft',version:0,approvedAt:null,snapshot:null};
+const budgetLocked=()=>state.approval.status==='approved';
+const guardBudget=()=>{if(!budgetLocked())return true;alert('هذه الميزانية معتمدة محلياً. أعد فتح الميزانية قبل تعديل البنود أو الافتراضات.');return false;};
+const budgetSnapshot=()=>({items:state.items.map(x=>({id:x.id,name:x.name,cat:x.cat,amount:x.amount})),students:state.students,fee:state.fee,otherRevenue:state.otherRevenue,reservePct:state.reservePct,estimated:figures().estimated,forecast:figures().revenue});
 const audit=(action,detail)=>{state.audit.unshift({id:'a'+Date.now()+Math.random().toString(36).slice(2),date:new Date().toISOString(),action,detail});state.audit=state.audit.slice(0,500);};
 const receiptTotal=kind=>state.collections.filter(x=>x.kind===kind).reduce((sum,x)=>sum+n(x.amount),0);
 const actualTuition=()=>n(state.collected)+receiptTotal('tuition');
 const actualOtherRevenue=()=>receiptTotal('other');
 const amountFor=(id)=>state.items.filter(x=>x.cat===id).reduce((a,x)=>a+x.amount,0);const actualFor=(id)=>state.items.filter(x=>x.cat===id).reduce((a,x)=>a+n(x.paid),0);
 function figures(){const base=state.items.filter(x=>x.cat!=='reserve').reduce((a,x)=>a+x.amount,0),reserve=base*n(state.reservePct)/100,explicitReserve=amountFor('reserve'),estimated=base+reserve+explicitReserve,actual=state.items.reduce((a,x)=>a+n(x.paid),0),committed=state.items.filter(x=>x.status==='committed'||x.status==='paid').reduce((a,x)=>a+Math.max(0,n(x.amount)-n(x.paid)),0),revenue=n(state.students)*n(state.fee)+n(state.otherRevenue),actualRevenue=actualTuition()+actualOtherRevenue();return {base,reserve,explicitReserve,estimated,actual,committed,revenue,actualRevenue,profit:revenue-estimated,remaining:estimated-actual-committed}};
-function render(){const f=figures();$('estimated').textContent=sar(f.estimated);$('actual').textContent=sar(f.actual);$('revenuesStat').textContent=sar(f.revenue);$('profit').textContent=sar(f.profit);$('profit').style.color=f.profit<0?'var(--red)':'var(--navy)';$('progressLabel').textContent=(f.estimated?((f.actual/f.estimated)*100).toFixed(1):0)+'%';$('globalProgress').style.width=Math.min(100,f.estimated?f.actual/f.estimated*100:0)+'%';$('committed').textContent=sar(f.committed);$('remaining').textContent=sar(f.remaining);$('reserve').textContent=sar(f.reserve+f.explicitReserve);$('budgetAdvice').textContent=state.items.length===0?'ابدأ بإضافة البنود المالية الفعلية للمعسكر؛ الأرقام الحالية لا تمثل ميزانية تشغيلية.':f.remaining<0?'تنبيه: المدفوعات والالتزامات تتجاوز الميزانية المقدرة. راجع بنود الإنفاق.':f.profit<0?'تنبيه: التكاليف المقدرة تتجاوز الإيرادات المتوقعة. راجع التسعير أو خفض التكاليف.':'الوضع الحالي: التكاليف المتوقعة مغطاة بالإيرادات المتوقعة. راجع الالتزامات والتحصيل بانتظام.';
+function render(){const f=figures();
+const locked=budgetLocked(),approval=state.approval;
+$('financeApprovalStatus').textContent=({draft:'مسودة',review:'بانتظار المراجعة',approved:'معتمدة محلياً'})[approval.status]||'مسودة';
+$('financeApprovalTotal').textContent=sar(f.estimated);
+$('financeApprovalVersion').textContent='الإصدار '+(approval.version||0)+(approval.approvedAt?' · '+approval.approvedAt.replace('T',' ').slice(0,16):' · غير معتمد');
+$('financeReviewButton').hidden=locked||approval.status==='review';
+$('financeApproveButton').hidden=locked;
+$('financeReopenButton').hidden=!locked;
+$('financeApprovalGuidance').textContent=locked?'ثُبتت التقديرات حتى إعادة الفتح.':approval.status==='review'?'بانتظار اعتماد الميزانية بعد المراجعة.':'أدخل المصروفات وتوقعات التسجيل ثم أرسل للمراجعة.';
+$('financeApprovalNotice').textContent=locked?'سجّل المدفوعات والتحصيلات حسب حدوثها. هذا الاعتماد محلي وليس صلاحية موثّقة.':'لا يعتمد هذا الإجراء على حساب مستخدم موثّق. يجب تأكيد الموافقات خارج النظام.';
+['studentCount','studentFee','otherRevenue','reservePct'].forEach(id=>$(id).disabled=locked);
+['addBtn','addBtn2','startExpense','customCatBtn'].forEach(id=>$(id).disabled=locked);
+const today=new Date().toISOString().slice(0,10);
+const due=state.items.filter(x=>x.due&&x.due<today&&x.status!=='estimated'&&n(x.amount)>n(x.paid));
+const refs=state.items.filter(x=>x.status!=='estimated'&&!x.ref);
+const overs=state.items.filter(x=>n(x.paid)>n(x.amount));
+const tasks=[];
+if(!state.items.length||!n(state.students)||!n(state.fee))tasks.push(['استكمال الميزانية','أدخل تكاليف المعسكر، وعدد الطلاب، ورسوم الطالب.']);
+if(due.length)tasks.push(['التزامات متأخرة ('+due.length+')',due.slice(0,3).map(x=>x.name).join('، ')]);
+if(refs.length)tasks.push(['مراجع ناقصة ('+refs.length+')','أضف رقم عرض السعر أو الفاتورة للبنود الملتزم بها.']);
+if(overs.length)tasks.push(['تجاوز التقدير ('+overs.length+')','راجع البنود التي يتجاوز مدفوعها التكلفة المقدرة.']);
+if(!locked)tasks.push(['اعتماد الميزانية','راجع مسودة التكاليف وقدمها للاعتماد المحلي.']);
+$('financeTasksCount').textContent=tasks.length+' متابعات';
+$('financeTasks').innerHTML=tasks.length?tasks.map(([title,desc])=>'<div style="padding:10px 0;border-bottom:1px solid var(--line)"><b>'+esc(title)+'</b><div class="fx-note">'+esc(desc)+'</div></div>').join(''):'<div class="callout">لا توجد تنبيهات تشغيلية ظاهرة حالياً.</div>';$('estimated').textContent=sar(f.estimated);$('actual').textContent=sar(f.actual);$('revenuesStat').textContent=sar(f.revenue);$('profit').textContent=sar(f.profit);$('profit').style.color=f.profit<0?'var(--red)':'var(--navy)';$('progressLabel').textContent=(f.estimated?((f.actual/f.estimated)*100).toFixed(1):0)+'%';$('globalProgress').style.width=Math.min(100,f.estimated?f.actual/f.estimated*100:0)+'%';$('committed').textContent=sar(f.committed);$('remaining').textContent=sar(f.remaining);$('reserve').textContent=sar(f.reserve+f.explicitReserve);$('budgetAdvice').textContent=state.items.length===0?'ابدأ بإضافة البنود المالية الفعلية للمعسكر؛ الأرقام الحالية لا تمثل ميزانية تشغيلية.':f.remaining<0?'تنبيه: المدفوعات والالتزامات تتجاوز الميزانية المقدرة. راجع بنود الإنفاق.':f.profit<0?'تنبيه: التكاليف المقدرة تتجاوز الإيرادات المتوقعة. راجع التسعير أو خفض التكاليف.':'الوضع الحالي: التكاليف المتوقعة مغطاة بالإيرادات المتوقعة. راجع الالتزامات والتحصيل بانتظام.';
 const data=state.categories.map(c=>({...c,value:amountFor(c.id)+(c.id==='reserve'?f.reserve:0),paid:actualFor(c.id)}));let sorted=[...data].sort((a,b)=>b.value-a.value);let max=sorted[0]?.value||1;$('chart').innerHTML=sorted.slice(0,5).map(c=>`<div class="chartrow"><span>${esc(c.name)}</span><div class="bar"><i style="background:${c.color};width:${Math.min(100,c.value/max*100)}%"></i></div><span class="v">${fmt(c.value)}</span></div>`).join('');$('categoryGrid').innerHTML=data.map(c=>`<article class="cat ${selectedCat===c.id?'selected':''}" data-cat="${esc(c.id)}" style="--tone:${c.color};--tint:${c.color}17"><div class="symbol">${c.icon}</div><h3>${esc(c.name)}</h3><div class="micro">${esc(c.desc)}</div><div class="money">${sar(c.value)}</div><div class="between"><span class="count">${state.items.filter(i=>i.cat===c.id).length} بنود</span><span class="count">${c.value?Math.round(c.paid/c.value*100):0}% مدفوع</span></div><div class="progress"><span style="width:${c.value?Math.min(100,c.paid/c.value*100):0}%"></span></div></article>`).join('');document.querySelectorAll('.cat').forEach(e=>e.onclick=()=>{selectedCat=selectedCat===e.dataset.cat?null:e.dataset.cat;render();$('expenses').scrollIntoView({behavior:'smooth',block:'start'})});
 const rows=state.items.filter(x=>(filter==='all'||x.status===filter)&&(!selectedCat||x.cat===selectedCat));
 $('expenseGettingStarted').hidden=state.items.length>0;
@@ -194,6 +221,7 @@ document.querySelectorAll('[data-reverse-payment]').forEach(el=>el.onclick=()=>{
 document.querySelectorAll('[data-pay]').forEach(el=>el.onclick=()=>openPayment(el.dataset.pay));
 document.querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{
  const item=state.items.find(x=>x.id===el.dataset.del);
+ if(!guardBudget())return;
  if(item&&n(item.paid)>0){alert('لا يمكن حذف بند عليه مدفوعات. ألغِ الدفعات أولاً أو احتفظ بالبند كسجل مالي.');return;}
  if(item&&confirm('حذف بند «'+item.name+'»؟ لا يمكن التراجع.')){
   state.items=state.items.filter(x=>x.id!==el.dataset.del);audit('حذف بند',item.name);save();render();
@@ -223,12 +251,13 @@ $('auditBody').innerHTML=state.audit.length?state.audit.slice(0,80).map(a=>'<tr>
 // Simplified break-even: estimated total / per-student fee, where expenses depend on entered planning quantity.
 const breakEven=n(state.fee)>0?Math.ceil(f.estimated/n(state.fee)):null;$('breakEven').value=breakEven===null?'—':breakEven+' طالب (تقديري)';$('alerts').textContent=f.actual+f.committed>f.estimated?'⚠ المدفوع والملتزم به يتجاوزان الميزانية.':f.profit<0?'⚠ عدد الطلاب أو سعر الاشتراك لا يغطيان المصروفات الحالية.':'✓ لا توجد تجاوزات إجمالية ظاهرة. راجع جودة تقديرات البنود قبل اعتماد الميزانية.';
 }
-$('filters').addEventListener('click',e=>{let b=e.target.closest('button[data-filter]');if(!b)return;filter=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));render()});[['studentCount','students'],['studentFee','fee'],['otherRevenue','otherRevenue'],['reservePct','reservePct']].forEach(([id,k])=>$(id).addEventListener('input',e=>{state[k]=n(e.target.value);save();render()}));
+$('filters').addEventListener('click',e=>{let b=e.target.closest('button[data-filter]');if(!b)return;filter=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));render()});[['studentCount','students'],['studentFee','fee'],['otherRevenue','otherRevenue'],['reservePct','reservePct']].forEach(([id,k])=>$(id).addEventListener('input',e=>{if(!guardBudget())return;state[k]=n(e.target.value);save();render()}));
 function modal(on){$('modalShell').classList.toggle('open',on)}function catmodal(on){$('catModal').classList.toggle('open',on)}function refreshCats(){let current=$('itemCat').value;$('itemCat').innerHTML=state.categories.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if(state.categories.some(x=>x.id===current))$('itemCat').value=current;else if(selectedCat)$('itemCat').value=selectedCat}
 
 let editingExpenseId=null,paymentExpenseId=null;
 const localDay=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
 function newItem(category){
+ if(!guardBudget())return;
  editingExpenseId=null;refreshCats();
  $('modalTitle').textContent='إضافة بند مالي';
  $('itemName').value='';$('calcMethod').value='unit';$('itemStatus').value='estimated';
@@ -238,6 +267,7 @@ function newItem(category){
  updateCalc();modal(true);$('itemName').focus();
 }
 function editItem(id){
+ if(!guardBudget())return;
  const x=state.items.find(row=>row.id===id);if(!x)return;
  editingExpenseId=x.id;refreshCats();
  $('modalTitle').textContent='تعديل البند المالي';
@@ -262,6 +292,7 @@ function updateCalc(){
 }
 ['calcMethod','itemStatus','itemQty','itemDays','unitPrice','extraCost'].forEach(id=>$(id).addEventListener('input',updateCalc));
 $('saveItem').onclick=()=>{
+ if(!guardBudget())return;
  const name=$('itemName').value.trim(),amount=updateCalc(),status=$('itemStatus').value;
  if(!name){alert('اكتب اسم البند المالي.');return;}
  if(!Number.isFinite(amount)||amount<=0){alert('أدخل تكلفة تقديرية أكبر من صفر.');return;}
@@ -343,6 +374,7 @@ $('customCatBtn').onclick=()=>catmodal(true);
 $('cancelCat').onclick=()=>catmodal(false);
 $('catModal').onclick=e=>{if(e.target===$('catModal'))catmodal(false)};
 $('saveCat').onclick=()=>{
+ if(!guardBudget())return;
  const name=$('catName').value.trim();
  if(!name){alert('أدخل اسم التصنيف.');return;}
  if(state.categories.some(c=>c.name===name)){alert('هذا التصنيف موجود بالفعل.');return;}
@@ -352,11 +384,29 @@ $('saveCat').onclick=()=>{
  audit('تصنيف مخصص',name);$('catName').value='';$('catDesc').value='';save();catmodal(false);render();
 };
 $('resetBtn').onclick=()=>{
+ if(!guardBudget())return;
  if(confirm('تحميل النموذج التجريبي سيستبدل جميع البنود والتحصيلات الحالية لهذا المعسكر. نوصي بتصدير CSV أولاً. هل تريد المتابعة؟')){
   state=DEFAULT();state.collections=[];state.audit=[];audit('تحميل بيانات تجريبية','استبدال جميع بيانات المعسكر بالنموذج التجريبي');selectedCat=null;filter='all';save();render();
  }
 };
 
+$('financeReviewButton').onclick=()=>{
+ if(!guardBudget())return;
+ if(!state.items.length||!n(state.students)||!n(state.fee)){alert('أكمل التكاليف وعدد الطلاب ورسوم الطالب قبل تقديم الميزانية.');return;}
+ state.approval.status='review';audit('إرسال الميزانية للمراجعة','التقديري '+sar(figures().estimated));save();render();
+};
+$('financeApproveButton').onclick=()=>{
+ if(!guardBudget())return;
+ if(state.approval.status!=='review'){alert('أرسل الميزانية للمراجعة أولاً.');return;}
+ if(!confirm('اعتماد هذه النسخة محلياً وتثبيت تقديراتها؟'))return;
+ state.approval={status:'approved',version:(state.approval.version||0)+1,approvedAt:new Date().toISOString(),snapshot:budgetSnapshot()};
+ audit('اعتماد ميزانية محلي','إصدار '+state.approval.version+' · '+sar(state.approval.snapshot.estimated));save();render();
+};
+$('financeReopenButton').onclick=()=>{
+ if(!budgetLocked())return;const reason=prompt('سبب إعادة فتح الميزانية (إلزامي):');
+ if(reason===null)return;if(!reason.trim()){alert('يجب توضيح سبب إعادة الفتح.');return;}
+ state.approval.status='draft';audit('إعادة فتح الميزانية',reason.trim());save();render();
+};
 function financeFileDownload(name,content,mime){
  const url=URL.createObjectURL(new Blob([content],{type:mime}));
  const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);
