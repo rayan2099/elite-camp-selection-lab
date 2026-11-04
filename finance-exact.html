@@ -136,6 +136,31 @@ html.finance-embedded .modal-shell .modal h2{font-size:18px}
 .expense-preset-grid button.active{border-color:#376de4;background:#e8f0ff;color:#1e4fb5}
 @media(max-width:760px){.expense-preset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
  .cat .symbol svg{display:block;width:26px;height:26px;color:var(--tone)}
+
+/* Financial-action buttons: Elite Academy orange, with comfortable separation. */
+:root{--finance-action-orange:#f47b35;--finance-action-orange-hover:#df6726}
+.btn.primary,
+.finance-workflow .flow-step .btn.primary,
+.report-actions .btn.primary,
+.finance-step-guide .btn.primary{
+ background:var(--finance-action-orange)!important;
+ border-color:var(--finance-action-orange)!important;
+ color:#fff!important;
+}
+.btn.primary:hover,
+.finance-workflow .flow-step .btn.primary:hover,
+.report-actions .btn.primary:hover,
+.finance-step-guide .btn.primary:hover{
+ background:var(--finance-action-orange-hover)!important;
+ border-color:var(--finance-action-orange-hover)!important;
+}
+.finance-workflow .flow-step button{margin-top:0}
+.finance-workflow .flow-step{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.finance-workflow .flow-step b{margin:0}
+.finance-workflow .flow-step p{margin:0 0 6px;min-height:0}
+.finance-workflow .flow-step button{max-width:100%;white-space:normal}
+.finance-workflow .flow-step button+button{margin-inline-start:0}
+.finance-step-guide .actions{gap:14px;row-gap:12px}
 </style><script>if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('finance-embedded');</script></head><body><aside><div class="brand">✦ أكاديمية النخبة</div><p class="desc">منصة إدارة المعسكرات</p><nav><a href="#overview">◫ &nbsp; نظرة عامة</a><a href="#categories">▦ &nbsp; التصنيفات المالية</a><a href="#expenses" class="active">▣ &nbsp; إدارة المصروفات</a><a href="#revenues">◈ &nbsp; الإيرادات والتسعير</a><a href="#analysis">▤ &nbsp; التحليل والتقارير</a></nav><div class="side-note">💡 كل مصروف له حالة مستقلة: تقديري، ملتزم به، أو مدفوع فعلياً؛ لضمان تقارير مالية دقيقة.</div></aside><main>
 <div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="fullReportBtn">التقرير المالي PDF</button></div></header>
 <section class="report-sheet" id="financeReportView" hidden role="region" aria-label="التقرير المالي التنفيذي">
