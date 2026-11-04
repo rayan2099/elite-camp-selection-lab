@@ -1151,8 +1151,8 @@ const ROLES=[
 ];
 const CAPS={
  director:['select','approve','brief','reset','export','catalog'],
- programs:['select','brief','export'],
- values:['select','approve','export'],
+ programs:['select','brief','export','catalog'],
+ values:['select','approve','export','catalog'],
  field:['export']
 };
 const DRAFT=[
@@ -1534,7 +1534,7 @@ function pageLibrary(){
   return pageHead('مكتبة البرامج','Program library',
     'استعرض برامج الأكاديمية وأضف برامج جديدة عند الحاجة، ثم اختر البرامج التي تخدم أهداف المعسكر.',
     'Browse existing programs, create additional ones, and select those serving camp goals.',
-    `${can('catalog')?`<button class="primary" data-act="newProgram">+ ${T('إنشاء برنامج جديد','Create new program')}</button>`:''}<button data-act="go:selection">${T('البرامج المختارة','Selected programs')} (${selCount()})</button>`)
+    `${can('catalog')?`<button class="primary" data-act="newProgram">+ ${T('إنشاء برنامج','Create program')}</button>`:''}<button data-act="go:selection">${T('البرامج المختارة','Selected programs')} (${selCount()})</button>`)
   +`<div class="note" style="margin-bottom:14px"><b>${T('إضافة برنامج للمكتبة','Adding a program to the library')}</b><p class="help">${T('أنشئ برنامجًا جديدًا مع هدف ومسار وأعمار ومتطلبات واضحة؛ سيبقى متاحًا في المكتبة لجميع المعسكرات على هذا المتصفح. أنشئه أولًا ثم اختر «أضف إلى الخطة» لإدراجه في المعسكر الحالي.','Create a program with a clear goal, track, ages and requirements. It will remain available to all camps in this browser. After saving, use Add to plan for the current camp.')}</p></div>`
   +`<div class="card">
       <div class="filters" style="margin:0">
@@ -3221,7 +3221,7 @@ function customProgramFields(track){
   return Object.entries(FIELDS).filter(([key])=>key.startsWith(track+'.'));
 }
 function customProgramModal(id){
-  if(!can('catalog'))return toast(T('إدارة مكتبة البرامج متاحة لمدير المعسكر فقط.','Only the camp director can manage the library.'));
+  if(!can('catalog'))return toast(T('إنشاء البرامج متاح للمدير وقائد البرامج ومسؤول القيم.','Program creation is available to the director, programs lead, and values lead.'));
   const existing=id?ITEM(id):null;
   if(id&&(!existing||!existing.custom))return;
   const i=existing||{ar:'',en:'',t:'lead',f:'thinking',ages:[10,15],load:2,goal:{ar:'',en:''},need:[],tags:[],ph:[['',''],['',''],['','']]};
