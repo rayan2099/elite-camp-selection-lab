@@ -72,9 +72,53 @@ html.finance-embedded .modal-shell .modal h2{font-size:18px}
 .fin-entry-modal textarea{font:inherit;width:100%;border:1px solid #dce4ef;border-radius:9px;padding:10px;resize:vertical;min-height:58px}
 .finance-notice{background:#fff8ed;border:1px solid #f2debc;padding:12px;border-radius:9px;color:#775323;font-size:11px;line-height:1.8;margin:9px 0}
 @media(max-width:900px){.finance-workflow{grid-template-columns:1fr}}
+
+/* Executive financial report, printable RTL and designed for decision makers */
+.report-sheet{margin:18px 0;background:white;border:1px solid #dbe4f0;border-radius:15px;padding:30px;color:#142540;direction:rtl;box-shadow:0 8px 30px #1629450b}
+.report-sheet[hidden]{display:none!important}
+.report-sheet .report-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:20px}
+.report-brand{display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:3px solid #1a3354;padding-bottom:20px}
+.report-brand strong{font-size:25px;font-weight:800}.report-brand small{display:block;font-size:11px;color:#60728f;margin-top:6px}
+.report-brand .report-mark{background:#142947;color:white;padding:15px 18px;border-radius:12px;font-weight:800}
+.report-metadata{display:flex;flex-wrap:wrap;gap:16px;color:#63738b;font-size:11px;margin:16px 0 22px}
+.report-sheet h2{font-size:17px!important;margin:26px 0 12px;padding-bottom:7px;border-bottom:1px solid #dfe7f0}
+.report-sheet h3{font-size:13px;margin:13px 0 8px}
+.report-intro{color:#5b6c83;font-size:12px;line-height:1.85}
+.report-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:15px}
+.report-metric{border:1px solid #dde6f1;background:#f7f9fc;border-radius:9px;padding:13px}
+.report-metric span{font-size:10px;display:block;color:#667996;line-height:1.6}
+.report-metric b{font-size:17px;display:block;margin-top:7px;white-space:nowrap}
+.report-table-wrap{overflow-x:auto}
+.report-sheet table{border-collapse:collapse;width:100%;font-size:11px;min-width:520px}
+.report-sheet th{background:#eaf0f8;color:#18304f;text-align:right;padding:10px 9px;border-bottom:1px solid #cbd8e8}
+.report-sheet td{padding:10px 9px;border-bottom:1px solid #e5ebf2;vertical-align:top;line-height:1.7}
+.report-sheet tr:nth-child(even) td{background:#fafbfd}
+.report-sheet .report-subtotal td{font-weight:800;background:#edf2fa}
+.report-good{color:#14835f}.report-risk{color:#b54c42}
+.report-note{font-size:11px;line-height:1.9;color:#52637b;background:#f2f6fc;border-radius:9px;padding:12px;margin:14px 0}
+.report-alert{background:#fff6e7;border:1px solid #f2d9a9;padding:12px;border-radius:9px;font-size:11px;line-height:1.9}
+.report-footer{border-top:1px solid #dce5ef;margin-top:30px;padding-top:15px;font-size:10px;color:#78869a}
+@media(max-width:750px){.report-sheet{padding:16px}.report-metrics{grid-template-columns:repeat(2,1fr)}.report-brand strong{font-size:19px}}
+@page{size:A4;margin:12mm}
+@media print{
+ html,body{background:#fff!important;overflow:visible!important}
+ body>aside{display:none!important}
+ body>main{margin:0!important;padding:0!important;max-width:none!important;width:100%!important}
+ body>main>*:not(#financeReportView){display:none!important}
+ #financeReportView{display:block!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;border-radius:0!important}
+ #financeReportView .report-actions{display:none!important}
+ .report-metrics{grid-template-columns:repeat(4,1fr)}
+ .report-sheet table{min-width:0;font-size:9.5px}
+ .report-sheet h2{break-after:avoid}
+ .report-sheet tr,.report-metric{break-inside:avoid}
+ .report-table-wrap{overflow:visible}
+ .report-brand{break-inside:avoid}
+}
 </style><script>if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('finance-embedded');</script></head><body><aside><div class="brand">✦ أكاديمية النخبة</div><p class="desc">منصة إدارة المعسكرات</p><nav><a href="#overview">◫ &nbsp; نظرة عامة</a><a href="#categories">▦ &nbsp; التصنيفات المالية</a><a href="#expenses" class="active">▣ &nbsp; إدارة المصروفات</a><a href="#revenues">◈ &nbsp; الإيرادات والتسعير</a><a href="#analysis">▤ &nbsp; التحليل والتقارير</a></nav><div class="side-note">💡 كل مصروف له حالة مستقلة: تقديري، ملتزم به، أو مدفوع فعلياً؛ لضمان تقارير مالية دقيقة.</div></aside><main>
 <div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="resetBtn">↺ تحميل نموذج تجريبي</button><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="backupBtn">نسخة احتياطية</button><button class="btn" id="fullReportBtn">تقرير المعسكر</button><button class="btn" id="restoreBtn">استعادة نسخة</button><input id="restoreFile" type="file" accept=".json,application/json" hidden></div></header>
-<div class="banner" id="financeCampBanner">ⓘ هذه نسخة تفاعلية تجريبية. جميع المبالغ الأولية افتراضية ويمكن تعديلها؛ يتم حفظ التغييرات داخل هذا المتصفح فقط.</div><div class="finance-notice">تنبيه: هذه أداة تشغيل محلية داخل متصفحك، وليست نظاماً محاسبياً سحابياً. لا تُرسل البيانات تلقائياً لأي حساب آخر. احفظ نسخة احتياطية بعد إدخال المعاملات، ولا تُسجّل أي دفعة قبل التحقق من حدوثها فعلياً.</div><section class="panel" id="financeQuickTemplates" style="margin:14px 0"><div class="panel-header"><div><h2>إضافة مصروف من قالب جاهز</h2><p class="fx-note">اختر بنداً، ثم أدخل الكميات والأسعار الحقيقية. القوالب لا تُضيف أي مبالغ افتراضية.</p></div></div><div class="filters" id="presetButtons"></div></section><div class="finance-workflow" id="financeWorkflow">
+<section class="report-sheet" id="financeReportView" hidden role="region" aria-label="التقرير المالي التنفيذي">
+<div class="report-actions"><button class="btn primary" id="printFinanceReport" type="button">طباعة / حفظ PDF</button><button class="btn" id="downloadReportCsv" type="button">تصدير البيانات التفصيلية CSV</button><button class="btn" id="closeFinanceReport" type="button">إغلاق التقرير</button></div>
+<div id="financeReportContent"></div></section><div class="banner" id="financeCampBanner">ⓘ هذه نسخة تفاعلية تجريبية. جميع المبالغ الأولية افتراضية ويمكن تعديلها؛ يتم حفظ التغييرات داخل هذا المتصفح فقط.</div><div class="finance-notice">تنبيه: هذه أداة تشغيل محلية داخل متصفحك، وليست نظاماً محاسبياً سحابياً. لا تُرسل البيانات تلقائياً لأي حساب آخر. احفظ نسخة احتياطية بعد إدخال المعاملات، ولا تُسجّل أي دفعة قبل التحقق من حدوثها فعلياً.</div><section class="panel" id="financeQuickTemplates" style="margin:14px 0"><div class="panel-header"><div><h2>إضافة مصروف من قالب جاهز</h2><p class="fx-note">اختر بنداً، ثم أدخل الكميات والأسعار الحقيقية. القوالب لا تُضيف أي مبالغ افتراضية.</p></div></div><div class="filters" id="presetButtons"></div></section><div class="finance-workflow" id="financeWorkflow">
 <div class="flow-step"><b>١ · إعداد ميزانية المعسكر</b><p>أدخل تكلفة السكن والوجبات والنقل والرحلات والمورد وطريقة الحساب. تبدأ كل البنود بمبالغك الفعلية وليس بيانات تجريبية.</p><button type="button" class="btn primary sm" id="startExpense">＋ فتح نموذج المصروف</button><button type="button" class="btn sm" id="showExpenseGuide">عرض التفاصيل</button></div>
 <div class="flow-step"><b>٢ · متابعة الالتزامات والمدفوعات</b><p>حوّل عرض السعر إلى التزام، وسجّل المبلغ المدفوع على دفعات بتاريخ ومرجع واضح. تابع الرصيد المتبقي لكل مورد.</p><button type="button" class="btn sm" id="jumpExpenses">فتح سجل المصروفات والدفعات</button><button type="button" class="btn sm" id="showPaymentsGuide">عرض التفاصيل</button></div>
 <div class="flow-step"><b>٣ · التسجيل والتحصيل</b><p>حدد الطلاب المتوقعين ورسومهم، ثم سجّل المبلغ الذي تم تحصيله فعلاً، مع اسم الدافع وتاريخ التحصيل ورقم العملية.</p><button type="button" class="btn sm" id="addCollection">＋ فتح نموذج التحصيل</button><button type="button" class="btn sm" id="showCollectionGuide">عرض التفاصيل</button></div>
@@ -476,21 +520,95 @@ function financeFileDownload(name,content,mime){
  a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);
 }
 
-$('fullReportBtn').onclick=()=>{
- const f=figures();
- const lines=[
-  ['نوع السجل','التاريخ','الاسم أو الوصف','التصنيف أو النوع','التقديري','المدفوع أو المحصل','الحالة','المورد / الدافع','المرجع','التفاصيل'],
-  ...state.items.map(x=>['مصروف',x.due||'',x.name,state.categories.find(c=>c.id===x.cat)?.name||'',x.amount,n(x.paid),x.status,x.vendor||'',x.ref||'',x.notes||'']),
-  ...state.items.flatMap(x=>(x.payments||[]).map(p=>['دفعة مورد',p.date||'',x.name,x.cat,'',p.amount,'مدفوع',x.vendor||'',p.ref||'',p.method||''])),
-  ...state.collections.map(x=>['تحصيل',x.date||'',x.payer||'دافع غير محدد',x.kind==='tuition'?'رسوم الطلاب':'إيرادات أخرى','',x.amount,'محصل',x.payer||'',x.ref||'','']),
-  ['ملخص','','الميزانية التقديرية','',f.estimated,'','','','',''],
-  ['ملخص','','الالتزامات غير المدفوعة','',f.committed,'','','','',''],
-  ['ملخص','','المدفوع للموردين','','',f.actual,'','','',''],
-  ['ملخص','','التحصيل الفعلي','','',f.actualRevenue,'','','',''],
-  ['ملخص','','صافي النقدية المسجلة','','',f.actualRevenue-f.actual,'','','','']
+
+function financeReportHtml(){
+ const f=figures(),name=financeCampName||'معسكر غير مسمى';
+ const dateText=new Intl.DateTimeFormat('ar-SA',{dateStyle:'long'}).format(new Date());
+ const money=x=>sar(x);
+ const categories=state.categories.map(c=>{
+  const items=state.items.filter(i=>i.cat===c.id);
+  return {name:c.name,planned:items.reduce((t,i)=>t+n(i.amount),0),paid:items.reduce((t,i)=>t+n(i.paid),0),count:items.length};
+ }).filter(c=>c.count>0);
+ const committed=state.items.filter(i=>i.status==='committed'||i.status==='paid');
+ const outstanding=committed.reduce((t,i)=>t+Math.max(0,n(i.amount)-n(i.paid)),0);
+ const collected=actualTuition()+actualOtherRevenue();
+ const cash=collected-f.actual;
+ const today=new Date().toISOString().slice(0,10);
+ const overdue=committed.filter(i=>i.due&&i.due<today&&n(i.amount)>n(i.paid));
+ const noDocs=committed.filter(i=>!i.ref);
+ const excess=state.items.filter(i=>n(i.paid)>n(i.amount));
+ const untracked=state.items.filter(i=>n(i.paid)>0&&(!Array.isArray(i.payments)||!i.payments.length));
+ const unapproved=state.approval?.status!=='approved';
+ const fmtDate=x=>x?esc(x):'—';
+ const row=(cells,cls='')=>'<tr'+(cls?' class="'+cls+'"':'')+'>'+cells.map(v=>'<td>'+v+'</td>').join('')+'</tr>';
+ const metrics=[
+  ['الميزانية التقديرية',money(f.estimated)],
+  ['المصروف المدفوع فعلياً',money(f.actual)],
+  ['الالتزامات غير المسددة',money(outstanding)],
+  ['الإيرادات المتوقعة',money(f.revenue)],
+  ['الإيرادات المحصلة فعلياً',money(collected)],
+  ['الرصيد النقدي المسجل',money(cash)],
+  ['الفائض المتوقع',money(f.profit)],
+  ['تكلفة الطالب المخططة',state.students?money(f.estimated/state.students):'غير متاح']
  ];
- const csv='\ufeff'+lines.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
- financeFileDownload('elite-camp-full-finance-'+(financeCampId||'demo').replace(/[^a-zA-Z0-9_-]/g,'_')+'.csv',csv,'text/csv;charset=utf-8');
+ const catRows=categories.map(c=>row([esc(c.name),String(c.count),money(c.planned),money(c.paid),money(Math.max(0,c.planned-c.paid))])).join('');
+ const itemRows=state.items.map(i=>row([
+  esc(i.name),esc(state.categories.find(c=>c.id===i.cat)?.name||'مخصص'),
+  money(i.amount),money(i.paid),money(Math.max(0,i.amount-n(i.paid))),
+  esc(({estimated:'تقديري',committed:'ملتزم به',paid:'مدفوع كلياً/جزئياً'})[i.status]||i.status),
+  esc(i.vendor||'—'),fmtDate(i.due)
+ ])).join('');
+ const payments=state.items.flatMap(i=>(i.payments||[]).map(p=>({...p,itemName:i.name,vendor:i.vendor||'—'}))).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+ const paymentRows=payments.map(p=>row([fmtDate(p.date),esc(p.itemName),esc(p.vendor),money(p.amount),esc(p.method||'—'),esc(p.ref||'—')])).join('');
+ const collections=(state.collections||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+ const collectionRows=collections.map(c=>row([fmtDate(c.date),c.kind==='tuition'?'رسوم الطلاب':'رعاية / إيراد آخر',esc(c.payer||'—'),money(c.amount),esc(c.ref||'—')])).join('');
+ const riskRows=[
+  ['الالتزامات المتأخرة',overdue.length,overdue.length?'راجع تواريخ الاستحقاق وسجّل السداد للموردين.':'لا يوجد تأخير ظاهر.'],
+  ['مراجع المستندات الناقصة',noDocs.length,noDocs.length?'أضف رقم عرض السعر أو الفاتورة.':'المراجع متوفرة في البنود الملتزم بها.'],
+  ['بنود تجاوزت التقدير',excess.length,excess.length?'افحص أسباب ارتفاع المدفوع عن المخطط.':'لا توجد تجاوزات مباشرة.'],
+  ['مدفوعات دون سجل دفعات تفصيلي',untracked.length,untracked.length?'راجع البنود المستوردة أو القديمة.':'المدفوعات لها تفاصيل مسجلة.'],
+  ['اعتماد الميزانية',unapproved?'غير معتمدة':'معتمدة محلياً',unapproved?'اعرض الميزانية للمراجعة.':'الاعتماد محلي غير موثق الهوية.']
+ ].map(r=>row(r.map(x=>esc(String(x))))).join('');
+ const status=state.approval?.status==='approved'?'معتمدة محلياً':state.approval?.status==='review'?'قيد المراجعة':'مسودة';
+ const section=(title,heads,body,cols)=>'<h2>'+title+'</h2><div class="report-table-wrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(body||'<tr><td colspan="'+cols+'">لا توجد بيانات مسجلة.</td></tr>')+'</tbody></table></div>';
+ return '<div class="report-brand"><div><strong>التقرير المالي التنفيذي للمعسكر</strong><small>أكاديمية النخبة · إدارة المعسكرات · ملخص إداري ومرفقات مالية</small></div><div class="report-mark">✦ النخبة</div></div>'
+ +'<div class="report-metadata"><span>المعسكر: <b>'+esc(name)+'</b></span><span>تاريخ إعداد التقرير: '+esc(dateText)+'</span><span>حالة الميزانية: '+esc(status)+'</span><span>الإصدار: '+esc(String(state.approval?.version||0))+'</span></div>'
+ +'<p class="report-intro">يعرض هذا التقرير وضع المعسكر استناداً إلى البنود والحركات المسجلة في هذا المتصفح. الأرقام المخططة تختلف عن المدفوعات والتحصيلات الفعلية، ولا يُعد التقرير كشفاً بنكياً أو قوائم مالية مدققة.</p>'
+ +'<div class="report-metrics">'+metrics.map(([k,v])=>'<div class="report-metric"><span>'+k+'</span><b>'+v+'</b></div>').join('')+'</div>'
+ +'<h2>١ · خلاصة الإدارة والتقييم المالي</h2>'
+ +'<div class="report-note">عدد الطلاب المتوقع: <b>'+fmt(state.students)+'</b> · رسم الاشتراك للطالب: <b>'+money(state.fee)+'</b> · هامش الفائض المتوقع: <b>'+(f.revenue?(f.profit/f.revenue*100).toFixed(1)+'%':'غير متاح')+'</b> · نسبة الصرف المدفوع من الميزانية: <b>'+(f.estimated?(f.actual/f.estimated*100).toFixed(1)+'%':'غير متاح')+'</b>. الرصيد النقدي يحسب فقط من التحصيلات المسجلة مطروحاً منها المدفوعات المسجلة؛ لا يمثل رصيد البنك.</div>'
+ +section('٢ · توزيع الميزانية حسب التصنيف',['التصنيف','البنود','التقديري','المدفوع','فرق التقدير'],catRows+row(['الإجمالي',String(state.items.length),money(f.base+f.explicitReserve),money(f.actual),money(Math.max(0,f.base+f.explicitReserve-f.actual))],'report-subtotal'),5)
+ +'<div class="report-note">مخصص الاحتياطي النسبي: '+money(f.reserve)+' · المصروفات المخططة شاملة الاحتياطي: '+money(f.estimated)+'؛ الاحتياطي ليس دفعة فعلية.</div>'
+ +section('٣ · المصروفات والالتزامات التفصيلية',['البند','التصنيف','التقديري','المدفوع','المتبقي','الحالة','المورد','الاستحقاق'],itemRows,8)
+ +section('٤ · سجل مدفوعات الموردين',['التاريخ','البند','المورد','المبلغ','الطريقة','المرجع'],paymentRows,6)
+ +section('٥ · التحصيلات والإيرادات',['التاريخ','نوع التحصيل','الدافع','المبلغ','المرجع'],collectionRows,5)
+ +'<div class="report-note">الإيراد المتوقع للطلاب: '+money(n(state.students)*n(state.fee))+' · الرعايات والإيرادات الأخرى المتوقعة: '+money(state.otherRevenue)+' · التحصيل الطلابي المسجل: '+money(actualTuition())+' · الإيرادات الأخرى المحصلة: '+money(actualOtherRevenue())+'. قد تتضمن السجلات القديمة تحصيلات افتتاحية بلا تفاصيل فردية.</div>'
+ +section('٦ · المخاطر والاستثناءات ونقاط المتابعة',['المؤشر','النتيجة','الإجراء المطلوب'],riskRows,3)
+ +'<div class="report-alert">ملاحظة حوكمة: جميع سجلات النظام حالياً محلية في المتصفح. الاعتماد محلي لا يتحقق من هوية المعتمد، وسجل التعديلات غير محمي مؤسسياً. يجب مطابقة المستندات والتحصيلات والمدفوعات مع الحسابات والفواتير الأصلية قبل الاعتماد النهائي.</div>'
+ +'<div class="report-footer">أكاديمية النخبة — تقرير تشغيلي آلي · إعداد إلكتروني وفق البيانات المتاحة بتاريخ '+esc(dateText)+' · يُفضّل الاحتفاظ بنسخة احتياطية من السجلات مع هذا التقرير. لا يعتمد هذا التقرير توقيعاً إلكترونياً.</div>';
+}
+function openFinanceReport(){
+ $('financeReportContent').innerHTML=financeReportHtml();
+ $('financeReportView').hidden=false;
+ if(typeof financeBringIntoView==='function')financeBringIntoView($('financeReportView'));
+ else $('financeReportView').scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('fullReportBtn').onclick=openFinanceReport;
+$('closeFinanceReport').onclick=()=>{$('financeReportView').hidden=true};
+$('printFinanceReport').onclick=()=>{window.focus();window.print()};
+$('downloadReportCsv').onclick=()=>{
+ const f=figures();
+ const rows=[
+  ['نوع السجل','التاريخ','البند / الدافع','التصنيف','التقديري','المدفوع/المحصل','الحالة','المورد','المرجع'],
+  ...state.items.map(i=>['مصروف',i.due||'',i.name,state.categories.find(c=>c.id===i.cat)?.name||'',i.amount,n(i.paid),i.status,i.vendor||'',i.ref||'']),
+  ...state.items.flatMap(i=>(i.payments||[]).map(p=>['دفعة',p.date||'',i.name,i.cat,'',p.amount,'مدفوع',i.vendor||'',p.ref||''])),
+  ...state.collections.map(c=>['تحصيل',c.date||'',c.payer||'—',c.kind==='tuition'?'رسوم طلاب':'إيراد آخر','',c.amount,'محصل',c.payer||'',c.ref||'']),
+  ['إجمالي','','الميزانية التقديرية','',f.estimated,'','','',''],
+  ['إجمالي','','المدفوع الفعلي','','',f.actual,'','',''],
+  ['إجمالي','','التحصيل الفعلي','','',f.actualRevenue,'','','']
+ ];
+ const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+ financeFileDownload('elite-camp-financial-report-'+(financeCampId||'demo').replace(/[^a-zA-Z0-9_-]/g,'_')+'.csv',csv,'text/csv;charset=utf-8');
 };
 $('exportAudit').onclick=()=>financeFileDownload('camp-finance-audit-'+(financeCampId||'demo')+'.json',JSON.stringify(state.audit,null,2),'application/json;charset=utf-8');
 function financeBackup(){
