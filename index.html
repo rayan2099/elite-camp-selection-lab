@@ -2037,9 +2037,12 @@ function stepBricks(){
   const placed=S.selected.filter(x=>x.day);
   return `<div class="build2">
     <div class="card">
-      <div class="row wrap" style="gap:12px;align-items:center"><div class="row wrap" style="gap:12px;justify-content:flex-start"><h2>${T('البرامج المتاحة','Available programs')}</h2><button class="primary small" data-act="newProgram">+ ${T('إنشاء برنامج','Create program')}</button></div>
-        <div class="seg">${[['all',T('الكل','All')]].concat(TRACKS.map(t=>[t.id,L(t)])).map(([id,label])=>
-          `<button class="${track===id?'on':''}" data-act="bin:${id}">${label}</button>`).join('')}</div></div>
+      <div class="row wrap" style="gap:16px;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <h2>${T('البرامج المتاحة','Available programs')}</h2>
+        <button class="primary" data-act="newProgram">+ ${T('إنشاء برنامج','Create program')}</button>
+      </div>
+      <div class="seg">${[['all',T('الكل','All')]].concat(TRACKS.map(t=>[t.id,L(t)])).map(([id,label])=>
+          `<button class="${track===id?'on':''}" data-act="bin:${id}">${label}</button>`).join('')}</div>
       <p class="help" style="margin:6px 0 12px">${T('أضف البرامج المناسبة إلى خطتك، ثم وزّعها على الأيام في الخطوة التالية.','Choose suitable programs for this camp, then allocate them in the next step.')}</p>
       <div style="margin:10px 0 13px"><input type="search" id="binSearch" autocomplete="off" spellcheck="false" value="${esc(binSearchQuery)}" placeholder="${T('ابحث بجزء من اسم البرنامج أو الهدف أو الوصف…','Search any part of a program name, goal or description…')}" aria-label="${T('البحث في البرامج المتاحة','Search available programs')}" style="width:100%;padding:10px 13px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--fg)"><p class="help" style="margin-top:5px">${T('تظهر النتائج فوراً حتى عند كتابة حرفين من منتصف الكلمة.','Results update instantly, including partial words.')}</p></div>
       <div class="bins" id="binSearchResults">
