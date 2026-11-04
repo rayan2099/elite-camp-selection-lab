@@ -2789,7 +2789,7 @@ function ocHandleClick(el){
  if(kind==='createEvent'){const ev=OC_EVENTS.find(x=>x.id===el.dataset.id);if(!ev)return;ocSelected=ev.id;ocSetHolidayRange(ev);ocCreateDuringHoliday();return;}
  if(kind==='day'){ocDate=el.dataset.date;const ev=ocEvent(ocDate);if(ev){if(ocSelected!==ev.id)ocSelected=ev.id;ocSetHolidayRange(ev,ocDate);}return render();}
  if(kind==='compare'){ocComparison=!ocComparison;return render();}
- if(kind==='toggleAnalysis'){ocAnalysisCollapsed=!ocAnalysisCollapsed;return render();}
+ if(kind==='toggleAnalysis'){const top=window.scrollY;ocAnalysisCollapsed=!ocAnalysisCollapsed;render();window.scrollTo(0,top);return;}
  if(kind==='use'){const e=OC_EVENTS.find(x=>x.id===ocSelected);ocInputs.start=e.start;ocInputs.duration=String(Math.min(7,Math.max(3,ocDayCount(e.start,e.end))));ocAnalyze();render();return;}
  if(kind==='analyze'){ocAnalyze();render();return;}
  if(kind==='create'){ocNewCamp();return;}
