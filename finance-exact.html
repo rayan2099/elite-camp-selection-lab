@@ -55,8 +55,8 @@ html.finance-embedded .cat .micro{font-size:10px}
 .finance-notice{background:#fff8ed;border:1px solid #f2debc;padding:12px;border-radius:9px;color:#775323;font-size:11px;line-height:1.8;margin:9px 0}
 @media(max-width:900px){.finance-workflow{grid-template-columns:1fr}}
 </style><script>if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('finance-embedded');</script></head><body><aside><div class="brand">✦ أكاديمية النخبة</div><p class="desc">منصة إدارة المعسكرات</p><nav><a href="#overview">◫ &nbsp; نظرة عامة</a><a href="#categories">▦ &nbsp; التصنيفات المالية</a><a href="#expenses" class="active">▣ &nbsp; إدارة المصروفات</a><a href="#revenues">◈ &nbsp; الإيرادات والتسعير</a><a href="#analysis">▤ &nbsp; التحليل والتقارير</a></nav><div class="side-note">💡 كل مصروف له حالة مستقلة: تقديري، ملتزم به، أو مدفوع فعلياً؛ لضمان تقارير مالية دقيقة.</div></aside><main>
-<div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="resetBtn">↺ تحميل نموذج تجريبي</button><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn primary" id="addBtn">＋ إضافة مصروف</button></div></header>
-<div class="banner" id="financeCampBanner">ⓘ هذه نسخة تفاعلية تجريبية. جميع المبالغ الأولية افتراضية ويمكن تعديلها؛ يتم حفظ التغييرات داخل هذا المتصفح فقط.</div><div class="finance-workflow" id="financeWorkflow">
+<div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="resetBtn">↺ تحميل نموذج تجريبي</button><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="backupBtn">نسخة احتياطية</button><button class="btn" id="restoreBtn">استعادة نسخة</button><input id="restoreFile" type="file" accept=".json,application/json" hidden><button class="btn primary" id="addBtn">＋ إضافة مصروف</button></div></header>
+<div class="banner" id="financeCampBanner">ⓘ هذه نسخة تفاعلية تجريبية. جميع المبالغ الأولية افتراضية ويمكن تعديلها؛ يتم حفظ التغييرات داخل هذا المتصفح فقط.</div><div class="finance-notice">تنبيه: هذه أداة تشغيل محلية داخل متصفحك، وليست نظاماً محاسبياً سحابياً. لا تُرسل البيانات تلقائياً لأي حساب آخر. احفظ نسخة احتياطية بعد إدخال المعاملات، ولا تُسجّل أي دفعة قبل التحقق من حدوثها فعلياً.</div><section class="panel" id="financeQuickTemplates" style="margin:14px 0"><div class="panel-header"><div><h2>إضافة مصروف من قالب جاهز</h2><p class="fx-note">اختر بنداً، ثم أدخل الكميات والأسعار الحقيقية. القوالب لا تُضيف أي مبالغ افتراضية.</p></div></div><div class="filters" id="presetButtons"></div></section><div class="finance-workflow" id="financeWorkflow">
 <div class="flow-step"><b>١ · إعداد ميزانية المعسكر</b><p>أضف بنود السكن والوجبات والنقل والرحلات وحدد طريقة الحساب والجهة الموردة.</p><button class="btn primary sm" id="startExpense">＋ إضافة بند مالي</button></div>
 <div class="flow-step"><b>٢ · متابعة الالتزامات والمدفوعات</b><p>سجّل الحجز أو العقد كالتزام، ثم أثبت المدفوعات فعلياً مع التاريخ والمرجع.</p><button class="btn sm" id="jumpExpenses">مراجعة سجل المصروفات</button></div>
 <div class="flow-step"><b>٣ · التسجيل والتحصيل</b><p>حدّد العدد والسعر المتوقع ثم سجّل مبالغ التحصيل الفعلية بدلاً من خلطها بالتوقعات.</p><button class="btn sm" id="addCollection">＋ تسجيل تحصيل</button></div>
@@ -128,6 +128,17 @@ const financeCampId=String(financeParams.get('camp')||'').slice(0,120);
 const financeCampName=String(financeParams.get('campName')||'').slice(0,140);
 const financeScoped=!!financeCampId;
 const financeStoreKey=financeScoped?'elitefinance-v3-camp:'+financeCampId:'elitefinance-v2';
+
+const FINANCE_PRESETS=[
+ {name:'إقامة الطلاب',cat:'stay',method:'personday',label:'طلاب × ليالي'},
+ {name:'وجبات الطلاب',cat:'meals',method:'personday',label:'طلاب × أيام'},
+ {name:'استئجار حافلة',cat:'transport',method:'day',label:'أيام الإيجار'},
+ {name:'وقود الحافلات',cat:'transport',method:'fixed',label:'مبلغ ثابت'},
+ {name:'تذاكر رحلة',cat:'trips',method:'unit',label:'عدد التذاكر'},
+ {name:'أجور المشرفين',cat:'staff',method:'personday',label:'مشرفون × أيام'},
+ {name:'حقائب الطلاب',cat:'supplies',method:'unit',label:'عدد الحقائب'},
+ {name:'تأمين المشاركين',cat:'safety',method:'unit',label:'عدد المشاركين'}
+];
 const EMPTY=()=>({categories:structuredClone(TYPES),items:[],students:0,fee:0,collected:0,otherRevenue:0,reservePct:10});
 let state;try{state=JSON.parse(localStorage.getItem(financeStoreKey))||(financeScoped?EMPTY():DEFAULT())}catch(e){state=financeScoped?EMPTY():DEFAULT()}
 if(!state||!Array.isArray(state.categories)||!Array.isArray(state.items))state=financeScoped?EMPTY():DEFAULT();
@@ -304,6 +315,43 @@ $('resetBtn').onclick=()=>{
   state=DEFAULT();state.collections=[];selectedCat=null;filter='all';save();render();
  }
 };
+
+function financeFileDownload(name,content,mime){
+ const url=URL.createObjectURL(new Blob([content],{type:mime}));
+ const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);
+ a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);
+}
+function financeBackup(){
+ const payload={schema:'elite-camp-finance-backup',version:1,campId:financeCampId||'demo',campName:financeCampName||'',
+  exportedAt:new Date().toISOString(),data:state};
+ financeFileDownload('camp-finance-backup-'+(financeCampId||'demo').replace(/[^a-zA-Z0-9_-]/g,'_')+'.json',
+  JSON.stringify(payload,null,2),'application/json;charset=utf-8');
+}
+$('backupBtn').onclick=financeBackup;
+$('restoreBtn').onclick=()=>$('restoreFile').click();
+$('restoreFile').addEventListener('change',async e=>{
+ const file=e.target.files?.[0];e.target.value='';if(!file)return;
+ try{
+  if(file.size>5000000)throw Error('الملف أكبر من الحد المسموح (5 ميجابايت).');
+  const backup=JSON.parse(await file.text());
+  if(backup.schema!=='elite-camp-finance-backup'||backup.version!==1||
+     !backup.data||!Array.isArray(backup.data.items)||!Array.isArray(backup.data.categories)||
+     !Array.isArray(backup.data.collections)||backup.campId!==(financeCampId||'demo')){
+    throw Error('ملف النسخة الاحتياطية غير صالح أو يخص معسكراً مختلفاً.');
+  }
+  if(!confirm('استعادة النسخة ستستبدل كل البيانات المالية الحالية لهذا المعسكر. احفظ نسخة من الوضع الحالي أولاً. هل تريد المتابعة؟'))return;
+  state=backup.data;save();filter='all';selectedCat=null;render();
+  alert('تمت استعادة البيانات المالية لهذا المعسكر.');
+ }catch(err){alert('تعذرت استعادة الملف: '+err.message)}
+});
+$('presetButtons').innerHTML=FINANCE_PRESETS.map((p,i)=>
+ '<button type="button" class="btn sm" data-preset="'+i+'">+ '+p.name+'</button>').join('');
+document.querySelectorAll('[data-preset]').forEach(button=>button.onclick=()=>{
+ const p=FINANCE_PRESETS[+button.dataset.preset];if(!p)return;
+ newItem(p.cat);$('itemName').value=p.name;$('calcMethod').value=p.method;
+ updateCalc();
+});
+
 $('exportBtn').onclick=()=>{let f=figures(),lines=[['الاسم','التصنيف','التكلفة التقديرية','المدفوع فعلياً','الحالة'],...state.items.map(x=>[x.name,state.categories.find(c=>c.id===x.cat)?.name||'',x.amount,x.paid,x.status]),['إجمالي تكلفة البنود','',f.base+f.explicitReserve,'',''],['مخصص الاحتياطي النسبي','',f.reserve,'',''],['الميزانية التقديرية','',f.estimated,'',''],['المصروف الفعلي','',f.actual,'',''],['الالتزامات غير المدفوعة','',f.committed,'',''],['الإيرادات المتوقعة','',f.revenue,'',''],['الفائض المتوقع','',f.profit,'','']];let csv='\ufeff'+lines.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');let url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));let a=document.createElement('a');a.href=url;a.download='elite-camp-budget-'+(financeCampId||'demo').replace(/[^a-zA-Z0-9_-]/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)};render();
 
 /* Read-only portfolio projections; never merge with actual ledger without approval. */
