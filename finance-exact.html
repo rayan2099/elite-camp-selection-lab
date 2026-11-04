@@ -393,11 +393,12 @@ $('resetBtn').onclick=()=>{
 $('financeReviewButton').onclick=()=>{
  if(!guardBudget())return;
  if(!state.items.length||!n(state.students)||!n(state.fee)){alert('أكمل التكاليف وعدد الطلاب ورسوم الطالب قبل تقديم الميزانية.');return;}
- state.approval.status='review';audit('إرسال الميزانية للمراجعة','التقديري '+sar(figures().estimated));save();render();
+ state.approval.status='review';state.approval.pendingSnapshot=JSON.stringify(budgetSnapshot());audit('إرسال الميزانية للمراجعة','التقديري '+sar(figures().estimated));save();render();
 };
 $('financeApproveButton').onclick=()=>{
  if(!guardBudget())return;
  if(state.approval.status!=='review'){alert('أرسل الميزانية للمراجعة أولاً.');return;}
+ if(state.approval.pendingSnapshot!==JSON.stringify(budgetSnapshot())){state.approval.status='draft';state.approval.pendingSnapshot=null;audit('إعادة مراجعة مطلوبة','تغيّرت تقديرات الميزانية بعد إرسالها للمراجعة');save();render();alert('تغيرت الميزانية بعد تقديمها للمراجعة. أعد إرسال النسخة المحدثة.');return;}
  if(!confirm('اعتماد هذه النسخة محلياً وتثبيت تقديراتها؟'))return;
  state.approval={status:'approved',version:(state.approval.version||0)+1,approvedAt:new Date().toISOString(),snapshot:budgetSnapshot()};
  audit('اعتماد ميزانية محلي','إصدار '+state.approval.version+' · '+sar(state.approval.snapshot.estimated));save();render();
