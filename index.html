@@ -2957,15 +2957,6 @@ function render(){
   header();
   const container=$('#app');
   container.innerHTML=(page==='finance'?'':`<div class="demo noprint"><span>◈ ${T('نموذج تخطيط تجريبي · بيانات الطلاب افتراضية · الحفظ على هذا المتصفح فقط','Planning prototype · sample student data · saved in this browser only')}</span><span>${T('مواءمة تخطيطية وليست تقييمًا للطالب','Planning alignment, not student assessment')}</span></div>`)+PAGES[page]();
-  if(page==='finance'){
-    const frame=document.getElementById('financeExactFrame');
-    frame?.addEventListener('load',()=>{
-      try{
-        const brand=frame.contentDocument?.querySelector('aside .brand');
-        if(brand){brand.title='العودة إلى إدارة المعسكرات';brand.style.cursor='pointer';brand.addEventListener('click',()=>{page='camps';render()});}
-      }catch(err){}
-    },{once:true});
-  }
   if(page==='library'){renderLib();}
   S.page=page;S.lang=lang;save();
   try{history.replaceState(null,'','#'+page)}catch(e){}
@@ -3504,7 +3495,7 @@ document.addEventListener('keydown',e=>{
     try{applyShared(decodePlan(raw.slice(6)));page='builder';S.step=5;S.shared=true;}
     catch(e){toast(T('رابط الخطة غير صالح أو ناقص.','The plan link is invalid or incomplete.'))}
   }
-  const h=(location.hash||'').replace('#','');
+  const h=(location.hash||'').replace(/^#/,'').replace(/\.+$/,'');
   if(raw.indexOf('#plan=')!==0&&h&&PAGES[h])page=h;
   if(!S.step)S.step=1;
   if(!S.log.length){logIt('أُنشئت مسودة الاختيار','Example draft created');save()}
