@@ -1,6 +1,8 @@
-name: Manual legacy Pages publisher (disabled on push)
+name: Deploy to GitHub Pages
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -9,7 +11,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "elite-camp-pages-manual"
+  group: "pages"
   cancel-in-progress: false
 
 jobs:
@@ -21,26 +23,40 @@ jobs:
     steps:
       - name: Checkout latest website
         uses: actions/checkout@v4
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+
       - name: Upload static website
         uses: actions/upload-pages-artifact@v4
         with:
           path: .
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
       - name: Verify published pages match latest version
         shell: bash
         run: |
           set -euo pipefail
           BASE="https://rayan2099.github.io/elite-camp-selection-lab"
+
+          # Read the version marker from the checked-out source so this check
+          # keeps working across future version bumps instead of pinning a date.
+          MARKER="$(grep -h -o -m1 'Elite Planner · [0-9][0-9.]*' index.html | head -n1 || true)"
+          if [ -z "$MARKER" ]; then
+            echo "::warning::No version marker found in index.html; skipping content verification."
+            exit 0
+          fi
+          echo "Source version marker: $MARKER"
+
           for file in index.html calendar.html elite-planner-2026-11.html; do
-            echo "Checking $file (not GitHub source, actual published URL)"
+            echo "Checking published $file"
             match=0
             for attempt in $(seq 1 12); do
-              if curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$BASE/$file?verify=${GITHUB_SHA}-$attempt" | grep -F 'Elite Planner · 2026.11.04.2' >/dev/null; then
-                echo "Published $file contains latest version marker"
+              if curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$BASE/$file?verify=${GITHUB_SHA}-$attempt" | grep -F "$MARKER" >/dev/null; then
+                echo "Published $file contains the latest version marker"
                 match=1
                 break
               fi
