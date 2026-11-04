@@ -563,6 +563,32 @@ html[data-theme=dark] .daynum{background:var(--accent);color:#22140d}
 @media print{.oc-page .oc-hero{color:#132d49;background:white;border:1px solid #ddd}.oc-page .oc-hero h1{color:#132d49}.oc-page .oc-hero p{color:#57687b}.oc-page .oc-grid{display:block}.oc-page .oc-stack{display:block}.oc-page .oc-panel{break-inside:avoid;margin:10px 0}.oc-page button{display:none}}
 
 
+
+/* Enhanced camp finance: visible operational cost taxonomy */
+.fin-categories-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:25px 0 12px}
+.fin-categories-head h2{font-size:21px}.fin-category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fin-category-tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0;box-shadow:var(--shadow)}
+.fin-cat-top{display:flex;align-items:center;gap:10px}.fin-cat-symbol{display:grid;place-items:center;font-size:22px;width:43px;height:43px;flex:none;border-radius:11px;background:var(--soft2)}
+.fin-cat-title{font-size:15px;font-weight:800;line-height:1.5}.fin-cat-description,.fin-cat-formula{font-size:11px;color:var(--muted);line-height:1.8}
+.fin-cat-formula{margin-top:8px}.fin-cat-stats{display:flex;justify-content:space-between;gap:12px;align-items:end;margin-top:11px}
+.fin-cat-stats strong{font-size:16px}.fin-cat-stats small{display:block;color:var(--muted);font-size:10px}
+.fin-cat-meter{height:7px;background:var(--soft2);border-radius:30px;overflow:hidden;margin-top:10px}
+.fin-cat-meter span{display:block;height:100%;background:var(--accent);border-radius:30px}
+.fin-cat-foot{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:12px}
+.fin-cat-foot button{font-weight:700;font-size:11px;padding:6px 10px}
+.fin-cat-warning{color:var(--bad);font-size:11px;font-weight:700}
+.fin-category-tile.is-reserve{border-style:dashed}
+.fin-insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+.fin-insight{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:13px}
+.fin-insight small{display:block;color:var(--muted);font-size:11px}.fin-insight strong{display:block;font-size:18px;margin-top:4px}
+.fin-distribution{display:flex;width:100%;height:13px;border-radius:20px;overflow:hidden;background:var(--soft2);margin:12px 0}
+.fin-distribution span{height:100%;min-width:0}
+.fin-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+.fin-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-inline-end:4px}
+@media(min-width:1320px){.fin-category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:720px){.fin-category-grid{grid-template-columns:1fr}.fin-insights{grid-template-columns:1fr 1fr}}
+@media(max-width:440px){.fin-insights{grid-template-columns:1fr}}
+
 /* Camp finance workspace */
 .fin-page{direction:rtl;text-align:right}.fin-page[dir="ltr"]{direction:ltr;text-align:left}
 .fin-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:18px}
@@ -1275,8 +1301,8 @@ function icon(name){
   return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
 }
 const NAV=[
-  ['start',[['opportunities','١. اختر موعد المعسكر','1. Choose camp dates'],['camps','٢. أنشئ المعسكر أو اختره','2. Create or select a camp']]],
-  ['plan',[['builder','٣. صمّم خطة المعسكر','3. Build the camp plan'],['library','مكتبة البرامج','Program library'],['selection','البرامج المختارة','Selected programs'],['days','توزيع البرامج على الأيام','Daily program allocation'],['finance','٤. ميزانية المعسكر وتكاليفه','4. Camp budget & costs']]],
+  ['start',[['opportunities','١. اختر موعد المعسكر','1. Choose camp dates'],['camps','٢. أنشئ المعسكر أو اختره','2. Create or select a camp'],['finance','الإدارة المالية للمعسكرات','Camp financial management']]],
+  ['plan',[['builder','٣. صمّم خطة المعسكر','3. Build the camp plan'],['library','مكتبة البرامج','Program library'],['selection','البرامج المختارة','Selected programs'],['days','توزيع البرامج على الأيام','Daily program allocation']]],
   ['verify',[['fit','٤. افحص مواءمة الطلاب','4. Check student alignment'],['readiness','٥. راجع اكتمال الخطة','5. Review plan completeness']]],
   ['out',[['dashboard','٦. استعرض ملخص الخطة','6. Review plan overview'],['outputs','٧. جهّز الملفات وشاركها','7. Export and share']]]
 ];
@@ -2812,6 +2838,45 @@ function finExport(){
  const csv='\uFEFF'+rows.map(row=>row.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\n');
  download('elite-camp-finance-'+(m.start||'draft')+'.csv',csv,'text/csv;charset=utf-8');
 }
+
+const FIN_CATEGORY_DETAILS={
+ accommodation:['🛏️','الفنادق، الاستراحات، المخيمات','عدد الليالي × تكلفة الليلة','Hotels, lodges and campsites','Nights × nightly rate'],
+ meals:['🍽️','الفطور، الغداء، العشاء، الضيافة','الأشخاص × الوجبات × الأيام × سعر الوجبة','Breakfast, lunch, dinner and catering','People × meals × days × unit price'],
+ transport:['🚌','الحافلات، البنزين، السائقون، المواقف','تكلفة ثابتة + مصروفات متغيرة','Buses, fuel, drivers and parking','Fixed cost + variable costs'],
+ activities:['🏕️','تذاكر الدخول، الحجوزات، المعدات','عدد المشاركين × تكلفة النشاط','Admissions, bookings and equipment','Participants × cost per activity'],
+ staff:['👥','المشرفون، المدربون، الإسعاف','عدد العاملين × الأجر × الأيام','Supervisors, trainers and first aid','Workers × wages × days'],
+ supplies:['📦','الملابس، الحقائب، الهدايا، الأدوات','الكمية × سعر الوحدة','Clothing, bags, gifts and tools','Quantity × unit price'],
+ safety:['🛡️','التأمين، الإسعافات، تجهيزات السلامة','تكلفة ثابتة أو تكلفة لكل مشارك','Insurance and safety supplies','Fixed fee or per participant'],
+ marketing:['📣','الإعلانات، التصوير، التصاميم','ميزانية محددة أو تكلفة كل خدمة','Ads, photography and designs','Fixed budget or per service'],
+ services:['🧾','الإنترنت، النظافة، الكهرباء، الرسوم','وفق تفاصيل البند','Internet, cleaning, electricity, fees','Per expense item'],
+ other:['➕','مصروفات مخصصة يضيفها المدير','وفق طريقة احتساب يحددها المدير','Director-defined custom expenses','Custom calculation']
+};
+const FIN_PALETTE=['#f07b3a','#527abb','#16a085','#9374bd','#d59b36','#4a9d83','#db7474','#6888a8','#98796c','#8395a7'];
+function finCategoryCards(d,t,readonly){
+ const card=([id,ar,en],i)=>{
+  const meta=FIN_CATEGORY_DETAILS[id]||FIN_CATEGORY_DETAILS.other;
+  const entries=t.costs.filter(x=>x.category===id);
+  const planned=entries.reduce((sum,x)=>sum+finTotal(x,'plan'),0);
+  const actual=entries.reduce((sum,x)=>sum+finTotal(x,'actual'),0);
+  const percent=planned?Math.round(actual/planned*100):0;
+  return '<article class="fin-category-tile"><div class="fin-cat-top"><span class="fin-cat-symbol" aria-hidden="true">'+meta[0]+'</span><div><div class="fin-cat-title">'+T(ar,en)+'</div><div class="fin-cat-description">'+T(meta[1],meta[3])+'</div></div></div>'
+   +'<div class="fin-cat-formula">'+T('طريقة الحساب: ','Calculation: ')+T(meta[2],meta[4])+'</div>'
+   +'<div class="fin-cat-stats"><div><small>'+T('التكلفة التقديرية','Estimated budget')+'</small><strong>'+finMoney(planned)+'</strong></div><div><small>'+T('المصروف الفعلي','Actual spending')+'</small><strong>'+finMoney(actual)+'</strong></div></div>'
+   +'<div class="fin-cat-meter" role="progressbar" aria-valuenow="'+Math.min(100,percent)+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+Math.min(100,percent)+'%;background:'+FIN_PALETTE[i]+'"></span></div>'
+   +'<div class="fin-cat-foot"><small>'+entries.length+' '+T('بنود','items')+' · '+percent+'%</small><div>'+(actual>planned&&planned>0?'<span class="fin-cat-warning">'+T('تجاوز التقدير','Over budget')+'</span>':'')+(!readonly?'<button data-fin="categoryadd" data-cat="'+esc(id)+'">+ '+T('إضافة بند','Add item')+'</button>':'')+'</div></div></article>';
+ };
+ const total=t.plannedCosts;
+ const slices=FIN_CATEGORIES.map(([id],i)=>({value:t.costs.filter(x=>x.category===id).reduce((sum,x)=>sum+finTotal(x,'plan'),0),color:FIN_PALETTE[i],name:finCategory(id)})).filter(x=>x.value>0);
+ const colors=slices.map(x=>'<span style="width:'+(total?x.value/total*100:0)+'%;background:'+x.color+'"></span>').join('');
+ const legend=slices.map(x=>'<span><i style="background:'+x.color+'"></i>'+esc(x.name)+' ('+(total?Math.round(100*x.value/total):0)+'%)</span>').join('');
+ const percent=t.budget?Math.round(t.actualCosts/t.budget*100):0;
+ const funding=t.forecastRevenue-t.budget;
+ return '<div class="fin-categories-head"><div><div class="eyebrow">'+T('تخطيط شامل للتكاليف','COMPLETE COST PLANNING')+'</div><h2>'+T('التصنيفات المالية للمعسكر','Camp cost categories')+'</h2><p class="fin-help">'+T('جميع مجالات التكلفة ظاهرة هنا. أضف بنودًا مخصصة لكل تصنيف دون التقيد بالقوالب.','Every cost category is visible. Add custom items to any category.')+'</p></div></div>'
+ +'<div class="fin-category-grid">'+FIN_CATEGORIES.map(card).join('')+'<article class="fin-category-tile is-reserve"><div class="fin-cat-top"><span class="fin-cat-symbol">💼</span><div><div class="fin-cat-title">'+T('الاحتياطي','Contingency reserve')+'</div><div class="fin-cat-description">'+T('تغطية المصروفات غير المتوقعة','Allowance for unexpected costs')+'</div></div></div><div class="fin-cat-formula">'+T('نسبة من التكاليف التقديرية','Percentage of estimated costs')+'</div><div class="fin-cat-stats"><div><small>'+T('الاحتياطي المخطط','Planned reserve')+'</small><strong>'+finMoney(t.reserve)+'</strong></div><div><small>'+T('النسبة','Rate')+'</small><strong>'+d.reservePct+'%</strong></div></div><p class="fin-help">'+T('الاحتياطي ليس مصروفًا مدفوعًا؛ يُسجل الصرف الفعلي ضمن البند المناسب.','Not an actual expense; record any spending in its proper category.')+'</p></article></div>'
+ +'<section class="fin-card"><h2>'+T('تحليل توزيع الميزانية','Budget allocation analysis')+'</h2><div class="fin-distribution" aria-label="'+T('توزيع المصروفات التقديرية','Estimated expense distribution')+'">'+colors+'</div><div class="fin-legend">'+(legend||T('أضف بنودًا لعرض توزيع الميزانية.','Add expenses to view distribution.'))+'</div>'
+ +'<div class="fin-insights"><div class="fin-insight"><small>'+T('نسبة الميزانية المصروفة','Budget used')+'</small><strong>'+percent+'%</strong></div><div class="fin-insight"><small>'+T('الميزانية المتبقية مقابل المدفوع','Budget less actual spending')+'</small><strong>'+finMoney(t.budget-t.actualCosts)+'</strong></div><div class="fin-insight"><small>'+T('هامش التمويل المتوقع','Expected funding margin')+'</small><strong class="'+(funding<0?'fin-bad':'fin-good')+'">'+finMoney(funding)+'</strong></div></div></section>';
+}
+
 function pageFinance(){
  const d=finState(),t=finCalc(d),students=finNumber(d.expectedStudents),fee=finNumber(d.fee),readonly=S.role!=='director';
  const k=(title,value,help)=>'<div class="fin-kpi"><small>'+title+'</small><strong>'+value+'</strong><span>'+help+'</span></div>';
@@ -2838,6 +2903,7 @@ function pageFinance(){
   +k(T('الفائض / العجز المتوقع','Forecast surplus / deficit'),finMoney(t.forecastBalance),T('قبل التنفيذ، وليس ربحًا محققًا','Planning figure; not realized profit'))
   +k(T('المصروف الفعلي المسجّل','Recorded actual spending'),finMoney(t.actualCosts),T('ما تم إدخاله فقط','Only entries recorded here'))
   +'</div>'
+  +finCategoryCards(d,t,readonly)
   +'<div class="fin-cols"><section class="fin-card"><h2>'+T('إيرادات الاشتراكات','Student registration revenue')+'</h2><p class="fin-help">'+T('أدخل عدد الطلاب المتوقع تحصيل رسومهم ورسوم الاشتراك للفرد. لا تُحسب رسوم الطلاب مرة ثانية ضمن الإيرادات الأخرى.','Enter expected paying students and fee per student. Do not duplicate tuition in other income.')+'</p>'
   +'<div class="fin-grid"><label>'+T('عدد الطلاب المتوقع سدادهم','Expected paying students')+'<input type="number" min="0" step="1" data-fin-setting="expectedStudents" value="'+d.expectedStudents+'" '+(readonly?'disabled':'')+'></label>'
   +'<label>'+T('رسوم الاشتراك لكل طالب (ر.س)','Fee per student (SAR)')+'<input type="number" min="0" step="0.01" data-fin-setting="fee" value="'+d.fee+'" '+(readonly?'disabled':'')+'></label>'
@@ -2865,6 +2931,7 @@ document.addEventListener('click',e=>{
  if(action==='export')return finExport();
  if(action==='newcost')return finEdit();
  if(action==='newrevenue'){finEdit();const type=document.getElementById('fin-kind');if(type)type.value='revenue';return}
+ if(action==='categoryadd'){finEdit();const category=document.getElementById('fin-category');if(category)category.value=b.dataset.cat;return;}
  if(action==='template')return finEdit(null,b.dataset.template);
  if(action==='edit')return finEdit(b.dataset.id);
  if(action==='save')return finSave(b.dataset.id);
