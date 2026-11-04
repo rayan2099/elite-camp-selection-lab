@@ -562,6 +562,35 @@ html[data-theme=dark] .daynum{background:var(--accent);color:#22140d}
 @media(max-width:550px){.oc-hero{padding:17px;flex-wrap:wrap}.oc-panel{padding:12px}.oc-cell{min-height:45px;padding:4px}.oc-cell small{display:none}.oc-form{grid-template-columns:1fr}.oc-week span{font-size:9px}}
 @media print{.oc-page .oc-hero{color:#132d49;background:white;border:1px solid #ddd}.oc-page .oc-hero h1{color:#132d49}.oc-page .oc-hero p{color:#57687b}.oc-page .oc-grid{display:block}.oc-page .oc-stack{display:block}.oc-page .oc-panel{break-inside:avoid;margin:10px 0}.oc-page button{display:none}}
 
+
+/* Camp finance workspace */
+.fin-page{direction:rtl;text-align:right}.fin-page[dir="ltr"]{direction:ltr;text-align:left}
+.fin-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:18px}
+.fin-top .actions{display:flex;gap:8px;flex-wrap:wrap}
+.fin-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.fin-kpi,.fin-card{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:17px;min-width:0}
+.fin-kpi small{color:var(--muted);display:block;font-size:11px}.fin-kpi strong{display:block;font-size:23px;margin-top:7px;line-height:1.4}
+.fin-kpi span{font-size:11px;color:var(--muted)}
+.fin-card{margin-top:15px}.fin-card h2{font-size:17px;margin:0 0 8px}
+.fin-help{color:var(--muted);font-size:12px;line-height:1.9;margin:4px 0 12px}
+.fin-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.fin-table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:11px;margin-top:10px}
+.fin-table{width:100%;border-collapse:collapse;min-width:760px}
+.fin-table th,.fin-table td{text-align:start;padding:10px;border-bottom:1px solid var(--line);font-size:12px;vertical-align:middle}
+.fin-table thead{background:var(--soft2)}.fin-table tbody tr:last-child td{border-bottom:0}
+.fin-table small{display:block;color:var(--muted);margin-top:3px}.fin-table th{font-size:11px}
+.fin-mini-btn{border:1px solid var(--line);background:var(--surface);padding:5px 9px;border-radius:8px;cursor:pointer;margin-inline-end:5px}
+.fin-note{background:var(--soft2);padding:12px;border-radius:11px;font-size:12px;line-height:1.9;margin-top:12px}
+.fin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.fin-grid label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700}
+.fin-grid input,.fin-grid select,.fin-grid textarea{border:1px solid var(--line);border-radius:8px;padding:9px;background:var(--surface);color:var(--ink);font:inherit;max-width:100%}
+.fin-grid .full{grid-column:1/-1}
+.fin-examples{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.fin-examples button{font-size:11px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.fin-good{color:#137453}.fin-bad{color:#b13f30}
+@media(max-width:980px){.fin-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.fin-cols{grid-template-columns:1fr}}
+@media(max-width:560px){.fin-kpis{grid-template-columns:1fr 1fr}.fin-kpi{padding:10px}.fin-kpi strong{font-size:17px}.fin-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -1247,7 +1276,7 @@ function icon(name){
 }
 const NAV=[
   ['start',[['opportunities','١. اختر موعد المعسكر','1. Choose camp dates'],['camps','٢. أنشئ المعسكر أو اختره','2. Create or select a camp']]],
-  ['plan',[['builder','٣. صمّم خطة المعسكر','3. Build the camp plan'],['library','مكتبة البرامج','Program library'],['selection','البرامج المختارة','Selected programs'],['days','توزيع البرامج على الأيام','Daily program allocation']]],
+  ['plan',[['builder','٣. صمّم خطة المعسكر','3. Build the camp plan'],['library','مكتبة البرامج','Program library'],['selection','البرامج المختارة','Selected programs'],['days','توزيع البرامج على الأيام','Daily program allocation'],['finance','٤. ميزانية المعسكر وتكاليفه','4. Camp budget & costs']]],
   ['verify',[['fit','٤. افحص مواءمة الطلاب','4. Check student alignment'],['readiness','٥. راجع اكتمال الخطة','5. Review plan completeness']]],
   ['out',[['dashboard','٦. استعرض ملخص الخطة','6. Review plan overview'],['outputs','٧. جهّز الملفات وشاركها','7. Export and share']]]
 ];
@@ -1258,6 +1287,7 @@ const PAGE_TITLES={
   selection:['البرامج المختارة','Selected programs'],days:['توزيع البرامج على الأيام','Daily program allocation'],
   fit:['مواءمة احتياجات الطلاب','Student needs alignment'],readiness:['مراجعة اكتمال الخطة','Plan completeness review'],
   opportunities:['تقويم فرص المعسكرات','Camp opportunities calendar'],
+  finance:['الميزانية والتشغيل المالي','Camp finances'],
   outputs:['ملفات الخطة والتجهيز','Plan & preparation files']
 };
 
@@ -2670,7 +2700,181 @@ function ocHandleClick(el){
  if(kind==='focus'){document.getElementById('oc-simulator')?.scrollIntoView({behavior:'smooth',block:'center'});}
 }
 
-const PAGES={opportunities:pageOpportunityCalendar,camps:pageCamps,builder:pageBuilder,dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
+
+/* ================== CAMP FINANCE: per-camp estimates and actuals ================== */
+const FIN_CATEGORIES=[
+ ['accommodation','السكن والإقامة','Accommodation'],
+ ['meals','الوجبات والضيافة','Meals and catering'],
+ ['transport','النقل والباصات والبنزين','Transport and fuel'],
+ ['activities','الرحلات والأنشطة','Trips and activities'],
+ ['staff','المشرفون والمدربون','Staff and trainers'],
+ ['supplies','المستلزمات والهدايا','Supplies and gifts'],
+ ['safety','السلامة والتأمين','Safety and insurance'],
+ ['marketing','التسويق والإعلام','Marketing'],
+ ['services','الخدمات والرسوم','Services and fees'],
+ ['other','مصروفات أخرى','Other expenses']
+];
+const FIN_TEMPLATES=[
+ ['سكن الطلاب / الليلة','Student accommodation / night','accommodation','ليلة سكن','room-night'],
+ ['فطور الطلاب','Student breakfast','meals','وجبة','meal'],
+ ['غداء الطلاب','Student lunch','meals','وجبة','meal'],
+ ['عشاء الطلاب','Student dinner','meals','وجبة','meal'],
+ ['مياه وضيافة','Water and refreshments','meals','حصة','portion'],
+ ['استئجار الباص','Bus hire','transport','يوم','day'],
+ ['وقود الباص','Bus fuel','transport','تعبئة','fill-up'],
+ ['أجر السائق','Driver wages','transport','يوم','day'],
+ ['تذاكر الرحلات','Trip admissions','activities','تذكرة','ticket'],
+ ['أجور المدربين','Trainer fees','staff','يوم','day'],
+ ['أجور المشرفين','Supervisor fees','staff','يوم','day'],
+ ['ملابس وحقائب','Uniforms and bags','supplies','قطعة','item'],
+ ['التأمين والإسعافات','Insurance and first aid','safety','شخص','person'],
+ ['التصوير والتسويق','Media and marketing','marketing','خدمة','service']
+];
+function finState(){
+ const c=activeCamp();if(!c.finance||typeof c.finance!=='object')c.finance={rows:[],reservePct:10,expectedStudents:0,fee:0,actualTuitionReceived:0};
+ const d=c.finance;if(!Array.isArray(d.rows))d.rows=[];
+ if(!Number.isFinite(+d.reservePct))d.reservePct=10;
+ if(!Number.isFinite(+d.expectedStudents))d.expectedStudents=0;
+ if(!Number.isFinite(+d.fee))d.fee=0;
+ if(!Number.isFinite(+d.actualTuitionReceived))d.actualTuitionReceived=0;
+ return d;
+}
+const finNumber=(v)=>{const n=Number(v);return Number.isFinite(n)&&n>=0?n:0};
+const finMoney=n=>new Intl.NumberFormat(lang==='ar'?'ar-SA':'en-US',{maximumFractionDigits:2,minimumFractionDigits:0}).format(n)+' '+T('ر.س','SAR');
+const finCategory=id=>{const x=FIN_CATEGORIES.find(y=>y[0]===id);return x?T(x[1],x[2]):id||T('أخرى','Other')};
+const finTotal=(r,p)=>finNumber(r[p+'Qty'])*finNumber(r[p+'Unit']);
+function finCalc(d){
+ const costs=d.rows.filter(x=>x.kind==='cost'),revenues=d.rows.filter(x=>x.kind==='revenue');
+ const plannedCosts=costs.reduce((a,x)=>a+finTotal(x,'plan'),0);
+ const actualCosts=costs.reduce((a,x)=>a+finTotal(x,'actual'),0);
+ const reserve=plannedCosts*finNumber(d.reservePct)/100;
+ const forecastTuition=finNumber(d.expectedStudents)*finNumber(d.fee);
+ const forecastOther=revenues.reduce((a,x)=>a+finTotal(x,'plan'),0);
+ const actualRevenue=revenues.reduce((a,x)=>a+finTotal(x,'actual'),0)+finNumber(d.actualTuitionReceived);
+ return {costs,revenues,plannedCosts,actualCosts,reserve,budget:plannedCosts+reserve,
+  forecastTuition,forecastOther,forecastRevenue:forecastTuition+forecastOther,
+  actualRevenue,forecastBalance:forecastTuition+forecastOther-plannedCosts-reserve,
+  actualBalance:actualRevenue-actualCosts};
+}
+function finPermission(){if(S.role!=='director'){toast(T('تعديل البيانات المالية متاح لمدير المعسكر فقط.','Only the camp director can edit finances.'));return false}return true}
+function finEdit(id,templateIndex){
+ if(!finPermission())return;
+ const d=finState(),existing=d.rows.find(x=>x.id===id);
+ const tpl=templateIndex!=null?FIN_TEMPLATES[+templateIndex]:null;
+ const r=existing||{id:'',kind:'cost',category:tpl?tpl[2]:'other',name:tpl?tpl[0]:'',unit:tpl?tpl[3]:'وحدة',planQty:1,planUnit:0,actualQty:0,actualUnit:0,note:''};
+ const catOptions=FIN_CATEGORIES.map(([v,ar,en])=>'<option value="'+v+'" '+(r.category===v?'selected':'')+'>'+T(ar,en)+'</option>').join('');
+ const customCategory=FIN_CATEGORIES.some(c=>c[0]===r.category)?'':r.category;
+ const input=(id,label,value,type='text',extra='')=>'<label>'+label+'<input id="'+id+'" type="'+type+'" value="'+esc(String(value==null?'':value))+'" '+extra+'></label>';
+ openModal('<div class="eyebrow">'+T('الميزانية والتشغيل المالي','CAMP FINANCES')+'</div><h2>'+T(existing?'تعديل بند مالي':'إضافة بند مالي',existing?'Edit finance item':'Add finance item')+'</h2>'
+ +'<p class="fin-help">'+T('أدخل الكمية وسعر الوحدة للتقديري والفعلي كلًّا على حدة. لا تُسجّل الأرقام الصفرية كمصروفات فعلية.','Enter quantities and unit prices for both estimated and actual amounts. Zero actual values do not represent spending.')+'</p>'
+ +'<div class="fin-grid">'
+ +'<label>'+T('نوع البند','Item type')+'<select id="fin-kind"><option value="cost" '+(r.kind==='cost'?'selected':'')+'>'+T('مصروف','Expense')+'</option><option value="revenue" '+(r.kind==='revenue'?'selected':'')+'>'+T('إيراد إضافي','Additional revenue')+'</option></select></label>'
+ +'<label>'+T('التصنيف','Category')+'<select id="fin-category">'+catOptions+'</select></label>'
+ +input('fin-customCategory',T('تصنيف مخصص (اختياري)','Custom category (optional)'),customCategory,'text','maxlength="60"')
+ +input('fin-name',T('اسم البند','Item name'),r.name,'text','maxlength="100"')
+ +input('fin-unit',T('وحدة الاحتساب (وجبة، يوم، رحلة...)','Unit (meal, day, trip...)'),r.unit,'text','maxlength="40"')
+ +input('fin-planQty',T('الكمية المقدّرة','Estimated quantity'),r.planQty,'number','min="0" step="any"')
+ +input('fin-planUnit',T('سعر الوحدة المقدّر (ريال)','Estimated unit price (SAR)'),r.planUnit,'number','min="0" step="any"')
+ +input('fin-actualQty',T('الكمية الفعلية','Actual quantity'),r.actualQty,'number','min="0" step="any"')
+ +input('fin-actualUnit',T('السعر الفعلي للوحدة (ريال)','Actual unit price (SAR)'),r.actualUnit,'number','min="0" step="any"')
+ +'<label class="full">'+T('ملاحظات / مورّد / تفاصيل اختيارية','Notes / supplier / optional details')+'<textarea id="fin-note" rows="2">'+esc(r.note||'')+'</textarea></label></div>'
+ +'<div class="actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px"><button data-act="close">'+T('إلغاء','Cancel')+'</button><button class="primary" data-fin="save" data-id="'+esc(r.id)+'">'+T('حفظ البند','Save item')+'</button></div>');
+}
+function finSave(id){
+ if(!finPermission())return;
+ const get=k=>document.getElementById(k)?.value||'';
+ const name=get('fin-name').trim(),unit=get('fin-unit').trim()||T('وحدة','unit');
+ if(!name){toast(T('اكتب اسم البند أولًا.','Enter the item name.'));return}
+ const keys=['planQty','planUnit','actualQty','actualUnit'];
+ for(const k of keys){const raw=get('fin-'+k);if(raw===''||!Number.isFinite(Number(raw))||Number(raw)<0){toast(T('أدخل كميات وأسعارًا صحيحة وغير سالبة.','Enter valid nonnegative quantities and prices.'));return}}
+ const d=finState();const row={id:id||newId('fin-'),kind:get('fin-kind')==='revenue'?'revenue':'cost',category:get('fin-customCategory').trim().slice(0,60)||get('fin-category'),
+  name:name.slice(0,100),unit:unit.slice(0,40),note:get('fin-note').slice(0,400)};
+ keys.forEach(k=>row[k]=finNumber(get('fin-'+k)));
+ const index=d.rows.findIndex(x=>x.id===id);if(index>=0)d.rows[index]=row;else d.rows.push(row);
+ activeCamp().updatedAt=Date.now();save();closeModal();render();toast(T('حُفظ البند المالي.','Finance item saved.'));
+}
+function finRemove(id){
+ if(!finPermission())return;const d=finState(),r=d.rows.find(x=>x.id===id);if(!r)return;
+ if(!confirm(T('حذف البند «'+r.name+'»؟','Delete “'+r.name+'”?')))return;
+ d.rows=d.rows.filter(x=>x.id!==id);save();render();
+}
+function finSetting(key,value){
+ if(!finPermission())return;
+ if(!['expectedStudents','fee','reservePct','actualTuitionReceived'].includes(key))return;
+ if(value===''||!Number.isFinite(Number(value))||Number(value)<0||(+value>100&&key==='reservePct')){toast(T('أدخل قيمة صحيحة.','Enter a valid amount.'));render();return}
+ finState()[key]=finNumber(value);save();render();
+}
+function finExport(){
+ const d=finState(),m=S.meta,tot=finCalc(d);
+ const rows=[['type','category','name','unit','estimated_qty','estimated_unit_price_SAR','estimated_total_SAR','actual_qty','actual_unit_price_SAR','actual_total_SAR','notes']];
+ d.rows.forEach(x=>rows.push([x.kind,finCategory(x.category),x.name,x.unit,x.planQty,x.planUnit,finTotal(x,'plan'),x.actualQty,x.actualUnit,finTotal(x,'actual'),x.note||'']));
+ rows.push(['SUMMARY','','Expected enrolled students','',d.expectedStudents],['SUMMARY','','Fee per student SAR','',d.fee],['SUMMARY','','Estimated costs SAR','',tot.plannedCosts],['SUMMARY','','Estimated reserve SAR','',tot.reserve],['SUMMARY','','Estimated revenue SAR','',tot.forecastRevenue],['SUMMARY','','Estimated balance SAR','',tot.forecastBalance],['SUMMARY','','Actual costs SAR','',tot.actualCosts],['SUMMARY','','Actual tuition received SAR','',d.actualTuitionReceived],['SUMMARY','','Actual recorded revenue SAR','',tot.actualRevenue],['SUMMARY','','Actual recorded balance SAR','',tot.actualBalance]);
+ const csv='\uFEFF'+rows.map(row=>row.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\n');
+ download('elite-camp-finance-'+(m.start||'draft')+'.csv',csv,'text/csv;charset=utf-8');
+}
+function pageFinance(){
+ const d=finState(),t=finCalc(d),students=finNumber(d.expectedStudents),fee=finNumber(d.fee),readonly=S.role!=='director';
+ const k=(title,value,help)=>'<div class="fin-kpi"><small>'+title+'</small><strong>'+value+'</strong><span>'+help+'</span></div>';
+ const asRows=(list,kind)=>list.length?'<div class="fin-table-scroll"><table class="fin-table"><thead><tr>'+[
+  T('البند / التصنيف','Item / category'),T('الكمية × سعر الوحدة','Quantity × unit price'),T('التقديري','Estimate'),T('الكمية × السعر الفعلي','Actual quantity × price'),T('الفعلي','Actual'),T('إجراء','Action')].map(a=>'<th>'+a+'</th>').join('')+'</tr></thead><tbody>'
+  +list.map(r=>'<tr><td><b>'+esc(r.name)+'</b><small>'+esc(finCategory(r.category))+(r.note?' · '+esc(r.note):'')+'</small></td>'
+  +'<td>'+r.planQty+' × '+finMoney(r.planUnit)+'<small>'+esc(r.unit)+'</small></td><td><b>'+finMoney(finTotal(r,'plan'))+'</b></td>'
+  +'<td>'+r.actualQty+' × '+finMoney(r.actualUnit)+'</td><td><b>'+finMoney(finTotal(r,'actual'))+'</b></td><td>'
+  +(!readonly?'<button class="fin-mini-btn" data-fin="edit" data-id="'+esc(r.id)+'">'+T('تعديل','Edit')+'</button><button class="fin-mini-btn" data-fin="delete" data-id="'+esc(r.id)+'">'+T('حذف','Delete')+'</button>':'—')+'</td></tr>').join('')+'</tbody></table></div>'
+  :'<div class="fin-note">'+T(kind==='cost'?'لم تُضف مصروفات بعد. ابدأ بالقوالب أو أنشئ بندًا مخصصًا.':'لم تُسجّل إيرادات إضافية بعد. رسوم الطلاب تُحسب في القسم العلوي، ولا تُكرر هنا.','No '+kind+' items added yet. Add a custom item to get started.')+'</div>';
+ const actualGap=t.actualCosts-t.plannedCosts;
+ const breakEven=fee>0?Math.max(0,Math.ceil(Math.max(0,t.budget-t.forecastOther)/fee)):null;
+ const costPer=students?t.budget/students:null;
+ return '<div class="fin-page" dir="'+(lang==='ar'?'rtl':'ltr')+'">'
+  +pageHead('إدارة ميزانية المعسكر','Camp financial management',
+  'خطّط للتكاليف والإيرادات، وسجّل المصروفات الفعلية لكل معسكر. جميع المبالغ بالريال السعودي.',
+  'Estimate costs and income, then record actual expenses for each camp. Amounts in Saudi riyals.',
+  '<button data-fin="export">'+T('تصدير الميزانية CSV','Export finance CSV')+'</button>')
+  +'<div class="fin-top"><div><b>'+esc(S.meta.campAr)+'</b><p class="fin-help">'+T('البيانات مستقلة لهذا المعسكر ومحفوظة على هذا المتصفح فقط.','Per-camp figures saved only in this browser.')+'</p></div>'
+  +'<div class="actions">'+(!readonly?'<button class="primary" data-fin="newcost">'+T('إضافة مصروف','Add expense')+'</button><button data-fin="newrevenue">'+T('إضافة إيراد آخر','Add other income')+'</button>':'')+'</div></div>'
+  +'<div class="fin-kpis">'
+  +k(T('التكاليف التقديرية مع الاحتياطي','Budget incl. reserve'),finMoney(t.budget),T('تكاليف البنود + احتياطي منفصل','Line items + separately calculated reserve'))
+  +k(T('الإيرادات المتوقعة','Forecast income'),finMoney(t.forecastRevenue),T('الاشتراكات + الإيرادات الأخرى','Fees + other income'))
+  +k(T('الفائض / العجز المتوقع','Forecast surplus / deficit'),finMoney(t.forecastBalance),T('قبل التنفيذ، وليس ربحًا محققًا','Planning figure; not realized profit'))
+  +k(T('المصروف الفعلي المسجّل','Recorded actual spending'),finMoney(t.actualCosts),T('ما تم إدخاله فقط','Only entries recorded here'))
+  +'</div>'
+  +'<div class="fin-cols"><section class="fin-card"><h2>'+T('إيرادات الاشتراكات','Student registration revenue')+'</h2><p class="fin-help">'+T('أدخل عدد الطلاب المتوقع تحصيل رسومهم ورسوم الاشتراك للفرد. لا تُحسب رسوم الطلاب مرة ثانية ضمن الإيرادات الأخرى.','Enter expected paying students and fee per student. Do not duplicate tuition in other income.')+'</p>'
+  +'<div class="fin-grid"><label>'+T('عدد الطلاب المتوقع سدادهم','Expected paying students')+'<input type="number" min="0" step="1" data-fin-setting="expectedStudents" value="'+d.expectedStudents+'" '+(readonly?'disabled':'')+'></label>'
+  +'<label>'+T('رسوم الاشتراك لكل طالب (ر.س)','Fee per student (SAR)')+'<input type="number" min="0" step="0.01" data-fin-setting="fee" value="'+d.fee+'" '+(readonly?'disabled':'')+'></label>'
+  +'<label class="full">'+T('رسوم الطلاب المحصّلة فعليًا حتى الآن (ر.س)','Actual tuition received (SAR)')+'<input type="number" min="0" step="0.01" data-fin-setting="actualTuitionReceived" value="'+d.actualTuitionReceived+'" '+(readonly?'disabled':'')+'></label></div>'
+  +'<div class="fin-note">'+T('إجمالي الاشتراكات المتوقع: ','Expected registration revenue: ')+'<b>'+finMoney(t.forecastTuition)+'</b>'
+  +'<p>'+T('الإيرادات الأخرى المتوقعة: ','Other expected income: ')+finMoney(t.forecastOther)+'</p></div></section>'
+  +'<section class="fin-card"><h2>'+T('الاحتياطي ونقطة التعادل','Reserve and break-even')+'</h2><p class="fin-help">'+T('الاحتياطي نسبة مستقلة من التكاليف التقديرية؛ لا يُسجل كمصروف فعلي إلا عند دفعه ضمن بند فعلي.','Reserve is a forecast allowance and is not counted as actual spending.')+'</p>'
+  +'<div class="fin-grid"><label>'+T('نسبة الاحتياطي (%)','Contingency (%)')+'<input type="number" min="0" max="100" step="0.5" data-fin-setting="reservePct" value="'+d.reservePct+'" '+(readonly?'disabled':'')+'></label></div>'
+  +'<div class="fin-note">'+T('قيمة الاحتياطي: ','Reserve allowance: ')+'<b>'+finMoney(t.reserve)+'</b>'
+  +'<p>'+T('التكلفة المتوقعة لكل طالب: ','Forecast cost per paying student: ')+'<b>'+(costPer===null?T('أدخل عدد الطلاب','Enter student count'):finMoney(costPer))+'</b></p>'
+  +'<p>'+T('عدد الطلاب المطلوب لنقطة التعادل حسب الرسم المحدد: ','Estimated break-even paying students: ')+'<b>'+(breakEven===null?T('أدخل رسوم الاشتراك','Enter student fee'):breakEven+' '+T('طالبًا','students'))+'</b></p></div></section></div>'
+  +'<section class="fin-card"><h2>'+T('بنود المصروفات','Expense items')+'</h2><p class="fin-help">'+T('أضف بندًا واحدًا لكل خدمة، مع كمية وسعر وحدة تقديريين وفعليين. أمثلة: عدد الأشخاص × عدد الوجبات × سعر الوجبة، أو عدد أيام الباص × إيجاره اليومي.','Define each service using a quantity and unit cost, such as total meals × meal price or bus days × daily rental.')+'</p>'
+  +(!readonly?'<div class="fin-examples">'+FIN_TEMPLATES.map((a,i)=>'<button data-fin="template" data-template="'+i+'">+ '+T(a[0],a[1])+'</button>').join('')+'</div>':'')
+  +asRows(t.costs,'cost')+'<div class="fin-note">'+T('إجمالي المصروفات المقدّرة دون الاحتياطي: ','Estimated costs before reserve: ')+'<b>'+finMoney(t.plannedCosts)+'</b> · '+T('الفعلية المدخلة: ','Recorded actual: ')+'<b>'+finMoney(t.actualCosts)+'</b></div></section>'
+  +'<section class="fin-card"><h2>'+T('الإيرادات الأخرى','Other revenues')+'</h2><p class="fin-help">'+T('مثل دعم الجهات الراعية والتبرعات والإيرادات غير المرتبطة برسوم التسجيل.','Examples: sponsorships, grants, and non-tuition revenue.')+'</p>'+asRows(t.revenues,'revenue')+'</section>'
+  +'<section class="fin-card"><h2>'+T('المراجعة المالية قبل الاعتماد','Financial review before approval')+'</h2>'
+  +'<div class="fin-cols"><div class="fin-note">'+T('الفرق بين المصروف الفعلي المسجّل والتقديري (دون الاحتياطي): ','Recorded actual costs minus estimated line costs (excluding reserve): ')+'<b class="'+(actualGap>0?'fin-bad':'fin-good')+'">'+finMoney(actualGap)+'</b><br>'+T('قد تكون الفروقات غير مكتملة إذا لم تُسجل جميع المصروفات.','Differences may be incomplete until all actual spending is entered.')+'</div>'
+  +'<div class="fin-note">'+T('صافي التدفق الفعلي المسجّل: ','Net recorded actual cash flow: ')+'<b class="'+(t.actualBalance<0?'fin-bad':'fin-good')+'">'+finMoney(t.actualBalance)+'</b><br>'+T('التحصيل الفعلي يشمل رسوم الطلاب المحصّلة والإيرادات الأخرى الفعلية؛ ولا يشمل توقعات الاشتراكات.','Actual cash flow includes received tuition and actual other income, not forecast registration revenue.')+'</div></div>'
+  +'<p class="fin-help">'+T('قبل الإقرار بالميزانية: تحقّق من أعداد المشاركين والوجبات والليالي والرحلات، والضرائب والرسوم النظامية والتأمين والفواتير. لا تُحسب الضريبة تلقائيًا، ويمكن إضافتها كبند مستقل.','Before approval verify participant counts, meals, nights, trips, taxes, fees, insurance and invoices. Taxes are not automatically calculated; add them as a separate item.')+'</p>'
+  +'</section></div>';
+}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-fin]');if(!b)return;
+ e.preventDefault();const action=b.dataset.fin;
+ if(action==='export')return finExport();
+ if(action==='newcost')return finEdit();
+ if(action==='newrevenue'){finEdit();const type=document.getElementById('fin-kind');if(type)type.value='revenue';return}
+ if(action==='template')return finEdit(null,b.dataset.template);
+ if(action==='edit')return finEdit(b.dataset.id);
+ if(action==='save')return finSave(b.dataset.id);
+ if(action==='delete')return finRemove(b.dataset.id);
+});
+document.addEventListener('change',e=>{
+ const b=e.target.closest('[data-fin-setting]');if(b)finSetting(b.dataset.finSetting,b.value);
+});
+
+const PAGES={finance:pageFinance,opportunities:pageOpportunityCalendar,camps:pageCamps,builder:pageBuilder,dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
 function render(){
   if(!PAGES[page]) page='camps';
   header();
