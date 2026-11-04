@@ -2009,9 +2009,10 @@ function stepPlate(){
 }
 
 /* ---------- ٢ · القطع ---------- */
+let binSearchQuery='';
 function stepBricks(){
   const track=S.binTrack||'all';
-  const pool=LIB.filter(i=>(track==='all'||i.t===track)&&!isSel(i.id));
+  const pool=LIB.filter(i=>(track==='all'||i.t===track)&&!isSel(i.id)&&(!libSearchNormalize(binSearchQuery)||libSearchNormalize(binSearchQuery).split(/\s+/).every(token=>libSearchNormalize(libSearchText(i)).includes(token))));
   const tray=S.selected.filter(x=>!x.day);
   const placed=S.selected.filter(x=>x.day);
   return `<div class="build2">
@@ -2020,8 +2021,9 @@ function stepBricks(){
         <div class="seg">${[['all',T('الكل','All')]].concat(TRACKS.map(t=>[t.id,L(t)])).map(([id,label])=>
           `<button class="${track===id?'on':''}" data-act="bin:${id}">${label}</button>`).join('')}</div></div>
       <p class="help" style="margin:6px 0 12px">${T('أضف البرامج المناسبة إلى خطتك، ثم وزّعها على الأيام في الخطوة التالية.','Choose suitable programs for this camp, then allocate them in the next step.')}</p>${can('catalog')?`<button class="small" data-act="newProgram" style="margin-bottom:12px">+ ${T('إنشاء برنامج وإضافته للمكتبة','Create a library program')}</button>`:''}
-      <div class="bins">
-        ${pool.map(i=>{const t=TRACK(i.t);return `<div class="bin" style="--bc:${t.color}">
+      <div style="margin:10px 0 13px"><input type="search" id="binSearch" autocomplete="off" spellcheck="false" value="${esc(binSearchQuery)}" placeholder="${T('ابحث بجزء من اسم البرنامج أو الهدف أو الوصف…','Search any part of a program name, goal or description…')}" aria-label="${T('البحث في البرامج المتاحة','Search available programs')}" style="width:100%;padding:10px 13px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--fg)"><p class="help" style="margin-top:5px">${T('تظهر النتائج فوراً حتى عند كتابة حرفين من منتصف الكلمة.','Results update instantly, including partial words.')}</p></div>
+      <div class="bins" id="binSearchResults">
+        ${pool.map(i=>{const t=TRACK(i.t);return `<div class="bin" data-bin-search="${esc(libSearchNormalize(libSearchText(i)))}" style="--bc:${t.color}">
           <span class="program-icon">${uiIcon(TRACKICON[i.t])}</span>
           <div class="ttl">${esc(L({ar:i.ar,en:i.en}))}</div>
           <div class="sub">${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))}</div>
@@ -3564,6 +3566,7 @@ document.addEventListener('change',e=>{const t=e.target;if(page==='opportunities
 document.addEventListener('input',e=>{
   const t=e.target;
   if(t.id==='q'){libFilter.q=t.value;renderLib()}
+  if(t.id==='binSearch'){binSearchQuery=t.value;const terms=libSearchNormalize(binSearchQuery).split(/\s+/).filter(Boolean);const cards=$('#binSearchResults .bin[data-bin-search]');let visible=0;cards.forEach(card=>{const matches=terms.every(term=>card.dataset.binSearch.includes(term));card.hidden=!matches;if(matches)visible++;});const empty=$('#binSearchEmpty');if(empty)empty.hidden=visible>0;return;}
   if(t.id==='campQ'){campFilter.q=t.value;render();const el=$('#campQ');if(el){el.focus();try{el.setSelectionRange(el.value.length,el.value.length)}catch(e){}}}
   if(t.id==='wDays'){wizCollect();wiz.d.dayCount=+t.value;renderWiz();return}
   if(t.id==='pkQ'){const q=t.value.toLowerCase();$$('#pkList [data-pk]').forEach(r=>{const i=ITEM(r.dataset.pk);r.style.display=(L({ar:i.ar,en:i.en})+' '+L(i.goal)).toLowerCase().includes(q)?'':'none'})}
