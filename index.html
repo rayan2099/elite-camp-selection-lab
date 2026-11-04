@@ -619,7 +619,7 @@ html[data-theme=dark] .daynum{background:var(--accent);color:#22140d}
 
 /* Finance dashboard inside the existing camp-planner navigation shell. */
 body.finance-exact-mode #app{padding:0!important;max-width:none!important;width:100%;margin:0}
-#financeExactFrame{display:block;width:100%;height:1900px;border:0;background:#f4f7fb;overflow:hidden}
+#financeExactFrame{display:block;width:100%;height:700px;min-height:0;border:0;background:#f4f7fb;overflow:hidden;vertical-align:top}
 
 /* Unified Camp Planner typography — applied across every section and navigation.
    Keep the design tokens and layouts unchanged; only adjust text hierarchy. */
@@ -3059,22 +3059,36 @@ function render(){
       try{
         const doc=financeFrame.contentDocument;
         if(!doc)return;
-        const embedCss=doc.createElement('style');
-        embedCss.textContent='aside{display:none!important}main{margin:0!important;max-width:none!important;width:100%!important;padding:30px 34px 60px!important}body{overflow:hidden}@media(max-width:850px){main{padding:20px 14px!important}}';
-        doc.head.appendChild(embedCss);
-        const updateFinanceHeight=()=>{
-          if(!financeFrame.isConnected)return;
-          const needed=Math.ceil(Math.max(doc.documentElement.scrollHeight,doc.body.scrollHeight))+4;
-          if(Math.abs(financeFrame.offsetHeight-needed)>2)financeFrame.style.height=needed+'px';
+        // Use the actual finance main content, never iframe viewport/document
+        // scrollHeight, which can create a feedback loop and endless blank space.
+        const content=doc.querySelector('main');
+        if(!content)return;
+        const css=doc.createElement('style');
+        css.textContent='html,body{margin:0!important;min-height:0!important;overflow-x:hidden!important;overflow-y:hidden!important}main{height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important}';
+        doc.head.appendChild(css);
+        let raf=0,lastHeight=0;
+        const measure=()=>{
+          raf=0;
+          if(!financeFrame.isConnected||!content.isConnected)return;
+          const style=financeFrame.contentWindow.getComputedStyle(content);
+          const bounds=content.getBoundingClientRect();
+          const height=Math.max(200,Math.ceil(bounds.height+parseFloat(style.marginTop||0)+parseFloat(style.marginBottom||0))+2);
+          if(Math.abs(height-lastHeight)>3){
+            lastHeight=height;
+            financeFrame.style.height=height+'px';
+          }
         };
-        updateFinanceHeight();
+        const schedule=()=>{
+          if(!raf)raf=requestAnimationFrame(measure);
+        };
+        schedule();
         if(typeof ResizeObserver!=='undefined'){
-          const observer=new ResizeObserver(updateFinanceHeight);
-          observer.observe(doc.querySelector('main')||doc.body);
-          financeFrame.addEventListener('load',()=>observer.disconnect(),{once:true});
+          const observer=new ResizeObserver(schedule);
+          observer.observe(content);
+          financeFrame.addEventListener('load',()=>{observer.disconnect();cancelAnimationFrame(raf)},{once:true});
         }
-        doc.fonts?.ready.then(updateFinanceHeight);
-        financeFrame.contentWindow?.addEventListener('resize',updateFinanceHeight);
+        doc.fonts?.ready.then(schedule);
+        financeFrame.contentWindow?.addEventListener('resize',schedule,{passive:true});
       }catch(err){console.warn('Finance embed sizing unavailable',err)}
     },{once:true});
   }
