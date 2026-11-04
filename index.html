@@ -1223,8 +1223,8 @@ function icon(name){
   return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
 }
 const NAV=[
-  ['plan',[['camps','إدارة المعسكرات','Manage camps'],['builder','تصميم المعسكر','Design camp'],['dashboard','ملخص الخطة','Plan overview'],['library','مكتبة البرامج','Program library'],['selection','البرامج المختارة','Selected programs'],['days','توزيع البرامج على الأيام','Daily program allocation']]],
-  ['strategic',[['opportunities','تقويم فرص المعسكرات','Camp opportunities calendar']]],
+  ['start',[['opportunities','تقويم فرص المعسكرات','Camp opportunities calendar'],['camps','إدارة المعسكرات','Manage camps'],['dashboard','ملخص الخطة','Plan overview']]],
+  ['plan',[['builder','تصميم المعسكر','Design camp'],['library','مكتبة البرامج','Program library'],['selection','البرامج المختارة','Selected programs'],['days','توزيع البرامج على الأيام','Daily program allocation']]],
   ['verify',[['fit','مواءمة احتياجات الطلاب','Student needs alignment'],['readiness','مراجعة اكتمال الخطة','Plan completeness review']]],
   ['out',[['outputs','ملفات الخطة والتجهيز','Plan & preparation files']]]
 ];
@@ -1248,7 +1248,7 @@ function header(){
       <svg viewBox="0 0 92 46" aria-hidden="true"><path fill="currentColor" d="M2 40 24 6l10 16 6-9 20 27H46L34 23l-8 17H2Z"/><path fill="currentColor" opacity=".45" d="M62 40 80 12l10 28H62Z"/></svg>
       <div><b>${T('أكاديمية النخبة','Elite Academy')}</b><small>CAMP PLANNER</small></div>
     </div>
-    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({plan:'التخطيط',strategic:'التخطيط الاستراتيجي',verify:'مراجعة الخطة',out:'التجهيز والمشاركة'}[g],{plan:'PLANNING',strategic:'STRATEGIC PLANNING',verify:'PLAN REVIEW',out:'PREPARE & SHARE'}[g])}</div>
+    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({start:'١ · تحديد الموعد والمعسكر',plan:'٢ · بناء خطة المعسكر',verify:'٣ · مراجعة الخطة',out:'٤ · التجهيز والمشاركة'}[g],{start:'1 · START & SCHEDULE',plan:'2 · DESIGN THE CAMP',verify:'3 · REVIEW THE PLAN',out:'4 · PREPARE & SHARE'}[g])}</div>
       ${items.map(([id,ar,en])=>`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='camps'?'collection':id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='opportunities'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}${id==='camps'?`<span class="cnt">${S.camps.length}</span>`:''}</button>`).join('')}
     </div>`).join('')}
     <div class="sidefoot">
