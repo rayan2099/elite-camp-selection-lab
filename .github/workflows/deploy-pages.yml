@@ -1,13 +1,6 @@
-name: Publish Elite Camp Dashboard to GitHub Pages
+name: Manual legacy Pages publisher (disabled on push)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "index.html"
-      - "calendar.html"
-      - "elite-planner-2026-11.html"
-      - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -16,7 +9,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "elite-camp-pages"
+  group: "elite-camp-pages-manual"
   cancel-in-progress: false
 
 jobs:
