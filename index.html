@@ -3298,7 +3298,7 @@ function addCustomLabel(kind){
  const input=$(isTag?'#cpNewTag':'#cpNewNeed');
  const group=input?.previousElementSibling;
  const dict=isTag?TAGNAMES:NEEDS;
- const value=input?.value.trim().replace(/\\s+/g,' ');
+ const value=input?.value.trim().replace(/\s+/g,' ');
  if(!input||!group||!value)return toast(T('أدخل اسم الوسم أولاً.','Enter a tag name first.'));
  if(value.length<2||value.length>48)return toast(T('اسم الوسم يجب أن يتراوح بين حرفين و48 حرفاً.','Tag must be 2–48 characters.'));
  const norm=x=>String(x).normalize('NFKC').replace(/[\u064B-\u065F\u0640]/g,'').trim().toLocaleLowerCase();
