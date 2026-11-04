@@ -156,7 +156,7 @@ const $=id=>document.getElementById(id);const n=x=>Math.max(0,Number(x)||0);cons
 if(!Array.isArray(state.collections))state.collections=[];
 if(!Array.isArray(state.audit))state.audit=[];
 if(!state.approval||typeof state.approval!=='object')state.approval={status:'draft',version:0,approvedAt:null,snapshot:null};
-const budgetLocked=()=>state.approval.status==='approved';
+const budgetLocked=()=>state.approval?.status==='approved';
 const guardBudget=()=>{if(!budgetLocked())return true;alert('هذه الميزانية معتمدة محلياً. أعد فتح الميزانية قبل تعديل البنود أو الافتراضات.');return false;};
 const budgetSnapshot=()=>({items:state.items.map(x=>({id:x.id,name:x.name,cat:x.cat,amount:x.amount})),students:state.students,fee:state.fee,otherRevenue:state.otherRevenue,reservePct:state.reservePct,estimated:figures().estimated,forecast:figures().revenue});
 const audit=(action,detail)=>{state.audit.unshift({id:'a'+Date.now()+Math.random().toString(36).slice(2),date:new Date().toISOString(),action,detail});state.audit=state.audit.slice(0,500);};
@@ -386,7 +386,7 @@ $('saveCat').onclick=()=>{
 $('resetBtn').onclick=()=>{
  if(!guardBudget())return;
  if(confirm('تحميل النموذج التجريبي سيستبدل جميع البنود والتحصيلات الحالية لهذا المعسكر. نوصي بتصدير CSV أولاً. هل تريد المتابعة؟')){
-  state=DEFAULT();state.collections=[];state.audit=[];audit('تحميل بيانات تجريبية','استبدال جميع بيانات المعسكر بالنموذج التجريبي');selectedCat=null;filter='all';save();render();
+  state=DEFAULT();state.collections=[];state.audit=[];state.approval={status:'draft',version:0,approvedAt:null,snapshot:null};audit('تحميل بيانات تجريبية','استبدال جميع بيانات المعسكر بالنموذج التجريبي');selectedCat=null;filter='all';save();render();
  }
 };
 
@@ -449,7 +449,7 @@ $('restoreFile').addEventListener('change',async e=>{
     throw Error('ملف النسخة الاحتياطية غير صالح أو يخص معسكراً مختلفاً.');
   }
   if(!confirm('استعادة النسخة ستستبدل كل البيانات المالية الحالية لهذا المعسكر. احفظ نسخة من الوضع الحالي أولاً. هل تريد المتابعة؟'))return;
-  state=backup.data;if(!Array.isArray(state.audit))state.audit=[];save();filter='all';selectedCat=null;render();
+  state=backup.data;if(!Array.isArray(state.audit))state.audit=[];if(!state.approval)state.approval={status:'draft',version:0,approvedAt:null,snapshot:null};save();filter='all';selectedCat=null;render();
   alert('تمت استعادة البيانات المالية لهذا المعسكر.');
  }catch(err){alert('تعذرت استعادة الملف: '+err.message)}
 });
