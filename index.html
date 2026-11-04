@@ -1534,7 +1534,7 @@ function pageLibrary(){
   return pageHead('مكتبة البرامج','Program library',
     'استعرض برامج الأكاديمية وأضف برامج جديدة عند الحاجة، ثم اختر البرامج التي تخدم أهداف المعسكر.',
     'Browse existing programs, create additional ones, and select those serving camp goals.',
-    `${can('catalog')?`<button class="primary" data-act="newProgram">+ ${T('إنشاء برنامج','Create program')}</button>`:''}<button data-act="go:selection">${T('البرامج المختارة','Selected programs')} (${selCount()})</button>`)
+    `<button class="primary" data-act="newProgram">+ ${T('إنشاء برنامج','Create program')}</button><button data-act="go:selection">${T('البرامج المختارة','Selected programs')} (${selCount()})</button>`)
   +`<div class="note" style="margin-bottom:14px"><b>${T('إضافة برنامج للمكتبة','Adding a program to the library')}</b><p class="help">${T('أنشئ برنامجًا جديدًا مع هدف ومسار وأعمار ومتطلبات واضحة؛ سيبقى متاحًا في المكتبة لجميع المعسكرات على هذا المتصفح. أنشئه أولًا ثم اختر «أضف إلى الخطة» لإدراجه في المعسكر الحالي.','Create a program with a clear goal, track, ages and requirements. It will remain available to all camps in this browser. After saving, use Add to plan for the current camp.')}</p></div>`
   +`<div class="card">
       <div class="filters" style="margin:0">
@@ -2027,10 +2027,10 @@ function stepBricks(){
   const placed=S.selected.filter(x=>x.day);
   return `<div class="build2">
     <div class="card">
-      <div class="row wrap"><h2>${T('البرامج المتاحة','Available programs')}</h2>
+      <div class="row wrap" style="gap:12px;align-items:center"><div class="row wrap" style="gap:12px;justify-content:flex-start"><h2>${T('البرامج المتاحة','Available programs')}</h2><button class="primary small" data-act="newProgram">+ ${T('إنشاء برنامج','Create program')}</button></div>
         <div class="seg">${[['all',T('الكل','All')]].concat(TRACKS.map(t=>[t.id,L(t)])).map(([id,label])=>
           `<button class="${track===id?'on':''}" data-act="bin:${id}">${label}</button>`).join('')}</div></div>
-      <p class="help" style="margin:6px 0 12px">${T('أضف البرامج المناسبة إلى خطتك، ثم وزّعها على الأيام في الخطوة التالية.','Choose suitable programs for this camp, then allocate them in the next step.')}</p>${can('catalog')?`<button class="small" data-act="newProgram" style="margin-bottom:12px">+ ${T('إنشاء برنامج وإضافته للمكتبة','Create a library program')}</button>`:''}
+      <p class="help" style="margin:6px 0 12px">${T('أضف البرامج المناسبة إلى خطتك، ثم وزّعها على الأيام في الخطوة التالية.','Choose suitable programs for this camp, then allocate them in the next step.')}</p>
       <div style="margin:10px 0 13px"><input type="search" id="binSearch" autocomplete="off" spellcheck="false" value="${esc(binSearchQuery)}" placeholder="${T('ابحث بجزء من اسم البرنامج أو الهدف أو الوصف…','Search any part of a program name, goal or description…')}" aria-label="${T('البحث في البرامج المتاحة','Search available programs')}" style="width:100%;padding:10px 13px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--fg)"><p class="help" style="margin-top:5px">${T('تظهر النتائج فوراً حتى عند كتابة حرفين من منتصف الكلمة.','Results update instantly, including partial words.')}</p></div>
       <div class="bins" id="binSearchResults">
         ${pool.map(i=>{const t=TRACK(i.t);return `<div class="bin" data-bin-search="${esc(libSearchNormalize(libSearchText(i)))}" ${binTerms.every(token=>libSearchNormalize(libSearchText(i)).includes(token))?'':'hidden'} style="--bc:${t.color}">
@@ -3220,7 +3220,9 @@ function saveBrief(){
 function customProgramFields(track){
   return Object.entries(FIELDS).filter(([key])=>key.startsWith(track+'.'));
 }
+let customProgramReturnPage='library';
 function customProgramModal(id){
+  if(!id)customProgramReturnPage=page;
   if(!can('catalog'))return toast(T('إنشاء البرامج متاح للمدير وقائد البرامج ومسؤول القيم.','Program creation is available to the director, programs lead, and values lead.'));
   const existing=id?ITEM(id):null;
   if(id&&(!existing||!existing.custom))return;
@@ -3279,7 +3281,14 @@ function saveCustomProgram(id){
   if(pos>=0)S.customPrograms[pos]=item;else S.customPrograms.push(item);
   registerCustomPrograms([item]);
   logIt(id?`تحديث البرنامج المضاف: ${ar}`:`إضافة برنامج للمكتبة: ${ar}`,id?`Updated custom program: ${en}`:`Created library program: ${en}`);
-  save();closeModal();libFilter.q='';libFilter.only=false;libFilter.track=t;libFilter.field='all';page='library';render();
+  save();closeModal();libFilter.q='';libFilter.only=false;libFilter.track=t;libFilter.field='all';
+  if(!id&&customProgramReturnPage==='builder'){
+    S.binTrack=t;binSearchQuery='';
+    page='builder';
+  }else{
+    page='library';
+  }
+  render();
   toast(id?T('حُفظت التعديلات.','Program updated.'):T('حُفظ البرنامج في المكتبة. يمكنك إضافته الآن إلى خطة المعسكر.','Program saved to the library. You can now add it to this camp.'));
 }
 function deleteCustomProgram(id){
