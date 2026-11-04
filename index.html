@@ -1995,7 +1995,7 @@ function builderFooter(){
     <button data-act="step:${n-1}" ${n===1?'disabled':''}>${T('→ السابق','← Back')}</button>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       ${n<5?`<button class="primary" data-act="step:${n+1}">${T('التالي: ','Next: ')}${T(STEPS[n][0],STEPS[n][1])}</button>`
-           :`<button class="primary" data-act="copyLink">${T('نسخ رابط مشاركة الخطة','Copy plan sharing link')}</button><button data-act="print">${T('طباعة','Print')}</button>`}
+           :''}
     </div>
   </div>`;
 }
@@ -2323,29 +2323,6 @@ function stepPlan(){
       ${metric(T('تغطية التحديات','Fit'),f.pct+'%',T(f.covered+' من '+f.total+' طلاب',f.covered+' of '+f.total+' students'))}
       ${metric(T('اكتمال التخطيط','Planning completion'),rd.score+'%',T(rd.passed+' من '+rd.total+' فحص',rd.passed+' of '+rd.total+' checks'))}
     </div>
-    <div class="card spacer screenonly">
-      <div class="row wrap" style="align-items:flex-start">
-        <div>
-          <div class="eyebrow">${T('برنامج المعسكر','CAMP PROGRAMME')}</div>
-          <h2 style="margin-top:5px">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))}</h2>
-          <p class="help">${esc(L({ar:S.meta.cityAr,en:S.meta.cityEn}))} · <span dir="ltr">${esc(S.meta.start)} — ${esc(S.meta.end)}</span> · ${S.meta.students} ${T('طالبًا','students')} · ${S.meta.days.length} ${T('أيام','days')}</p>
-        </div>
-        <span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}% ${T('استيفاء الشروط','checks met')}</span>
-      </div>
-      <div class="sharebox">
-        <input readonly id="planUrl" value="${esc(isFile?'#':shareUrl())}" dir="ltr" aria-label="${T('رابط مشاركة نسخة الخطة','Shareable plan-copy link')}">
-        <button class="small" data-act="copyLink">${T('نسخ','Copy')}</button>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-        <button class="primary" data-act="copyLink">${T('نسخ رابط مشاركة الخطة','Copy plan sharing link')}</button>
-        <button data-act="exportJson">${T('تصدير JSON','Export JSON')}</button>
-        <button data-act="copySummary">${T('نسخ ملخص','Copy summary')}</button>
-        <button data-act="print">${T('طباعة','Print')}</button>
-      </div>
-      <p class="help" style="margin-top:8px">${isFile
-        ? T('افتح الملف من الرابط المنشور (GitHub Pages) ليعمل رابط المشاركة؛ محليًا استخدم «تصدير JSON».','Open the file from the published URL (GitHub Pages) for share links to work; locally use “Export JSON”.')
-        : T('من يفتح هذا الرابط يرى نفس الخطة على متصفحه، ويمكنه تعديل نسخته.','Whoever opens this link sees the same plan in their browser and can edit their copy.')}</p>
-    </div>
     <div class="printonly printcover">
       <div class="row" style="align-items:flex-start">
         <div>
@@ -2356,8 +2333,11 @@ function stepPlan(){
         <div style="text-align:center"><b style="font-size:22px">${rd.score}%</b><div class="help">${T('اكتمال التخطيط','Planning completion')}</div></div>
       </div>
     </div>
-    <div class="row spacer noprint" style="gap:8px"><h2 style="font-size:16px">${T('معاينة البرنامج اليومي','Daily program preview')}</h2>
+    <div class="row spacer noprint" style="gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+      <div><h2 style="font-size:16px">${T('معاينة الجدول','Schedule preview')}</h2>
       <span class="help">${T('معاينة أولية لجدول يومي مبني على قالب ثابت؛ راجع أوقات الصلاة والجلسات والأنشطة قبل التنفيذ.','A preview based on a fixed template. Verify prayer times, sessions and activities before use.')}</span></div>
+      <button class="primary" data-act="print">${T('طباعة','Print')}</button>
+    </div>
     <div class="spacer">${programSection()}</div>
     <div class="grid cols2 spacer print-supplement">
       <div class="card">
