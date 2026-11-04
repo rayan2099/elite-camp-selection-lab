@@ -648,6 +648,13 @@ body{font-size:var(--type-body);line-height:1.7}
 #sidebar .brand b{font-size:14px}
 #sidebar .navlabel{font-size:10px;letter-spacing:.04em}
 #sidebar .navbtn{font-size:12px;line-height:1.55}
+#sidebar .finance-sublist{margin:3px 7px 8px 3px;padding-inline-start:12px;border-inline-start:2px solid var(--line);display:flex;flex-direction:column;gap:3px}
+#sidebar .finance-subitem{width:100%;font-size:11.5px;padding:8px 10px;border:0;border-radius:7px;text-align:start;background:transparent;color:var(--fg);line-height:1.5;display:flex;align-items:center;gap:7px;cursor:pointer}
+#sidebar .finance-subitem:hover{background:var(--soft)}
+#sidebar .finance-subitem.active{background:var(--accentsoft);color:var(--fg);font-weight:800}
+#sidebar .finance-subitem .camp-marker{font-size:11px;opacity:.75;flex:none}
+#sidebar .finance-subitem .camp-label{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#sidebar .finance-toggle{margin-inline-start:auto;flex:none;font-size:12px;opacity:.85}
 #sidebar .sidefoot{font-size:11px}
 #topbar .crumb{font-size:12px}
 #topbar button,#app button{font-family:inherit}
@@ -1269,6 +1276,7 @@ function registerCustomPrograms(programs){
 registerCustomPrograms(S.customPrograms);
 let lang=S.lang||'ar';
 let page=S.page||'dashboard';
+let financeNavOpen=true;
 let libFilter={q:'',track:'all',field:'all',age:'all',only:false};
 
 const $=s=>document.querySelector(s);
@@ -1391,7 +1399,7 @@ function header(){
       <div><b>${T('أكاديمية النخبة','Elite Academy')}</b><small>CAMP PLANNER</small></div>
     </div>
     ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({start:'ابدأ من هنا',plan:'صمّم الخطة',verify:'تحقق من الخطة',out:'النتائج والمشاركة'}[g],{start:'START HERE',plan:'BUILD THE PLAN',verify:'CHECK THE PLAN',out:'RESULTS & SHARING'}[g])}</div>
-      ${items.map(([id,ar,en])=>`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='camps'?'collection':id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='opportunities'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}${id==='camps'?`<span class="cnt">${S.camps.length}</span>`:''}</button>`).join('')}
+      ${items.map(([id,ar,en])=>id==='finance'?`<div><button class="navbtn ${page==='finance'?'active':''}" data-act="toggleFinanceNav" aria-expanded="${financeNavOpen}" aria-controls="financeCampLinks">${icon('export')}<span>${T(ar,en)}</span><span class="finance-toggle">${financeNavOpen?'⌄':'›'}</span></button>${financeNavOpen?`<div class="finance-sublist" id="financeCampLinks">${S.camps.map(c=>`<button class="finance-subitem ${page==='finance'&&c.id===S.activeId?'active':''}" data-fin-camp="${esc(c.id)}" title="${esc(campName(c))}"><span class="camp-marker">▣</span><span class="camp-label">${esc(campName(c))}</span></button>`).join('')}</div>`:''}</div>`:`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='camps'?'collection':id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='opportunities'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}${id==='camps'?`<span class="cnt">${S.camps.length}</span>`:''}</button>`).join('')}
     </div>`).join('')}
     <div class="sidefoot">
       <span>${T('اكتمال شروط الخطة','Plan checks completed')}</span>
@@ -3034,7 +3042,9 @@ document.addEventListener('change',e=>{
 });
 
 function pageFinanceExact(){
- return '<iframe id="financeExactFrame" src="finance-exact.html?embed=1" title="الإدارة المالية للمعسكر" loading="eager"></iframe>';
+ const camp=activeCamp();
+ const src='finance-exact.html?embed=1&camp='+encodeURIComponent(camp.id)+'&campName='+encodeURIComponent(campName(camp));
+ return '<iframe id="financeExactFrame" src="'+esc(src)+'" title="'+esc(T('الإدارة المالية: ','Finances: ')+campName(camp))+'" loading="eager"></iframe>';
 }
 const PAGES={finance:pageFinanceExact,opportunities:pageOpportunityCalendar,camps:pageCamps,builder:pageBuilder,dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
 function render(){
@@ -3494,6 +3504,8 @@ document.addEventListener('click',e=>{
   }
   const cal=e.target.closest('[data-oc]');
   if(cal&&page==='opportunities'){e.preventDefault();ocHandleClick(cal);return}
+  const campFinance=e.target.closest('[data-fin-camp]');
+  if(campFinance){const camp=campById(campFinance.dataset.finCamp);if(camp){S.activeId=camp.id;page='finance';save();if(window.innerWidth<860)$('#sidebar').classList.remove('open');render();}return;}
   const nav=e.target.closest('[data-page]');
   if(nav){page=nav.dataset.page;if(window.innerWidth<860)$('#sidebar').classList.remove('open');render();return}
   const pickHere=e.target.closest('[data-pickhere]');
@@ -3502,6 +3514,7 @@ document.addEventListener('click',e=>{
   const [a,arg]=el.dataset.act.split(':');
   const map={
     go:()=>{page=arg;render()},
+    toggleFinanceNav:()=>{if(page!=='finance'){page='finance';financeNavOpen=true;render();}else{financeNavOpen=!financeNavOpen;header();}},
     lang:()=>{lang=lang==='ar'?'en':'ar';render()},
     theme:()=>{S.theme=S.theme==='light'?'dark':'light';render()},
     menu:()=>{$('#sidebar').classList.toggle('open')},
