@@ -46,7 +46,7 @@ jobs:
             echo "Checking $file (not GitHub source, actual published URL)"
             match=0
             for attempt in $(seq 1 12); do
-              if curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$BASE/$file?verify=${GITHUB_SHA}-$attempt" | grep -Fq 'Elite Planner · 2026.11.04.2'; then
+              if curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$BASE/$file?verify=${GITHUB_SHA}-$attempt" | grep -F 'Elite Planner · 2026.11.04.2' >/dev/null; then
                 echo "Published $file contains latest version marker"
                 match=1
                 break
