@@ -579,8 +579,10 @@ function financeReportHtml(){
  const itemRows=state.items.map(i=>row([
   esc(i.name),esc(state.categories.find(c=>c.id===i.cat)?.name||'مخصص'),
   money(i.amount),money(i.paid),money(Math.max(0,i.amount-n(i.paid))),
-  esc(({estimated:'تقديري',committed:'ملتزم به',paid:'مدفوع كلياً/جزئياً'})[i.status]||i.status),
-  esc(i.vendor||'—'),fmtDate(i.due)
+  esc(({estimated:'تقديري',committed:'ملتزم به',paid:'مدفوع جزئياً أو كلياً'})[i.status]||i.status)
+ ])).join('');
+ const supplierRows=state.items.filter(i=>i.vendor||i.due||i.ref).map(i=>row([
+  esc(i.name),esc(i.vendor||'غير محدد'),fmtDate(i.due),esc(i.ref||'—')
  ])).join('');
  const payments=state.items.flatMap(i=>(i.payments||[]).map(p=>({...p,itemName:i.name,vendor:i.vendor||'—'}))).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
  const paymentRows=payments.map(p=>row([fmtDate(p.date),esc(p.itemName),esc(p.vendor),money(p.amount),esc(p.method||'—'),esc(p.ref||'—')])).join('');
@@ -607,7 +609,8 @@ function financeReportHtml(){
  +section('٢ · توزيع الميزانية حسب التصنيف',['التصنيف','البنود','التقديري','المدفوع','فرق التقدير'],catRows+row(['الإجمالي',String(state.items.length),money(f.base+f.explicitReserve),money(f.actual),money(Math.max(0,f.base+f.explicitReserve-f.actual))],'report-subtotal'),5)
  +'<div class="report-note">مخصص الاحتياطي النسبي: '+money(f.reserve)+' · المصروفات المخططة شاملة الاحتياطي: '+money(f.estimated)+'؛ الاحتياطي ليس دفعة فعلية.</div>'
  +'<h2>تحليل بصري لتوزيع التكاليف</h2><div class="report-note">'+(costBars||'لا توجد بيانات بعد.')+'</div>'
- +section('٣ · المصروفات والالتزامات التفصيلية',['البند','التصنيف','التقديري','المدفوع','المتبقي','الحالة','المورد','الاستحقاق'],itemRows,8)
+ +section('٣ · المصروفات والالتزامات التفصيلية',['البند','التصنيف','التقديري','المدفوع','المتبقي','الحالة'],itemRows,6)
+ +section('تفاصيل الموردين وتواريخ الاستحقاق',['البند','المورد','تاريخ الاستحقاق','مرجع المستند'],supplierRows,4)
  +section('٤ · سجل مدفوعات الموردين',['التاريخ','البند','المورد','المبلغ','الطريقة','المرجع'],paymentRows,6)
  +section('٥ · التحصيلات والإيرادات',['التاريخ','نوع التحصيل','الدافع','المبلغ','المرجع'],collectionRows,5)
  +'<div class="report-note">الإيراد المتوقع للطلاب: '+money(n(state.students)*n(state.fee))+' · الرعايات والإيرادات الأخرى المتوقعة: '+money(state.otherRevenue)+' · التحصيل الطلابي المسجل: '+money(actualTuition())+' · الإيرادات الأخرى المحصلة: '+money(actualOtherRevenue())+'. قد تتضمن السجلات القديمة تحصيلات افتتاحية بلا تفاصيل فردية.</div>'
