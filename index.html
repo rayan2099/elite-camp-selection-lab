@@ -137,9 +137,19 @@ label.fld textarea{resize:vertical;min-height:70px;line-height:1.6}
 html[data-theme=dark] .seg button.on{background:var(--accent);color:#22140d}
 
 /* ---------- library ---------- */
-.custom-checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:7px;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--soft);max-height:190px;overflow:auto;width:100%}
-.custom-checks label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:400;color:var(--fg);cursor:pointer;line-height:1.5}
-.custom-checks input{accent-color:var(--accent);flex:none}
+/* Accessible, responsive selection tiles for program skills and requirements */
+.custom-option-section{display:flex;flex-direction:column;gap:8px;min-width:0}
+.custom-option-title{font-size:13px;font-weight:800;color:var(--fg)}
+.custom-option-section>.help{font-weight:400}
+.custom-checks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--soft);width:100%;max-height:none;overflow:visible;min-width:0}
+.custom-checks label{display:flex;align-items:center;justify-content:flex-start;gap:11px;min-width:0;min-height:52px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:13px;font-weight:600;color:var(--fg);cursor:pointer;line-height:1.55;white-space:normal;overflow-wrap:anywhere;transition:background .15s,border-color .15s,box-shadow .15s}
+.custom-checks label:hover{border-color:var(--accent);background:var(--accentsoft)}
+.custom-checks label:has(input:checked){border-color:var(--accent);background:var(--accentsoft);box-shadow:inset 0 0 0 1px var(--accent)}
+.custom-checks label:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.custom-checks input[type="checkbox"]{width:19px;height:19px;min-width:19px;margin:0;accent-color:var(--accent);flex:none;cursor:pointer}
+.custom-checks .option-text{display:block;min-width:0;flex:1;line-height:1.5}
+@media(max-width:800px){.custom-checks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.custom-checks{grid-template-columns:1fr;padding:9px}.custom-checks label{min-height:46px}}
 
 .libgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
 .libcard{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:15px;display:flex;flex-direction:column;gap:10px;position:relative;transition:.15s;border-inline-start:3px solid var(--tc,var(--line))}
@@ -3240,10 +3250,10 @@ function customProgramModal(id){
       <label class="fld">${T('الحد الأدنى للعمر','Minimum age')}<input type="number" id="cpAgeMin" min="6" max="18" value="${i.ages[0]}"></label>
       <label class="fld">${T('الحد الأعلى للعمر','Maximum age')}<input type="number" id="cpAgeMax" min="6" max="18" value="${i.ages[1]}"></label>
       <label class="fld wide">${T('مستوى التجهيز','Preparation level')}<select id="cpLoad"><option value="1" ${i.load===1?'selected':''}>1 — ${T('بسيط','Low')}</option><option value="2" ${i.load===2?'selected':''}>2 — ${T('متوسط','Medium')}</option><option value="3" ${i.load===3?'selected':''}>3 — ${T('مرتفع','High')}</option></select><span class="help">${T('تقدير نسبي للجهد، وليس عدد ساعات أو تكلفة.','Relative preparation effort, not hours or cost.')}</span></label>
-      <label class="fld wide">${T('المعرفة والمهارات المستهدفة (اختياري)','Targeted needs / skills (optional)')}<span class="help">${T('اختر وسومًا دقيقة فقط؛ تُستخدم في المطابقة الأولية مع احتياجات الطلاب.','Select only applicable tags; they inform the preliminary student-needs match.')}</span>
-        <span class="custom-checks">${Object.entries(TAGNAMES).map(([key,val])=>`<label><input type="checkbox" data-custom-tag="${key}" ${i.tags.includes(key)?'checked':''}> ${T(val[0],val[1])}</label>`).join('')}</span></label>
-      <label class="fld wide">${T('متطلبات التشغيل والتجهيز','Operational and preparation needs')}<span class="help">${T('حدّد ما يجب توفيره قبل تنفيذ البرنامج.','Identify resources required before delivery.')}</span>
-        <span class="custom-checks">${Object.entries(NEEDS).map(([key,val])=>`<label><input type="checkbox" data-custom-need="${key}" ${i.need.includes(key)?'checked':''}> ${T(val[0],val[1])}</label>`).join('')}</span></label>
+      <div class="fld wide custom-option-section"><span class="custom-option-title">${T('المعرفة والمهارات المستهدفة (اختياري)','Targeted needs / skills (optional)')}</span><span class="help">${T('اختر وسومًا دقيقة فقط؛ تُستخدم في المطابقة الأولية مع احتياجات الطلاب.','Select only applicable tags; they inform the preliminary student-needs match.')}</span>
+        <div class="custom-checks">${Object.entries(TAGNAMES).map(([key,val])=>`<label><input type="checkbox" data-custom-tag="${key}" ${i.tags.includes(key)?'checked':''}><span class="option-text">${T(val[0],val[1])}</span></label>`).join('')}</div></div>
+      <div class="fld wide custom-option-section"><span class="custom-option-title">${T('متطلبات التشغيل والتجهيز','Operational and preparation needs')}</span><span class="help">${T('حدّد ما يجب توفيره قبل تنفيذ البرنامج.','Identify resources required before delivery.')}</span>
+        <div class="custom-checks">${Object.entries(NEEDS).map(([key,val])=>`<label><input type="checkbox" data-custom-need="${key}" ${i.need.includes(key)?'checked':''}><span class="option-text">${T(val[0],val[1])}</span></label>`).join('')}</div></div>
       <label class="fld wide">${T('1. التهيئة والتعلّم','1. Introduction and learning')}<textarea id="cpPh1" maxlength="500" placeholder="${T('كيف تبدأ التجربة؟','How will it start?')}">${esc(i.ph[0]?.[0]||'')}</textarea></label>
       <label class="fld wide">${T('2. الممارسة والتطبيق','2. Practice and application')}<textarea id="cpPh2" maxlength="500" placeholder="${T('كيف يطبّق الطالب ما تعلّمه؟','How will students apply learning?')}">${esc(i.ph[1]?.[0]||'')}</textarea></label>
       <label class="fld wide">${T('3. المخرجات وإظهار الأثر','3. Outputs and demonstration')}<textarea id="cpPh3" maxlength="500" placeholder="${T('كيف يُظهر الطالب ما أنجزه؟','How can students demonstrate their work?')}">${esc(i.ph[2]?.[0]||'')}</textarea></label>
