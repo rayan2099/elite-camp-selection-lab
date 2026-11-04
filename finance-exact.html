@@ -126,12 +126,21 @@ html.finance-embedded .modal-shell .modal h2{font-size:18px}
 .report-signatures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:27px}
 .report-signatures .sign{padding:15px 0;border-top:1px solid #afbed0;font-size:11px;color:#5c6e86}
 @media print{.report-signatures{break-inside:avoid}}
+.expense-templates{border:1px solid #dbe4ef;background:#f7f9fd;border-radius:12px;padding:14px;margin:15px 0}
+.expense-templates-title{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:10px}
+.expense-templates-title strong{font-size:13px}
+.expense-templates-title span{font-size:11px;color:var(--muted)}
+.expense-preset-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.expense-preset-grid button{white-space:normal;text-align:center;line-height:1.5;min-height:38px;background:white}
+.expense-preset-grid button:hover,.expense-preset-grid button:focus-visible{border-color:#376de4;background:#edf3ff}
+.expense-preset-grid button.active{border-color:#376de4;background:#e8f0ff;color:#1e4fb5}
+@media(max-width:760px){.expense-preset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
  .cat .symbol svg{display:block;width:26px;height:26px;color:var(--tone)}
 </style><script>if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('finance-embedded');</script></head><body><aside><div class="brand">✦ أكاديمية النخبة</div><p class="desc">منصة إدارة المعسكرات</p><nav><a href="#overview">◫ &nbsp; نظرة عامة</a><a href="#categories">▦ &nbsp; التصنيفات المالية</a><a href="#expenses" class="active">▣ &nbsp; إدارة المصروفات</a><a href="#revenues">◈ &nbsp; الإيرادات والتسعير</a><a href="#analysis">▤ &nbsp; التحليل والتقارير</a></nav><div class="side-note">💡 كل مصروف له حالة مستقلة: تقديري، ملتزم به، أو مدفوع فعلياً؛ لضمان تقارير مالية دقيقة.</div></aside><main>
 <div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="fullReportBtn">التقرير المالي PDF</button></div></header>
 <section class="report-sheet" id="financeReportView" hidden role="region" aria-label="التقرير المالي التنفيذي">
 <div class="report-actions"><button class="btn primary" id="printFinanceReport" type="button">فتح تقرير PDF للطباعة</button><button class="btn" id="browserPrintFinanceReport" type="button">طباعة المتصفح / حفظ PDF</button><button class="btn" id="downloadReportCsv" type="button">تصدير البيانات التفصيلية CSV</button><button class="btn" id="closeFinanceReport" type="button">إغلاق التقرير</button></div>
-<div id="financeReportContent"></div></section><div class="banner" id="financeCampBanner">ⓘ هذه نسخة تفاعلية تجريبية. جميع المبالغ الأولية افتراضية ويمكن تعديلها؛ يتم حفظ التغييرات داخل هذا المتصفح فقط.</div><div class="finance-notice">تنبيه: هذه أداة تشغيل محلية داخل متصفحك، وليست نظاماً محاسبياً سحابياً. لا تُرسل البيانات تلقائياً لأي حساب آخر. احفظ نسخة احتياطية بعد إدخال المعاملات، ولا تُسجّل أي دفعة قبل التحقق من حدوثها فعلياً.</div><section class="panel" id="financeQuickTemplates" style="margin:14px 0"><div class="panel-header"><div><h2>إضافة مصروف من قالب جاهز</h2><p class="fx-note">اختر بنداً، ثم أدخل الكميات والأسعار الحقيقية. القوالب لا تُضيف أي مبالغ افتراضية.</p></div></div><div class="filters" id="presetButtons"></div></section><div class="finance-workflow" id="financeWorkflow">
+<div id="financeReportContent"></div></section><div class="banner" id="financeCampBanner">ⓘ هذه نسخة تفاعلية تجريبية. جميع المبالغ الأولية افتراضية ويمكن تعديلها؛ يتم حفظ التغييرات داخل هذا المتصفح فقط.</div><div class="finance-notice">تنبيه: هذه أداة تشغيل محلية داخل متصفحك، وليست نظاماً محاسبياً سحابياً. لا تُرسل البيانات تلقائياً لأي حساب آخر. احفظ نسخة احتياطية بعد إدخال المعاملات، ولا تُسجّل أي دفعة قبل التحقق من حدوثها فعلياً.</div><div class="finance-workflow" id="financeWorkflow">
 <div class="flow-step"><b>١ · إعداد ميزانية المعسكر</b><p>أدخل تكلفة السكن والوجبات والنقل والرحلات والمورد وطريقة الحساب. تبدأ كل البنود بمبالغك الفعلية وليس بيانات تجريبية.</p><button type="button" class="btn primary sm" id="startExpense">＋ فتح نموذج المصروف</button><button type="button" class="btn sm" id="showExpenseGuide">عرض التفاصيل</button></div>
 <div class="flow-step"><b>٢ · متابعة الالتزامات والمدفوعات</b><p>حوّل عرض السعر إلى التزام، وسجّل المبلغ المدفوع على دفعات بتاريخ ومرجع واضح. تابع الرصيد المتبقي لكل مورد.</p><button type="button" class="btn sm" id="jumpExpenses">فتح سجل المصروفات والدفعات</button><button type="button" class="btn sm" id="showPaymentsGuide">عرض التفاصيل</button></div>
 <div class="flow-step"><b>٣ · التسجيل والتحصيل</b><p>حدد الطلاب المتوقعين ورسومهم، ثم سجّل المبلغ الذي تم تحصيله فعلاً، مع اسم الدافع وتاريخ التحصيل ورقم العملية.</p><button type="button" class="btn sm" id="addCollection">＋ فتح نموذج التحصيل</button><button type="button" class="btn sm" id="showCollectionGuide">عرض التفاصيل</button></div>
@@ -173,7 +182,7 @@ html.finance-embedded .modal-shell .modal h2{font-size:18px}
 <section class="panel finance-ledger" id="financeApproval"><div class="panel-header"><div><h2>مراجعة واعتماد الميزانية</h2><p class="fx-note">اعتماد تشغيلي محلي لا يمثل توقيعاً محاسبياً موثقاً.</p></div><span class="tag" id="financeApprovalStatus">مسودة</span></div><div class="finance-workflow"><div class="flow-step"><b>نسخة الميزانية الحالية</b><strong id="financeApprovalTotal">—</strong><p id="financeApprovalVersion">لم تعتمد بعد</p></div><div class="flow-step"><b>مراجعة التكاليف والإيرادات</b><p id="financeApprovalGuidance">راجع جميع البنود قبل الاعتماد.</p><button class="btn sm" id="financeReviewButton">إرسال للمراجعة</button></div><div class="flow-step"><b>اعتماد / إعادة فتح</b><p>تثبيت التقديرات بعد الاعتماد، مع السماح بتسجيل المدفوعات والتحصيل.</p><button class="btn primary sm" id="financeApproveButton">اعتماد الميزانية</button><button class="btn sm" id="financeReopenButton" hidden>إعادة فتح الميزانية</button></div></div><div class="callout" id="financeApprovalNotice">هذا إجراء محلي، ولا يثبت هوية المعتمد.</div></section><section class="panel finance-ledger" id="financeOperations"><div class="panel-header"><div><h2>المتابعات والالتزامات المالية</h2><p class="fx-note">مهام مشتقة من بيانات المعسكر الفعلية.</p></div><span class="tag" id="financeTasksCount">—</span></div><div id="financeTasks"></div></section><section class="panel finance-ledger" id="financeReadiness"><div class="panel-header"><div><h2>جاهزية الملف المالي</h2><p class="fx-note">مؤشرات اكتمال الإدخال للتحضير والمراجعة، وليست اعتماداً محاسبياً.</p></div><span class="tag" id="financeCompletion">—</span></div><div id="financeChecklist"></div></section>
 <section class="panel finance-ledger" id="financeAudit"><div class="panel-header"><div><h2>سجل الحركة والمراجعة المالية</h2><p class="fx-note">آخر التعديلات والتسجيلات والتصحيحات لهذا المعسكر فقط (بحد أقصى 500 عملية). السجل محلي وغير محمي من التلاعب، فلا يُعد سجل تدقيق محاسبياً معتمداً.</p></div><button class="btn sm" id="exportAudit">تصدير سجل الحركة</button></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>العملية</th><th>التفاصيل</th></tr></thead><tbody id="auditBody"></tbody></table></div></section>
 <p class="footer">أكاديمية النخبة • نموذج أولي مستقل للإدارة المالية • تخزين محلي في المتصفح • جميع القيم الأولية لأغراض العرض وليست بيانات تشغيلية معتمدة</p></main>
-<div class="modal-shell" id="modalShell" role="dialog" aria-modal="true"><div class="modal fin-entry-modal"><div class="between"><div><h2 id="modalTitle">إضافة مصروف</h2><p class="sub">حدد التصنيف وطريقة الحساب وحالة الصرف.</p></div><button class="btn sm" id="closeModal">✕ إغلاق</button></div><div class="form-grid"><label class="field">اسم المصروف<input id="itemName" placeholder="مثال: استئجار حافلات"></label><label class="field">التصنيف<select id="itemCat"></select></label><label class="field">طريقة الاحتساب<select id="calcMethod"><option value="unit">الكمية × سعر الوحدة</option><option value="personday">الأشخاص × الأيام × السعر</option><option value="day">عدد الأيام × التكلفة اليومية</option><option value="fixed">مبلغ ثابت</option></select></label><label class="field">حالة المصروف<select id="itemStatus"><option value="estimated">تقديري</option><option value="committed">ملتزم به (غير مدفوع)</option><option value="paid">مدفوع</option></select></label><label class="field" id="qtyField">الكمية / عدد الأشخاص<input id="itemQty" type="number" min="0" value="1"></label><label class="field" id="daysField" style="display:none">عدد الأيام<input id="itemDays" type="number" min="0" value="1"></label><label class="field">السعر / تكلفة الوحدة (ر.س)<input id="unitPrice" type="number" min="0" value="0"></label><label class="field">مصاريف إضافية ثابتة (ر.س)<input id="extraCost" type="number" min="0" value="0"></label><label class="field">المورّد / المستفيد<input id="itemVendor" maxlength="120" placeholder="اسم الفندق أو شركة النقل"></label>
+<div class="modal-shell" id="modalShell" role="dialog" aria-modal="true"><div class="modal fin-entry-modal"><div class="between"><div><h2 id="modalTitle">إضافة مصروف</h2><p class="sub">حدد التصنيف وطريقة الحساب وحالة الصرف.</p></div><button class="btn sm" id="closeModal">✕ إغلاق</button></div><div class="expense-templates" id="expenseTemplates"><div class="expense-templates-title"><strong>اختر بنداً مالياً جاهزاً</strong><span>اختياري — أو اكتب اسماً مخصصاً أدناه</span></div><div class="expense-preset-grid" id="presetButtons"></div><p class="fin-helper" style="margin-top:8px">اختيار البند يعبّئ الاسم والتصنيف وطريقة الحساب فقط. أدخل الكميات والأسعار الفعلية قبل الحفظ.</p></div><div class="form-grid"><label class="field">اسم المصروف<input id="itemName" placeholder="مثال: استئجار حافلات"></label><label class="field">التصنيف<select id="itemCat"></select></label><label class="field">طريقة الاحتساب<select id="calcMethod"><option value="unit">الكمية × سعر الوحدة</option><option value="personday">الأشخاص × الأيام × السعر</option><option value="day">عدد الأيام × التكلفة اليومية</option><option value="fixed">مبلغ ثابت</option></select></label><label class="field">حالة المصروف<select id="itemStatus"><option value="estimated">تقديري</option><option value="committed">ملتزم به (غير مدفوع)</option><option value="paid">مدفوع</option></select></label><label class="field" id="qtyField">الكمية / عدد الأشخاص<input id="itemQty" type="number" min="0" value="1"></label><label class="field" id="daysField" style="display:none">عدد الأيام<input id="itemDays" type="number" min="0" value="1"></label><label class="field">السعر / تكلفة الوحدة (ر.س)<input id="unitPrice" type="number" min="0" value="0"></label><label class="field">مصاريف إضافية ثابتة (ر.س)<input id="extraCost" type="number" min="0" value="0"></label><label class="field">المورّد / المستفيد<input id="itemVendor" maxlength="120" placeholder="اسم الفندق أو شركة النقل"></label>
 <label class="field">تاريخ الاستحقاق / الدفع<input id="itemDue" type="date"></label>
 <label class="field">رقم العرض أو الفاتورة<input id="itemRef" maxlength="80" placeholder="مرجع اختياري"></label>
 <label class="field">تفاصيل البند<textarea id="itemNotes" maxlength="500" placeholder="وصف الخدمة أو شروط الاتفاق"></textarea></label>
@@ -384,7 +393,7 @@ $('showExpenseGuide').onclick=()=>financeShowGuide('expenseStepGuide');
 $('showPaymentsGuide').onclick=()=>financeShowGuide('paymentsStepGuide');
 $('showCollectionGuide').onclick=()=>financeShowGuide('collectionsStepGuide');
 $('guideNewExpense').onclick=()=>newItem();
-$('guideShowTemplates').onclick=()=>financeBringIntoView($('financeQuickTemplates'));
+$('guideShowTemplates').onclick=()=>{if(newItem())financeBringIntoView($('expenseTemplates'));};
 $('guideJumpExpenses').onclick=()=>financeBringIntoView($('expenses'));
 $('guideNewCollection').onclick=()=>openCollection();
 $('guideRevenueSettings').onclick=()=>financeBringIntoView($('revenues'));
@@ -396,6 +405,7 @@ const localDay=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth
 function newItem(category){
  if(!guardBudget())return false;
  editingExpenseId=null;refreshCats();
+ $('expenseTemplates').hidden=false;clearPresetSelection();
  $('modalTitle').textContent='إضافة بند مالي';
  $('itemName').value='';$('calcMethod').value='unit';$('itemStatus').value='estimated';
  $('itemQty').value=1;$('itemDays').value=1;$('unitPrice').value=0;$('extraCost').value=0;$('paidValue').value=0;
@@ -407,6 +417,7 @@ function editItem(id){
  if(!guardBudget())return;
  const x=state.items.find(row=>row.id===id);if(!x)return;
  editingExpenseId=x.id;refreshCats();
+ $('expenseTemplates').hidden=true;clearPresetSelection();
  $('modalTitle').textContent='تعديل البند المالي';
  $('itemName').value=x.name||'';$('itemCat').value=x.cat;
  $('calcMethod').value=x.method||'fixed';$('itemStatus').value=x.status||'estimated';
@@ -715,11 +726,20 @@ $('downloadReportCsv').onclick=()=>{
 };
 $('exportAudit').onclick=()=>financeFileDownload('camp-finance-audit-'+(financeCampId||'demo')+'.json',JSON.stringify(state.audit,null,2),'application/json;charset=utf-8');
 $('presetButtons').innerHTML=FINANCE_PRESETS.map((p,i)=>
- '<button type="button" class="btn sm" data-preset="'+i+'">+ '+p.name+'</button>').join('');
+ '<button type="button" class="btn sm" data-preset="'+i+'" aria-pressed="false">'+p.name+'</button>').join('');
+function clearPresetSelection(){
+ document.querySelectorAll('[data-preset]').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-pressed','false');});
+}
 document.querySelectorAll('[data-preset]').forEach(button=>button.onclick=()=>{
- const p=FINANCE_PRESETS[+button.dataset.preset];if(!p)return;
- if(!newItem(p.cat))return;$('itemName').value=p.name;$('calcMethod').value=p.method;
+ if(editingExpenseId)return;
+ const p=FINANCE_PRESETS[Number(button.dataset.preset)];if(!p)return;
+ $('itemName').value=p.name;
+ if(state.categories.some(c=>c.id===p.cat))$('itemCat').value=p.cat;
+ $('calcMethod').value=p.method;
+ clearPresetSelection();
+ button.classList.add('active');button.setAttribute('aria-pressed','true');
  updateCalc();
+ $('unitPrice').focus();
 });
 
 $('exportBtn').onclick=()=>{let f=figures(),lines=[['الاسم','التصنيف','التكلفة التقديرية','المدفوع فعلياً','الحالة'],...state.items.map(x=>[x.name,state.categories.find(c=>c.id===x.cat)?.name||'',x.amount,x.paid,x.status]),['إجمالي تكلفة البنود','',f.base+f.explicitReserve,'',''],['مخصص الاحتياطي النسبي','',f.reserve,'',''],['الميزانية التقديرية','',f.estimated,'',''],['المصروف الفعلي','',f.actual,'',''],['الالتزامات غير المدفوعة','',f.committed,'',''],['الإيرادات المتوقعة','',f.revenue,'',''],['الفائض المتوقع','',f.profit,'','']];let csv='\ufeff'+lines.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');let url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));let a=document.createElement('a');a.href=url;a.download='elite-camp-budget-'+(financeCampId||'demo').replace(/[^a-zA-Z0-9_-]/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)};render();
