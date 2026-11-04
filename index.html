@@ -1530,7 +1530,7 @@ function pageLibrary(){
   +`<div class="note" style="margin-bottom:14px"><b>${T('إضافة برنامج للمكتبة','Adding a program to the library')}</b><p class="help">${T('أنشئ برنامجًا جديدًا مع هدف ومسار وأعمار ومتطلبات واضحة؛ سيبقى متاحًا في المكتبة لجميع المعسكرات على هذا المتصفح. أنشئه أولًا ثم اختر «أضف إلى الخطة» لإدراجه في المعسكر الحالي.','Create a program with a clear goal, track, ages and requirements. It will remain available to all camps in this browser. After saving, use Add to plan for the current camp.')}</p></div>`
   +`<div class="card">
       <div class="filters" style="margin:0">
-        <input type="search" id="q" placeholder="${T('ابحث باسم البرنامج أو الهدف…','Search a program or goal…')}" value="${esc(libFilter.q)}">
+        <input type="search" id="q" autocomplete="off" spellcheck="false" placeholder="${T('اكتب حرفين أو جزءًا من أي كلمة…','Type two letters or part of any word…')}" aria-label="${T('بحث فوري في أسماء البرامج والأهداف والمحتوى','Instant search in program names, goals and content')}" value="${esc(libFilter.q)}">
         <select id="fTrack"><option value="all">${T('كل المسارات','All tracks')}</option>${TRACKS.map(t=>`<option value="${t.id}" ${libFilter.track===t.id?'selected':''}>${L(t)}</option>`).join('')}</select>
         <select id="fField"><option value="all">${T('كل المجالات','All fields')}</option>${fieldsFor(libFilter.track).map(([k,v])=>`<option value="${k}" ${libFilter.field===k?'selected':''}>${L({ar:v[0],en:v[1]})}</option>`).join('')}</select>
         <select id="fAge"><option value="all">${T('كل الأعمار','All ages')}</option><option value="y" ${libFilter.age==='y'?'selected':''}>10–12</option><option value="m" ${libFilter.age==='m'?'selected':''}>13–15</option></select>
@@ -1544,15 +1544,31 @@ function pageLibrary(){
 function fieldsFor(track){
   return Object.entries(FIELDS).filter(([k])=>track==='all'||k.startsWith(track+'.'));
 }
+/* Search every occurrence of a partial word, regardless of its position.
+   Arabic normalization removes harakat/tatweel and folds common letter variants. */
+function libSearchNormalize(value){
+ return String(value==null?'':value).toLowerCase().normalize('NFKC')
+  .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g,'')
+  .replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ؤ/g,'و').replace(/ئ/g,'ي')
+  .replace(/ة/g,'ه').replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+}
+function libSearchText(i){
+ return [i.ar,i.en,i.goal?.ar,i.goal?.en,
+  FIELDOF(i.t,i.f),FIELDEN(i.t,i.f),
+  TRACK(i.t)?.ar,TRACK(i.t)?.en,
+  ...(Array.isArray(i.ph)?i.ph.flat():[]),
+  ...(Array.isArray(i.tags)?i.tags:[])
+ ].filter(x=>typeof x==='string').join(' ');
+}
 function libList(){
-  const q=libFilter.q.trim().toLowerCase();
+  const q=libSearchNormalize(libFilter.q);
   return LIB.filter(i=>{
     if(libFilter.track!=='all'&&i.t!==libFilter.track)return false;
     if(libFilter.field!=='all'&&i.t+'.'+i.f!==libFilter.field)return false;
     if(libFilter.age==='y'&&i.ages[1]>12)return false;
     if(libFilter.age==='m'&&i.ages[0]<13)return false;
     if(libFilter.only&&!isSel(i.id))return false;
-    if(q&&!(L({ar:i.ar,en:i.en})+' '+L(i.goal)+' '+L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)})).toLowerCase().includes(q))return false;
+    if(q&&!q.split(/\s+/).every(token=>libSearchNormalize(libSearchText(i)).includes(token)))return false;
     return true;
   });
 }
