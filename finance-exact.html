@@ -154,11 +154,11 @@ $('expensesBody').innerHTML=rows.length?rows.map(x=>{
  const label=x.status==='estimated'?'تقديري':x.status==='committed'?'ملتزم به':remaining>0?'مدفوع جزئيًا':'مدفوع';
  const vendor=x.vendor?'المورد: '+esc(x.vendor):'';
  const details=[vendor,x.due?'التاريخ: '+esc(x.due):'',x.ref?'المرجع: '+esc(x.ref):'',x.notes?esc(x.notes):''].filter(Boolean).join(' · ');
- return \`<tr><td><b>\${esc(x.name)}</b>\${details?'<div class="fin-meta">'+details+'</div>':''}</td>
- <td>\${esc(state.categories.find(c=>c.id===x.cat)?.name||'مخصص')}</td>
- <td>\${fmt(x.amount)}</td><td><b>\${fmt(paid)}</b><div class="fin-meta">المتبقي: \${fmt(remaining)}</div></td>
- <td><span class="pill \${x.status}">\${label}</span></td>
- <td><div class="fin-row-actions"><button data-edit="\${esc(x.id)}">تعديل</button><button data-pay="\${esc(x.id)}">تسجيل دفعة</button><button class="del" data-del="\${esc(x.id)}">حذف</button></div></td></tr>\`;
+ return `<tr><td><b>${esc(x.name)}</b>${details?'<div class="fin-meta">'+details+'</div>':''}</td>
+ <td>${esc(state.categories.find(c=>c.id===x.cat)?.name||'مخصص')}</td>
+ <td>${fmt(x.amount)}</td><td><b>${fmt(paid)}</b><div class="fin-meta">المتبقي: ${fmt(remaining)}</div></td>
+ <td><span class="pill ${x.status}">${label}</span></td>
+ <td><div class="fin-row-actions"><button data-edit="${esc(x.id)}">تعديل</button><button data-pay="${esc(x.id)}">تسجيل دفعة</button><button class="del" data-del="${esc(x.id)}">حذف</button></div></td></tr>`;
 }).join(''):'<tr><td colspan="6"><div class="empty">لا توجد بنود مطابقة. أضف مصروفًا أو غيّر الفلتر.</div></td></tr>';
 document.querySelectorAll('[data-edit]').forEach(el=>el.onclick=()=>editItem(el.dataset.edit));
 document.querySelectorAll('[data-pay]').forEach(el=>el.onclick=()=>openPayment(el.dataset.pay));
@@ -169,7 +169,7 @@ document.querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{
  }
 });
 $('collectionsBody').innerHTML=state.collections.length?state.collections.slice().reverse().map(x=>
- \`<tr><td>\${esc(x.date||'—')}</td><td>\${x.kind==='tuition'?'رسوم الطلاب':'إيراد آخر'}</td><td>\${esc(x.payer||'—')}</td><td>\${sar(x.amount)}\${x.ref?'<div class="fin-meta">مرجع: '+esc(x.ref)+'</div>':''}</td><td><button class="del" data-collection-del="\${esc(x.id)}">حذف</button></td></tr>\`
+ `<tr><td>${esc(x.date||'—')}</td><td>${x.kind==='tuition'?'رسوم الطلاب':'إيراد آخر'}</td><td>${esc(x.payer||'—')}</td><td>${sar(x.amount)}${x.ref?'<div class="fin-meta">مرجع: '+esc(x.ref)+'</div>':''}</td><td><button class="del" data-collection-del="${esc(x.id)}">حذف</button></td></tr>`
 ).join(''):'<tr><td colspan="5" class="empty">لا توجد عمليات تحصيل مسجلة بعد.</td></tr>';
 document.querySelectorAll('[data-collection-del]').forEach(el=>el.onclick=()=>{
  if(confirm('هل تريد حذف عملية التحصيل المسجلة؟')){state.collections=state.collections.filter(x=>x.id!==el.dataset.collectionDel);save();render();}
