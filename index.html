@@ -620,6 +620,66 @@ html[data-theme=dark] .daynum{background:var(--accent);color:#22140d}
 /* Finance dashboard inside the existing camp-planner navigation shell. */
 body.finance-exact-mode #app{padding:0!important;max-width:none!important;width:100%;margin:0}
 #financeExactFrame{display:block;width:100%;height:1900px;border:0;background:#f4f7fb;overflow:hidden}
+
+/* Unified Camp Planner typography — applied across every section and navigation.
+   Keep the design tokens and layouts unchanged; only adjust text hierarchy. */
+:root{
+  --type-body:13px;
+  --type-page:23px;
+  --type-section:16px;
+  --type-card:14px;
+  --type-label:11px;
+  --type-caption:11px;
+  --type-metric:23px;
+}
+body,button,input,select,textarea,table{
+  font-family:Tahoma,"Segoe UI",Arial,sans-serif;
+}
+body{font-size:var(--type-body);line-height:1.7}
+#shell h1,#app h1{font-size:var(--type-page);font-weight:800;line-height:1.4}
+#shell h2,#app h2{font-size:var(--type-section);font-weight:800;line-height:1.45}
+#shell h3,#app h3{font-size:var(--type-card);line-height:1.45}
+#app p,#app li{line-height:1.75}
+#app .eyebrow,#app .muted,#app .help,#app small{letter-spacing:normal}
+#app .eyebrow,#app .help{font-size:var(--type-label)}
+#app small,#app .metric .label{font-size:var(--type-caption)}
+#app .big,#app .metric .value{font-size:var(--type-metric);font-weight:800;line-height:1.25;letter-spacing:-.3px}
+#app .metric .sub{font-size:var(--type-caption)}
+#sidebar .brand b{font-size:14px}
+#sidebar .navlabel{font-size:10px;letter-spacing:.04em}
+#sidebar .navbtn{font-size:12px;line-height:1.55}
+#sidebar .sidefoot{font-size:11px}
+#topbar .crumb{font-size:12px}
+#topbar button,#app button{font-family:inherit}
+#app button{font-size:12px;line-height:1.5}
+#app button.small{font-size:11px}
+#app label.fld{font-size:11px}
+#app label.fld input,#app label.fld select,#app label.fld textarea,
+#app .filters input,#app .filters select{font-size:12px}
+#app table{font-size:12px}
+#app th{font-size:11px}
+#app td{font-size:12px}
+#app .card h2{font-size:var(--type-section)}
+#app .libcard .ttl{font-size:14px}
+#app .libcard .goal{font-size:11.5px}
+#app .pill,#app .trackchip{font-size:10.5px}
+#app .note,#app .empty{font-size:12px}
+#app .admin-guide{font-size:12px}
+#app .admin-guide b{font-size:12px}
+#app .admin-guide p{font-size:11.5px}
+#app .oc-page h1{font-size:var(--type-page)}
+#app .oc-page h2{font-size:var(--type-section)}
+#app .fin-page h1{font-size:var(--type-page)}
+#app .fin-page h2{font-size:var(--type-section)}
+#app .fin-kpi strong{font-size:var(--type-metric)}
+#app .fin-cat-title{font-size:13px}
+#app .fin-cat-stats strong{font-size:15px}
+#app .fx-figures strong{font-size:18px}
+@media(max-width:600px){
+ :root{--type-page:19px;--type-section:14px;--type-metric:20px}
+ #app .big{font-size:20px}
+}
+
 </style>
 </head>
 <body>
