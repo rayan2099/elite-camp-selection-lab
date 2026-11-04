@@ -473,6 +473,72 @@ html[data-theme=dark] .daynum{background:var(--accent);color:#22140d}
   .print-day-foot b{white-space:nowrap;color:#17304e}
 }
 
+
+/* Opportunity calendar — camp planning prototype */
+.oc-page{--oc-orange:#f47b3b;--oc-green:#168768}
+.oc-hero{border-radius:17px;background:linear-gradient(120deg,#112b49,#1b4166);padding:22px 25px;color:white;display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:16px;overflow:hidden}
+.oc-hero h1{font-size:clamp(23px,3vw,31px);line-height:1.5;color:white;margin:3px 0}
+.oc-hero p{color:#cbd8e7;font-size:12px;max-width:620px}
+.oc-hero .oc-kicker{color:#ffae77;font-weight:800;font-size:11px}
+.oc-hero button{background:#f47b3b;border:0;color:white;white-space:nowrap;font-weight:800}
+.oc-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-bottom:16px}
+.oc-stat,.oc-panel{background:var(--surface);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow)}
+.oc-stat{padding:15px;min-width:0}
+.oc-stat span{font-size:11px;color:var(--muted);display:block}
+.oc-stat strong{display:block;font-size:24px;line-height:1.5;color:var(--fg)}
+.oc-stat small{font-size:10.5px;color:var(--oc-green)}
+.oc-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(260px,.9fr);gap:14px;align-items:start}
+.oc-stack{display:grid;gap:14px}
+.oc-panel{padding:17px;min-width:0}
+.oc-panel h2{font-size:17px;margin:0}
+.oc-panel h3{font-size:13px;margin:0}
+.oc-head{display:flex;justify-content:space-between;gap:9px;align-items:center;margin-bottom:13px}
+.oc-muted{font-size:11.5px;color:var(--muted)}
+.oc-arrows{display:flex;gap:7px;align-items:center}
+.oc-arrows button{padding:3px 10px;font-size:18px;min-width:32px}
+.oc-arrows b{min-width:112px;text-align:center;font-size:13px}
+.oc-filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.oc-filters button{font-size:11px;padding:5px 9px}
+.oc-filters button.active{background:var(--accentsoft);border-color:var(--accent);color:var(--warn)}
+.oc-week,.oc-cells{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.oc-week{margin-bottom:5px}
+.oc-week span{text-align:center;color:var(--muted);font-size:10px;padding:5px 0}
+.oc-cell{border:1px solid var(--line);border-radius:9px;background:var(--soft);min-height:65px;padding:7px;text-align:start;position:relative;min-width:0}
+.oc-cell b{font-size:11px}
+.oc-cell small{display:block;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+.oc-cell.break{background:#e8f6f0;border-color:#d2ebde;color:#1a6d55}
+.oc-cell.national,.oc-cell.season{background:#fff0e5;border-color:#f5ddc9;color:#ad5d28}
+.oc-cell.current{outline:2px solid var(--accent);outline-offset:-2px}
+.oc-cell.selected{box-shadow:inset 0 0 0 2px var(--accent)}
+.oc-cell.off{border:0;background:transparent;cursor:default}
+.oc-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:12px}
+.oc-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:middle;margin-inline-end:5px}
+.oc-hint{padding:11px 12px;border-radius:9px;background:var(--soft);color:var(--muted);font-size:11px;margin-top:14px}
+.oc-op{display:block;width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;text-align:start;margin-top:8px;background:var(--surface)}
+.oc-op:hover{border-color:var(--accent)}
+.oc-op.active{background:var(--accentsoft);border-color:var(--accent)}
+.oc-op strong{display:block;font-size:13px}
+.oc-op small{font-size:11px;color:var(--muted)}
+.oc-op .oc-score{font-size:21px;font-weight:850;color:var(--oc-green);direction:ltr}
+.oc-score small{font-size:10px}
+.oc-meter{height:5px;background:var(--soft2);border-radius:8px;overflow:hidden;margin-top:9px}
+.oc-meter i{height:100%;display:block;border-radius:8px;background:#1a9b76}
+.oc-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.oc-reason{display:flex;gap:9px;align-items:start;margin:9px 0;font-size:11.5px;color:var(--muted)}
+.oc-reason i{font-style:normal;color:var(--oc-green);font-weight:800}
+.oc-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:13px}
+.oc-form label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}
+.oc-form input,.oc-form select{width:100%;min-width:0;padding:9px 10px;border:1px solid var(--line);background:var(--surface);border-radius:9px}
+.oc-result{padding:13px;border:1px solid #b8e0cf;background:#eaf7f1;color:#145e49;border-radius:10px;margin-top:12px;font-size:12px}
+.oc-result p{margin-top:5px}
+.oc-compare{margin-top:12px;width:100%;border-collapse:collapse}
+.oc-compare th,.oc-compare td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:start;font-size:11px}
+.oc-source{border-top:1px solid var(--line);margin-top:12px;padding-top:11px;color:var(--muted);font-size:10.5px}
+.oc-page .oc-disclaimer{padding:12px 14px;border:1px dashed var(--line);margin-top:15px;border-radius:11px;font-size:11px;color:var(--muted)}
+@media(max-width:900px){.oc-grid{grid-template-columns:1fr}.oc-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:550px){.oc-hero{padding:17px;flex-wrap:wrap}.oc-panel{padding:12px}.oc-cell{min-height:45px;padding:4px}.oc-cell small{display:none}.oc-form{grid-template-columns:1fr}.oc-week span{font-size:9px}}
+@media print{.oc-page .oc-hero{color:#132d49;background:white;border:1px solid #ddd}.oc-page .oc-hero h1{color:#132d49}.oc-page .oc-hero p{color:#57687b}.oc-page .oc-grid{display:block}.oc-page .oc-stack{display:block}.oc-page .oc-panel{break-inside:avoid;margin:10px 0}.oc-page button{display:none}}
+
 </style>
 </head>
 <body>
@@ -1158,6 +1224,7 @@ function icon(name){
 }
 const NAV=[
   ['plan',[['camps','إدارة المعسكرات','Manage camps'],['builder','تصميم المعسكر','Design camp'],['dashboard','ملخص الخطة','Plan overview'],['library','مكتبة البرامج','Program library'],['selection','البرامج المختارة','Selected programs'],['days','توزيع البرامج على الأيام','Daily program allocation']]],
+  ['strategic',[['opportunities','تقويم فرص المعسكرات','Camp opportunities calendar']]],
   ['verify',[['fit','مواءمة احتياجات الطلاب','Student needs alignment'],['readiness','مراجعة اكتمال الخطة','Plan completeness review']]],
   ['out',[['outputs','ملفات الخطة والتجهيز','Plan & preparation files']]]
 ];
@@ -1167,6 +1234,7 @@ const PAGE_TITLES={
   dashboard:['ملخص الخطة','Plan overview'],library:['مكتبة البرامج','Program library'],
   selection:['البرامج المختارة','Selected programs'],days:['توزيع البرامج على الأيام','Daily program allocation'],
   fit:['مواءمة احتياجات الطلاب','Student needs alignment'],readiness:['مراجعة اكتمال الخطة','Plan completeness review'],
+  opportunities:['تقويم فرص المعسكرات','Camp opportunities calendar'],
   outputs:['ملفات الخطة والتجهيز','Plan & preparation files']
 };
 
@@ -1180,8 +1248,8 @@ function header(){
       <svg viewBox="0 0 92 46" aria-hidden="true"><path fill="currentColor" d="M2 40 24 6l10 16 6-9 20 27H46L34 23l-8 17H2Z"/><path fill="currentColor" opacity=".45" d="M62 40 80 12l10 28H62Z"/></svg>
       <div><b>${T('أكاديمية النخبة','Elite Academy')}</b><small>CAMP PLANNER</small></div>
     </div>
-    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({plan:'التخطيط',verify:'مراجعة الخطة',out:'التجهيز والمشاركة'}[g],{plan:'PLANNING',verify:'PLAN REVIEW',out:'PREPARE & SHARE'}[g])}</div>
-      ${items.map(([id,ar,en])=>`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='camps'?'collection':id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}${id==='camps'?`<span class="cnt">${S.camps.length}</span>`:''}</button>`).join('')}
+    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({plan:'التخطيط',strategic:'التخطيط الاستراتيجي',verify:'مراجعة الخطة',out:'التجهيز والمشاركة'}[g],{plan:'PLANNING',strategic:'STRATEGIC PLANNING',verify:'PLAN REVIEW',out:'PREPARE & SHARE'}[g])}</div>
+      ${items.map(([id,ar,en])=>`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='camps'?'collection':id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='opportunities'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}${id==='camps'?`<span class="cnt">${S.camps.length}</span>`:''}</button>`).join('')}
     </div>`).join('')}
     <div class="sidefoot">
       <span>${T('اكتمال شروط الخطة','Plan checks completed')}</span>
@@ -2427,7 +2495,92 @@ function delCampOk(id){
   toast(T('حُذف المعسكر.','Camp deleted.'));
 }
 /* ============================ العرض والتنقل ============================ */
-const PAGES={camps:pageCamps,builder:pageBuilder,dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
+
+/* ======================== Camp opportunities calendar =======================
+   Dates are illustrative planning entries; verify against current official
+   Ministry of Education calendars before treating them as operational facts.
+   Scores are illustrative UX values, not predicted registrations.
+============================================================================ */
+const OC_MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const OC_MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const OC_EVENTS=[
+{id:'fall',ar:'إجازة الخريف',en:'Autumn break',start:'2026-11-20',end:'2026-11-28',kind:'break',score:88,summaryAr:'نافذة محتملة لمعسكر مهاري قصير.',summaryEn:'Potential window for a short skills camp.',reasonAr:['إجازة دراسية متصلة في بيانات النموذج','تتيح تجربة من 3 إلى 6 أيام','تحقّق من نية السفر لدى الأسر'],reasonEn:['Consecutive days in sample calendar','Allows a 3–6 day program','Check families’ travel plans']},
+{id:'winter',ar:'إجازة منتصف العام',en:'Mid-year break',start:'2027-01-08',end:'2027-01-16',kind:'break',score:92,summaryAr:'فترة مقترحة لمعسكر مكثف.',summaryEn:'Potential intensive-camp window.',reasonAr:['نافذة خارج الدراسة','مدة تكفي لبرنامج متتابع','راجع الطقس وتوافر المشرفين'],reasonEn:['School-break window','Room for a multi-day camp','Review weather and staffing']},
+{id:'founding',ar:'مناسبة يوم التأسيس',en:'Founding Day period',start:'2027-02-19',end:'2027-02-22',kind:'national',score:72,summaryAr:'مرشح لأنشطة الهوية الوطنية القصيرة.',summaryEn:'Potential short heritage-themed program.',reasonAr:['مناسبة مرتبطة بالهوية والقيم','تجربة قصيرة محتملة','تواريخ الإجازة تحتاج تحققًا رسميًا'],reasonEn:['Connects to national values','Potential short format','Verify exact holiday dates']},
+{id:'fitr',ar:'نافذة عيد الفطر',en:'Eid al-Fitr window',start:'2027-02-26',end:'2027-03-13',kind:'break',score:61,summaryAr:'نافذة تحتاج تحققًا من التقويم المحلي والسفر.',summaryEn:'Requires local-calendar and travel checks.',reasonAr:['فترة إجازة محتملة','يمكن اختبار أنشطة بعد العيد','السفر والزيارات قد يزاحمان التسجيل'],reasonEn:['Potential break window','Possible post-Eid activities','Travel may reduce attendance']},
+{id:'adha',ar:'نافذة عيد الأضحى',en:'Eid al-Adha window',start:'2027-05-07',end:'2027-05-22',kind:'break',score:63,summaryAr:'فرصة محتملة مع قيود السفر والعيد.',summaryEn:'Potential window with travel limitations.',reasonAr:['نافذة طويلة مبدئيًا','قد تناسب معسكرات متعددة الأيام','تحقّق من تقويم المنطقة والتواريخ'],reasonEn:['Potential extended break','May suit multi-day camps','Verify local dates and school calendar']},
+{id:'summer',ar:'بداية الإجازة الصيفية',en:'Start of summer break',start:'2027-06-25',end:'2027-07-31',kind:'season',score:85,summaryAr:'فرصة موسمية محتملة لدفعات متعددة.',summaryEn:'Seasonal option for multiple cohorts.',reasonAr:['نافذة تبدأ بعد انتهاء الدراسة في النموذج','تسمح بمرونة في المدة','انتبه للحرارة والسفر الصيفي'],reasonEn:['Sample post-school window','Flexible camp lengths','Consider heat and summer travel']}
+];
+let ocYear=2026,ocMonth=10,ocSelected='fall',ocDate='2026-11-20',ocFilter='all',ocComparison=false,ocAnalysis=null,ocInputs={start:'2027-01-09',duration:'5',region:'qassim',age:'10-15'};
+const ocDateKey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const ocDayCount=(a,b)=>Math.round((Date.parse(b+'T12:00:00')-Date.parse(a+'T12:00:00'))/86400000)+1;
+const ocFmt=date=>{const [y,m,d]=date.split('-').map(Number);return d+' '+(lang==='ar'?OC_MONTHS_AR:OC_MONTHS_EN)[m-1]+' '+y};
+const ocName=e=>lang==='ar'?e.ar:e.en;
+const ocEvent=d=>OC_EVENTS.find(e=>d>=e.start&&d<=e.end);
+const ocRegions={qassim:['القصيم','Qassim'],riyadh:['الرياض','Riyadh'],jeddah:['جدة','Jeddah'],madinah:['المدينة المنورة','Madinah']};
+function ocMonthsShift(n){ocMonth+=n;if(ocMonth<0){ocMonth=11;ocYear--}else if(ocMonth>11){ocMonth=0;ocYear++}render();}
+function ocOpenEvent(id){const ev=OC_EVENTS.find(x=>x.id===id);if(!ev)return;ocSelected=id;ocDate=ev.start;[ocYear,ocMonth]=[+ev.start.slice(0,4),+ev.start.slice(5,7)-1];render();}
+function ocCalendarHtml(){
+ const first=(new Date(ocYear,ocMonth,1).getDay()+1)%7,days=new Date(ocYear,ocMonth+1,0).getDate();
+ let cells=Array.from({length:first},()=>'<div class="oc-cell off" aria-hidden="true"></div>').join('');
+ for(let n=1;n<=days;n++){
+  const k=ocYear+'-'+String(ocMonth+1).padStart(2,'0')+'-'+String(n).padStart(2,'0'),ev=ocEvent(k),visible=ev&&(ocFilter==='all'||ocFilter===ev.kind);
+  cells+='<button type="button" class="oc-cell '+(visible?ev.kind:'')+' '+(k===ocDate?'selected':'')+'" data-oc="day" data-date="'+k+'" aria-label="'+esc(k+(visible?' '+ocName(ev):''))+'"><b>'+n+'</b>'+(visible?'<small>'+esc(ocName(ev))+'</small>':'')+'</button>';
+ }
+ return '<div class="oc-week">'+(lang==='ar'?['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة']:['Sat','Sun','Mon','Tue','Wed','Thu','Fri']).map(n=>'<span>'+n+'</span>').join('')+'</div><div class="oc-cells">'+cells+'</div>';
+}
+function ocAnalyze(){
+ const start=ocInputs.start,duration=+ocInputs.duration;
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||duration<1)return;
+ let covered=0;const overlapping=new Set();
+ for(let i=0;i<duration;i++){const d=new Date(start+'T12:00:00');d.setDate(d.getDate()+i);const ev=ocEvent(ocDateKey(d));if(ev){covered++;overlapping.add(ocName(ev));}}
+ const end=new Date(start+'T12:00:00');end.setDate(end.getDate()+duration-1);
+ const score=Math.max(18,Math.min(95,Math.round(30+55*covered/duration+(duration<=7?8:0))));
+ ocAnalysis={start,end:ocDateKey(end),covered,duration,score,names:[...overlapping]};
+}
+function ocNewCamp(){
+ const start=ocInputs.start||OC_EVENTS.find(x=>x.id===ocSelected).start,days=Math.max(3,Math.min(8,+ocInputs.duration||5));
+ newCampModal();
+ wiz.d.start=start;const end=new Date(start+'T12:00:00');end.setDate(end.getDate()+days-1);
+ wiz.d.end=ocDateKey(end);wiz.d.dayCount=days;
+ renderWiz();
+}
+function pageOpportunityCalendar(){
+ const chosen=OC_EVENTS.find(x=>x.id===ocSelected)||OC_EVENTS[0], monthLabel=(lang==='ar'?OC_MONTHS_AR:OC_MONTHS_EN)[ocMonth]+' '+ocYear;
+ const upcoming=OC_EVENTS.filter(e=>e.end>='2026-11-04'),featured=upcoming.filter(e=>['fall','winter','founding','summer'].includes(e.id));
+ const keyChoice=(a,b)=>T(a,b);
+ const pickerOpts=Object.entries(ocRegions).map(([id,label])=>'<option value="'+id+'" '+(ocInputs.region===id?'selected':'')+'>'+T(...label)+'</option>').join('');
+ const filterButtons=[['all','جميع المناسبات','All events'],['break','الإجازات الدراسية','School breaks'],['national','المناسبات الوطنية','National occasions'],['season','المواسم','Seasons']];
+ return '<div class="oc-page">'
+ +'<section class="oc-hero"><div><div class="oc-kicker">'+T('التخطيط الاستراتيجي · تقويم السعودية','STRATEGIC PLANNING · SAUDI ARABIA')+'</div><h1>'+T('تقويم فرص المعسكرات','Camp opportunities calendar')+'</h1><p>'+T('استكشف نوافذ الإجازات والمواسم، وقارن الخيارات، وحدّد موعدًا أوليًا قبل بدء تجهيز المعسكر وتسويقه.','Explore breaks and seasonal windows, compare options and select a tentative launch date before preparation and marketing.')+'</p></div><button data-oc="focus">'+T('اختبر موعد معسكرك','Test a camp date')+'</button></section>'
+ +'<div class="oc-stats"><div class="oc-stat"><span>'+T('فترات مرصودة في النموذج','Sample calendar windows')+'</span><strong>'+OC_EVENTS.length+'</strong><small>'+T('التواريخ تحتاج تحققًا','Dates need verification')+'</small></div><div class="oc-stat"><span>'+T('فرص مقترحة','Suggested opportunities')+'</span><strong>'+featured.length+'</strong><small>'+T('تقييم أولي','Initial assessment')+'</small></div><div class="oc-stat"><span>'+T('أقرب نافذة مدخلة','Next listed window')+'</span><strong style="font-size:17px">'+ocFmt(upcoming[0].start)+'</strong><small>'+ocName(upcoming[0])+'</small></div><div class="oc-stat"><span>'+T('نطاق النموذج','Sample coverage')+'</span><strong style="font-size:19px">2026–2027</strong><small>'+T('التعليم العام السعودي','Saudi general education')+'</small></div></div>'
+ +'<div class="oc-grid"><div class="oc-stack"><section class="oc-panel"><div class="oc-head"><div><h2>'+T('التقويم السنوي','Annual calendar')+'</h2><p class="oc-muted">'+T('اختر مناسبة من الأيام الملوّنة لاستكشاف تفاصيلها.','Select a highlighted date to inspect the opportunity.')+'</p></div><div class="oc-arrows"><button data-oc="prev" aria-label="'+T('الشهر السابق','Previous month')+'">›</button><b>'+monthLabel+'</b><button data-oc="next" aria-label="'+T('الشهر التالي','Next month')+'">‹</button></div></div><div class="oc-filters">'+filterButtons.map(([id,ar,en])=>'<button data-oc="filter" data-filter="'+id+'" class="'+(ocFilter===id?'active':'')+'">'+T(ar,en)+'</button>').join('')+'</div>'+ocCalendarHtml()+'<div class="oc-legend"><span><i style="background:#cbe9dc"></i>'+T('إجازة دراسية','School break')+'</span><span><i style="background:#f6d7be"></i>'+T('مناسبة وطنية أو موسم','Occasion or season')+'</span></div><div class="oc-hint"><b>'+T('كيف تستخدم التقويم؟','How to use it')+'</b> '+T('اختر نافذة، ثم راجع مدتها وأسباب ترشيحها. تحقّق من التواريخ الرسمية للمنطقة قبل اعتماد موعد المعسكر.','Choose a window, review the reasons and verify official local dates before committing.')+'</div></section>'
+ +'<section class="oc-panel" id="oc-simulator"><div class="oc-head"><div><h2>'+T('محاكي موعد المعسكر','Camp date simulator')+'</h2><p class="oc-muted">'+T('فحص مبدئي لتداخل المدة مع النوافذ المدرجة.','Initial overlap check against listed windows.')+'</p></div><span class="pill orange">'+T('تجريبي','Illustrative')+'</span></div>'
+ +'<div class="oc-form"><div><label for="oc-start">'+T('تاريخ البداية','Start date')+'</label><input id="oc-start" data-oc-input="start" type="date" value="'+ocInputs.start+'"></div><div><label for="oc-duration">'+T('المدة','Duration')+'</label><select id="oc-duration" data-oc-input="duration">'+[3,5,7,10,14].map(n=>'<option value="'+n+'" '+(+ocInputs.duration===n?'selected':'')+'>'+n+' '+T('أيام','days')+'</option>').join('')+'</select></div><div><label for="oc-region">'+T('المنطقة','Region')+'</label><select id="oc-region" data-oc-input="region">'+pickerOpts+'</select></div><div><label for="oc-age">'+T('الفئة العمرية','Age group')+'</label><select id="oc-age" data-oc-input="age">'+['8-12','10-15','13-15'].map(a=>'<option value="'+a+'" '+(ocInputs.age===a?'selected':'')+'>'+a+' '+T('سنة','years')+'</option>').join('')+'</select></div></div>'
+ +'<button class="primary" data-oc="analyze" style="width:100%;margin-top:13px">'+T('تحليل الموعد المقترح','Analyze proposed date')+'</button>'
+ +(ocAnalysis?'<div class="oc-result" role="status"><div class="oc-row"><b>'+T('نتيجة الفحص الأولي','Initial review result')+'</b><strong dir="ltr">'+ocAnalysis.score+'/100</strong></div><p>'+T('تتداخل ','Overlap: ')+ocAnalysis.covered+'/'+ocAnalysis.duration+T(' أيام مع النوافذ المُدرجة.',' days with listed windows.')+'</p><p>'+ocFmt(ocAnalysis.start)+' — '+ocFmt(ocAnalysis.end)+'</p><p><b>'+T('تنبيه: ','Note: ')+'</b>'+T('الدرجة مبنية على التداخل مع التقويم التجريبي، ولا تشمل الطلب الفعلي أو الطقس أو جاهزية الفريق.','This illustrative score reflects calendar overlap only, not actual demand, weather, or readiness.')+'</p><button data-oc="create" class="primary" style="margin-top:10px">'+T('إنشاء مسودة معسكر بهذا الموعد','Create a camp draft with these dates')+'</button></div>':'')
+ +'</section></div><div class="oc-stack"><section class="oc-panel"><div class="oc-head"><div><h2>'+T('الفرص المقترحة','Suggested opportunities')+'</h2><p class="oc-muted">'+T('الدرجات توضيحية وليست توقعات تسجيل.','Scores are illustrative, not enrollment predictions.')+'</p></div><span class="pill line">'+featured.length+'</span></div>'
+ +featured.map(e=>'<button class="oc-op '+(ocSelected===e.id?'active':'')+'" data-oc="event" data-id="'+e.id+'"><div class="oc-row"><strong>'+ocName(e)+'</strong><span class="oc-score">'+e.score+'<small>/100</small></span></div><small>'+ocFmt(e.start)+' · '+ocDayCount(e.start,e.end)+' '+T('أيام','days')+'</small><div class="oc-meter"><i style="width:'+e.score+'%"></i></div></button>').join('')
+ +'<div class="oc-source">'+T('المناسبات المدرجة للتصوّر فقط، ويجب مطابقة كل تاريخ مع وزارة التعليم والتقويم المطبق في المنطقة.','Planning-only entries. Confirm dates with the Ministry of Education and regional calendar.')+'</div></section>'
+ +'<section class="oc-panel"><div class="oc-head"><h2>'+T('تحليل الفرصة المختارة','Selected opportunity')+'</h2><span class="pill orange">'+T('غير معتمد','Unverified')+'</span></div><h3>'+ocName(chosen)+'</h3><p class="oc-muted">'+ocFmt(chosen.start)+' — '+ocFmt(chosen.end)+'</p><div class="oc-meter"><i style="width:'+chosen.score+'%"></i></div><p class="oc-muted" style="margin:11px 0">'+T(chosen.summaryAr,chosen.summaryEn)+'</p>'+(lang==='ar'?chosen.reasonAr:chosen.reasonEn).map(x=>'<div class="oc-reason"><i>✓</i><span>'+esc(x)+'</span></div>').join('')+'<button class="primary" data-oc="use" style="width:100%;margin-top:10px">'+T('استخدم الفترة في المحاكي','Use this date in simulator')+'</button></section>'
+ +'<section class="oc-panel"><div class="oc-head"><h2>'+T('مقارنة الفترات','Compare windows')+'</h2><button data-oc="compare" class="small">'+(ocComparison?T('إخفاء','Hide'):T('عرض','Show'))+'</button></div><p class="oc-muted">'+T('قارن المدة والدرجة التجريبية دون اعتبارها توقعًا فعليًا للحضور.','Compare duration and sample scores without treating them as forecasts.')+'</p>'+(ocComparison?'<table class="oc-compare"><thead><tr><th>'+T('الفترة','Window')+'</th><th>'+T('الأيام','Days')+'</th><th>'+T('الدرجة','Score')+'</th></tr></thead><tbody>'+featured.map(e=>'<tr><td>'+ocName(e)+'</td><td>'+ocDayCount(e.start,e.end)+'</td><td dir="ltr">'+e.score+'/100</td></tr>').join('')+'</tbody></table>':'')+'</section></div></div>'
+ +'<div class="oc-disclaimer"><b>'+T('مهم قبل اعتماد المواعيد: ','Before confirming dates: ')+'</b>'+T('هذه واجهة تخطيط تجريبية وليست مرتبطة بمصدر تقويم مباشر أو بأرصاد طقس أو باستطلاعات الأسر. ينبغي التحقق من تواريخ وزارة التعليم والإجازات المحلية، ثم مراجعة الطلب والطقس والتجهيزات. تحفظ إعدادات المحاكي داخل جلسة الصفحة فقط.','This is a prototype, not connected to live official calendars, weather or parent surveys. Verify Ministry of Education dates and regional variations before making operational decisions. Simulator settings are session-only.')+'</div></div>';
+}
+function ocHandleClick(el){
+ const kind=el.dataset.oc;
+ if(kind==='prev')return ocMonthsShift(-1);
+ if(kind==='next')return ocMonthsShift(1);
+ if(kind==='filter'){ocFilter=el.dataset.filter;return render();}
+ if(kind==='event')return ocOpenEvent(el.dataset.id);
+ if(kind==='day'){ocDate=el.dataset.date;const ev=ocEvent(ocDate);if(ev)ocSelected=ev.id;return render();}
+ if(kind==='compare'){ocComparison=!ocComparison;return render();}
+ if(kind==='use'){const e=OC_EVENTS.find(x=>x.id===ocSelected);ocInputs.start=e.start;ocInputs.duration=String(Math.min(7,Math.max(3,ocDayCount(e.start,e.end))));ocAnalyze();render();return;}
+ if(kind==='analyze'){ocAnalyze();render();return;}
+ if(kind==='create'){ocNewCamp();return;}
+ if(kind==='focus'){document.getElementById('oc-simulator')?.scrollIntoView({behavior:'smooth',block:'center'});}
+}
+
+const PAGES={opportunities:pageOpportunityCalendar,camps:pageCamps,builder:pageBuilder,dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
 function render(){
   if(!PAGES[page]) page='camps';
   header();
@@ -2857,6 +3010,8 @@ document.addEventListener('click',e=>{
     const pl=e.target.closest('[data-plate]');
     if(pl&&held){e.preventDefault();placeBrick(held,+pl.dataset.plate);return}
   }
+  const cal=e.target.closest('[data-oc]');
+  if(cal&&page==='opportunities'){e.preventDefault();ocHandleClick(cal);return}
   const nav=e.target.closest('[data-page]');
   if(nav){page=nav.dataset.page;if(window.innerWidth<860)$('#sidebar').classList.remove('open');render();return}
   const pickHere=e.target.closest('[data-pickhere]');
@@ -2928,6 +3083,7 @@ document.addEventListener('click',e=>{
   };
   if(map[a]){e.preventDefault();map[a]()}
 });
+document.addEventListener('change',e=>{const t=e.target;if(page==='opportunities'&&t.dataset.ocInput){ocInputs[t.dataset.ocInput]=t.value;ocAnalysis=null;}});
 document.addEventListener('input',e=>{
   const t=e.target;
   if(t.id==='q'){libFilter.q=t.value;renderLib()}
