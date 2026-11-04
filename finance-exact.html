@@ -128,9 +128,9 @@ html.finance-embedded .modal-shell .modal h2{font-size:18px}
 @media print{.report-signatures{break-inside:avoid}}
  .cat .symbol svg{display:block;width:26px;height:26px;color:var(--tone)}
 </style><script>if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('finance-embedded');</script></head><body><aside><div class="brand">✦ أكاديمية النخبة</div><p class="desc">منصة إدارة المعسكرات</p><nav><a href="#overview">◫ &nbsp; نظرة عامة</a><a href="#categories">▦ &nbsp; التصنيفات المالية</a><a href="#expenses" class="active">▣ &nbsp; إدارة المصروفات</a><a href="#revenues">◈ &nbsp; الإيرادات والتسعير</a><a href="#analysis">▤ &nbsp; التحليل والتقارير</a></nav><div class="side-note">💡 كل مصروف له حالة مستقلة: تقديري، ملتزم به، أو مدفوع فعلياً؛ لضمان تقارير مالية دقيقة.</div></aside><main>
-<div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="fullReportBtn">⬇ التقرير المالي PDF</button></div></header>
+<div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="fullReportBtn">التقرير المالي PDF</button></div></header>
 <section class="report-sheet" id="financeReportView" hidden role="region" aria-label="التقرير المالي التنفيذي">
-<div class="report-actions"><button class="btn primary" id="printFinanceReport" type="button">⬇ تنزيل التقرير PDF</button><button class="btn" id="browserPrintFinanceReport" type="button">طباعة المتصفح / حفظ PDF</button><button class="btn" id="downloadReportCsv" type="button">تصدير البيانات التفصيلية CSV</button><button class="btn" id="closeFinanceReport" type="button">إغلاق التقرير</button></div>
+<div class="report-actions"><button class="btn primary" id="printFinanceReport" type="button">فتح تقرير PDF للطباعة</button><button class="btn" id="browserPrintFinanceReport" type="button">طباعة المتصفح / حفظ PDF</button><button class="btn" id="downloadReportCsv" type="button">تصدير البيانات التفصيلية CSV</button><button class="btn" id="closeFinanceReport" type="button">إغلاق التقرير</button></div>
 <div id="financeReportContent"></div></section><div class="banner" id="financeCampBanner">ⓘ هذه نسخة تفاعلية تجريبية. جميع المبالغ الأولية افتراضية ويمكن تعديلها؛ يتم حفظ التغييرات داخل هذا المتصفح فقط.</div><div class="finance-notice">تنبيه: هذه أداة تشغيل محلية داخل متصفحك، وليست نظاماً محاسبياً سحابياً. لا تُرسل البيانات تلقائياً لأي حساب آخر. احفظ نسخة احتياطية بعد إدخال المعاملات، ولا تُسجّل أي دفعة قبل التحقق من حدوثها فعلياً.</div><section class="panel" id="financeQuickTemplates" style="margin:14px 0"><div class="panel-header"><div><h2>إضافة مصروف من قالب جاهز</h2><p class="fx-note">اختر بنداً، ثم أدخل الكميات والأسعار الحقيقية. القوالب لا تُضيف أي مبالغ افتراضية.</p></div></div><div class="filters" id="presetButtons"></div></section><div class="finance-workflow" id="financeWorkflow">
 <div class="flow-step"><b>١ · إعداد ميزانية المعسكر</b><p>أدخل تكلفة السكن والوجبات والنقل والرحلات والمورد وطريقة الحساب. تبدأ كل البنود بمبالغك الفعلية وليس بيانات تجريبية.</p><button type="button" class="btn primary sm" id="startExpense">＋ فتح نموذج المصروف</button><button type="button" class="btn sm" id="showExpenseGuide">عرض التفاصيل</button></div>
 <div class="flow-step"><b>٢ · متابعة الالتزامات والمدفوعات</b><p>حوّل عرض السعر إلى التزام، وسجّل المبلغ المدفوع على دفعات بتاريخ ومرجع واضح. تابع الرصيد المتبقي لكل مورد.</p><button type="button" class="btn sm" id="jumpExpenses">فتح سجل المصروفات والدفعات</button><button type="button" class="btn sm" id="showPaymentsGuide">عرض التفاصيل</button></div>
@@ -618,97 +618,73 @@ function financeReportHtml(){
  +'<div class="report-footer">أكاديمية النخبة — تقرير تشغيلي آلي · إعداد إلكتروني وفق البيانات المتاحة بتاريخ '+esc(dateText)+' · يُفضّل الاحتفاظ بنسخة احتياطية من السجلات مع هذا التقرير. لا يعتمد هذا التقرير توقيعاً إلكترونياً.</div>';
 }
 
-let financePdfLoading=null;
-async function ensureFinancePdfLibrary(){
- if(typeof window.html2pdf==='function')return;
- if(financePdfLoading)return financePdfLoading;
- const providers=[
-  'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
-  'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js'
- ];
- financePdfLoading=(async()=>{
-  for(const src of providers){
-   try{
-    await new Promise((resolve,reject)=>{
-     const script=document.createElement('script');script.src=src;script.async=true;
-     script.onload=resolve;script.onerror=()=>reject(new Error('Library unavailable'));
-     document.head.appendChild(script);
-    });
-    if(typeof window.html2pdf==='function')return;
-   }catch(e){}
-  }
-  throw new Error('لم يتم تحميل أداة إنشاء PDF. تحقق من اتصال الإنترنت أو قيود المتصفح.');
- })();
- try{await financePdfLoading;}finally{financePdfLoading=null}
+
+/* Native print layout preserves selectable Arabic text and avoids html2canvas clipping.
+   A static GitHub Pages application cannot force a PDF download via print; the user selects Save as PDF. */
+const FINANCE_PRINT_CSS=`
+@page{size:A4 portrait;margin:13mm 11mm 15mm}
+:root{color-scheme:light}
+*{box-sizing:border-box}
+html{direction:rtl;background:#fff}
+body{margin:0;padding:0;background:white;color:#172944;direction:rtl;font-family:Tahoma,"Segoe UI",Arial,sans-serif;font-size:10pt;line-height:1.65;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.report-sheet{width:100%;max-width:100%;margin:0;padding:0;border:0;box-shadow:none;direction:rtl}
+.report-brand{display:flex;justify-content:space-between;align-items:center;gap:8mm;border-bottom:2px solid #19334f;padding:0 0 6mm;margin:0 0 5mm;break-inside:avoid}
+.report-brand strong{font-size:20pt;line-height:1.4;display:block}
+.report-brand small{font-size:9pt;line-height:1.6;color:#667892}
+.report-brand .report-mark{flex:none;background:#1d3657;color:#fff;padding:4mm;border-radius:3mm;font-size:12pt;font-weight:bold}
+.report-metadata{display:flex;flex-wrap:wrap;gap:2mm 6mm;margin:0 0 5mm;font-size:8.5pt;color:#51657f}
+.report-intro{font-size:9pt;line-height:1.8;color:#536983;margin:0 0 6mm}
+.report-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3mm;margin:0 0 6mm}
+.report-metric{min-width:0;min-height:21mm;break-inside:avoid;border:1px solid #d8e2f0;background:#f5f8fc;border-radius:2mm;padding:3mm}
+.report-metric span{display:block;color:#62728b;font-size:8.4pt;line-height:1.5}
+.report-metric b{display:block;margin-top:2mm;font-size:14pt;line-height:1.45;direction:rtl;unicode-bidi:plaintext;overflow-wrap:anywhere}
+h2{font-size:13pt;line-height:1.5;margin:7mm 0 3mm;border-bottom:1px solid #dae4ef;padding-bottom:2mm;color:#1a3558;break-after:avoid}
+h3{font-size:10pt;break-after:avoid}
+.report-note{background:#f3f6fb;color:#4a5f78;padding:3mm;border-radius:2mm;margin:3mm 0;font-size:9pt;line-height:1.7;overflow-wrap:anywhere}
+.report-alert{background:#fff8ea;border:1px solid #eddcb9;color:#665233;padding:3mm;margin:4mm 0;font-size:8.5pt;line-height:1.8;overflow-wrap:anywhere}
+.report-table-wrap{width:100%;overflow:visible!important;margin:0 0 4mm}
+table{width:100%!important;max-width:100%!important;min-width:0!important;border-collapse:collapse;table-layout:fixed;direction:rtl;font-size:8pt}
+thead{display:table-header-group}
+tfoot{display:table-footer-group}
+tr{break-inside:avoid;page-break-inside:avoid}
+th,td{width:auto;max-width:0;overflow-wrap:anywhere;word-break:normal;white-space:normal;line-height:1.5;text-align:right;vertical-align:top;border-bottom:1px solid #e2e9f0;padding:2.3mm 1.6mm}
+th{background:#e9f0f8;color:#1c3b62;font-weight:800}
+tbody tr:nth-child(even) td{background:#f9fbfe}
+.report-subtotal td{font-weight:800;background:#ebf1fa!important}
+.report-signatures{display:grid;grid-template-columns:1fr 1fr;gap:6mm;margin-top:10mm;break-inside:avoid}
+.report-signatures .sign{border-top:1px solid #adbbca;padding-top:3mm;font-size:8.5pt}
+.report-footer{margin-top:9mm;border-top:1px solid #dce4ed;padding-top:3mm;font-size:8pt;color:#75859a;line-height:1.6}
+.print-toolbar{display:flex;gap:10px;justify-content:flex-start;padding:12px;background:#eef3fa;border-bottom:1px solid #dce4ee;position:sticky;top:0;z-index:5;direction:rtl}
+.print-toolbar button{font:600 13px Tahoma,Arial,sans-serif;border:1px solid #a6b8d2;border-radius:7px;padding:10px 14px;background:white;color:#173554;cursor:pointer}
+.print-toolbar button.primary{background:#376de4;color:white;border-color:#376de4}
+.print-content{width:190mm;max-width:calc(100% - 32px);margin:16px auto;padding:0}
+@media screen{body{background:#e9edf4}.print-content{background:white;padding:12mm;box-shadow:0 8px 30px #24324b17;box-sizing:content-box}}
+@media print{.print-toolbar{display:none!important}.print-content{margin:0!important;padding:0!important;max-width:none!important;width:auto!important;box-shadow:none!important}a{color:inherit;text-decoration:none}}
+`;
+function printableFinanceDocument(){
+ const title='التقرير المالي التنفيذي - '+(financeCampName||'أكاديمية النخبة');
+ const report=financeReportHtml();
+ return '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">'+
+ '<meta name="viewport" content="width=device-width,initial-scale=1">'+
+ '<title>'+esc(title)+'</title><style>'+FINANCE_PRINT_CSS+'</style></head>'+
+ '<body><div class="print-toolbar"><button class="primary" onclick="window.print()">طباعة / حفظ PDF</button>'+
+ '<button onclick="window.close()">إغلاق</button></div><main class="print-content report-sheet">'+
+ report+'</main></body></html>';
 }
-let financePdfBusy=false;
-async function downloadFinancePdf(){
- if(financePdfBusy)return;
- financePdfBusy=true;
- const buttons=[$('fullReportBtn'),$('printFinanceReport')];
- const original=buttons.map(b=>b.textContent);
- buttons.forEach(b=>{b.disabled=true;b.textContent='جارٍ تجهيز التقرير…';});
- let host=null;
- try{
-  // Always render the real report in a visible, in-flow element before capture.
-  // Fixed, negative-z-index and off-viewport nodes can produce blank PDF canvases.
-  $('financeReportContent').innerHTML=financeReportHtml();
-  $('financeReportView').hidden=false;
-  await ensureFinancePdfLibrary();
-  if(document.fonts?.ready)await document.fonts.ready;
-  const source=$('financeReportContent');
-  if(!source||!source.innerText.includes('التقرير المالي التنفيذي')||source.innerText.trim().length<100){
-   throw new Error('محتوى التقرير غير جاهز للتصدير.');
-  }
-  host=document.createElement('div');
-  host.id='financePdfCapture';
-  host.dir='rtl';
-  host.className='report-sheet';
-  host.style.cssText='position:relative;display:block;width:760px;max-width:none;height:auto;overflow:visible;margin:0 auto;padding:20px;background:#fff;color:#142540;box-shadow:none;border:0;z-index:1;';
-  host.innerHTML=source.innerHTML;
-  // Keep the capture surface in the normal layout and visible to html2canvas.
-  source.after(host);
-  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  const bounds=host.getBoundingClientRect();
-  if(bounds.width<300||bounds.height<100)throw new Error('أبعاد التقرير غير صالحة، تعذر إنشاء PDF.');
-  const filename='elite-camp-financial-report-'+(financeCampId||'camp').replace(/[^a-zA-Z0-9_-]/g,'_')+'.pdf';
-  const options={
-   margin:[12,10,13,10],filename,
-   image:{type:'jpeg',quality:0.96},
-   html2canvas:{scale:1.6,useCORS:true,backgroundColor:'#ffffff',logging:false,scrollX:0,windowWidth:900},
-   pagebreak:{mode:['css','legacy'],avoid:['tr','.report-brand','.report-metric','.report-note','.report-alert','.report-signatures']},
-   jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true}
-  };
-  const worker=window.html2pdf().set(options).from(host).toCanvas();
-  const canvas=await worker.get('canvas');
-  if(!canvas||canvas.width<200||canvas.height<100)throw new Error('فشل رسم التقرير؛ لن يتم تنزيل صفحة بيضاء.');
-  // Detect an effectively blank canvas before saving.
-  const ctx=canvas.getContext('2d',{willReadFrequently:true});
-  const sample=ctx.getImageData(0,0,canvas.width,Math.min(180,canvas.height)).data;
-  let nonWhite=0;
-  for(let i=0;i<sample.length;i+=32){
-    if(sample[i]<225||sample[i+1]<225||sample[i+2]<225)nonWhite++;
-  }
-  if(nonWhite<12)throw new Error('تم اكتشاف صفحة بيضاء أثناء الرسم؛ تم إيقاف التصدير.');
-  await worker.toPdf();
-  const pdf=await worker.get('pdf');
-  const pages=pdf.internal.getNumberOfPages();
-  if(pages<1)throw new Error('لم تُنشأ صفحات التقرير.');
-  for(let page=1;page<=pages;page++){
-   pdf.setPage(page);
-   pdf.setTextColor(110,124,145);pdf.setFont('helvetica','normal');pdf.setFontSize(8);
-   pdf.text(page+' / '+pages,105,290,{align:'center'});
-  }
-  await worker.save();
- }catch(err){
-  alert('لم يتم تنزيل PDF لأن عملية الرسم فشلت: '+(err?.message||String(err))+
-    '\nسيظهر التقرير داخل الصفحة ويمكنك استخدام طباعة المتصفح ثم حفظ PDF.');
+function downloadFinancePdf(){
+ // Synchronous window opening keeps the browser from blocking it as a popup.
+ const w=window.open('','_blank');
+ if(!w){
   openFinanceReport();
- }finally{
-  if(host)host.remove();
-  financePdfBusy=false;
-  buttons.forEach((b,i)=>{b.disabled=false;b.textContent=original[i]});
+  alert('المتصفح منع فتح التقرير. اسمح بالنوافذ المنبثقة ثم أعد المحاولة، أو استخدم طباعة المتصفح.');
+  return;
  }
+ w.document.open();
+ w.document.write(printableFinanceDocument());
+ w.document.close();
+ w.focus();
+ // Browser-native print is intentional: it retains real Arabic glyphs and paginates tables.
+ // Users choose "Save as PDF" in the print destination.
 }
 function openFinanceReport(){
  $('financeReportContent').innerHTML=financeReportHtml();
@@ -719,7 +695,7 @@ function openFinanceReport(){
 $('fullReportBtn').onclick=()=>downloadFinancePdf();
 $('closeFinanceReport').onclick=()=>{$('financeReportView').hidden=true};
 $('printFinanceReport').onclick=()=>downloadFinancePdf();
-$('browserPrintFinanceReport').onclick=()=>{openFinanceReport();window.focus();window.print()};
+$('browserPrintFinanceReport').onclick=()=>downloadFinancePdf();
 $('downloadReportCsv').onclick=()=>{
  const f=figures();
  const rows=[
