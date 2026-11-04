@@ -2763,12 +2763,14 @@ function finEdit(id,templateIndex){
  const tpl=templateIndex!=null?FIN_TEMPLATES[+templateIndex]:null;
  const r=existing||{id:'',kind:'cost',category:tpl?tpl[2]:'other',name:tpl?tpl[0]:'',unit:tpl?tpl[3]:'وحدة',planQty:1,planUnit:0,actualQty:0,actualUnit:0,note:''};
  const catOptions=FIN_CATEGORIES.map(([v,ar,en])=>'<option value="'+v+'" '+(r.category===v?'selected':'')+'>'+T(ar,en)+'</option>').join('');
+ const customCategory=FIN_CATEGORIES.some(c=>c[0]===r.category)?'':r.category;
  const input=(id,label,value,type='text',extra='')=>'<label>'+label+'<input id="'+id+'" type="'+type+'" value="'+esc(String(value==null?'':value))+'" '+extra+'></label>';
  openModal('<div class="eyebrow">'+T('الميزانية والتشغيل المالي','CAMP FINANCES')+'</div><h2>'+T(existing?'تعديل بند مالي':'إضافة بند مالي',existing?'Edit finance item':'Add finance item')+'</h2>'
  +'<p class="fin-help">'+T('أدخل الكمية وسعر الوحدة للتقديري والفعلي كلًّا على حدة. لا تُسجّل الأرقام الصفرية كمصروفات فعلية.','Enter quantities and unit prices for both estimated and actual amounts. Zero actual values do not represent spending.')+'</p>'
  +'<div class="fin-grid">'
  +'<label>'+T('نوع البند','Item type')+'<select id="fin-kind"><option value="cost" '+(r.kind==='cost'?'selected':'')+'>'+T('مصروف','Expense')+'</option><option value="revenue" '+(r.kind==='revenue'?'selected':'')+'>'+T('إيراد إضافي','Additional revenue')+'</option></select></label>'
  +'<label>'+T('التصنيف','Category')+'<select id="fin-category">'+catOptions+'</select></label>'
+ +input('fin-customCategory',T('تصنيف مخصص (اختياري)','Custom category (optional)'),customCategory,'text','maxlength="60"')
  +input('fin-name',T('اسم البند','Item name'),r.name,'text','maxlength="100"')
  +input('fin-unit',T('وحدة الاحتساب (وجبة، يوم، رحلة...)','Unit (meal, day, trip...)'),r.unit,'text','maxlength="40"')
  +input('fin-planQty',T('الكمية المقدّرة','Estimated quantity'),r.planQty,'number','min="0" step="any"')
@@ -2785,7 +2787,7 @@ function finSave(id){
  if(!name){toast(T('اكتب اسم البند أولًا.','Enter the item name.'));return}
  const keys=['planQty','planUnit','actualQty','actualUnit'];
  for(const k of keys){const raw=get('fin-'+k);if(raw===''||!Number.isFinite(Number(raw))||Number(raw)<0){toast(T('أدخل كميات وأسعارًا صحيحة وغير سالبة.','Enter valid nonnegative quantities and prices.'));return}}
- const d=finState();const row={id:id||newId('fin-'),kind:get('fin-kind')==='revenue'?'revenue':'cost',category:get('fin-category'),
+ const d=finState();const row={id:id||newId('fin-'),kind:get('fin-kind')==='revenue'?'revenue':'cost',category:get('fin-customCategory').trim().slice(0,60)||get('fin-category'),
   name:name.slice(0,100),unit:unit.slice(0,40),note:get('fin-note').slice(0,400)};
  keys.forEach(k=>row[k]=finNumber(get('fin-'+k)));
  const index=d.rows.findIndex(x=>x.id===id);if(index>=0)d.rows[index]=row;else d.rows.push(row);
