@@ -2376,10 +2376,11 @@ function renderWiz(){
     </div>`;
   } else if(w.step===2){
     body=`<div class="fields">
-      <label class="fld">${T('تاريخ البداية','Start date')}<input id="wStart" type="date" value="${esc(d.start)}"></label>
-      <label class="fld">${T('تاريخ النهاية','End date')}<input id="wEnd" type="date" value="${esc(d.end)}"></label>
+      <label class="fld">${T('تاريخ البداية','Start date')}<input id="wStart" type="date" ${w.holiday?`min="${w.holiday.start}" max="${w.holiday.end}"`:''} value="${esc(d.start)}"></label>
+      <label class="fld">${T('تاريخ النهاية','End date')}<input id="wEnd" type="date" ${w.holiday?`min="${w.holiday.start}" max="${w.holiday.end}"`:''} value="${esc(d.end)}"></label>
       <label class="fld wide">${T('عدد الأيام','Number of days')}<select id="wDays">${[3,4,5,6,7,8].map(n=>`<option value="${n}" ${d.dayCount===n?'selected':''}>${n} ${T('أيام','days')}</option>`).join('')}</select></label>
     </div>
+    ${w.holiday?`<p class="help">${T('الإجازة المختارة: ','Selected window: ')}${esc(T(w.holiday.ar,w.holiday.en))} · ${w.holiday.start} — ${w.holiday.end}. ${T('يجب أن تقع أيام المعسكر بالكامل داخلها.','All camp dates must stay within it.')}</p>`:''}
     <h3 style="margin:16px 0 8px">${T('عناوين الأيام','Day titles')}</h3>
     <div style="display:flex;flex-direction:column;gap:6px">
       ${Array.from({length:d.dayCount}).map((_,i)=>`<div class="row" style="gap:8px">
@@ -2429,14 +2430,17 @@ function wizCollect(){
     $$('[data-wtheme]').forEach(el=>{const i=+el.dataset.wtheme;d.themes[i]=d.themes[i]||{ar:'',en:''};d.themes[i][lang]=el.value});
   }
 }
+function wizValidDates(){const d=wiz.d;const days=ocDayCount(d.start,d.end);if(!d.start||!d.end||d.end<d.start||days!==d.dayCount){toast(T('تأكد من توافق تاريخ البداية والنهاية مع عدد أيام المعسكر.','Ensure the date range matches the camp day count.'));return false}if(wiz.holiday&&(d.start<wiz.holiday.start||d.end>wiz.holiday.end)){toast(T('يجب أن تقع جميع أيام المعسكر داخل الإجازة المختارة.','All camp dates must fall within the selected break.'));return false}return true}
 function wizNext(){
   wizCollect();
+  if(wiz.step===2&&!wizValidDates())return;
   if(wiz.step===1&&!wiz.d.campAr.trim()){toast(T('اكتب اسم المعسكر أولًا.','Enter a camp name first.'));return}
   wiz.step=Math.min(3,wiz.step+1);renderWiz();
 }
 function wizBack(){wizCollect();wiz.step=Math.max(1,wiz.step-1);renderWiz()}
 function wizCreate(){
   wizCollect();
+  if(!wizValidDates())return;
   const d=wiz.d;
   const days=Array.from({length:d.dayCount}).map((_,i)=>{
     const th=d.themes[i]||{ar:'',en:''};
@@ -2512,7 +2516,7 @@ const OC_EVENTS=[
 {id:'adha',ar:'نافذة عيد الأضحى',en:'Eid al-Adha window',start:'2027-05-07',end:'2027-05-22',kind:'break',score:63,summaryAr:'فرصة محتملة مع قيود السفر والعيد.',summaryEn:'Potential window with travel limitations.',reasonAr:['نافذة طويلة مبدئيًا','قد تناسب معسكرات متعددة الأيام','تحقّق من تقويم المنطقة والتواريخ'],reasonEn:['Potential extended break','May suit multi-day camps','Verify local dates and school calendar']},
 {id:'summer',ar:'بداية الإجازة الصيفية',en:'Start of summer break',start:'2027-06-25',end:'2027-07-31',kind:'season',score:85,summaryAr:'فرصة موسمية محتملة لدفعات متعددة.',summaryEn:'Seasonal option for multiple cohorts.',reasonAr:['نافذة تبدأ بعد انتهاء الدراسة في النموذج','تسمح بمرونة في المدة','انتبه للحرارة والسفر الصيفي'],reasonEn:['Sample post-school window','Flexible camp lengths','Consider heat and summer travel']}
 ];
-let ocYear=2026,ocMonth=10,ocSelected='fall',ocDate='2026-11-20',ocFilter='all',ocComparison=false,ocAnalysis=null,ocInputs={start:'2027-01-09',duration:'5',region:'qassim',age:'10-15'};
+let ocYear=2026,ocMonth=10,ocSelected='fall',ocDate='2026-11-20',ocFilter='all',ocComparison=false,ocAnalysis=null,ocInputs={start:'2027-01-09',duration:'5',region:'qassim',age:'10-15'},ocHolidayStart='2026-11-20',ocHolidayEnd='2026-11-24';
 const ocDateKey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const ocDayCount=(a,b)=>Math.round((Date.parse(b+'T12:00:00')-Date.parse(a+'T12:00:00'))/86400000)+1;
 const ocFmt=date=>{const [y,m,d]=date.split('-').map(Number);return d+' '+(lang==='ar'?OC_MONTHS_AR:OC_MONTHS_EN)[m-1]+' '+y};
@@ -2520,7 +2524,10 @@ const ocName=e=>lang==='ar'?e.ar:e.en;
 const ocEvent=d=>OC_EVENTS.find(e=>d>=e.start&&d<=e.end);
 const ocRegions={qassim:['القصيم','Qassim'],riyadh:['الرياض','Riyadh'],jeddah:['جدة','Jeddah'],madinah:['المدينة المنورة','Madinah']};
 function ocMonthsShift(n){ocMonth+=n;if(ocMonth<0){ocMonth=11;ocYear--}else if(ocMonth>11){ocMonth=0;ocYear++}render();}
-function ocOpenEvent(id){const ev=OC_EVENTS.find(x=>x.id===id);if(!ev)return;ocSelected=id;ocDate=ev.start;[ocYear,ocMonth]=[+ev.start.slice(0,4),+ev.start.slice(5,7)-1];render();}
+function ocOpenEvent(id){const ev=OC_EVENTS.find(x=>x.id===id);if(!ev)return;ocSelected=id;ocDate=ev.start;ocSetHolidayRange(ev);[ocYear,ocMonth]=[+ev.start.slice(0,4),+ev.start.slice(5,7)-1];render();}
+function ocAddDays(date,n){const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+n);return ocDateKey(d);}
+function ocSetHolidayRange(ev,preferredStart){const latest=ocAddDays(ev.end,-2);ocHolidayStart=preferredStart&&preferredStart>=ev.start&&preferredStart<=latest?preferredStart:ev.start;ocHolidayEnd=ocAddDays(ocHolidayStart,Math.min(4,ocDayCount(ocHolidayStart,ev.end)-1));}
+function ocCreateDuringHoliday(){const ev=OC_EVENTS.find(x=>x.id===ocSelected);if(!ev)return;const count=ocDayCount(ocHolidayStart,ocHolidayEnd);if(!ocHolidayStart||!ocHolidayEnd||ocHolidayStart<ev.start||ocHolidayEnd>ev.end||ocHolidayStart>ocHolidayEnd||count<3||count>8){toast(T('اختر فترة من 3 إلى 8 أيام تقع بالكامل داخل الإجازة.','Select 3–8 days entirely within the selected break.'));return}newCampModal();wiz.d.start=ocHolidayStart;wiz.d.end=ocHolidayEnd;wiz.d.dayCount=count;wiz.d.ageMin=+ocInputs.age.split('-')[0]||10;wiz.d.ageMax=+ocInputs.age.split('-')[1]||15;wiz.d.cityAr=T(...ocRegions[ocInputs.region]);wiz.holiday={id:ev.id,start:ev.start,end:ev.end,ar:ev.ar,en:ev.en};renderWiz();}
 function ocCalendarHtml(){
  const first=(new Date(ocYear,ocMonth,1).getDay()+1)%7,days=new Date(ocYear,ocMonth+1,0).getDate();
  let cells=Array.from({length:first},()=>'<div class="oc-cell off" aria-hidden="true"></div>').join('');
@@ -2563,7 +2570,7 @@ function pageOpportunityCalendar(){
  +'</section></div><div class="oc-stack"><section class="oc-panel"><div class="oc-head"><div><h2>'+T('الفرص المقترحة','Suggested opportunities')+'</h2><p class="oc-muted">'+T('الدرجات توضيحية وليست توقعات تسجيل.','Scores are illustrative, not enrollment predictions.')+'</p></div><span class="pill line">'+featured.length+'</span></div>'
  +featured.map(e=>'<button class="oc-op '+(ocSelected===e.id?'active':'')+'" data-oc="event" data-id="'+e.id+'"><div class="oc-row"><strong>'+ocName(e)+'</strong><span class="oc-score">'+e.score+'<small>/100</small></span></div><small>'+ocFmt(e.start)+' · '+ocDayCount(e.start,e.end)+' '+T('أيام','days')+'</small><div class="oc-meter"><i style="width:'+e.score+'%"></i></div></button>').join('')
  +'<div class="oc-source">'+T('المناسبات المدرجة للتصوّر فقط، ويجب مطابقة كل تاريخ مع وزارة التعليم والتقويم المطبق في المنطقة.','Planning-only entries. Confirm dates with the Ministry of Education and regional calendar.')+'</div></section>'
- +'<section class="oc-panel"><div class="oc-head"><h2>'+T('تحليل الفرصة المختارة','Selected opportunity')+'</h2><span class="pill orange">'+T('غير معتمد','Unverified')+'</span></div><h3>'+ocName(chosen)+'</h3><p class="oc-muted">'+ocFmt(chosen.start)+' — '+ocFmt(chosen.end)+'</p><div class="oc-meter"><i style="width:'+chosen.score+'%"></i></div><p class="oc-muted" style="margin:11px 0">'+T(chosen.summaryAr,chosen.summaryEn)+'</p>'+(lang==='ar'?chosen.reasonAr:chosen.reasonEn).map(x=>'<div class="oc-reason"><i>✓</i><span>'+esc(x)+'</span></div>').join('')+'<button class="primary" data-oc="use" style="width:100%;margin-top:10px">'+T('استخدم الفترة في المحاكي','Use this date in simulator')+'</button></section>'
+ +'<section class="oc-panel"><div class="oc-head"><h2>'+T('تحليل الفرصة المختارة','Selected opportunity')+'</h2><span class="pill orange">'+T('غير معتمد','Unverified')+'</span></div><h3>'+ocName(chosen)+'</h3><p class="oc-muted">'+ocFmt(chosen.start)+' — '+ocFmt(chosen.end)+'</p><div class="oc-meter"><i style="width:'+chosen.score+'%"></i></div><p class="oc-muted" style="margin:11px 0">'+T(chosen.summaryAr,chosen.summaryEn)+'</p>'+(lang==='ar'?chosen.reasonAr:chosen.reasonEn).map(x=>'<div class="oc-reason"><i>✓</i><span>'+esc(x)+'</span></div>').join('')+'<button class="primary" data-oc="use" style="width:100%;margin-top:10px">'+T('استخدم الفترة في المحاكي','Use this date in simulator')+'</button><div class="oc-hint" style="margin-top:12px"><b>'+T('أنشئ معسكرًا داخل هذه الإجازة','Create a camp during this break')+'</b><p class="oc-muted" style="margin:6px 0 10px">'+T('اختر بداية ونهاية المعسكر داخل الفترة المحددة، ثم أكمل بياناته. من 3 إلى 8 أيام.','Choose a start and end within this window (3–8 days), then complete camp details.')+'</p><div class="oc-form"><div><label for="oc-holiday-start">'+T('بداية المعسكر','Camp starts')+'</label><input id="oc-holiday-start" type="date" data-oc-holiday="start" min="'+chosen.start+'" max="'+chosen.end+'" value="'+ocHolidayStart+'"></div><div><label for="oc-holiday-end">'+T('نهاية المعسكر','Camp ends')+'</label><input id="oc-holiday-end" type="date" data-oc-holiday="end" min="'+chosen.start+'" max="'+chosen.end+'" value="'+ocHolidayEnd+'"></div></div><button class="primary" data-oc="createHoliday" style="width:100%;margin-top:12px">'+T('إنشاء معسكر خلال هذه الإجازة','Create camp during this break')+'</button><p class="oc-muted" style="font-size:11px;margin-top:7px">'+T('التواريخ في التقويم تجريبية؛ تأكد من التواريخ الرسمية قبل الاعتماد.','Calendar dates are illustrative; verify official dates before committing.')+'</p></div></section>'
  +'<section class="oc-panel"><div class="oc-head"><h2>'+T('مقارنة الفترات','Compare windows')+'</h2><button data-oc="compare" class="small">'+(ocComparison?T('إخفاء','Hide'):T('عرض','Show'))+'</button></div><p class="oc-muted">'+T('قارن المدة والدرجة التجريبية دون اعتبارها توقعًا فعليًا للحضور.','Compare duration and sample scores without treating them as forecasts.')+'</p>'+(ocComparison?'<table class="oc-compare"><thead><tr><th>'+T('الفترة','Window')+'</th><th>'+T('الأيام','Days')+'</th><th>'+T('الدرجة','Score')+'</th></tr></thead><tbody>'+featured.map(e=>'<tr><td>'+ocName(e)+'</td><td>'+ocDayCount(e.start,e.end)+'</td><td dir="ltr">'+e.score+'/100</td></tr>').join('')+'</tbody></table>':'')+'</section></div></div>'
  +'<div class="oc-disclaimer"><b>'+T('مهم قبل اعتماد المواعيد: ','Before confirming dates: ')+'</b>'+T('هذه واجهة تخطيط تجريبية وليست مرتبطة بمصدر تقويم مباشر أو بأرصاد طقس أو باستطلاعات الأسر. ينبغي التحقق من تواريخ وزارة التعليم والإجازات المحلية، ثم مراجعة الطلب والطقس والتجهيزات. تحفظ إعدادات المحاكي داخل جلسة الصفحة فقط.','This is a prototype, not connected to live official calendars, weather or parent surveys. Verify Ministry of Education dates and regional variations before making operational decisions. Simulator settings are session-only.')+'</div></div>';
 }
@@ -2573,11 +2580,12 @@ function ocHandleClick(el){
  if(kind==='next')return ocMonthsShift(1);
  if(kind==='filter'){ocFilter=el.dataset.filter;return render();}
  if(kind==='event')return ocOpenEvent(el.dataset.id);
- if(kind==='day'){ocDate=el.dataset.date;const ev=ocEvent(ocDate);if(ev)ocSelected=ev.id;return render();}
+ if(kind==='day'){ocDate=el.dataset.date;const ev=ocEvent(ocDate);if(ev){if(ocSelected!==ev.id)ocSelected=ev.id;ocSetHolidayRange(ev,ocDate);}return render();}
  if(kind==='compare'){ocComparison=!ocComparison;return render();}
  if(kind==='use'){const e=OC_EVENTS.find(x=>x.id===ocSelected);ocInputs.start=e.start;ocInputs.duration=String(Math.min(7,Math.max(3,ocDayCount(e.start,e.end))));ocAnalyze();render();return;}
  if(kind==='analyze'){ocAnalyze();render();return;}
  if(kind==='create'){ocNewCamp();return;}
+ if(kind==='createHoliday'){ocCreateDuringHoliday();return;}
  if(kind==='focus'){document.getElementById('oc-simulator')?.scrollIntoView({behavior:'smooth',block:'center'});}
 }
 
@@ -3084,7 +3092,7 @@ document.addEventListener('click',e=>{
   };
   if(map[a]){e.preventDefault();map[a]()}
 });
-document.addEventListener('change',e=>{const t=e.target;if(page==='opportunities'&&t.dataset.ocInput){ocInputs[t.dataset.ocInput]=t.value;ocAnalysis=null;}});
+document.addEventListener('change',e=>{const t=e.target;if(page==='opportunities'&&t.dataset.ocInput){ocInputs[t.dataset.ocInput]=t.value;ocAnalysis=null;}if(page==='opportunities'&&t.dataset.ocHoliday){if(t.dataset.ocHoliday==='start')ocHolidayStart=t.value;else ocHolidayEnd=t.value;}});
 document.addEventListener('input',e=>{
   const t=e.target;
   if(t.id==='q'){libFilter.q=t.value;renderLib()}
