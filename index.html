@@ -1223,10 +1223,10 @@ function icon(name){
   return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
 }
 const NAV=[
-  ['start',[['opportunities','تقويم فرص المعسكرات','Camp opportunities calendar'],['camps','إدارة المعسكرات','Manage camps'],['dashboard','ملخص الخطة','Plan overview']]],
-  ['plan',[['builder','تصميم المعسكر','Design camp'],['library','مكتبة البرامج','Program library'],['selection','البرامج المختارة','Selected programs'],['days','توزيع البرامج على الأيام','Daily program allocation']]],
-  ['verify',[['fit','مواءمة احتياجات الطلاب','Student needs alignment'],['readiness','مراجعة اكتمال الخطة','Plan completeness review']]],
-  ['out',[['outputs','ملفات الخطة والتجهيز','Plan & preparation files']]]
+  ['start',[['opportunities','١. اختر موعد المعسكر','1. Choose camp dates'],['camps','٢. أنشئ المعسكر أو اختره','2. Create or select a camp']]],
+  ['plan',[['builder','٣. صمّم خطة المعسكر','3. Build the camp plan'],['library','مكتبة البرامج','Program library'],['selection','البرامج المختارة','Selected programs'],['days','توزيع البرامج على الأيام','Daily program allocation']]],
+  ['verify',[['fit','٤. افحص مواءمة الطلاب','4. Check student alignment'],['readiness','٥. راجع اكتمال الخطة','5. Review plan completeness']]],
+  ['out',[['dashboard','٦. استعرض ملخص الخطة','6. Review plan overview'],['outputs','٧. جهّز الملفات وشاركها','7. Export and share']]]
 ];
 const PAGE_TITLES={
   camps:['إدارة المعسكرات','Manage camps'],
@@ -1248,7 +1248,7 @@ function header(){
       <svg viewBox="0 0 92 46" aria-hidden="true"><path fill="currentColor" d="M2 40 24 6l10 16 6-9 20 27H46L34 23l-8 17H2Z"/><path fill="currentColor" opacity=".45" d="M62 40 80 12l10 28H62Z"/></svg>
       <div><b>${T('أكاديمية النخبة','Elite Academy')}</b><small>CAMP PLANNER</small></div>
     </div>
-    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({start:'١ · تحديد الموعد والمعسكر',plan:'٢ · بناء خطة المعسكر',verify:'٣ · مراجعة الخطة',out:'٤ · التجهيز والمشاركة'}[g],{start:'1 · START & SCHEDULE',plan:'2 · DESIGN THE CAMP',verify:'3 · REVIEW THE PLAN',out:'4 · PREPARE & SHARE'}[g])}</div>
+    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({start:'ابدأ من هنا',plan:'صمّم الخطة',verify:'تحقق من الخطة',out:'النتائج والمشاركة'}[g],{start:'START HERE',plan:'BUILD THE PLAN',verify:'CHECK THE PLAN',out:'RESULTS & SHARING'}[g])}</div>
       ${items.map(([id,ar,en])=>`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='camps'?'collection':id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='opportunities'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}${id==='camps'?`<span class="cnt">${S.camps.length}</span>`:''}</button>`).join('')}
     </div>`).join('')}
     <div class="sidefoot">
