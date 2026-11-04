@@ -1792,8 +1792,29 @@ applyCustomLabels();
 const tagName=t=>TAGNAMES[t]?L({ar:TAGNAMES[t][0],en:TAGNAMES[t][1]}):t;
 
 /* ============================ ٦ · الجاهزية ============================ */
+function newPrepRequirementModal(){
+  openModal('<h2>'+T('إضافة متطلب تشغيلي','Add operational requirement')+'</h2>'+
+    '<p class="help" style="margin:10px 0">'+T('سجّل احتياجاً خاصاً بهذا المعسكر، ثم حدد المسؤول وحالة الجاهزية في الجدول.','Add a camp-specific requirement and track its readiness.')+'</p>'+
+    '<label class="fld">'+T('اسم المتطلب','Requirement name')+'<input id="prepNewName" maxlength="100" placeholder="'+T('مثال: تجهيز حقيبة الإسعافات','e.g. Prepare first aid kit')+'"></label>'+
+    '<div class="actions" style="display:flex;gap:9px;justify-content:flex-end;margin-top:15px"><button data-act="close">'+T('إلغاء','Cancel')+'</button><button class="primary" data-act="savePrepRequirement">'+T('حفظ المتطلب','Save requirement')+'</button></div>');
+  document.getElementById('prepNewName')?.focus();
+}
+function savePrepRequirement(){
+  const name=(document.getElementById('prepNewName')?.value||'').trim().replace(/\s+/g,' ');
+  if(name.length<2)return toast(T('أدخل اسم المتطلب (حرفان على الأقل).','Enter a requirement name of at least two characters.'));
+  const manual=Array.isArray(S.prep.__manual)?S.prep.__manual:[];
+  const existing=[...needsAgg().map(x=>NEEDS[x[0]]?.[0]||''),...manual.map(x=>x.name)];
+  const norm=x=>String(x).normalize('NFKC').replace(/[\u064B-\u065F\u0640]/g,'').trim().toLowerCase();
+  if(existing.some(x=>norm(x)===norm(name)))return toast(T('المتطلب مسجل بالفعل.','Requirement already exists.'));
+  const id=newId('manual-prep-');
+  S.prep.__manual=[...manual,{id,name}];S.prep[id]={owner:'',done:false};
+  logIt('إضافة متطلب تشغيلي: '+name,'Added operational requirement: '+name);
+  save();closeModal();render();toast(T('تمت إضافة المتطلب.','Requirement added.'));
+}
 function pageReadiness(){
   const rd=readiness(), na=needsAgg();
+  const customReqs=Array.isArray(S.prep.__manual)?S.prep.__manual:[];
+  customReqs.forEach(r=>{NEEDS[r.id]=[r.name,r.name];na.push([r.id,null])});
   return pageHead('مراجعة اكتمال الخطة','Plan completeness review',
     'راجع شروط اكتمال خطة البرامج قبل الاعتماد. لا يشمل هذا الفحص سلامة الموقع أو التصاريح أو الجاهزية التشغيلية.',
     'Review program-planning checks before approval. This does not assess venue safety, permits or operational readiness.',
@@ -1828,12 +1849,12 @@ function pageReadiness(){
       </div>
     </div>
     <div class="card spacer">
-      <div class="row"><h2>${T('جاهزية المعسكر ومتطلبات التشغيل','Camp operational readiness and requirements')}</h2>
-        <span class="pill line">${T('مستخرجة من البرامج','From programs')}</span></div>
+      <div class="row wrap" style="justify-content:space-between;gap:12px"><h2>${T('جاهزية المعسكر ومتطلبات التشغيل','Camp operational readiness and requirements')}</h2>
+        <button class="primary small noprint" data-act="newPrepRequirement">+ ${T('إضافة متطلب تشغيلي','Add operational requirement')}</button></div>
       <p class="help" style="margin:6px 0 12px">${T('تابع جميع متطلبات تشغيل المعسكر، وحدّد المسؤول عن كل متطلب، وتأكد من جاهزيته قبل بدء التنفيذ. يمكنك إضافة متطلبات جديدة حسب احتياجات المعسكر.','Track all operational requirements, assign an owner and verify readiness before delivery. You can add camp-specific requirements.')}</p>
       ${na.length?`<div class="tablewrap"><table><thead><tr><th>${T('المتطلب التشغيلي','Operational requirement')}</th><th>${T('البرامج المرتبطة','Related programs')}</th><th>${T('المسؤول عن التنفيذ','Responsible owner')}</th><th>${T('حالة الجاهزية','Readiness')}</th></tr></thead><tbody>
         ${na.map(([k,n])=>`<tr><td><b>${esc(L({ar:NEEDS[k][0],en:NEEDS[k][1]}))}</b></td>
-          <td><span class="pill">${n}</span></td>
+          <td>${n===null?`<span class="pill line">${T('إضافة يدوية','Manually added')}</span>`:`<span class="pill">${n}</span>`}</td>
           <td><input data-prep="owner:${k}" value="${esc((S.prep[k]||{}).owner||'')}" placeholder="${T('اسم المسؤول','Owner name')}" style="width:150px"></td>
           <td><label class="pill ${((S.prep[k]||{}).done)?'good':'line'}" style="cursor:pointer"><input type="checkbox" data-prep="done:${k}" ${((S.prep[k]||{}).done)?'checked':''} style="margin:0"> ${((S.prep[k]||{}).done)?T('جاهز للتنفيذ','Ready for delivery'):T('جارٍ التجهيز','In preparation')}</label></td></tr>`).join('')}
       </tbody></table></div>`:`<div class="empty">${T('لا متطلبات لأن الخطة فارغة.','No requirements yet because the plan is empty.')}</div>`}
@@ -3595,6 +3616,8 @@ document.addEventListener('click',e=>{
     saveBrief:()=>saveBrief(),
     item:()=>itemModal(arg),
     newProgram:()=>customProgramModal(),
+    newPrepRequirement:()=>newPrepRequirementModal(),
+    savePrepRequirement:()=>savePrepRequirement(),
     addCustomLabel:()=>addCustomLabel(arg),
     editProgram:()=>customProgramModal(arg),
     saveCustomProgram:()=>saveCustomProgram(arg||null),
