@@ -2538,13 +2538,47 @@ function ocCalendarHtml(){
  return '<div class="oc-week">'+(lang==='ar'?['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة']:['Sat','Sun','Mon','Tue','Wed','Thu','Fri']).map(n=>'<span>'+n+'</span>').join('')+'</div><div class="oc-cells">'+cells+'</div>';
 }
 function ocAnalyze(){
- const start=ocInputs.start,duration=+ocInputs.duration;
- if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||duration<1)return;
- let covered=0;const overlapping=new Set();
- for(let i=0;i<duration;i++){const d=new Date(start+'T12:00:00');d.setDate(d.getDate()+i);const ev=ocEvent(ocDateKey(d));if(ev){covered++;overlapping.add(ocName(ev));}}
- const end=new Date(start+'T12:00:00');end.setDate(end.getDate()+duration-1);
- const score=Math.max(18,Math.min(95,Math.round(30+55*covered/duration+(duration<=7?8:0))));
- ocAnalysis={start,end:ocDateKey(end),covered,duration,score,names:[...overlapping]};
+ const start=ocInputs.start,duration=Number(ocInputs.duration);
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||!Number.isInteger(duration)||duration<1||duration>31){ocAnalysis=null;return;}
+ const end=ocAddDays(start,duration-1),segments=[];
+ for(let i=0;i<duration;i++){
+  const date=ocAddDays(start,i),event=ocEvent(date)||null;
+  const previous=segments[segments.length-1];
+  if(previous&&previous.id===(event?event.id:null)){previous.end=date;previous.days++;}
+  else segments.push({id:event?event.id:null,start:date,end:date,days:1,event});
+ }
+ const covered=segments.filter(g=>g.event).reduce((sum,g)=>sum+g.days,0),outside=duration-covered;
+ const matches=segments.filter(g=>g.event),full=outside===0&&matches.length===1;
+ const event=full?matches[0].event:null;
+ ocAnalysis={start,end,duration,covered,outside,segments,full,event};
+}
+function ocAnalysisHtml(){
+ const a=ocAnalysis;if(!a)return '';
+ const primary=a.full?a.event:null;
+ const heading=a.full?T('الموعد داخل '+ocName(primary),'Dates fall within '+ocName(primary))
+   :a.covered===0?T('الموعد خارج الإجازات المدرجة','Dates are outside listed breaks')
+   :T('الموعد لا يقع بالكامل داخل إجازة واحدة','Dates are not entirely within a single break');
+ const intro=a.full?
+   T('اخترت '+a.duration+' أيام متتالية، من '+ocFmt(a.start)+' إلى '+ocFmt(a.end)+'، وجميعها ضمن الفترة المدرجة باسم «'+ocName(primary)+'».','Your '+a.duration+' consecutive days, '+ocFmt(a.start)+' to '+ocFmt(a.end)+', all fall within the listed '+ocName(primary)+' window.')
+   :a.covered===0?
+   T('الأيام المختارة غير مصنّفة ضمن أي إجازة في التقويم التجريبي الحالي. هذا لا يعني بالضرورة أنها أيام دراسية.','None of the chosen dates are labeled as a break in this sample calendar. This does not necessarily mean they are school days.')
+   :T('بعض أيام المعسكر تقع خارج الفترة المقترحة أو ضمن أكثر من مناسبة؛ راجع التفاصيل قبل اعتماد الموعد.','Some camp days fall outside the proposed window or across more than one event; review the breakdown before deciding.');
+ const rows=a.segments.map(g=>'<div style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)"><span><b>'+(g.event?esc(ocName(g.event)):T('خارج الفترات المدرجة','Outside listed windows'))+'</b><small style="display:block;opacity:.8">'+ocFmt(g.start)+(g.end!==g.start?' — '+ocFmt(g.end):'')+'</small></span><b>'+g.days+' '+T('أيام','days')+'</b></div>').join('');
+ const remaining=a.full?Math.max(0,ocDayCount(primary.start,primary.end)-a.duration):0;
+ const recommendation=a.full?
+  T('الخطوة التالية: يمكنك إنشاء مسودة بهذا الموعد. تحقق أولًا من التقويم الدراسي الرسمي في المنطقة وتوافر المشرفين والموقع قبل إعلان التسجيل.','Next: You can create a draft for these dates. First verify the official local school calendar and staff/venue availability before opening registration.')
+  :a.covered===0?
+  T('الخطوة التالية: جرّب تاريخًا داخل إحدى الإجازات الظاهرة، أو تحقق يدويًا من كون هذا الموعد إجازة رسمية.','Next: Try dates within a listed break, or manually verify whether these are official holidays.')
+  :T('الخطوة التالية: عدّل تاريخ البداية أو المدة لتقع جميع أيام المعسكر داخل إجازة واحدة، أو راجع الأيام الخارجة قبل إنشاء المسودة.','Next: Adjust the start date or duration to fit entirely within one break, or review the outside dates before drafting.');
+ return '<div class="oc-result" role="status" style="margin-top:14px">'
+  +'<div class="oc-row" style="align-items:center;gap:12px"><b>'+T('مراجعة الموعد المختار','Selected dates review')+'</b><span class="pill '+(a.full?'':'orange')+'">'+(a.full?T('ضمن فترة مدرجة','Within listed window'):T('يحتاج مراجعة','Needs review'))+'</span></div>'
+  +'<h3 style="margin:13px 0 7px;font-size:18px">'+heading+'</h3>'
+  +'<p style="line-height:1.8;margin:0 0 9px">'+intro+'</p>'
+  +'<div style="padding:10px 12px;background:rgba(255,255,255,.58);border-radius:10px;margin:12px 0"><div style="font-size:12px;font-weight:700;margin-bottom:7px">'+T('تفصيل الأيام حسب التقويم','Day-by-day calendar breakdown')+'</div>'+rows+'</div>'
+  +(a.full?'<p style="margin:8px 0">'+T('تبقى من أيام الإجازة المدرجة خارج مدة المعسكر: ','Listed break days outside your camp: ')+'<b>'+remaining+' '+T('أيام','days')+'</b></p>':'')
+  +'<p style="margin:11px 0;line-height:1.8"><b>'+T('ما الإجراء المناسب؟ ','Recommended action: ')+'</b>'+recommendation+'</p>'
+  +'<p style="font-size:12px;opacity:.8;line-height:1.7">'+T('مصدر النتيجة: مطابقة حسابية للتواريخ المدخلة مع أحداث التقويم التجريبي فقط؛ ليست توقعًا للإقبال أو تقييمًا لجودة الموعد، ولا تؤكد صحة الإجازات رسميًا.','Source: date matching against sample calendar entries only; not an enrollment forecast, a quality score, or official holiday verification.')+'</p>'
+  +'<button data-oc="create" class="primary" style="margin-top:10px">'+T('المتابعة إلى إنشاء مسودة معسكر','Continue to camp draft')+'</button></div>';
 }
 function ocNewCamp(){
  const start=ocInputs.start||OC_EVENTS.find(x=>x.id===ocSelected).start,days=Math.max(3,Math.min(8,+ocInputs.duration||5));
@@ -2567,9 +2601,9 @@ function pageOpportunityCalendar(){
  +'<section class="oc-panel" id="oc-simulator"><div class="oc-head"><div><h2>'+T('محاكي موعد المعسكر','Camp date simulator')+'</h2><p class="oc-muted">'+T('فحص مبدئي لتداخل المدة مع النوافذ المدرجة.','Initial overlap check against listed windows.')+'</p></div><span class="pill orange">'+T('تجريبي','Illustrative')+'</span></div>'
  +'<div class="oc-form"><div><label for="oc-start">'+T('تاريخ البداية','Start date')+'</label><input id="oc-start" data-oc-input="start" type="date" value="'+ocInputs.start+'"></div><div><label for="oc-duration">'+T('المدة','Duration')+'</label><select id="oc-duration" data-oc-input="duration">'+[3,5,7,10,14].map(n=>'<option value="'+n+'" '+(+ocInputs.duration===n?'selected':'')+'>'+n+' '+T('أيام','days')+'</option>').join('')+'</select></div><div><label for="oc-region">'+T('المنطقة','Region')+'</label><select id="oc-region" data-oc-input="region">'+pickerOpts+'</select></div><div><label for="oc-age">'+T('الفئة العمرية','Age group')+'</label><select id="oc-age" data-oc-input="age">'+['8-12','10-15','13-15'].map(a=>'<option value="'+a+'" '+(ocInputs.age===a?'selected':'')+'>'+a+' '+T('سنة','years')+'</option>').join('')+'</select></div></div>'
  +'<button class="primary" data-oc="analyze" style="width:100%;margin-top:13px">'+T('تحليل الموعد المقترح','Analyze proposed date')+'</button>'
- +(ocAnalysis?'<div class="oc-result" role="status"><div class="oc-row"><b>'+T('نتيجة الفحص الأولي','Initial review result')+'</b><strong dir="ltr">'+ocAnalysis.score+'/100</strong></div><p>'+T('تتداخل ','Overlap: ')+ocAnalysis.covered+'/'+ocAnalysis.duration+T(' أيام مع النوافذ المُدرجة.',' days with listed windows.')+'</p><p>'+ocFmt(ocAnalysis.start)+' — '+ocFmt(ocAnalysis.end)+'</p><p><b>'+T('تنبيه: ','Note: ')+'</b>'+T('الدرجة مبنية على التداخل مع التقويم التجريبي، ولا تشمل الطلب الفعلي أو الطقس أو جاهزية الفريق.','This illustrative score reflects calendar overlap only, not actual demand, weather, or readiness.')+'</p><button data-oc="create" class="primary" style="margin-top:10px">'+T('إنشاء مسودة معسكر بهذا الموعد','Create a camp draft with these dates')+'</button></div>':'')
- +'</section></div><div class="oc-stack"><section class="oc-panel"><div class="oc-head"><div><h2>'+T('الفرص المقترحة','Suggested opportunities')+'</h2><p class="oc-muted">'+T('الدرجات توضيحية وليست توقعات تسجيل.','Scores are illustrative, not enrollment predictions.')+'</p></div><span class="pill line">'+featured.length+'</span></div>'
- +featured.map(e=>'<button class="oc-op '+(ocSelected===e.id?'active':'')+'" data-oc="event" data-id="'+e.id+'"><div class="oc-row"><strong>'+ocName(e)+'</strong><span class="oc-score">'+e.score+'<small>/100</small></span></div><small>'+ocFmt(e.start)+' · '+ocDayCount(e.start,e.end)+' '+T('أيام','days')+'</small><div class="oc-meter"><i style="width:'+e.score+'%"></i></div><span style="display:block;margin-top:8px;font-size:12px;font-weight:700;color:var(--navy)">'+T('اختر هذه الإجازة وحدد معسكرًا ↓','Select this break ↓')+'</span></button><button type="button" class="primary" style="width:100%;margin:-4px 0 12px" data-oc="createEvent" data-id="'+e.id+'">'+T('إنشاء معسكر في ','Create camp during ')+ocName(e)+'</button>').join('')
+ +ocAnalysisHtml()
+ +'</section></div><div class="oc-stack"><section class="oc-panel"><div class="oc-head"><div><h2>'+T('الفرص المقترحة','Suggested opportunities')+'</h2><p class="oc-muted">'+T('الفترات للتخطيط الأولي وليست توصيات مبنية على بيانات إقبال.','Calendar windows are planning examples, not demand-based recommendations.')+'</p></div><span class="pill line">'+featured.length+'</span></div>'
+ +featured.map(e=>'<button class="oc-op '+(ocSelected===e.id?'active':'')+'" data-oc="event" data-id="'+e.id+'"><div class="oc-row"><strong>'+ocName(e)+'</strong><span class="oc-score">'+ocDayCount(e.start,e.end)+'<small> '+T('أيام','days')+'</small></span></div><small>'+ocFmt(e.start)+' · '+ocDayCount(e.start,e.end)+' '+T('أيام','days')+'</small><span style="display:block;margin-top:8px;font-size:12px;font-weight:700;color:var(--navy)">'+T('اختر هذه الإجازة وحدد معسكرًا ↓','Select this break ↓')+'</span></button><button type="button" class="primary" style="width:100%;margin:-4px 0 12px" data-oc="createEvent" data-id="'+e.id+'">'+T('إنشاء معسكر في ','Create camp during ')+ocName(e)+'</button>').join('')
  +'<div class="oc-source">'+T('المناسبات المدرجة للتصوّر فقط، ويجب مطابقة كل تاريخ مع وزارة التعليم والتقويم المطبق في المنطقة.','Planning-only entries. Confirm dates with the Ministry of Education and regional calendar.')+'</div></section>'
  +'<section class="oc-panel"><div class="oc-head"><h2>'+T('تحليل الفرصة المختارة','Selected opportunity')+'</h2><span class="pill orange">'+T('غير معتمد','Unverified')+'</span></div><h3>'+ocName(chosen)+'</h3><p class="oc-muted">'+ocFmt(chosen.start)+' — '+ocFmt(chosen.end)+'</p><div class="oc-meter"><i style="width:'+chosen.score+'%"></i></div><p class="oc-muted" style="margin:11px 0">'+T(chosen.summaryAr,chosen.summaryEn)+'</p>'+(lang==='ar'?chosen.reasonAr:chosen.reasonEn).map(x=>'<div class="oc-reason"><i>✓</i><span>'+esc(x)+'</span></div>').join('')+'<button class="primary" data-oc="use" style="width:100%;margin-top:10px">'+T('استخدم الفترة في المحاكي','Use this date in simulator')+'</button></section>'
  +'<section class="oc-panel"><div class="oc-head"><h2>'+T('مقارنة الفترات','Compare windows')+'</h2><button data-oc="compare" class="small">'+(ocComparison?T('إخفاء','Hide'):T('عرض','Show'))+'</button></div><p class="oc-muted">'+T('قارن المدة والدرجة التجريبية دون اعتبارها توقعًا فعليًا للحضور.','Compare duration and sample scores without treating them as forecasts.')+'</p>'+(ocComparison?'<table class="oc-compare"><thead><tr><th>'+T('الفترة','Window')+'</th><th>'+T('الأيام','Days')+'</th><th>'+T('الدرجة','Score')+'</th></tr></thead><tbody>'+featured.map(e=>'<tr><td>'+ocName(e)+'</td><td>'+ocDayCount(e.start,e.end)+'</td><td dir="ltr">'+e.score+'/100</td></tr>').join('')+'</tbody></table>':'')+'</section></div></div>'
