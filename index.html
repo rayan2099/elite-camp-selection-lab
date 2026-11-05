@@ -489,6 +489,44 @@ html[data-theme=dark] .daynum{background:var(--accent);color:#22140d}
 }
 
 
+/* Dedicated schedule print rules: exactly one print sheet per camp day,
+   without compounded before/after page breaks and without surrounding UI. */
+@media print{
+  @page{size:A4 portrait;margin:9mm 11mm 10mm}
+  body:has(.schedule-print-pages) #app > :not(.schedule-print-pages){display:none!important}
+  body:has(.schedule-print-pages) #app > .schedule-print-pages{
+    display:block!important;margin:0!important;padding:0!important;
+    width:100%!important;max-width:none!important;
+    break-before:auto!important;break-after:auto!important;
+  }
+  body:has(.schedule-print-pages) .schedule-print-pages > .dayblock,
+  body:has(.schedule-print-pages) .schedule-print-pages > .dayblock.pbreak{
+    display:block!important;
+    margin:0!important;padding:0!important;
+    height:auto!important;min-height:0!important;
+    break-before:auto!important;page-break-before:auto!important;
+    break-after:page!important;page-break-after:always!important;
+    break-inside:auto!important;page-break-inside:auto!important;
+  }
+  body:has(.schedule-print-pages) .schedule-print-pages > .dayblock:last-child{
+    break-after:auto!important;page-break-after:auto!important;
+  }
+  body:has(.schedule-print-pages) .schedule-print-pages .daybar,
+  body:has(.schedule-print-pages) .schedule-print-pages .tlrow,
+  body:has(.schedule-print-pages) .schedule-print-pages .print-day-masthead,
+  body:has(.schedule-print-pages) .schedule-print-pages .print-day-context,
+  body:has(.schedule-print-pages) .schedule-print-pages .print-section-label,
+  body:has(.schedule-print-pages) .schedule-print-pages .print-day-foot{
+    break-inside:avoid!important;page-break-inside:avoid!important;
+  }
+  body:has(.schedule-print-pages) .schedule-print-pages .tlrow{
+    min-height:7.2mm!important;padding:1mm 1.5mm!important;
+  }
+  body:has(.schedule-print-pages) .schedule-print-pages .tlbody{gap:.6mm 1.5mm!important}
+  body:has(.schedule-print-pages) .schedule-print-pages .tlwhy{font-size:6.6pt!important;line-height:1.25!important}
+  body:has(.schedule-print-pages) .schedule-print-pages .print-day-foot{margin-top:2mm!important}
+}
+
 /* Opportunity calendar — camp planning prototype */
 .oc-page{--oc-orange:#f47b3b;--oc-green:#168768}
 .oc-hero{border-radius:17px;background:linear-gradient(120deg,#112b49,#1b4166);padding:22px 25px;color:white;display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:16px;overflow:hidden}
@@ -2359,7 +2397,7 @@ function stepPlan(){
       <span class="help">${T('معاينة أولية لجدول يومي مبني على قالب ثابت؛ راجع أوقات الصلاة والجلسات والأنشطة قبل التنفيذ.','A preview based on a fixed template. Verify prayer times, sessions and activities before use.')}</span></div>
       <button class="primary" data-act="print">${T('طباعة','Print')}</button>
     </div>
-    <div class="spacer">${programSection()}</div>
+    <div class="spacer schedule-print-pages">${programSection()}</div>
     <div class="grid cols2 spacer print-supplement">
       <div class="card">
         <h2>${T('متطلبات التجهيز','Prep requirements')}</h2>
