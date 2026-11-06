@@ -1361,7 +1361,7 @@ function programBalance(){
  const days=S.meta.days.map((_,j)=>({day:j+1,activities:0,types:{sport:0,skills:0,culture:0,trips:0},modes:{theoretical:0,practical:0},notes:[]}));
  S.selected.forEach(x=>{const i=ITEM(x.id);if(!i)return;
   const type=i.t==='sport'?'sport':i.t==='trips'?'trips':i.t==='values'?'culture':'skills';
-  const mode=activityType(i);types[type]++;modes[mode]++;
+  const mode=x.activityType||activityType(i);types[type]++;modes[mode]++;
   const d=days[x.day-1];if(d){d.activities++;d.types[type]++;d.modes[mode]++;}
  });
  const recommendations=[];
@@ -1665,8 +1665,8 @@ function pageSelection(){
     `${can('select')?`<button data-act="go:days">${T('توزيع الأيام','Day map')}</button>`:''}<button class="primary" data-act="go:library">${can('select')?T('+ أضف من المكتبة','+ Add from library'):T('المكتبة','Library')}</button>`)
   +`${ro?viewOnly():''}<div class="grid cols4">
       ${metric(T('الإجمالي','Total'),selCount(),T('برنامجًا في الخطة','programs in the plan'))}
-      ${metric(T('أساسي','Core'),coreCount(),T(`الحد ${S.rules.coreTarget}`,`target ${S.rules.coreTarget}`))}
-      ${metric(T('قيم','Values'),valuesCount(),T(`الحد ${S.rules.valuesMin}`,`min ${S.rules.valuesMin}`))}
+      ${metric(T('أساسي','Core'),coreCount(),T('من البرامج المختارة','selected programs'))}
+      ${metric(T('قيم','Values'),valuesCount(),T('من البرامج المختارة','selected programs'))}
       ${metric(T('مبرر مكتوب','Rationale'),`${selCount()-S.selected.filter(x=>!x.why||x.why.trim().length<8).length} / ${selCount()}`,T('يُراجع قبل الاعتماد','reviewed before approval'))}
     </div>
     <div class="card spacer pad0">
@@ -1698,15 +1698,13 @@ function pageSelection(){
           <button class="primary" data-act="go:library">${T('فتح المكتبة','Open library')}</button></div>`}
     </div>
     <div class="grid cols2 spacer">
-      <div class="card"><h2>${T('معايير اكتمال الخطة','Plan completion criteria')}</h2>
-        <p class="help" style="margin-top:6px">${T('تُستخدم هذه المعايير لحساب اكتمال خطة البرامج، ولا تعني جاهزية التشغيل الميداني.','These criteria evaluate program-plan completeness, not operational readiness.')}</p>
-        <div class="fields spacer">
-          <label class="fld">${T('الحد الأدنى للبرامج الأساسية','Minimum core programs')}<input type="number" min="1" max="40" value="${S.rules.coreTarget}" data-rule="coreTarget" style="max-width:120px" ${can('brief')?'':'disabled'}></label>
-          <label class="fld">${T('الحد الأدنى لبرامج القيم','Minimum values programs')}<input type="number" min="0" max="20" value="${S.rules.valuesMin}" data-rule="valuesMin" style="max-width:120px" ${can('brief')?'':'disabled'}></label>
-          <label class="fld">${T('أقصى عدد في اليوم','Max programs per day')}<input type="number" min="1" max="12" value="${S.rules.perDayMax}" data-rule="perDayMax" style="max-width:120px" ${can('brief')?'':'disabled'}></label>
-          <label class="fld">${T('أقل عدد مسارات','Minimum tracks covered')}<input type="number" min="1" max="6" value="${S.rules.minTracks}" data-rule="minTracks" style="max-width:120px" ${can('brief')?'':'disabled'}></label>
-          <label class="fld wide">${T('أدنى نسبة تغطية لتحديات الطلاب (%)','Minimum student-challenge coverage (%)')}<input type="number" min="0" max="100" value="${S.rules.coverageMin}" data-rule="coverageMin" style="max-width:120px" ${can('brief')?'':'disabled'}></label>
+      <div class="card"><h2>${T('مؤشرات تكامل الأنشطة','Activity balance indicators')}</h2>
+        <p class="help" style="margin-top:6px">${T('للتحليل والتوصية فقط؛ لا توجد أعداد مفروضة للبرامج أو المسارات.','Advisory insights only; no mandatory program or track quotas.')}</p>
+        <div class="grid cols2 spacer" style="gap:12px">
+          ${[['sport','الرياضية','Sport'],['skills','المهارية','Skills'],['culture','الثقافية والقيمية','Culture & values'],['trips','الرحلات','Trips']].map(([k,ar,en])=>`<div class="pill line" style="justify-content:space-between;padding:10px"><span>${T(ar,en)}</span><b>${rd.balance.types[k]}</b></div>`).join('')}
         </div>
+        <div class="statline spacer"><span>${T('نظري','Theoretical')} <b>${rd.balance.modes.theoretical}</b></span><span>${T('عملي','Practical')} <b>${rd.balance.modes.practical}</b></span></div>
+        <button class="small spacer" data-act="go:readiness">${T('عرض تحليل الخطة','View plan analysis')}</button>
       </div>
       <div class="card"><h2>${T('البرامج الأساسية والمساندة','Core and supporting programs')}</h2>
         ${S.selected.length?`<div class="grid cols2" style="margin-top:12px;gap:12px">
@@ -1867,13 +1865,13 @@ function pageReadiness(){
           ${ring(rd.score)}
           <div><div class="help">${T('الفحص الآلي لشروط التخطيط','Automated planning checks')}</div>
             <div class="big mono"><span dir="ltr">${rd.passed}/${rd.total}</span></div>
-            <p class="help">${T('شرطًا مستوفيًا من قواعد الاختيار المعلنة.','conditions met from the declared rules.')}</p>
-            <button class="small" data-act="go:selection" style="margin-top:6px">${T('تعديل القواعد','Edit rules')}</button></div>
+            <p class="help">${T('بندان يتعلقان بالتوزيع والمبررات، دون فرض حصص للبرامج.','Two documentation checks; no required program quotas.')}</p>
+            <button class="small" data-act="go:selection" style="margin-top:6px">${T('عرض توزيع البرامج','Review programs')}</button></div>
         </div>
         <hr class="sep">
         <div class="statline" style="justify-content:space-between">
-          <span>${T('مستوفى','Met')} <b>${rd.passed}</b></span>
-          <span>${T('معلّق','Open')} <b>${rd.total-rd.passed}</b></span>
+          <span>${T('موثق','Documented')} <b>${rd.passed}</b></span>
+          <span>${T('بحاجة متابعة','Needs follow-up')} <b>${rd.total-rd.passed}</b></span>
           <span>${T('معتمد','Approved')} <b>${T(S.selected.filter(x=>x.approved).length+' من '+selCount(), S.selected.filter(x=>x.approved).length+' of '+selCount())}</b></span>
         </div>
         <div class="note ${rd.score>=80?'':'orange'}" style="margin-top:12px">
@@ -2308,7 +2306,7 @@ function scheduleRow(day,index){
 function scheduleDiagnostics(day){
  const map=slotMap(day),balance=programBalance().days[day-1],notes=[...balance.notes];
  const events=DAY_TEMPLATE.map((r,i)=>scheduleRow(day,i)).filter(r=>r.ic!=='prayer');
- const minute=x=>{const m=String(x).match(/^(\\d{1,2}):(\\d{2})/);return m?Number(m[1])*60+Number(m[2]):null};
+ const minute=x=>{const m=String(x).match(/^(\d{1,2}):(\d{2})/);return m?Number(m[1])*60+Number(m[2]):null};
  const ranges=events.map(x=>({name:T(x.ar,x.en),start:minute(x.t),end:minute(String(x.t).split(/[–-]/)[1]||'')})).filter(x=>x.start!==null&&x.end!==null&&x.end>x.start);
  for(let k=1;k<ranges.length;k++)if(ranges[k].start<ranges[k-1].end){
   notes.push(T('تداخل زمني بين «'+ranges[k-1].name+'» و«'+ranges[k].name+'».','Time overlap: '+ranges[k-1].name+' / '+ranges[k].name+'.'));
@@ -2328,7 +2326,7 @@ function dayTimeline(day,opts){
                 <span class="tlname">${esc(L({ar:it.i.ar,en:it.i.en}))}</span>
                 <span class="tlmeta">${esc(L(t.short))} · ${it.x.pri==='core'?T('أساسي','core'):T('مساند','support')}</span>
                 ${o.why&&it.x.why?`<small class="tlwhy">${esc(it.x.why)}</small>`:''}
-                ${it.i.activityBreakdown?`<small class="tlwhy" style="display:block">${esc(it.i.activityBreakdown)}</small>`:''}
+                ${(it.x.activityBreakdown||it.i.activityBreakdown)?`<small class="tlwhy" style="display:block">${esc(it.x.activityBreakdown||it.i.activityBreakdown)}</small>`:''}
                 ${o.why?`<button type="button" class="small noprint" data-act="editScheduleProgram:${it.x.id}" style="margin-inline-start:auto">${T('تعديل البرنامج','Edit program')}</button>`:''}
               </div>`}).join('')
           : `<span class="tlhint">${T('جلسة شاغرة','Open session')}</span>`)
@@ -2436,9 +2434,9 @@ function stepPlan(){
   const isFile=location.protocol==='file:';
   return `<div class="grid cols4 screenonly">
       ${metric(T('البرامج','Programs'),selCount(),T('في البناء','in the build'))}
-      ${metric(T('الأساسية','Core'),coreCount(),T('حد أدنى '+S.rules.coreTarget,'min '+S.rules.coreTarget))}
+      ${metric(T('الأساسية','Core'),coreCount(),T('برامج أساسية','core programs'))}
       ${metric(T('تغطية التحديات','Fit'),f.pct+'%',T(f.covered+' من '+f.total+' طلاب',f.covered+' of '+f.total+' students'))}
-      ${metric(T('اكتمال التخطيط','Planning completion'),rd.score+'%',T(rd.passed+' من '+rd.total+' فحص',rd.passed+' of '+rd.total+' checks'))}
+      ${metric(T('توثيق الخطة','Plan documentation'),rd.score+'%',T(rd.passed+' من '+rd.total+' فحص',rd.passed+' of '+rd.total+' checks'))}
     </div>
     <div class="printonly printcover">
       <div class="row" style="align-items:flex-start">
@@ -3512,6 +3510,8 @@ function editModal(id){
       <label class="fld">${T('اليوم','Day')}<select id="eDay">
         <option value="">${T('غير موزّع','Unassigned')}</option>
         ${S.meta.days.map((d,k)=>`<option value="${k+1}" ${x.day===k+1?'selected':''}>${k+1} · ${esc(L(d))}</option>`).join('')}</select></label>
+      <label class="fld">${T('طبيعة النشاط','Activity format')}<select id="eActivityType"><option value="theoretical" ${(x.activityType||activityType(i))==='theoretical'?'selected':''}>${T('نظري','Theoretical')}</option><option value="practical" ${(x.activityType||activityType(i))==='practical'?'selected':''}>${T('عملي','Practical')}</option></select></label>
+      <label class="fld wide">${T('تفريعات النشاط والألعاب الفردية','Subactivities and individual games')}<textarea id="eBreakdown" maxlength="1500" rows="3" placeholder="${T('أدخل كل نشاط فرعي في سطر','One subactivity per line')}">${esc(x.activityBreakdown??i.activityBreakdown??'')}</textarea></label>
       <label class="fld wide">${T('لماذا اخترنا هذا البرنامج لهذا المعسكر؟','Why this program for this camp?')}
         <textarea id="eWhy" placeholder="${T('اربط السبب بتحدٍ أعلنته الأسر أو بهدف يوم محدد…','Tie the reason to a family-declared challenge or a specific day goal…')}">${esc(x.why||'')}</textarea></label>
     </div>
@@ -3525,7 +3525,7 @@ function editModal(id){
 }
 function saveEdit(id){
   const x=S.selected.find(s=>s.id===id);if(!x)return;
-  x.pri=$('#ePri').value;x.day=$('#eDay').value?+$('#eDay').value:null;x.why=$('#eWhy').value.trim();
+  x.pri=$('#ePri').value;x.day=$('#eDay').value?+$('#eDay').value:null;x.why=$('#eWhy').value.trim();x.activityType=$('#eActivityType').value;x.activityBreakdown=$('#eBreakdown').value.trim();
   logIt(`حُدّث قرار «${ITEM(id).ar}»`,`Decision updated: ${ITEM(id).en}`);
   save();closeModal();render();toast(T('حُفظ قرار الاختيار.','Decision saved.'));
 }
