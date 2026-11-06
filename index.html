@@ -106,12 +106,12 @@ small{font-size:12px}
 .elite-time-card-head .elite-time-icon svg{width:19px;height:19px}
 .elite-time-analysis .elite-time-card-value{
  align-self:center;justify-self:stretch;min-width:0;direction:rtl;text-align:right;
- font-size:clamp(23px,2.2vw,32px);font-weight:800;line-height:1.16;color:var(--fg);
+ font-size:clamp(30px,2.8vw,39px);font-weight:800;line-height:1.16;color:var(--fg);
  font-variant-numeric:tabular-nums
 }
 .elite-time-card-value .elite-quantity,.elite-time-card .elite-quantity{display:inline-flex;flex-direction:row;direction:rtl;align-items:baseline;gap:6px;white-space:nowrap}
-.elite-time-card-value .elite-quantity-num{font-size:1.18em;font-weight:850;line-height:1}
-.elite-time-card-value .elite-quantity-unit{font-size:.48em;font-weight:650;color:var(--muted)}
+.elite-time-card-value .elite-quantity-num{font-size:1.12em;font-weight:850;line-height:1}
+.elite-time-card-value .elite-quantity-unit{font-size:.62em;font-weight:700;color:var(--muted)}
 .elite-time-analysis .elite-time-card-duration{
  box-sizing:border-box;display:flex;align-items:center;gap:7px;width:100%;min-height:34px;
  padding:7px 9px;background:var(--soft);border:1px solid var(--line);border-radius:8px;
@@ -126,13 +126,17 @@ small{font-size:12px}
  .elite-time-card-head h3{font-size:12px}
  .elite-time-card-head .elite-time-icon{width:28px;height:28px;flex-basis:28px}
  .elite-time-card-head .elite-time-icon svg{width:16px;height:16px}
- .elite-time-analysis .elite-time-card-value{font-size:23px}
+ .elite-time-analysis .elite-time-card-value{font-size:clamp(26px,3vw,34px)}
 }
 @media(max-width:640px){
  .elite-time-analysis .elite-time-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
  .elite-time-analysis .elite-time-card{min-height:158px;padding:12px}
 }
 @media(max-width:350px){.elite-time-analysis .elite-time-cards{grid-template-columns:1fr}}
+
+/* Ensure the unit label remains legible even with inherited compact card typography. */
+.elite-time-analysis .elite-time-card-value .elite-quantity-unit{font-size:.62em;font-weight:700}
+.elite-time-analysis .elite-time-card-value .elite-quantity-num{font-size:1.12em}
 /* ---------- contextual manager guidance ---------- */
 .admin-guide{background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid var(--accent);border-radius:12px;padding:12px 15px;margin:0 0 17px;box-shadow:var(--shadow);font-size:12.5px}
 .admin-guide-row{display:flex;gap:10px;align-items:flex-start}
