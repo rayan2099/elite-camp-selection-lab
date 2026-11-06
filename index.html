@@ -1355,33 +1355,36 @@ const unassigned=()=>S.selected.filter(x=>!x.day).length;
 const valuesCount=()=>S.selected.filter(x=>{const i=ITEM(x.id);return i&&i.t==='values'}).length;
 const trackCovered=()=>TRACKS.filter(t=>trackCount(t.id)>0).length;
 
+function activityType(i){return i?.activityType==='practical'?'practical':i?.activityType==='theoretical'?'theoretical':(i?.t==='sport'||i?.t==='trips'?'practical':'theoretical')}
+function programBalance(){
+ const types={sport:0,skills:0,culture:0,trips:0},modes={theoretical:0,practical:0};
+ const days=S.meta.days.map((_,j)=>({day:j+1,activities:0,types:{sport:0,skills:0,culture:0,trips:0},modes:{theoretical:0,practical:0},notes:[]}));
+ S.selected.forEach(x=>{const i=ITEM(x.id);if(!i)return;
+  const type=i.t==='sport'?'sport':i.t==='trips'?'trips':i.t==='values'?'culture':'skills';
+  const mode=activityType(i);types[type]++;modes[mode]++;
+  const d=days[x.day-1];if(d){d.activities++;d.types[type]++;d.modes[mode]++;}
+ });
+ const recommendations=[];
+ if(S.selected.length){
+  for(const [key,count] of Object.entries(types)){if(!count)recommendations.push(T({sport:'لا توجد أنشطة رياضية ضمن الاختيار.',skills:'لا توجد أنشطة مهارية ضمن الاختيار.',culture:'لا توجد أنشطة ثقافية أو قيمية ضمن الاختيار.',trips:'لا توجد رحلات ضمن الاختيار.'}[key],{sport:'No sport activities selected.',skills:'No skills activities selected.',culture:'No cultural or values activities selected.',trips:'No trips selected.'}[key]));}
+  if(!modes.practical)recommendations.push(T('البرامج المختارة مصنفة نظرياً؛ راجع فرص التطبيق العملي.','Selected programs are theoretical; consider hands-on practice.'));
+  if(!modes.theoretical)recommendations.push(T('البرامج المختارة عملية؛ راجع فرص التهيئة والمعرفة.','Selected programs are practical; consider preparation and learning.'));
+  days.forEach(d=>{
+   if(!d.activities)d.notes.push(T('لا توجد برامج موزعة لهذا اليوم.','No programs scheduled on this day.'));
+   if(d.activities>3)d.notes.push(T('يضم اليوم '+d.activities+' برامج؛ راجع سعة الجدول والتداخلات.','This day has '+d.activities+' programs; check capacity and overlaps.'));
+   for(const [key,count] of Object.entries(d.types))if(count>=3)d.notes.push(T('تكرار ملحوظ في أنشطة '+({sport:'الرياضة',skills:'المهارات',culture:'الثقافة والقيم',trips:'الرحلات'}[key])+' ('+count+').','Repeated '+key+' activities ('+count+').'));
+  });
+ }
+ return {types,modes,days,recommendations};
+}
 function readiness(){
-  const checks=[];
-  const chk=(ok,ar,en,noteAr,noteEn,fix)=>checks.push({ok,ar,en,note:T(noteAr,noteEn),fix});
-  const miss=unassigned();
-  chk(miss===0,'كل برنامج مختار له يوم محدد','Every selected program has a day',
-      miss?`${miss} برنامجًا دون يوم`:'مكتمل',miss?`${miss} without a day`:'Complete','days');
-  const core=coreCount();
-  chk(core>=S.rules.coreTarget,'استيفاء عدد البرامج الأساسية','Core programs target met',
-      `${core} من ${S.rules.coreTarget}`,`${core} of ${S.rules.coreTarget}`,'selection');
-  const vc=valuesCount();
-  chk(vc>=S.rules.valuesMin,'الحد الأدنى من برامج القيم','Minimum values programs',
-      `${vc} من ${S.rules.valuesMin}`,`${vc} of ${S.rules.valuesMin}`,'library');
-  const tc=trackCovered();
-  chk(tc>=S.rules.minTracks,'تنوّع المسارات','Track diversity',
-      `${tc} من ${TRACKS.length} مسارات`,`${tc} of ${TRACKS.length} tracks`,'library');
-  const over=S.meta.days.map((d,i)=>({i:i+1,n:dayLoad(i+1)})).filter(x=>x.n>S.rules.perDayMax);
-  chk(over.length===0,'لا يوم محمّل فوق الحد','No day over capacity',
-      over.length?`اليوم ${over.map(o=>o.i).join('، ')}`:`الحد ${S.rules.perDayMax} لكل يوم`,
-      over.length?`Day ${over.map(o=>o.i).join(', ')}`:`Max ${S.rules.perDayMax} per day`,'days');
-  const noWhy=S.selected.filter(x=>!x.why||x.why.trim().length<8).length;
-  chk(noWhy===0,'لكل اختيار مبرر مكتوب','Every pick has a rationale',
-      noWhy?`${noWhy} بلا مبرر`:'مكتمل',noWhy?`${noWhy} missing`:'Complete','selection');
-  const f=fitStats();
-  chk(f.pct>=S.rules.coverageMin,'تغطية تحديات الطلاب','Student-challenge coverage',
-      `${f.pct}% من ${f.total} طالبًا`,`${f.pct}% of ${f.total} students`,'fit');
-  const passed=checks.filter(c=>c.ok).length;
-  return {checks,passed,total:checks.length,score:Math.round(passed/checks.length*100)};
+ const b=programBalance(),unassignedCount=unassigned(),withoutWhy=S.selected.filter(x=>!x.why||x.why.trim().length<8).length;
+ const checks=[
+  {ok:unassignedCount===0,ar:'توزيع البرامج على الأيام',en:'Programs assigned to days',note:unassignedCount?T(unassignedCount+' برنامج دون يوم',unassignedCount+' programs unassigned'):T('لا توجد برامج غير موزعة','No unassigned programs'),fix:'days'},
+  {ok:withoutWhy===0,ar:'توثيق مبررات الاختيار',en:'Selection rationale',note:withoutWhy?T(withoutWhy+' دون مبرر',withoutWhy+' missing rationale'):T('المبررات مسجلة','Rationales recorded'),fix:'selection'}
+ ];
+ const passed=checks.filter(x=>x.ok).length;
+ return {checks,passed,total:checks.length,score:checks.length?Math.round(passed/checks.length*100):100,balance:b};
 }
 
 function needsAgg(){
@@ -2201,12 +2204,18 @@ function stepStability(){
   const maxH=Math.max(1,...S.meta.days.map((d,i)=>dayLoad(i+1)));
   return `<div class="build3">
     <div class="card">
-      <div class="row"><h2>${T('نتيجة مراجعة الخطة','Plan review results')}</h2><span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}%</span></div>
-      <div class="statline" style="margin:10px 0 14px"><span>${T('مستوفى','met')} <b>${rd.passed}</b></span><span>${T('معلّق','open')} <b>${rd.total-rd.passed}</b></span></div>
+      <div class="row"><h2>${T('تحليل الخطة وتكامل الأنشطة','Plan analysis and activity balance')}</h2><span class="pill ${rd.score>=80?'good':'orange'}">${rd.score}%</span></div>
+      <div class="statline" style="margin:10px 0 14px"><span>${T('موثق','documented')} <b>${rd.passed}</b></span><span>${T('بحاجة متابعة','needs attention')} <b>${rd.total-rd.passed}</b></span></div>
+      <div class="balance-stats" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0">
+        ${[['sport','الرياضية','Sport'],['skills','المهارية','Skills'],['culture','الثقافية والقيمية','Culture & values'],['trips','الرحلات','Trips']].map(([key,ar,en])=>`<div class="pill line" style="justify-content:space-between;padding:9px 12px"><span>${T(ar,en)}</span><b>${rd.balance.types[key]}</b></div>`).join('')}
+      </div>
+      <div class="statline" style="margin:8px 0 13px"><span>${T('أنشطة نظرية','Theoretical')} <b>${rd.balance.modes.theoretical}</b></span><span>${T('أنشطة عملية','Practical')} <b>${rd.balance.modes.practical}</b></span></div>
+      <p class="help" style="margin-bottom:10px">${T('هذه مؤشرات إرشادية وليست حصصاً إلزامية أو شروطاً رقمية لاكتمال الخطة.','These are advisory indicators, not required quotas or numerical approval criteria.')}</p>
+      ${rd.balance.recommendations.length?`<div class="note orange" style="margin-bottom:12px"><b>${T('اقتراحات لتحسين التكامل','Balance suggestions')}</b><div style="margin-top:6px">${rd.balance.recommendations.map(x=>`<p style="margin:4px 0">• ${esc(x)}</p>`).join('')}</div></div>`:''}
       <div class="checklg">
         ${rd.checks.map(c=>`<div class="cg ${c.ok?'ok':'no'}"><div class="led">${c.ok?'✓':'!'}</div>
           <div style="flex:1"><b>${T(c.ar,c.en)}</b><p>${esc(c.note||'')}</p></div>
-          ${!c.ok&&c.fix?`<button class="small" data-act="go:${c.fix}">${T('إصلاح','Fix')}</button>`:''}</div>`).join('')}
+          ${!c.ok&&c.fix?`<button class="small" data-act="go:${c.fix}">${T('مراجعة','Review')}</button>`:''}</div>`).join('')}
       </div>
     </div>
     <div>
@@ -3306,6 +3315,8 @@ function customProgramModal(id){
       <label class="fld">${T('الاسم بالإنجليزية (اختياري)','English name (optional)')}<input id="cpEn" maxlength="100" dir="ltr" value="${esc(i.en||'')}"></label>
       <label class="fld">${T('المسار *','Track *')}<select id="cpTrack">${TRACKS.map(t=>`<option value="${t.id}" ${t.id===i.t?'selected':''}>${L(t)}</option>`).join('')}</select></label>
       <label class="fld">${T('المجال ضمن المسار *','Field within track *')}<select id="cpField">${customProgramFields(i.t).map(([key,val])=>`<option value="${key.split('.')[1]}" ${key===i.t+'.'+i.f?'selected':''}>${T(val[0],val[1])}</option>`).join('')}</select></label>
+      <label class="fld">${T('طبيعة النشاط','Activity format')}<select id="cpActivityType"><option value="theoretical" ${activityType(i)==='theoretical'?'selected':''}>${T('نظري','Theoretical')}</option><option value="practical" ${activityType(i)==='practical'?'selected':''}>${T('عملي','Practical')}</option></select></label>
+      <label class="fld wide">${T('تفريعات النشاط / الألعاب الفردية (اختياري)','Activity breakdown / individual games (optional)')}<textarea id="cpActivityBreakdown" maxlength="1500" placeholder="${T('اكتب تفريعة في كل سطر (مثال: سباق التتابع، التوازن، تحدّي الدقة).','Enter one subactivity per line.')}" rows="3">${esc(i.activityBreakdown||'')}</textarea><span class="help">${T('تُعرض التفريعات مع البرنامج في الجدول عند اختياره.','Breakdown is displayed with the program in the schedule.')}</span></label>
       <label class="fld wide">${T('الهدف التعليمي أو التربوي *','Learning / development objective *')}<textarea id="cpGoal" required maxlength="500" placeholder="${T('ماذا سيتمكن الطالب من تطبيقه أو إظهاره بعد البرنامج؟','What will students be able to demonstrate after this program?')}">${esc(i.goal.ar)}</textarea></label>
       <label class="fld">${T('الحد الأدنى للعمر','Minimum age')}<input type="number" id="cpAgeMin" min="6" max="18" value="${i.ages[0]}"></label>
       <label class="fld">${T('الحد الأعلى للعمر','Maximum age')}<input type="number" id="cpAgeMax" min="6" max="18" value="${i.ages[1]}"></label>
@@ -3378,7 +3389,7 @@ function saveCustomProgram(id){
   if(LIB.some(x=>x.id!==id&&x.ar.trim().toLowerCase()===ar.toLowerCase()))return toast(T('يوجد برنامج بهذا الاسم في المكتبة.','A program with this name already exists.'));
   const original=id?ITEM(id):null;
   if(id&&(!original||!original.custom))return;
-  const item={id:id||newId('CUSTOM-'),custom:true,t,f,ar,en,ages:[min,max],load,
+  const item={id:id||newId('CUSTOM-'),custom:true,t,f,ar,en,ages:[min,max],load,activityType:v('cpActivityType'),activityBreakdown:v('cpActivityBreakdown'),
     goal:{ar:goal,en:goal},
     need:$$('[data-custom-need]:checked').map(x=>x.dataset.customNeed),
     tags:$$('[data-custom-tag]:checked').map(x=>x.dataset.customTag),
