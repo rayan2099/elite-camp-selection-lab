@@ -44,6 +44,17 @@ small{font-size:12px}
 .demo{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-size:11.5px;color:var(--muted);margin-bottom:16px}
 .demo span:last-child{color:var(--accent);font-weight:700;letter-spacing:.02em}
 
+.elite-reallocate{direction:rtl;text-align:right;margin-top:12px;padding:13px;border-radius:12px;background:color-mix(in srgb,var(--accent) 7%,var(--surface));border:1px solid var(--line)}
+.elite-reallocate-header,.elite-reallocate-session-title{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.elite-reallocate-session{margin:10px 0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px}
+.elite-reallocate-session-title{font-size:12px;margin-bottom:9px}
+.elite-reallocate-session-title time{color:var(--muted);font-variant-numeric:tabular-nums}
+.elite-suggestion-list{display:flex;flex-wrap:wrap;gap:7px}
+.elite-suggestion{display:flex;align-items:center;gap:7px;text-align:right;direction:rtl;padding:7px 10px;background:var(--soft);border-radius:9px;font-size:12px}
+.elite-suggestion:hover{background:var(--accentsoft);border-color:var(--accent)}
+.elite-suggestion small{display:block;color:var(--muted);font-size:10px}
+.elite-suggestion-plus{width:20px;height:20px;display:grid;place-items:center;border-radius:50%;background:var(--accent);color:#22140d}
+@media print{.elite-reallocate{display:none!important}}
 /* ---------- approved subactivities and RTL time intelligence ---------- */
 .elite-subactivities{text-align:right;direction:rtl}
 .elite-phase-options{display:grid;gap:8px;margin-top:9px}
@@ -2315,12 +2326,14 @@ function dayItems(day){
     .sort((a,b)=>(a.x.pri==='core'?0:1)-(b.x.pri==='core'?0:1));
 }
 function slotMap(day){
-  const items=dayItems(day), map={};
-  items.forEach((o,k)=>{
-    const slot=SLOTS[Math.min(k,SLOTS.length-1)];
-    (map[slot]=map[slot]||[]).push(o);
-  });
-  return map;
+ const items=dayItems(day),map={};
+ items.filter(o=>SLOTS.includes(o.x.slot)).forEach(o=>(map[o.x.slot]=map[o.x.slot]||[]).push(o));
+ const empty=SLOTS.filter(slot=>!(map[slot]||[]).length);
+ items.filter(o=>!SLOTS.includes(o.x.slot)).forEach(o=>{
+  const slot=empty.length?empty.shift():SLOTS[SLOTS.length-1];
+  (map[slot]=map[slot]||[]).push(o);
+ });
+ return map;
 }
 function scheduleRow(day,index){
  const override=S.prep?.__scheduleEdits?.[day]?.[index]||{};
@@ -2332,7 +2345,7 @@ function eliteTimeMinutes(value){
  const h=Number(m[1]),min=Number(m[2]);return h<24&&min<60?h*60+min:null;
 }
 function eliteClock(n){return String(Math.floor(n/60)%24).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
-function eliteDuration(n){return Math.floor(n/60)+' '+T('ساعة','hr')+' '+n%60+' '+T('دقيقة','min')}
+function eliteDuration(n){const h=Math.floor(n/60),m=n%60;return [h?`${h} ${T(h===1?'ساعة':h===2?'ساعتان':'ساعات',h===1?'hour':'hours')}`:'',m||!h?`${m} ${T(m===1?'دقيقة':'دقائق','min')}`:''].filter(Boolean).join(' و ')}
 function eliteScheduleStats(day){
  const rows=DAY_TEMPLATE.map((r,i)=>({row:scheduleRow(day,i),index:i})),sessions=[],totals={program:0,other:0,prayer:0};
  for(const {row,index} of rows){
@@ -2345,9 +2358,25 @@ function eliteScheduleStats(day){
  }
  return {sessions,totals,scheduled:totals.program+totals.other+totals.prayer,unfilled:sessions.filter(s=>s.row.slot&&!(slotMap(day)[s.row.slot]||[]).length)};
 }
+function eliteSuggestions(day,slot){
+ const preferred={badge:['lead','values','skills'],elite:['lead','skills','values'],workshop:['skills','stem','values'],sport:['sport'],culture:['values','lead','trips']}[slot]||[];
+ return LIB.filter(i=>!isSel(i.id)&&preferred.includes(i.t))
+  .sort((a,b)=>preferred.indexOf(a.t)-preferred.indexOf(b.t)||String(a.id).localeCompare(String(b.id))).slice(0,3);
+}
+function eliteAddSuggestion(day,slot,id){
+ day=Number(day);
+ if(!can('select'))return toast(T('لا تملك صلاحية التعديل.','Not permitted to edit.'));
+ if(!Number.isInteger(day)||day<1||day>S.meta.days.length||!SLOTS.includes(slot))return;
+ const it=ITEM(id);if(!it)return;
+ if((slotMap(day)[slot]||[]).length)return toast(T('الجلسة لم تعد شاغرة.','Session is no longer empty.'));
+ if(isSel(id))return toast(T('البرنامج مختار مسبقًا.','Program already selected.'));
+ S.selected.push({id,pri:'support',day,slot,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
+ logIt('إضافة '+it.ar+' إلى '+slot+' في اليوم '+day,'Added '+it.en+' to '+slot+' on day '+day);
+ save();render();toast(T('تمت إضافة البرنامج للجلسة المحددة.','Added directly to the chosen session.'));
+}
 function eliteDayAnalysis(day){
  const stat=eliteScheduleStats(day),colors={program:'#168660',other:'#2563eb',prayer:'#a16207'};
- const card=(title,minutes,color)=>`<div class="elite-time-card" style="--time-accent:${color}"><span>${title}</span><strong dir="ltr">${minutes} ${T('دقيقة','min')}</strong><small>${eliteDuration(minutes)}</small></div>`;
+ const card=(title,minutes,color)=>`<div class="elite-time-card" style="--time-accent:${color}"><span>${title}</span><strong dir="ltr">${minutes} ${T(minutes===1?'دقيقة':'دقائق','min')}</strong><small>${eliteDuration(minutes)}</small></div>`;
  return `<div class="elite-time-analysis" dir="rtl">
     <div class="elite-time-cards">
       ${card(T('إجمالي الوقت الموقّت','Total timed activities'),stat.scheduled,'#0d1f3a')}
@@ -2357,9 +2386,14 @@ function eliteDayAnalysis(day){
     </div>
     <p class="help" style="margin:10px 0">${T('تُحسب المدد فقط للفترات التي تحتوي وقت بداية ونهاية. الأوقات المفردة لا تُضاف إلى الإجمالي. جلسات البرامج الشاغرة محسوبة ضمن وقت الجدول المخطط ومبيّنة أدناه.','Only activities with valid start and end times are counted. Single timestamps are excluded. Empty program slots remain included in planned timetable hours and are highlighted below.')}</p>
     <div class="elite-time-rows">
-      ${stat.sessions.map(a=>`<div class="elite-time-row" style="--time-accent:${colors[a.type]}" dir="rtl"><span class="elite-time-name">${esc(T(a.row.ar,a.row.en))}${a.row.slot&&!(slotMap(day)[a.row.slot]||[]).length?` <em>${T('(شاغرة)','(empty)')}</em>`:''}</span><time dir="ltr">${eliteClock(a.start)} – ${eliteClock(a.end)}</time><strong dir="ltr">${a.minutes} ${T('دقيقة','min')}</strong></div>`).join('')}
+      ${stat.sessions.map(a=>`<div class="elite-time-row" style="--time-accent:${colors[a.type]}" dir="rtl"><span class="elite-time-name">${esc(T(a.row.ar,a.row.en))}${a.row.slot&&!(slotMap(day)[a.row.slot]||[]).length?` <em>${T('(شاغرة)','(empty)')}</em>`:''}</span><time dir="ltr">${eliteClock(a.start)} – ${eliteClock(a.end)}</time><strong dir="ltr">${a.minutes} ${T(a.minutes===1?'دقيقة':'دقائق','min')}</strong></div>`).join('')}
     </div>
-    ${stat.unfilled.length?`<p class="elite-free-time">${T('فرص إعادة التوزيع: ','Reallocation opportunities: ')}<strong dir="ltr">${stat.unfilled.reduce((n,a)=>n+a.minutes,0)} ${T('دقيقة','min')}</strong> · ${stat.unfilled.length} ${T('جلسة','sessions')}</p>`:''}
+    ${stat.unfilled.length?`<div class="elite-reallocate" dir="rtl">
+      <div class="elite-reallocate-header"><div><b>${T('فرص إعادة التوزيع','Reallocation opportunities')}</b><p class="help">${T('اختر برنامجًا لإضافته مباشرة للجلسة الشاغرة.','Choose a program to add directly to the empty session.')}</p></div><span class="pill orange"><b dir="ltr">${stat.unfilled.reduce((n,a)=>n+a.minutes,0)} ${T('دقيقة','min')}</b> · <b dir="ltr">${stat.unfilled.length} ${T('جلسات','sessions')}</b></span></div>
+      ${stat.unfilled.map(a=>`<div class="elite-reallocate-session"><div class="elite-reallocate-session-title"><strong>${esc(T(a.row.ar,a.row.en))}</strong><time dir="ltr">${eliteClock(a.start)} – ${eliteClock(a.end)} · ${a.minutes} ${T('دقيقة','min')}</time></div>
+      <div class="elite-suggestion-list">${eliteSuggestions(day,a.row.slot).map(p=>`<button type="button" class="elite-suggestion" data-act="eliteAddSuggestion:${day},${a.row.slot},${p.id}" ${can('select')?'':'disabled'}><b class="elite-suggestion-plus">+</b><span>${esc(L({ar:p.ar,en:p.en}))}<small>${esc(L(TRACK(p.t)))}</small></span></button>`).join('')||`<span class="help">${T('لا تتوفر خيارات أخرى حاليًا.','No more suitable programs available.')}</span>`}</div></div>`).join('')}
+      <button type="button" class="small" data-act="go:library">${T('استعراض مكتبة البرامج','Browse program library')}</button>
+    </div>`:''}
  </div>`;
 }
 function scheduleDiagnostics(day){
@@ -3798,6 +3832,7 @@ document.addEventListener('click',e=>{
     editScheduleRow:()=>{const [day,index]=arg.split(',');editScheduleRow(day,index)},
     saveScheduleRow:()=>{const [day,index]=arg.split(',');saveScheduleRow(day,index)},
     editScheduleProgram:()=>editModal(arg),
+    eliteAddSuggestion:()=>{const [day,slot,id]=arg.split(',');eliteAddSuggestion(day,slot,id)},
     newPrepRequirement:()=>newPrepRequirementModal(),
     savePrepRequirement:()=>savePrepRequirement(),
     addCustomLabel:()=>addCustomLabel(arg),
