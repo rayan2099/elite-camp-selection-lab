@@ -3445,6 +3445,41 @@ function customProgramFields(track){
   return Object.entries(FIELDS).filter(([key])=>key.startsWith(track+'.'));
 }
 let customProgramReturnPage='library';
+function customBreakdownSource(track,field){
+ const same=LIB.filter(i=>!i.custom&&i.t===track&&i.f===field);
+ const others=LIB.filter(i=>!i.custom&&i.t===track&&i.f!==field);
+ const programs=[...same,...others].slice(0,12);
+ const seen=new Set(),options=[];
+ for(const program of programs){
+  for(const [n,phase] of (program.ph||[]).entries()){
+   const value=String(L({ar:phase[0],en:phase[1]})||'').trim();
+   if(value.length<3||seen.has(value))continue;
+   seen.add(value);
+   options.push({value,program:L({ar:program.ar,en:program.en}),phase:n+1,match:program.f===field});
+  }
+ }
+ if(track==='sport'){
+  for(const program of programs){
+   for(const value of ELITE_SPORT_SUBACTIVITIES[program.id]||[]){
+    if(seen.has(value))continue;seen.add(value);options.push({value,program:L({ar:program.ar,en:program.en}),phase:0,match:program.f===field});
+   }
+  }
+ }
+ return options.sort((a,b)=>Number(b.match)-Number(a.match)).slice(0,60);
+}
+function customBreakdownOptions(track,field,selected=[]){
+ const chosen=new Set(selected.map(v=>String(v).trim()));
+ const options=customBreakdownSource(track,field);
+ return options.length?options.map(o=>`<label class="elite-phase-option"><input type="checkbox" data-cp-breakdown value="${esc(o.value)}" ${chosen.has(o.value)?'checked':''}><span><strong>${esc(o.program)}</strong><small>${esc(o.value)}</small></span></label>`).join('')
+  :`<p class="help">${T('لا توجد تفريعات موثقة لهذا المجال حاليًا، ويمكنك إضافتها يدويًا.','No documented subactivities for this field. Add yours manually below.')}</p>`;
+}
+function refreshCustomBreakdowns(){
+ const wrap=$('#cpSuggestedBreakdowns');
+ const track=$('#cpTrack')?.value,field=$('#cpField')?.value;
+ if(!wrap||!track||!field)return;
+ // Keep existing manual entries. Selected library options are intentionally context-specific.
+ wrap.innerHTML=customBreakdownOptions(track,field);
+}
 function customProgramModal(id){
   if(!id)customProgramReturnPage=page;
   if(!can('catalog'))return toast(T('إنشاء البرامج متاح للمدير وقائد البرامج ومسؤول القيم.','Program creation is available to the director, programs lead, and values lead.'));
@@ -3461,7 +3496,14 @@ function customProgramModal(id){
       <label class="fld">${T('المسار *','Track *')}<select id="cpTrack">${TRACKS.map(t=>`<option value="${t.id}" ${t.id===i.t?'selected':''}>${L(t)}</option>`).join('')}</select></label>
       <label class="fld">${T('المجال ضمن المسار *','Field within track *')}<select id="cpField">${customProgramFields(i.t).map(([key,val])=>`<option value="${key.split('.')[1]}" ${key===i.t+'.'+i.f?'selected':''}>${T(val[0],val[1])}</option>`).join('')}</select></label>
       <label class="fld">${T('طبيعة النشاط','Activity format')}<select id="cpActivityType"><option value="theoretical" ${activityType(i)==='theoretical'?'selected':''}>${T('نظري','Theoretical')}</option><option value="practical" ${activityType(i)==='practical'?'selected':''}>${T('عملي','Practical')}</option></select></label>
-      <label class="fld wide">${T('تفريعات النشاط / الألعاب الفردية (اختياري)','Activity breakdown / individual games (optional)')}<textarea id="cpActivityBreakdown" maxlength="1500" placeholder="${T('اكتب تفريعة في كل سطر (مثال: سباق التتابع، التوازن، تحدّي الدقة).','Enter one subactivity per line.')}" rows="3">${esc(i.activityBreakdown||'')}</textarea><span class="help">${T('تُعرض التفريعات مع البرنامج في الجدول عند اختياره.','Breakdown is displayed with the program in the schedule.')}</span></label>
+      <div class="fld wide elite-subactivities" dir="rtl">
+        <b>${T('تفريعات النشاط — اختر من المكتبة أو أضف يدويًا','Subactivities — select from library or add your own')}</b>
+        <p class="help">${T('تظهر خيارات مستمدة من البرامج الموجودة في وثيقة الأكاديمية بحسب المسار والمجال. يمكن اختيار أكثر من تفريعة، وتُحفظ جميع الاختيارات في البرنامج.','Related options are drawn from the academy programme library for the selected track and field. Choose multiple options or enter custom ones.')}</p>
+        <div id="cpSuggestedBreakdowns" class="elite-phase-options">${customBreakdownOptions(i.t,i.f,(i.activityBreakdown||'').split('\\n'))}</div>
+        <label class="fld" style="margin-top:12px">${T('تفريعات يدوية إضافية (كل تفريعة في سطر)','Additional manual subactivities (one per line)')}
+          <textarea id="cpActivityBreakdown" dir="rtl" maxlength="3000" rows="3" placeholder="${T('أضف تفريعات جديدة غير موجودة في الخيارات أعلاه…','Add subactivities not offered above…')}">${esc((i.activityBreakdown||'').split('\\n').filter(v=>v.trim()&&!customBreakdownSource(i.t,i.f).some(o=>o.value===v.trim())).join('\\n'))}</textarea>
+        </label>
+      </div>
       <label class="fld wide">${T('الهدف التعليمي أو التربوي *','Learning / development objective *')}<textarea id="cpGoal" required maxlength="500" placeholder="${T('ماذا سيتمكن الطالب من تطبيقه أو إظهاره بعد البرنامج؟','What will students be able to demonstrate after this program?')}">${esc(i.goal.ar)}</textarea></label>
       <label class="fld">${T('الحد الأدنى للعمر','Minimum age')}<input type="number" id="cpAgeMin" min="6" max="18" value="${i.ages[0]}"></label>
       <label class="fld">${T('الحد الأعلى للعمر','Maximum age')}<input type="number" id="cpAgeMax" min="6" max="18" value="${i.ages[1]}"></label>
@@ -3521,6 +3563,7 @@ function refreshCustomFields(){
   const track=$('#cpTrack')?.value;
   const field=$('#cpField');if(!track||!field)return;
   field.innerHTML=customProgramFields(track).map(([key,val])=>`<option value="${key.split('.')[1]}">${T(val[0],val[1])}</option>`).join('');
+  refreshCustomBreakdowns();
 }
 function saveCustomProgram(id){
   if(!can('catalog'))return;
@@ -3534,7 +3577,7 @@ function saveCustomProgram(id){
   if(LIB.some(x=>x.id!==id&&x.ar.trim().toLowerCase()===ar.toLowerCase()))return toast(T('يوجد برنامج بهذا الاسم في المكتبة.','A program with this name already exists.'));
   const original=id?ITEM(id):null;
   if(id&&(!original||!original.custom))return;
-  const item={id:id||newId('CUSTOM-'),custom:true,t,f,ar,en,ages:[min,max],load,activityType:v('cpActivityType'),activityBreakdown:v('cpActivityBreakdown'),
+  const item={id:id||newId('CUSTOM-'),custom:true,t,f,ar,en,ages:[min,max],load,activityType:v('cpActivityType'),activityBreakdown:[...new Set([...$('[data-cp-breakdown]:checked').map(el=>el.value.trim()),...v('cpActivityBreakdown').split(/\r?\n/).map(v=>v.trim()).filter(Boolean)])].join('\n'),
     goal:{ar:goal,en:goal},
     need:$$('[data-custom-need]:checked').map(x=>x.dataset.customNeed),
     tags:$$('[data-custom-tag]:checked').map(x=>x.dataset.customTag),
@@ -3902,6 +3945,7 @@ document.addEventListener('input',e=>{
 document.addEventListener('change',e=>{
   const t=e.target;
   if(t.id==='cpTrack'){refreshCustomFields();return}
+  if(t.id==='cpField'){refreshCustomBreakdowns();return}
   if(t.id==='fTrack'){libFilter.track=t.value;libFilter.field='all';render();return}
   if(t.id==='fField'){libFilter.field=t.value;render();return}
   if(t.id==='fAge'){libFilter.age=t.value;render();return}
