@@ -2301,9 +2301,24 @@ function slotMap(day){
   });
   return map;
 }
+function scheduleRow(day,index){
+ const override=S.prep?.__scheduleEdits?.[day]?.[index]||{};
+ return {...DAY_TEMPLATE[index],...override};
+}
+function scheduleDiagnostics(day){
+ const map=slotMap(day),balance=programBalance().days[day-1],notes=[...balance.notes];
+ const events=DAY_TEMPLATE.map((r,i)=>scheduleRow(day,i)).filter(r=>r.ic!=='prayer');
+ const minute=x=>{const m=String(x).match(/^(\\d{1,2}):(\\d{2})/);return m?Number(m[1])*60+Number(m[2]):null};
+ const ranges=events.map(x=>({name:T(x.ar,x.en),start:minute(x.t),end:minute(String(x.t).split(/[–-]/)[1]||'')})).filter(x=>x.start!==null&&x.end!==null&&x.end>x.start);
+ for(let k=1;k<ranges.length;k++)if(ranges[k].start<ranges[k-1].end){
+  notes.push(T('تداخل زمني بين «'+ranges[k-1].name+'» و«'+ranges[k].name+'».','Time overlap: '+ranges[k-1].name+' / '+ranges[k].name+'.'));
+ }
+ for(const [slot,items] of Object.entries(map))if(items.length>1)notes.push(T('تم جمع '+items.length+' برامج في جلسة واحدة؛ راجع توقيتها.','Multiple programs assigned to one session; verify timing.'));
+ return [...new Set(notes)];
+}
 function dayTimeline(day,opts){
   const map=slotMap(day), o=opts||{};
-  return `<div class="tl">${DAY_TEMPLATE.map(row=>{
+  return `<div class="tl">${DAY_TEMPLATE.map((original,idx)=>{const row=scheduleRow(day,idx);
     const items=row.slot?(map[row.slot]||[]):[];
     const body = row.slot
       ? (items.length
@@ -2313,14 +2328,44 @@ function dayTimeline(day,opts){
                 <span class="tlname">${esc(L({ar:it.i.ar,en:it.i.en}))}</span>
                 <span class="tlmeta">${esc(L(t.short))} · ${it.x.pri==='core'?T('أساسي','core'):T('مساند','support')}</span>
                 ${o.why&&it.x.why?`<small class="tlwhy">${esc(it.x.why)}</small>`:''}
+                ${it.i.activityBreakdown?`<small class="tlwhy" style="display:block">${esc(it.i.activityBreakdown)}</small>`:''}
+                ${o.why?`<button type="button" class="small noprint" data-act="editScheduleProgram:${it.x.id}" style="margin-inline-start:auto">${T('تعديل البرنامج','Edit program')}</button>`:''}
               </div>`}).join('')
           : `<span class="tlhint">${T('جلسة شاغرة','Open session')}</span>`)
       : '';
     return `<div class="tlrow ${row.slot?'prog':'fixed'} ${row.slot&&!items.length?'tl-empty':''}">
       <div class="tltime">${row.t}</div>
       <div class="tldot">${tico(row.ic)}</div>
-      <div class="tlbody"><b>${T(row.ar,row.en)}</b>${body}</div>
+      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${body}<button type="button" class="small noprint" data-act="editScheduleRow:${day},${idx}" title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button></div>
     </div>`}).join('')}</div>`;
+}
+
+function editScheduleRow(day,index){
+ const n=Number(day),j=Number(index);
+ if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length)return;
+ const row=scheduleRow(n,j);
+ openModal(`<div class="eyebrow">${T('الجدول اليومي','DAILY SCHEDULE')}</div><h2>${T('تعديل فعالية اليوم','Edit daily activity')} ${n}</h2>
+   <div class="fields spacer">
+   <label class="fld">${T('الوقت','Time')}<input id="seTime" maxlength="32" value="${esc(row.t)}" dir="ltr" placeholder="08:40 – 09:40"></label>
+   <label class="fld">${T('اسم الفعالية بالعربية','Arabic activity name')}<input id="seAr" maxlength="90" value="${esc(row.ar)}"></label>
+   <label class="fld">${T('اسم الفعالية بالإنجليزية','English activity name')}<input id="seEn" maxlength="90" value="${esc(row.en||'')}"></label></div>
+   <p class="help">${T('الجدول قابل للتعديل لهذا المعسكر دون تغيير الجدول الأساسي لبقية المعسكرات. راجع أوقات الصلاة حسب الموقع والتاريخ.','Changes affect this camp only. Verify prayer times for the venue and date.')}</p>
+   <div class="actions spacer" style="display:flex;gap:8px;justify-content:flex-end">
+   <button data-act="close">${T('إلغاء','Cancel')}</button>
+   <button class="primary" data-act="saveScheduleRow:${n},${j}">${T('حفظ التعديل','Save changes')}</button></div>`);
+}
+function saveScheduleRow(day,index){
+ const n=Number(day),j=Number(index);
+ if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length)return;
+ const t=$('#seTime')?.value.trim(),ar=$('#seAr')?.value.trim(),en=$('#seEn')?.value.trim();
+ if(!t||!ar)return toast(T('الوقت واسم الفعالية مطلوبان.','Time and activity name are required.'));
+ if(!/^\\d{1,2}:\\d{2}(\\s*[–-]\\s*\\d{1,2}:\\d{2})?$/.test(t))return toast(T('استخدم وقتاً مثل 08:40 أو 08:40 – 09:40.','Enter a time such as 08:40 or 08:40 – 09:40.'));
+ const validTime=v=>{const parts=v.split(':').map(Number);return parts[0]>=0&&parts[0]<24&&parts[1]>=0&&parts[1]<60};
+ if(!t.split(/\\s*[–-]\\s*/).every(validTime))return toast(T('الوقت غير صحيح.','Invalid time.'));
+ if(!S.prep.__scheduleEdits)S.prep.__scheduleEdits={};
+ if(!S.prep.__scheduleEdits[n])S.prep.__scheduleEdits[n]={};
+ S.prep.__scheduleEdits[n][j]={t,ar,en:en||ar};
+ save();closeModal();render();toast(T('تم تحديث جدول اليوم.','Day schedule updated.'));
 }
 
 function planDays(){
@@ -2374,6 +2419,10 @@ function programSection(){
       </div>
       <div class="printonly print-section-label"><b>${T('التسلسل الزمني للأنشطة','ACTIVITY TIMELINE')}</b><span>${T('الوقت / الفعالية / البرنامج','Time / Activity / Program')}</span></div>
       ${dayTimeline(n,{why:true})}
+      <div class="noprint" style="padding:11px 13px;border:1px solid var(--line);border-radius:10px;margin-top:10px">
+         <div class="row wrap" style="gap:8px"><b>${T('تحليل اليوم','Daily schedule analysis')}</b><span class="pill">${T('دون احتساب الصلوات في تحليل التكرار','Prayers excluded from repetition counts')}</span></div>
+         ${scheduleDiagnostics(n).length?`<div style="margin-top:7px">${scheduleDiagnostics(n).map(x=>`<p class="help" style="margin:4px 0">• ${esc(x)}</p>`).join('')}</div>`:`<p class="help" style="margin-top:7px">${T('لا توجد تعارضات أو ملاحظات تلقائية مرصودة.','No automatic conflicts or issues detected.')}</p>`}
+      </div>
       <div class="printonly print-day-foot">
         <span>${T('تنبيه: الجدول مقترح. راجع أوقات الصلاة والتنقلات والأنشطة والمرافق قبل التنفيذ.','Draft schedule: verify prayer, travel, activity and venue times before delivery.')}</span>
         <b>${T('اليوم','Day')} ${n} / ${S.meta.days.length}</b>
@@ -3665,6 +3714,9 @@ document.addEventListener('click',e=>{
     saveBrief:()=>saveBrief(),
     item:()=>itemModal(arg),
     newProgram:()=>customProgramModal(),
+    editScheduleRow:()=>{const [day,index]=arg.split(',');editScheduleRow(day,index)},
+    saveScheduleRow:()=>{const [day,index]=arg.split(',');saveScheduleRow(day,index)},
+    editScheduleProgram:()=>editModal(arg),
     newPrepRequirement:()=>newPrepRequirementModal(),
     savePrepRequirement:()=>savePrepRequirement(),
     addCustomLabel:()=>addCustomLabel(arg),
