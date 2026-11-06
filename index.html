@@ -3561,6 +3561,13 @@ function itemModal(id){
       <button data-act="close">${T('إغلاق','Close')}</button>
     </div>`);
 }
+const ELITE_SPORT_SUBACTIVITIES={
+ SP1:['التحمل','السرعة','القوة','المرونة','التوازن','كروس فت مصغر','الوثب','الضغط','الجري'],
+ SP2:['كرة القدم','التحكم بالكرة','التمرير','المراوغة','التصويب','كرة السلة','التنطيط','الرميات الحرة','كرة الطائرة','الإرسال','الاستقبال','الضرب الساحق','حائط الصد','كرة اليد','شد الحبل','صيد الكرات','الخماسيات السريعة','الألعاب المائية الجماعية'],
+ SP3:['السباحة','تعلم الأساسيات','سباقات قصيرة','مسابقات غطس','الدفاع عن النفس','التايكوندو','الكاراتيه','الجمباز','حركات أساسية','عروض مهارية','ألعاب القوى المصغرة','الجري القصير','الوثب الطويل','رمي الكرة الطبية'],
+ SP4:['الروح الرياضية','الانضباط','اللعب النظيف','احترام المنافس','ورشة القيم في الملعب','تحكيم الطلاب','جائزة اللاعب القدوة','ضبط الانفعالات','التعامل مع الخسارة','التفكير تحت الضغط'],
+ SP5:['دوري كرة القدم','دوري كرة السلة','دوري الكرة الطائرة','بطولة اللياقة البدنية','دوري السباحة الصيفي','المباريات الودية','البطولات المحلية والإقليمية','التحكيم','نشر النتائج','الكؤوس والميداليات']
+};
 function editModal(id){
   const x=S.selected.find(s=>s.id===id);if(!x)return;
   const i=ITEM(id);
@@ -3578,11 +3585,12 @@ function editModal(id){
       <div class="fld wide elite-subactivities" dir="rtl">
         <b>${T('التفريعات المعتمدة للبرنامج — انقر للاختيار','Approved program subactivities — click to select')}</b>
         <p class="help">${T('هذه التفريعات مأخوذة من وثيقة البرامج المعتمدة (39 صفحة). اختر ما سيُنفّذ فعليًا؛ لا يُفرض اختيار جميع التفريعات.','These options come from the 39-page approved programme document. Select what you will actually deliver.')}</p>
+        ${ELITE_SPORT_SUBACTIVITIES[i.id]?.length?`<p class="help" style="margin-top:10px">${T('تفريعات الرياضة الواردة في الوثيقة — اختر اللعبة أو المهارة بالتحديد','Sports subactivities documented in the source — select games and skills')}</p><div class="elite-phase-options">${ELITE_SPORT_SUBACTIVITIES[i.id].map(v=>`<label class="elite-phase-option"><input type="checkbox" data-approved-phase value="${esc(v)}" ${(x.activityBreakdown||'').split('\\n').includes(v)?'checked':''}><span><small>${esc(v)}</small></span></label>`).join('')}</div>`:''}
         <div class="elite-phase-options">
-          ${(i.ph||[]).map((p,index)=>{const label=L({ar:p[0],en:p[1]});const existing=(x.activityBreakdown||'').split('\n').map(v=>v.trim());const checked=existing.includes(label)||existing.includes(p[0]);return `<label class="elite-phase-option"><input type="checkbox" data-approved-phase value="${esc(label)}" ${checked?'checked':''}><span><strong>${T(['الدورة التدريبية','الورشة التطبيقية','التحدي'][index]||'تفريع معتمد',['Training session','Practical workshop','Challenge'][index]||'Approved subactivity')}</strong><small>${esc(label)}</small></span></label>`}).join('')}
+          ${(i.ph||[]).map((p,index)=>{const label=L({ar:p[0],en:p[1]});const existing=(x.activityBreakdown||'').split('\n').map(v=>v.trim());const checked=existing.includes(label)||existing.includes(p[0]);return `<label class="elite-phase-option"><input type="checkbox" data-approved-phase value="${esc(label)}" ${checked?'checked':''}><span><strong>${(i.t==='sport'||i.t==='trips'?T('محتوى البرنامج','Program content'):T(['الدورة التدريبية','الورشة التطبيقية','التحدي'][index]||'تفريع معتمد',['Training session','Practical workshop','Challenge'][index]||'Approved subactivity'))}</strong><small>${esc(label)}</small></span></label>`}).join('')}
         </div>
         <label class="fld" style="margin-top:12px">${T('تفريعات إضافية يدوية (تفريع في كل سطر)','Additional custom subactivities (one per line)')}
-          <textarea id="eBreakdown" maxlength="3000" rows="3" dir="rtl" placeholder="${T('أضف الألعاب أو الأنشطة الفرعية غير الموجودة في الوثيقة…','Enter custom activities not listed in the document…')}">${esc((x.activityBreakdown||'').split('\n').filter(v=>v.trim()&&!(i.ph||[]).some(p=>v.trim()===L({ar:p[0],en:p[1]})||v.trim()===p[0])).join('\n'))}</textarea>
+          <textarea id="eBreakdown" maxlength="3000" rows="3" dir="rtl" placeholder="${T('أضف الألعاب أو الأنشطة الفرعية غير الموجودة في الوثيقة…','Enter custom activities not listed in the document…')}">${esc((x.activityBreakdown||'').split('\n').filter(v=>v.trim()&&!(i.ph||[]).some(p=>v.trim()===L({ar:p[0],en:p[1]})||v.trim()===p[0])&&!(ELITE_SPORT_SUBACTIVITIES[i.id]||[]).includes(v.trim())).join('\n'))}</textarea>
         </label>
       </div>
       <label class="fld wide">${T('لماذا اخترنا هذا البرنامج لهذا المعسكر؟','Why this program for this camp?')}
