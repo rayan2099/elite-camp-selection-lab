@@ -44,6 +44,29 @@ small{font-size:12px}
 .demo{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-size:11.5px;color:var(--muted);margin-bottom:16px}
 .demo span:last-child{color:var(--accent);font-weight:700;letter-spacing:.02em}
 
+/* ---------- approved subactivities and RTL time intelligence ---------- */
+.elite-subactivities{text-align:right;direction:rtl}
+.elite-phase-options{display:grid;gap:8px;margin-top:9px}
+.elite-phase-option{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;background:var(--soft);text-align:right;direction:rtl}
+.elite-phase-option:has(input:checked){border-color:var(--good);background:color-mix(in srgb,var(--good) 9%,var(--surface))}
+.elite-phase-option input{flex:none;margin-top:5px;accent-color:var(--good)}
+.elite-phase-option span{display:flex;flex-direction:column;gap:3px}
+.elite-phase-option strong{color:var(--fg);font-size:12px}
+.elite-phase-option small{color:var(--muted);font-size:12px}
+.elite-time-analysis{direction:rtl;text-align:right;margin-top:13px}
+.elite-time-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.elite-time-card{min-width:0;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--time-accent);border-radius:10px;padding:11px;text-align:right}
+.elite-time-card span,.elite-time-card small{display:block;color:var(--muted);font-size:11px}
+.elite-time-card strong{display:block;color:var(--time-accent);font-size:18px;font-variant-numeric:tabular-nums;text-align:right;margin:4px 0}
+.elite-time-rows{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.elite-time-row{display:grid;grid-template-columns:minmax(0,1fr) 140px 105px;gap:12px;align-items:center;padding:8px 12px;border-right:4px solid var(--time-accent);background:var(--surface);border-bottom:1px solid var(--line);font-size:12px}
+.elite-time-row:last-child{border-bottom:0}
+.elite-time-row time{font-variant-numeric:tabular-nums;text-align:center}
+.elite-time-row strong{color:var(--time-accent);font-size:12px;text-align:left;font-variant-numeric:tabular-nums}
+.elite-time-name em{font-style:normal;color:var(--warn);font-size:11px}
+.elite-free-time{background:var(--accentsoft);padding:10px 12px;margin-top:9px;border-radius:9px;font-size:12px;text-align:right}
+@media(max-width:840px){.elite-time-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.elite-time-row{grid-template-columns:minmax(0,1fr) auto;gap:4px}.elite-time-row strong{grid-column:2}}
+@media print{.elite-time-analysis{display:none!important}}
 /* ---------- contextual manager guidance ---------- */
 .admin-guide{background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid var(--accent);border-radius:12px;padding:12px 15px;margin:0 0 17px;box-shadow:var(--shadow);font-size:12.5px}
 .admin-guide-row{display:flex;gap:10px;align-items:flex-start}
@@ -2303,6 +2326,42 @@ function scheduleRow(day,index){
  const override=S.prep?.__scheduleEdits?.[day]?.[index]||{};
  return {...DAY_TEMPLATE[index],...override};
 }
+function eliteTimeMinutes(value){
+ const m=String(value||'').match(/^(\d{1,2}):(\d{2})$/);
+ if(!m)return null;
+ const h=Number(m[1]),min=Number(m[2]);return h<24&&min<60?h*60+min:null;
+}
+function eliteClock(n){return String(Math.floor(n/60)%24).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
+function eliteDuration(n){return Math.floor(n/60)+' '+T('ساعة','hr')+' '+n%60+' '+T('دقيقة','min')}
+function eliteScheduleStats(day){
+ const rows=DAY_TEMPLATE.map((r,i)=>({row:scheduleRow(day,i),index:i})),sessions=[],totals={program:0,other:0,prayer:0};
+ for(const {row,index} of rows){
+  const parts=String(row.t||'').split(/\s*[–-]\s*/);
+  if(parts.length!==2)continue;
+  const start=eliteTimeMinutes(parts[0]),end=eliteTimeMinutes(parts[1]);
+  if(start===null||end===null||end<=start)continue;
+  const minutes=end-start,type=row.ic==='prayer'?'prayer':row.slot?'program':'other';
+  totals[type]+=minutes;sessions.push({index,start,end,minutes,type,row});
+ }
+ return {sessions,totals,scheduled:totals.program+totals.other+totals.prayer,unfilled:sessions.filter(s=>s.row.slot&&!(slotMap(day)[s.row.slot]||[]).length)};
+}
+function eliteDayAnalysis(day){
+ const stat=eliteScheduleStats(day),colors={program:'#168660',other:'#2563eb',prayer:'#a16207'};
+ const card=(title,minutes,color)=>`<div class="elite-time-card" style="--time-accent:${color}"><span>${title}</span><strong dir="ltr">${minutes} ${T('دقيقة','min')}</strong><small>${eliteDuration(minutes)}</small></div>`;
+ return `<div class="elite-time-analysis" dir="rtl">
+    <div class="elite-time-cards">
+      ${card(T('إجمالي الوقت الموقّت','Total timed activities'),stat.scheduled,'#0d1f3a')}
+      ${card(T('جلسات البرامج','Program sessions'),stat.totals.program,colors.program)}
+      ${card(T('الأنشطة والراحة','Other activities & breaks'),stat.totals.other,colors.other)}
+      ${card(T('الصلوات ذات المدة المحددة','Timed prayers'),stat.totals.prayer,colors.prayer)}
+    </div>
+    <p class="help" style="margin:10px 0">${T('تُحسب المدد فقط للفترات التي تحتوي وقت بداية ونهاية. الأوقات المفردة لا تُضاف إلى الإجمالي. جلسات البرامج الشاغرة محسوبة ضمن وقت الجدول المخطط ومبيّنة أدناه.','Only activities with valid start and end times are counted. Single timestamps are excluded. Empty program slots remain included in planned timetable hours and are highlighted below.')}</p>
+    <div class="elite-time-rows">
+      ${stat.sessions.map(a=>`<div class="elite-time-row" style="--time-accent:${colors[a.type]}" dir="rtl"><span class="elite-time-name">${esc(T(a.row.ar,a.row.en))}${a.row.slot&&!(slotMap(day)[a.row.slot]||[]).length?` <em>${T('(شاغرة)','(empty)')}</em>`:''}</span><time dir="ltr">${eliteClock(a.start)} – ${eliteClock(a.end)}</time><strong dir="ltr">${a.minutes} ${T('دقيقة','min')}</strong></div>`).join('')}
+    </div>
+    ${stat.unfilled.length?`<p class="elite-free-time">${T('فرص إعادة التوزيع: ','Reallocation opportunities: ')}<strong dir="ltr">${stat.unfilled.reduce((n,a)=>n+a.minutes,0)} ${T('دقيقة','min')}</strong> · ${stat.unfilled.length} ${T('جلسة','sessions')}</p>`:''}
+ </div>`;
+}
 function scheduleDiagnostics(day){
  const map=slotMap(day),balance=programBalance().days[day-1],notes=[...balance.notes];
  const events=DAY_TEMPLATE.map((r,i)=>scheduleRow(day,i)).filter(r=>r.ic!=='prayer');
@@ -2423,6 +2482,7 @@ function programSection(){
       ${dayTimeline(n,{why:true})}
       <div class="noprint" style="padding:11px 13px;border:1px solid var(--line);border-radius:10px;margin-top:10px">
          <div class="row wrap" style="gap:8px"><b>${T('تحليل اليوم','Daily schedule analysis')}</b><span class="pill">${T('دون احتساب الصلوات في تحليل التكرار','Prayers excluded from repetition counts')}</span></div>
+         ${eliteDayAnalysis(n)}
          ${scheduleDiagnostics(n).length?`<div style="margin-top:7px">${scheduleDiagnostics(n).map(x=>`<p class="help" style="margin:4px 0">• ${esc(x)}</p>`).join('')}</div>`:`<p class="help" style="margin-top:7px">${T('لا توجد تعارضات أو ملاحظات تلقائية مرصودة.','No automatic conflicts or issues detected.')}</p>`}
       </div>
       <div class="printonly print-day-foot">
@@ -3515,7 +3575,16 @@ function editModal(id){
         <option value="">${T('غير موزّع','Unassigned')}</option>
         ${S.meta.days.map((d,k)=>`<option value="${k+1}" ${x.day===k+1?'selected':''}>${k+1} · ${esc(L(d))}</option>`).join('')}</select></label>
       <label class="fld">${T('طبيعة النشاط','Activity format')}<select id="eActivityType"><option value="theoretical" ${(x.activityType||activityType(i))==='theoretical'?'selected':''}>${T('نظري','Theoretical')}</option><option value="practical" ${(x.activityType||activityType(i))==='practical'?'selected':''}>${T('عملي','Practical')}</option></select></label>
-      <label class="fld wide">${T('تفريعات النشاط والألعاب الفردية','Subactivities and individual games')}<textarea id="eBreakdown" maxlength="1500" rows="3" placeholder="${T('أدخل كل نشاط فرعي في سطر','One subactivity per line')}">${esc(x.activityBreakdown??i.activityBreakdown??'')}</textarea></label>
+      <div class="fld wide elite-subactivities" dir="rtl">
+        <b>${T('التفريعات المعتمدة للبرنامج — انقر للاختيار','Approved program subactivities — click to select')}</b>
+        <p class="help">${T('هذه التفريعات مأخوذة من وثيقة البرامج المعتمدة (39 صفحة). اختر ما سيُنفّذ فعليًا؛ لا يُفرض اختيار جميع التفريعات.','These options come from the 39-page approved programme document. Select what you will actually deliver.')}</p>
+        <div class="elite-phase-options">
+          ${(i.ph||[]).map((p,index)=>{const label=L({ar:p[0],en:p[1]});const existing=(x.activityBreakdown||'').split('\n').map(v=>v.trim());const checked=existing.includes(label)||existing.includes(p[0]);return `<label class="elite-phase-option"><input type="checkbox" data-approved-phase value="${esc(label)}" ${checked?'checked':''}><span><strong>${T(['الدورة التدريبية','الورشة التطبيقية','التحدي'][index]||'تفريع معتمد',['Training session','Practical workshop','Challenge'][index]||'Approved subactivity')}</strong><small>${esc(label)}</small></span></label>`}).join('')}
+        </div>
+        <label class="fld" style="margin-top:12px">${T('تفريعات إضافية يدوية (تفريع في كل سطر)','Additional custom subactivities (one per line)')}
+          <textarea id="eBreakdown" maxlength="3000" rows="3" dir="rtl" placeholder="${T('أضف الألعاب أو الأنشطة الفرعية غير الموجودة في الوثيقة…','Enter custom activities not listed in the document…')}">${esc((x.activityBreakdown||'').split('\n').filter(v=>v.trim()&&!(i.ph||[]).some(p=>v.trim()===L({ar:p[0],en:p[1]})||v.trim()===p[0])).join('\n'))}</textarea>
+        </label>
+      </div>
       <label class="fld wide">${T('لماذا اخترنا هذا البرنامج لهذا المعسكر؟','Why this program for this camp?')}
         <textarea id="eWhy" placeholder="${T('اربط السبب بتحدٍ أعلنته الأسر أو بهدف يوم محدد…','Tie the reason to a family-declared challenge or a specific day goal…')}">${esc(x.why||'')}</textarea></label>
     </div>
@@ -3529,7 +3598,7 @@ function editModal(id){
 }
 function saveEdit(id){
   const x=S.selected.find(s=>s.id===id);if(!x)return;
-  x.pri=$('#ePri').value;x.day=$('#eDay').value?+$('#eDay').value:null;x.why=$('#eWhy').value.trim();x.activityType=$('#eActivityType').value;x.activityBreakdown=$('#eBreakdown').value.trim();
+  x.pri=$('#ePri').value;x.day=$('#eDay').value?+$('#eDay').value:null;x.why=$('#eWhy').value.trim();x.activityType=$('#eActivityType').value;x.activityBreakdown=[...new Set([...$('[data-approved-phase]:checked').map(el=>el.value.trim()),...$('#eBreakdown').value.split(/\r?\n/).map(v=>v.trim()).filter(Boolean)])].join('\n');
   logIt(`حُدّث قرار «${ITEM(id).ar}»`,`Decision updated: ${ITEM(id).en}`);
   save();closeModal();render();toast(T('حُفظ قرار الاختيار.','Decision saved.'));
 }
