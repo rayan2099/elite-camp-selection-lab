@@ -2344,6 +2344,18 @@ function scheduleRow(day,index){
  const override=S.prep?.__scheduleEdits?.[day]?.[index]||{};
  return {...DAY_TEMPLATE[index],...override};
 }
+function slotHasCustomActivity(day,index){
+ const changed=S.prep?.__scheduleEdits?.[day]?.[index];
+ const base=DAY_TEMPLATE[index];
+ return !!(base?.slot&&changed&&(String(changed.ar||'').trim()!==String(base.ar||'').trim()||String(changed.en||'').trim()!==String(base.en||'').trim()));
+}
+function slotIsUnassigned(day,index){
+ const row=scheduleRow(day,index);
+ return !!row.slot&&!(slotMap(day)[row.slot]||[]).length&&!slotHasCustomActivity(day,index);
+}
+function unassignedSlots(day){
+ return DAY_TEMPLATE.map((_,index)=>({index,row:scheduleRow(day,index)})).filter(o=>slotIsUnassigned(day,o.index));
+}
 function eliteTimeMinutes(value){
  const m=String(value||'').match(/^(\d{1,2}):(\d{2})$/);
  if(!m)return null;
@@ -2361,7 +2373,7 @@ function eliteScheduleStats(day){
   const minutes=end-start,type=row.ic==='prayer'?'prayer':row.slot?'program':'other';
   totals[type]+=minutes;sessions.push({index,start,end,minutes,type,row});
  }
- return {sessions,totals,scheduled:totals.program+totals.other+totals.prayer,unfilled:sessions.filter(s=>s.row.slot&&!(slotMap(day)[s.row.slot]||[]).length)};
+ return {sessions,totals,scheduled:totals.program+totals.other+totals.prayer,unfilled:sessions.filter(s=>slotIsUnassigned(day,s.index))};
 }
 function eliteSuggestions(day,slot){
  const preferred={badge:['lead','values','skills'],elite:['lead','skills','values'],workshop:['skills','stem','values'],sport:['sport'],culture:['values','lead','trips']}[slot]||[];
@@ -2373,7 +2385,7 @@ function eliteAddSuggestion(day,slot,id){
  if(!can('select'))return toast(T('لا تملك صلاحية التعديل.','Not permitted to edit.'));
  if(!Number.isInteger(day)||day<1||day>S.meta.days.length||!SLOTS.includes(slot))return;
  const it=ITEM(id);if(!it)return;
- if((slotMap(day)[slot]||[]).length)return toast(T('الجلسة لم تعد شاغرة.','Session is no longer empty.'));
+ if((slotMap(day)[slot]||[]).length||DAY_TEMPLATE.some((r,index)=>r.slot===slot&&slotHasCustomActivity(day,index)))return toast(T('هذه الفترة تحتوي برنامجًا أو نشاطًا مُحددًا بالفعل.','This session already has an assigned program or custom activity.'));
  if(isSel(id))return toast(T('البرنامج مختار مسبقًا.','Program already selected.'));
  S.selected.push({id,pri:'support',day,slot,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
  logIt('إضافة '+it.ar+' إلى '+slot+' في اليوم '+day,'Added '+it.en+' to '+slot+' on day '+day);
@@ -2391,7 +2403,7 @@ function eliteDayAnalysis(day){
     </div>
     <p class="help" style="margin:10px 0">${T('تُحسب المدد فقط للفترات التي تحتوي وقت بداية ونهاية. الأوقات المفردة لا تُضاف إلى الإجمالي. جلسات البرامج الشاغرة محسوبة ضمن وقت الجدول المخطط ومبيّنة أدناه.','Only activities with valid start and end times are counted. Single timestamps are excluded. Empty program slots remain included in planned timetable hours and are highlighted below.')}</p>
     <div class="elite-time-rows">
-      ${stat.sessions.map(a=>`<div class="elite-time-row" style="--time-accent:${colors[a.type]}" dir="rtl"><span class="elite-time-name">${esc(T(a.row.ar,a.row.en))}${a.row.slot&&!(slotMap(day)[a.row.slot]||[]).length?` <em>${T('(شاغرة)','(empty)')}</em>`:''}</span><time dir="ltr">${eliteClock(a.start)} – ${eliteClock(a.end)}</time><strong dir="ltr">${a.minutes} ${T(a.minutes===1?'دقيقة':'دقائق','min')}</strong></div>`).join('')}
+      ${stat.sessions.map(a=>`<div class="elite-time-row" style="--time-accent:${colors[a.type]}" dir="rtl"><span class="elite-time-name">${esc(T(a.row.ar,a.row.en))}${slotIsUnassigned(day,a.index)?` <em>${T('(شاغرة)','(empty)')}</em>`:''}</span><time dir="ltr">${eliteClock(a.start)} – ${eliteClock(a.end)}</time><strong dir="ltr">${a.minutes} ${T(a.minutes===1?'دقيقة':'دقائق','min')}</strong></div>`).join('')}
     </div>
     ${stat.unfilled.length?`<div class="elite-reallocate" dir="rtl">
       <div class="elite-reallocate-header"><div><b>${T('فرص إعادة التوزيع','Reallocation opportunities')}</b><p class="help">${T('اختر برنامجًا لإضافته مباشرة للجلسة الشاغرة.','Choose a program to add directly to the empty session.')}</p></div><span class="pill orange"><b dir="ltr">${stat.unfilled.reduce((n,a)=>n+a.minutes,0)} ${T('دقيقة','min')}</b> · <b dir="ltr">${stat.unfilled.length} ${T('جلسات','sessions')}</b></span></div>
@@ -2409,7 +2421,7 @@ function scheduleDiagnostics(day){
  for(let k=1;k<ranges.length;k++)if(ranges[k].start<ranges[k-1].end){
   notes.push(T('تداخل زمني بين «'+ranges[k-1].name+'» و«'+ranges[k].name+'».','Time overlap: '+ranges[k-1].name+' / '+ranges[k].name+'.'));
  }
- const freeSlots=SLOTS.filter(slot=>!(map[slot]||[]).length);
+ const freeSlots=unassignedSlots(day);
  if(freeSlots.length)notes.push(T('هناك '+freeSlots.length+' جلسات برنامج غير مشغولة في قالب اليوم؛ يمكن إعادة توزيع الأنشطة.','There are '+freeSlots.length+' unfilled program sessions; consider reallocating activities.'));
  for(const [slot,items] of Object.entries(map))if(items.length>1)notes.push(T('تم جمع '+items.length+' برامج في جلسة واحدة؛ راجع توقيتها.','Multiple programs assigned to one session; verify timing.'));
  return [...new Set(notes)];
@@ -2418,6 +2430,7 @@ function dayTimeline(day,opts){
   const map=slotMap(day), o=opts||{};
   return `<div class="tl">${DAY_TEMPLATE.map((original,idx)=>{const row=scheduleRow(day,idx);
     const items=row.slot?(map[row.slot]||[]):[];
+    const customActivity=slotHasCustomActivity(day,idx);
     const body = row.slot
       ? (items.length
           ? items.map(it=>{
@@ -2429,12 +2442,12 @@ function dayTimeline(day,opts){
                 ${(it.x.activityBreakdown||it.i.activityBreakdown)?`<small class="tlwhy" style="display:block">${esc(it.x.activityBreakdown||it.i.activityBreakdown)}</small>`:''}
                 ${o.why?`<button type="button" class="small noprint" data-act="editScheduleProgram:${it.x.id}" ${can('select')?'':'disabled'} style="margin-inline-start:auto">${T('تعديل البرنامج','Edit program')}</button>`:''}
               </div>`}).join('')
-          : `<span class="tlhint">${T('جلسة شاغرة','Open session')}</span>`)
+          : customActivity?`<span class="pill good">${T('نشاط مُحدد يدويًا','Custom activity assigned')}</span>`:`<span class="tlhint">${T('لم يُحدد برنامج أو نشاط بعد','No program or activity assigned')}</span>`)
       : '';
     return `<div class="tlrow ${row.slot?'prog':'fixed'} ${row.slot&&!items.length?'tl-empty':''}">
       <div class="tltime">${row.t}</div>
       <div class="tldot">${tico(row.ic)}</div>
-      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${body}<button type="button" class="small noprint" data-act="editScheduleRow:${day},${idx}" ${can('select')?'':'disabled'} title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button></div>
+      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${row.slot&&!items.length&&!customActivity?`<small class="tlwhy" style="display:block">${T('هذا عنوان فترة في قالب الجدول، وليس نشاطًا مُعيّنًا.','This is a timetable category, not an assigned activity.')}</small>`:''}${body}<button type="button" class="small noprint" data-act="editScheduleRow:${day},${idx}" ${can('select')?'':'disabled'} title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button></div>
     </div>`}).join('')}</div>`;
 }
 
