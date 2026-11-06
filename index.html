@@ -2377,8 +2377,8 @@ function eliteUnit(n,kind){
 }
 function eliteQuantity(n,kind){
  const unit=eliteUnit(n,kind);
- // Explicit bidi isolation prevents RTL layouts from reversing the label and digits.
- return `<span class="elite-quantity" dir="rtl"><span class="elite-quantity-unit">${unit}</span><bdi dir="ltr" class="elite-quantity-num">${n}</bdi></span>`;
+ // In an RTL flex row, display the number first (rightmost), then the Arabic unit.
+ return `<span class="elite-quantity" dir="rtl"><bdi dir="ltr" class="elite-quantity-num">${n}</bdi><span class="elite-quantity-unit">${unit}</span></span>`;
 }
 function eliteDuration(n){
  const h=Math.floor(n/60),m=n%60;
