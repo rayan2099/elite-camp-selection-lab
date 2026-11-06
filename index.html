@@ -78,6 +78,13 @@ small{font-size:12px}
 .elite-free-time{background:var(--accentsoft);padding:10px 12px;margin-top:9px;border-radius:9px;font-size:12px;text-align:right}
 @media(max-width:840px){.elite-time-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.elite-time-row{grid-template-columns:minmax(0,1fr) auto;gap:4px}.elite-time-row strong{grid-column:2}}
 @media print{.elite-time-analysis{display:none!important}}
+.elite-quantity{display:inline-flex;direction:rtl;align-items:baseline;gap:.28em;white-space:nowrap;unicode-bidi:isolate}
+.elite-quantity-unit{direction:rtl}
+.elite-quantity-num{direction:ltr;font-variant-numeric:tabular-nums}
+.elite-time-card strong,.elite-time-card small{direction:rtl;text-align:right}
+.elite-time-card strong .elite-quantity{font-size:inherit}
+.elite-time-card small .elite-quantity{font-size:inherit}
+.elite-time-row strong{direction:rtl;text-align:right}
 /* ---------- contextual manager guidance ---------- */
 .admin-guide{background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid var(--accent);border-radius:12px;padding:12px 15px;margin:0 0 17px;box-shadow:var(--shadow);font-size:12.5px}
 .admin-guide-row{display:flex;gap:10px;align-items:flex-start}
@@ -2362,7 +2369,21 @@ function eliteTimeMinutes(value){
  const h=Number(m[1]),min=Number(m[2]);return h<24&&min<60?h*60+min:null;
 }
 function eliteClock(n){return String(Math.floor(n/60)%24).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
-function eliteDuration(n){const h=Math.floor(n/60),m=n%60;return [h?`${h} ${T(h===1?'ساعة':h===2?'ساعتان':'ساعات',h===1?'hour':'hours')}`:'',m||!h?`${m} ${T(m===1?'دقيقة':'دقائق','min')}`:''].filter(Boolean).join(' و ')}
+function eliteUnit(n,kind){
+ const rem=n%100;
+ if(kind==='minute')return T(n===2?'دقيقتان':rem>=3&&rem<=10?'دقائق':'دقيقة',n===1?'minute':'minutes');
+ if(kind==='hour')return T(n===2?'ساعتان':rem>=3&&rem<=10?'ساعات':'ساعة',n===1?'hour':'hours');
+ return T(n===2?'جلستان':rem>=3&&rem<=10?'جلسات':'جلسة',n===1?'session':'sessions');
+}
+function eliteQuantity(n,kind){
+ const unit=eliteUnit(n,kind);
+ // Explicit bidi isolation prevents RTL layouts from reversing the label and digits.
+ return `<span class="elite-quantity" dir="rtl"><span class="elite-quantity-unit">${unit}</span><bdi dir="ltr" class="elite-quantity-num">${n}</bdi></span>`;
+}
+function eliteDuration(n){
+ const h=Math.floor(n/60),m=n%60;
+ return [h?eliteQuantity(h,'hour'):'',m||!h?eliteQuantity(m,'minute'):''].filter(Boolean).join(' '+T('و','and')+' ');
+}
 function eliteScheduleStats(day){
  const rows=DAY_TEMPLATE.map((r,i)=>({row:scheduleRow(day,i),index:i})),sessions=[],totals={program:0,other:0,prayer:0};
  for(const {row,index} of rows){
@@ -2393,7 +2414,7 @@ function eliteAddSuggestion(day,slot,id){
 }
 function eliteDayAnalysis(day){
  const stat=eliteScheduleStats(day),colors={program:'#168660',other:'#2563eb',prayer:'#a16207'};
- const card=(title,minutes,color)=>`<div class="elite-time-card" style="--time-accent:${color}"><span>${title}</span><strong dir="ltr">${minutes} ${T(minutes===1?'دقيقة':'دقائق','min')}</strong><small>${eliteDuration(minutes)}</small></div>`;
+ const card=(title,minutes,color)=>`<div class="elite-time-card" style="--time-accent:${color}"><span>${title}</span><strong>${eliteQuantity(minutes,'minute')}</strong><small>${eliteDuration(minutes)}</small></div>`;
  return `<div class="elite-time-analysis" dir="rtl">
     <div class="elite-time-cards">
       ${card(T('إجمالي الوقت الموقّت','Total timed activities'),stat.scheduled,'#0d1f3a')}
@@ -2403,11 +2424,11 @@ function eliteDayAnalysis(day){
     </div>
     <p class="help" style="margin:10px 0">${T('تُحسب المدد فقط للفترات التي تحتوي وقت بداية ونهاية. الأوقات المفردة لا تُضاف إلى الإجمالي. جلسات البرامج الشاغرة محسوبة ضمن وقت الجدول المخطط ومبيّنة أدناه.','Only activities with valid start and end times are counted. Single timestamps are excluded. Empty program slots remain included in planned timetable hours and are highlighted below.')}</p>
     <div class="elite-time-rows">
-      ${stat.sessions.map(a=>`<div class="elite-time-row" style="--time-accent:${colors[a.type]}" dir="rtl"><span class="elite-time-name">${esc(T(a.row.ar,a.row.en))}${slotIsUnassigned(day,a.index)?` <em>${T('(شاغرة)','(empty)')}</em>`:''}</span><time dir="ltr">${eliteClock(a.start)} – ${eliteClock(a.end)}</time><strong dir="ltr">${a.minutes} ${T(a.minutes===1?'دقيقة':'دقائق','min')}</strong></div>`).join('')}
+      ${stat.sessions.map(a=>`<div class="elite-time-row" style="--time-accent:${colors[a.type]}" dir="rtl"><span class="elite-time-name">${esc(T(a.row.ar,a.row.en))}${slotIsUnassigned(day,a.index)?` <em>${T('(شاغرة)','(empty)')}</em>`:''}</span><time dir="ltr">${eliteClock(a.start)} – ${eliteClock(a.end)}</time><strong>${eliteQuantity(a.minutes,'minute')}</strong></div>`).join('')}
     </div>
     ${stat.unfilled.length?`<div class="elite-reallocate" dir="rtl">
-      <div class="elite-reallocate-header"><div><b>${T('فرص إعادة التوزيع','Reallocation opportunities')}</b><p class="help">${T('اختر برنامجًا لإضافته مباشرة للجلسة الشاغرة.','Choose a program to add directly to the empty session.')}</p></div><span class="pill orange"><b dir="ltr">${stat.unfilled.reduce((n,a)=>n+a.minutes,0)} ${T('دقيقة','min')}</b> · <b dir="ltr">${stat.unfilled.length} ${T('جلسات','sessions')}</b></span></div>
-      ${stat.unfilled.map(a=>`<div class="elite-reallocate-session"><div class="elite-reallocate-session-title"><strong>${esc(T(a.row.ar,a.row.en))}</strong><time dir="ltr">${eliteClock(a.start)} – ${eliteClock(a.end)} · ${a.minutes} ${T('دقيقة','min')}</time></div>
+      <div class="elite-reallocate-header"><div><b>${T('فرص إعادة التوزيع','Reallocation opportunities')}</b><p class="help">${T('اختر برنامجًا لإضافته مباشرة للجلسة الشاغرة.','Choose a program to add directly to the empty session.')}</p></div><span class="pill orange"><b>${eliteQuantity(stat.unfilled.reduce((n,a)=>n+a.minutes,0),'minute')}</b> · <b>${eliteQuantity(stat.unfilled.length,'session')}</b></span></div>
+      ${stat.unfilled.map(a=>`<div class="elite-reallocate-session"><div class="elite-reallocate-session-title"><strong>${esc(T(a.row.ar,a.row.en))}</strong><time dir="ltr">${eliteClock(a.start)} – ${eliteClock(a.end)} · ${eliteQuantity(a.minutes,'minute')}</time></div>
       <div class="elite-suggestion-list">${eliteSuggestions(day,a.row.slot).map(p=>`<button type="button" class="elite-suggestion" data-act="eliteAddSuggestion:${day},${a.row.slot},${p.id}" ${can('select')?'':'disabled'}><b class="elite-suggestion-plus">+</b><span>${esc(L({ar:p.ar,en:p.en}))}<small>${esc(L(TRACK(p.t)))}</small></span></button>`).join('')||`<span class="help">${T('لا تتوفر خيارات أخرى حاليًا.','No more suitable programs available.')}</span>`}</div></div>`).join('')}
       <button type="button" class="small" data-act="go:library">${T('استعراض مكتبة البرامج','Browse program library')}</button>
     </div>`:''}
