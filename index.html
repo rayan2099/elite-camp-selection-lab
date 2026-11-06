@@ -3499,9 +3499,9 @@ function customProgramModal(id){
       <div class="fld wide elite-subactivities" dir="rtl">
         <b>${T('تفريعات النشاط — اختر من المكتبة أو أضف يدويًا','Subactivities — select from library or add your own')}</b>
         <p class="help">${T('تظهر خيارات مستمدة من البرامج الموجودة في وثيقة الأكاديمية بحسب المسار والمجال. يمكن اختيار أكثر من تفريعة، وتُحفظ جميع الاختيارات في البرنامج.','Related options are drawn from the academy programme library for the selected track and field. Choose multiple options or enter custom ones.')}</p>
-        <div id="cpSuggestedBreakdowns" class="elite-phase-options">${customBreakdownOptions(i.t,i.f,(i.activityBreakdown||'').split('\\n'))}</div>
+        <div id="cpSuggestedBreakdowns" class="elite-phase-options">${customBreakdownOptions(i.t,i.f,(i.activityBreakdown||'').split('\n'))}</div>
         <label class="fld" style="margin-top:12px">${T('تفريعات يدوية إضافية (كل تفريعة في سطر)','Additional manual subactivities (one per line)')}
-          <textarea id="cpActivityBreakdown" dir="rtl" maxlength="3000" rows="3" placeholder="${T('أضف تفريعات جديدة غير موجودة في الخيارات أعلاه…','Add subactivities not offered above…')}">${esc((i.activityBreakdown||'').split('\\n').filter(v=>v.trim()&&!customBreakdownSource(i.t,i.f).some(o=>o.value===v.trim())).join('\\n'))}</textarea>
+          <textarea id="cpActivityBreakdown" dir="rtl" maxlength="3000" rows="3" placeholder="${T('أضف تفريعات جديدة غير موجودة في الخيارات أعلاه…','Add subactivities not offered above…')}">${esc((i.activityBreakdown||'').split('\n').filter(v=>v.trim()&&!customBreakdownSource(i.t,i.f).some(o=>o.value===v.trim())).join('\n'))}</textarea>
         </label>
       </div>
       <label class="fld wide">${T('الهدف التعليمي أو التربوي *','Learning / development objective *')}<textarea id="cpGoal" required maxlength="500" placeholder="${T('ماذا سيتمكن الطالب من تطبيقه أو إظهاره بعد البرنامج؟','What will students be able to demonstrate after this program?')}">${esc(i.goal.ar)}</textarea></label>
