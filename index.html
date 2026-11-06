@@ -85,6 +85,22 @@ small{font-size:12px}
 .elite-time-card strong .elite-quantity{font-size:inherit}
 .elite-time-card small .elite-quantity{font-size:inherit}
 .elite-time-row strong{direction:rtl;text-align:right}
+
+/* Reference-inspired time summary: large two-column cards, RTL and isolated Western digits. */
+.elite-time-analysis .elite-time-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:16px 0 20px;direction:rtl}
+.elite-time-analysis .elite-time-card{padding:26px 28px 22px;min-height:224px;border:1px solid var(--line);border-top:5px solid var(--time-accent);border-radius:18px;background:var(--surface);box-shadow:0 2px 5px rgba(16,34,53,.06);text-align:right;display:flex;flex-direction:column;justify-content:space-between;gap:14px}
+.elite-time-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-direction:row}
+.elite-time-card-head h3{margin:0;font-size:18px;font-weight:750;color:var(--fg);line-height:1.5}
+.elite-time-card-head .elite-time-icon{display:grid;place-items:center;width:51px;height:51px;border-radius:50%;background:color-mix(in srgb,var(--time-accent) 12%,white);color:var(--time-accent);flex:none}
+.elite-time-icon svg{width:25px;height:25px}
+.elite-time-card-value{font-size:40px;font-weight:800;line-height:1.15;color:var(--fg);font-variant-numeric:tabular-nums;direction:rtl}
+.elite-time-card-value .elite-quantity{gap:10px;direction:rtl;align-items:baseline}
+.elite-time-card-value .elite-quantity-num{font-size:1.22em;font-weight:850}
+.elite-time-card-value .elite-quantity-unit{font-size:.48em;font-weight:650;color:var(--muted)}
+.elite-time-card-duration{display:flex;align-items:center;gap:9px;min-height:41px;padding:9px 12px;background:var(--soft);border:1px solid var(--line);border-radius:10px;color:var(--muted);font-size:13px;font-weight:650;direction:rtl}
+.elite-time-card-duration svg{width:17px;height:17px;flex:none;color:var(--muted)}
+.elite-time-card-duration .elite-quantity{gap:4px}
+@media(max-width:700px){.elite-time-analysis .elite-time-cards{grid-template-columns:1fr;gap:12px}.elite-time-analysis .elite-time-card{padding:18px;min-height:190px}.elite-time-card-value{font-size:32px}.elite-time-card-head h3{font-size:16px}}
 /* ---------- contextual manager guidance ---------- */
 .admin-guide{background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid var(--accent);border-radius:12px;padding:12px 15px;margin:0 0 17px;box-shadow:var(--shadow);font-size:12.5px}
 .admin-guide-row{display:flex;gap:10px;align-items:flex-start}
@@ -2414,13 +2430,23 @@ function eliteAddSuggestion(day,slot,id){
 }
 function eliteDayAnalysis(day){
  const stat=eliteScheduleStats(day),colors={program:'#168660',other:'#2563eb',prayer:'#a16207'};
- const card=(title,minutes,color)=>`<div class="elite-time-card" style="--time-accent:${color}"><span>${title}</span><strong>${eliteQuantity(minutes,'minute')}</strong><small>${eliteDuration(minutes)}</small></div>`;
+ const icons={
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+  program:'<path d="m8 8-4 4 4 4m8-8 4 4-4 4M10 19h9"/>',
+  break:'<path d="M5 8h12v7a5 5 0 0 1-5 5H9a4 4 0 0 1-4-4V8Zm12 2h2a3 3 0 0 1 0 6h-2M3 22h17M9 3v2m4-2v2"/>',
+  prayer:'<path d="M12 20s-7-4.6-9-9a5 5 0 0 1 9-4 5 5 0 0 1 9 4c-2 4.4-9 9-9 9Z"/>'
+ };
+ const card=(title,minutes,color,kind)=>`<div class="elite-time-card elite-time-card--${kind}" style="--time-accent:${color}">
+   <div class="elite-time-card-head"><h3>${title}</h3><span class="elite-time-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">${icons[kind]}</svg></span></div>
+   <div class="elite-time-card-value">${eliteQuantity(minutes,'minute')}</div>
+   <div class="elite-time-card-duration"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 8v5l3 2M9 2h6"/></svg><span>${eliteDuration(minutes)}</span></div>
+ </div>`;
  return `<div class="elite-time-analysis" dir="rtl">
     <div class="elite-time-cards">
-      ${card(T('إجمالي الوقت الموقّت','Total timed activities'),stat.scheduled,'#0d1f3a')}
-      ${card(T('جلسات البرامج','Program sessions'),stat.totals.program,colors.program)}
-      ${card(T('الأنشطة والراحة','Other activities & breaks'),stat.totals.other,colors.other)}
-      ${card(T('الصلوات ذات المدة المحددة','Timed prayers'),stat.totals.prayer,colors.prayer)}
+      ${card(T('إجمالي الوقت الموقّت','Total timed activities'),stat.scheduled,'#182b45','clock')}
+      ${card(T('جلسات البرامج','Program sessions'),stat.totals.program,colors.program,'program')}
+      ${card(T('الأنشطة والراحة','Other activities & breaks'),stat.totals.other,colors.other,'break')}
+      ${card(T('الصلوات ذات المدة المحددة','Timed prayers'),stat.totals.prayer,colors.prayer,'prayer')}
     </div>
     <p class="help" style="margin:10px 0">${T('تُحسب المدد فقط للفترات التي تحتوي وقت بداية ونهاية. الأوقات المفردة لا تُضاف إلى الإجمالي. جلسات البرامج الشاغرة محسوبة ضمن وقت الجدول المخطط ومبيّنة أدناه.','Only activities with valid start and end times are counted. Single timestamps are excluded. Empty program slots remain included in planned timetable hours and are highlighted below.')}</p>
     <div class="elite-time-rows">
