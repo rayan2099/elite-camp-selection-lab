@@ -86,21 +86,22 @@ small{font-size:12px}
 .elite-time-card small .elite-quantity{font-size:inherit}
 .elite-time-row strong{direction:rtl;text-align:right}
 
-/* Reference-inspired time summary: large two-column cards, RTL and isolated Western digits. */
-.elite-time-analysis .elite-time-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:16px 0 20px;direction:rtl}
-.elite-time-analysis .elite-time-card{padding:26px 28px 22px;min-height:224px;border:1px solid var(--line);border-top:5px solid var(--time-accent);border-radius:18px;background:var(--surface);box-shadow:0 2px 5px rgba(16,34,53,.06);text-align:right;display:flex;flex-direction:column;justify-content:space-between;gap:14px}
-.elite-time-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-direction:row}
-.elite-time-card-head h3{margin:0;font-size:18px;font-weight:750;color:var(--fg);line-height:1.5}
-.elite-time-card-head .elite-time-icon{display:grid;place-items:center;width:51px;height:51px;border-radius:50%;background:color-mix(in srgb,var(--time-accent) 12%,white);color:var(--time-accent);flex:none}
-.elite-time-icon svg{width:25px;height:25px}
-.elite-time-card-value{font-size:40px;font-weight:800;line-height:1.15;color:var(--fg);font-variant-numeric:tabular-nums;direction:rtl}
-.elite-time-card-value .elite-quantity{gap:10px;direction:rtl;align-items:baseline}
-.elite-time-card-value .elite-quantity-num{font-size:1.22em;font-weight:850}
-.elite-time-card-value .elite-quantity-unit{font-size:.48em;font-weight:650;color:var(--muted)}
-.elite-time-card-duration{display:flex;align-items:center;gap:9px;min-height:41px;padding:9px 12px;background:var(--soft);border:1px solid var(--line);border-radius:10px;color:var(--muted);font-size:13px;font-weight:650;direction:rtl}
-.elite-time-card-duration svg{width:17px;height:17px;flex:none;color:var(--muted)}
-.elite-time-card-duration .elite-quantity{gap:4px}
-@media(max-width:700px){.elite-time-analysis .elite-time-cards{grid-template-columns:1fr;gap:12px}.elite-time-analysis .elite-time-card{padding:18px;min-height:190px}.elite-time-card-value{font-size:32px}.elite-time-card-head h3{font-size:16px}}
+/* Compact time-summary cards: four in one desktop row, RTL and Western digits. */
+.elite-time-analysis .elite-time-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:12px 0 16px;direction:rtl}
+.elite-time-analysis .elite-time-card{min-width:0;min-height:146px;padding:13px 14px 12px;border:1px solid var(--line);border-top:4px solid var(--time-accent);border-radius:12px;background:var(--surface);box-shadow:0 1px 3px rgba(16,34,53,.05);text-align:right;display:flex;flex-direction:column;justify-content:space-between;gap:8px}
+.elite-time-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;flex-direction:row}
+.elite-time-card-head h3{margin:0;font-size:clamp(11px,1.05vw,14px);font-weight:750;color:var(--fg);line-height:1.4}
+.elite-time-card-head .elite-time-icon{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:color-mix(in srgb,var(--time-accent) 12%,white);color:var(--time-accent);flex:none}
+.elite-time-icon svg{width:17px;height:17px}
+.elite-time-card-value{font-size:clamp(21px,2vw,28px);font-weight:800;line-height:1.15;color:var(--fg);font-variant-numeric:tabular-nums;direction:rtl}
+.elite-time-card-value .elite-quantity{gap:5px;direction:rtl;align-items:baseline}
+.elite-time-card-value .elite-quantity-num{font-size:1.12em;font-weight:850}
+.elite-time-card-value .elite-quantity-unit{font-size:.5em;font-weight:650;color:var(--muted)}
+.elite-time-card-duration{display:flex;align-items:center;gap:6px;min-height:29px;padding:5px 8px;background:var(--soft);border:1px solid var(--line);border-radius:7px;color:var(--muted);font-size:11px;font-weight:650;direction:rtl}
+.elite-time-card-duration svg{width:14px;height:14px;flex:none;color:var(--muted)}
+.elite-time-card-duration .elite-quantity{gap:3px}
+@media(max-width:760px){.elite-time-analysis .elite-time-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.elite-time-analysis .elite-time-card{min-height:135px;padding:11px}.elite-time-card-head h3{font-size:12px}}
+@media(max-width:380px){.elite-time-analysis .elite-time-cards{grid-template-columns:1fr}.elite-time-analysis .elite-time-card{min-height:112px}}
 /* ---------- contextual manager guidance ---------- */
 .admin-guide{background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid var(--accent);border-radius:12px;padding:12px 15px;margin:0 0 17px;box-shadow:var(--shadow);font-size:12.5px}
 .admin-guide-row{display:flex;gap:10px;align-items:flex-start}
