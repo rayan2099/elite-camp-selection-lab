@@ -67,7 +67,7 @@ small{font-size:12px}
 .elite-time-analysis{direction:rtl;text-align:right;margin-top:13px}
 .elite-time-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
 .elite-time-card{min-width:0;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--time-accent);border-radius:10px;padding:11px;text-align:right}
-.elite-time-card span,.elite-time-card small{display:block;color:var(--muted);font-size:11px}
+.elite-time-card small{display:block;color:var(--muted);font-size:11px}
 .elite-time-card strong{display:block;color:var(--time-accent);font-size:18px;font-variant-numeric:tabular-nums;text-align:right;margin:4px 0}
 .elite-time-rows{border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .elite-time-row{display:grid;grid-template-columns:minmax(0,1fr) 140px 105px;gap:12px;align-items:center;padding:8px 12px;border-right:4px solid var(--time-accent);background:var(--surface);border-bottom:1px solid var(--line);font-size:12px}
@@ -137,6 +137,13 @@ small{font-size:12px}
 /* Ensure the unit label remains legible even with inherited compact card typography. */
 .elite-time-analysis .elite-time-card-value .elite-quantity-unit{font-size:.62em;font-weight:700}
 .elite-time-analysis .elite-time-card-value .elite-quantity-num{font-size:1.12em}
+/* The metric must not inherit the old 11px badge/span rule. */
+.elite-time-analysis .elite-time-card .elite-time-card-value{font-size:clamp(36px,2.6vw,46px);line-height:1.2;color:var(--fg)}
+.elite-time-analysis .elite-time-card .elite-time-card-value>.elite-quantity{display:inline-flex;font-size:inherit;color:inherit;align-items:baseline;gap:9px;direction:rtl}
+.elite-time-analysis .elite-time-card .elite-time-card-value .elite-quantity-num{font-size:1em;line-height:1;font-weight:850;color:var(--fg)}
+.elite-time-analysis .elite-time-card .elite-time-card-value .elite-quantity-unit{font-size:.52em;line-height:1.2;font-weight:700;color:var(--muted)}
+@media(max-width:900px){.elite-time-analysis .elite-time-card .elite-time-card-value{font-size:clamp(30px,3.3vw,40px)}}
+@media(max-width:640px){.elite-time-analysis .elite-time-card .elite-time-card-value{font-size:clamp(32px,7vw,42px)}}
 /* ---------- contextual manager guidance ---------- */
 .admin-guide{background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid var(--accent);border-radius:12px;padding:12px 15px;margin:0 0 17px;box-shadow:var(--shadow);font-size:12.5px}
 .admin-guide-row{display:flex;gap:10px;align-items:flex-start}
