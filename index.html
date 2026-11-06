@@ -278,6 +278,7 @@ td select,td input{border:1px solid var(--line);background:var(--surface);border
 .tray .empty{width:100%;text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 
 .bins{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:10px}
+.bins .bin[hidden]{display:none!important}
 .bin{position:relative;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px}
 .bin .ttl{font-size:12px;font-weight:700;line-height:1.45;padding-top:6px}
 .bin .sub{font-size:10.5px;color:var(--muted)}
@@ -2140,11 +2141,15 @@ function stepPlate(){
 
 /* ---------- ٢ · القطع ---------- */
 let binSearchQuery='';
+function binSearchText(i,query){
+ const short=libSearchNormalize(query).replace(/ /g,'').length<=2;
+ return libSearchNormalize(short?[i.ar,i.en].join(' '):libSearchText(i));
+}
 function stepBricks(){
   const track=S.binTrack||'all';
   const pool=LIB.filter(i=>(track==='all'||i.t===track)&&!isSel(i.id));
   const binTerms=libSearchNormalize(binSearchQuery).split(/\s+/).filter(Boolean);
-  const matchingCount=pool.filter(i=>binTerms.every(token=>libSearchNormalize(libSearchText(i)).includes(token))).length;
+  const matchingCount=pool.filter(i=>binTerms.every(token=>binSearchText(i,binSearchQuery).includes(token))).length;
   const tray=S.selected.filter(x=>!x.day);
   const placed=S.selected.filter(x=>x.day);
   return `<div class="build2">
@@ -2156,9 +2161,9 @@ function stepBricks(){
       <div class="seg">${[['all',T('الكل','All')]].concat(TRACKS.map(t=>[t.id,L(t)])).map(([id,label])=>
           `<button class="${track===id?'on':''}" data-act="bin:${id}">${label}</button>`).join('')}</div>
       <p class="help" style="margin:6px 0 12px">${T('أضف البرامج المناسبة إلى خطتك، ثم وزّعها على الأيام في الخطوة التالية.','Choose suitable programs for this camp, then allocate them in the next step.')}</p>
-      <div style="margin:10px 0 13px"><input type="search" id="binSearch" autocomplete="off" spellcheck="false" value="${esc(binSearchQuery)}" placeholder="${T('ابحث بجزء من اسم البرنامج أو الهدف أو الوصف…','Search any part of a program name, goal or description…')}" aria-label="${T('البحث في البرامج المتاحة','Search available programs')}" style="width:100%;padding:10px 13px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--fg)"><p class="help" style="margin-top:5px">${T('تظهر النتائج فور كتابة حرف واحد، حتى لو كان من منتصف الكلمة.','Results update instantly, including partial words.')}</p></div>
+      <div style="margin:10px 0 13px"><input type="search" id="binSearch" autocomplete="off" spellcheck="false" value="${esc(binSearchQuery)}" placeholder="${T('ابحث بجزء من اسم البرنامج أو الهدف أو الوصف…','Search any part of a program name, goal or description…')}" aria-label="${T('البحث في البرامج المتاحة','Search available programs')}" style="width:100%;padding:10px 13px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--fg)"><p class="help" style="margin-top:5px">${T('ابحث بحرف واحد أو أكثر. البحث القصير في أسماء البرامج، والبحث الأطول يشمل الأهداف والأوصاف.','Results update instantly, including partial words.')}</p></div>
       <div class="bins" id="binSearchResults">
-        ${pool.map(i=>{const t=TRACK(i.t);return `<div class="bin" data-bin-search="${esc(libSearchNormalize(libSearchText(i)))}" ${binTerms.every(token=>libSearchNormalize(libSearchText(i)).includes(token))?'':'hidden'} style="--bc:${t.color}">
+        ${pool.map(i=>{const t=TRACK(i.t);return `<div class="bin" data-bin-search="${esc(binSearchText(i,binSearchQuery))}" ${binTerms.every(token=>binSearchText(i,binSearchQuery).includes(token))?'':'hidden'} style="--bc:${t.color}">
           <span class="program-icon">${uiIcon(TRACKICON[i.t])}</span>
           <div class="ttl">${esc(L({ar:i.ar,en:i.en}))}</div>
           <div class="sub">${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))}</div>
@@ -3937,7 +3942,20 @@ document.addEventListener('change',e=>{const t=e.target;if(page==='opportunities
 document.addEventListener('input',e=>{
   const t=e.target;
   if(t.id==='q'){libFilter.q=t.value;renderLib()}
-  if(t.id==='binSearch'){binSearchQuery=t.value;const terms=libSearchNormalize(binSearchQuery).split(/\s+/).filter(Boolean);const cards=$('#binSearchResults .bin[data-bin-search]');let visible=0;cards.forEach(card=>{const matches=terms.every(term=>card.dataset.binSearch.includes(term));card.hidden=!matches;if(matches)visible++;});const empty=$('#binSearchEmpty');if(empty)empty.hidden=visible>0;return;}
+  if(t.id==='binSearch'){
+    binSearchQuery=t.value;
+    const terms=libSearchNormalize(binSearchQuery).split(/\s+/).filter(Boolean);
+    const cards=$$('#binSearchResults .bin[data-bin-search]');
+    let visible=0;
+    cards.forEach(card=>{
+      const act=card.querySelector('[data-act^="add:"]')?.dataset.act||'';
+      const i=ITEM(act.slice(4));
+      const matches=!!i&&terms.every(term=>binSearchText(i,binSearchQuery).includes(term));
+      card.hidden=!matches;if(matches)visible++;
+    });
+    const empty=$('#binSearchEmpty');if(empty)empty.hidden=visible>0;
+    return;
+  }
   if(t.id==='campQ'){campFilter.q=t.value;render();const el=$('#campQ');if(el){el.focus();try{el.setSelectionRange(el.value.length,el.value.length)}catch(e){}}}
   if(t.id==='wDays'){wizCollect();wiz.d.dayCount=+t.value;renderWiz();return}
   if(t.id==='pkQ'){const q=t.value.toLowerCase();$$('#pkList [data-pk]').forEach(r=>{const i=ITEM(r.dataset.pk);r.style.display=(L({ar:i.ar,en:i.en})+' '+L(i.goal)).toLowerCase().includes(q)?'':'none'})}
