@@ -1716,7 +1716,7 @@ function pageSelection(){
         :`<p class="help" style="margin-top:12px">${T('لا اختيار بعد.','Nothing selected yet.')}</p>`}
       </div>
     </div>
-    ${rd.score<100?`<div class="note orange spacer"><b>${T('قبل الاعتماد: ','Before approval: ')}</b>${T(`${rd.total-rd.passed} شرطًا لم يُستوفَ بعد. راجع فحص الجاهزية.`,`${rd.total-rd.passed} condition(s) still open. See the readiness check.`)}
+    ${rd.score<100?`<div class="note orange spacer"><b>${T('للمتابعة: ','For follow-up: ')}</b>${T(`${rd.total-rd.passed} بند توثيق يحتاج مراجعة.`,`${rd.total-rd.passed} documentation item(s) need review.`)}
       <button class="small" data-act="go:readiness" style="margin-inline-start:8px">${T('فتح الفحص','Open check')}</button></div>`:''}`;
 }
 function viewOnly(){
@@ -1901,8 +1901,8 @@ function pageReadiness(){
     <div class="grid cols2 spacer">
       <div class="card"><h2>${T('قرار اعتماد البرامج','Program approval decision')}</h2>
         <div class="note" style="margin-top:10px">
-          <b>${rd.score>=80?T('اجتاز حد مراجعة الخطة','Planning review threshold met'):T('تحتاج الخطة إلى استكمال','Plan needs further work')}</b>
-          <p class="help" style="margin-top:6px">${rd.score>=80?T('اجتازت الخطة الحد الآلي للمراجعة، لكن نسبة الاكتمال لا تثبت الجاهزية التشغيلية.','The automated review threshold is met, but the score does not establish operational readiness.'):T('أكمل الشروط المعلّمة قبل رفع الاختيار للاعتماد.','Complete the flagged conditions before formal approval.')}</p>
+          <b>${rd.score>=80?T('اكتملت مراجعة التوثيق','Documentation checks completed'):T('توجد عناصر تحتاج متابعة','Some items need follow-up')}</b>
+          <p class="help" style="margin-top:6px">${rd.score>=80?T('تم توثيق توزيع البرامج ومبرراتها؛ راجع توازن الأنشطة وجاهزية التشغيل قبل التنفيذ.','Program allocation and rationale are documented. Review activity balance and operational readiness before delivery.'):T('استكمل توثيق التوزيع والمبررات، ثم راجع التوصيات غير الملزمة.','Complete allocation and rationale records; then review the nonbinding suggestions.')}</p>
         </div>
         <div class="actions spacer" style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="primary" data-act="approveAll" ${can('approve')?'':'disabled'}>${T('اعتماد الاختيار بالكامل','Approve the whole selection')}</button>
@@ -2183,7 +2183,7 @@ function stepAssemble(){
   <div class="row spacer" style="gap:8px;flex-wrap:wrap">
     <button data-act="autoplan">${T('توزيع البرامج تلقائيًا','Auto-allocate programs')}</button>
     ${tray.length?`<span class="pill orange">${tray.length} ${T('برامج غير موزّعة','unassigned programs')}</span>`:''}
-    <span class="help" style="margin-inline-start:auto">${T('الحد لكل يوم: ','Max per day: ')}${max}</span>
+    <span class="help" style="margin-inline-start:auto">${T('مرجع إرشادي: ','Suggested per day: ')}${max}</span>
   </div>`;
 }
 
@@ -2311,6 +2311,8 @@ function scheduleDiagnostics(day){
  for(let k=1;k<ranges.length;k++)if(ranges[k].start<ranges[k-1].end){
   notes.push(T('تداخل زمني بين «'+ranges[k-1].name+'» و«'+ranges[k].name+'».','Time overlap: '+ranges[k-1].name+' / '+ranges[k].name+'.'));
  }
+ const freeSlots=SLOTS.filter(slot=>!(map[slot]||[]).length);
+ if(freeSlots.length)notes.push(T('هناك '+freeSlots.length+' جلسات برنامج غير مشغولة في قالب اليوم؛ يمكن إعادة توزيع الأنشطة.','There are '+freeSlots.length+' unfilled program sessions; consider reallocating activities.'));
  for(const [slot,items] of Object.entries(map))if(items.length>1)notes.push(T('تم جمع '+items.length+' برامج في جلسة واحدة؛ راجع توقيتها.','Multiple programs assigned to one session; verify timing.'));
  return [...new Set(notes)];
 }
@@ -2327,18 +2329,19 @@ function dayTimeline(day,opts){
                 <span class="tlmeta">${esc(L(t.short))} · ${it.x.pri==='core'?T('أساسي','core'):T('مساند','support')}</span>
                 ${o.why&&it.x.why?`<small class="tlwhy">${esc(it.x.why)}</small>`:''}
                 ${(it.x.activityBreakdown||it.i.activityBreakdown)?`<small class="tlwhy" style="display:block">${esc(it.x.activityBreakdown||it.i.activityBreakdown)}</small>`:''}
-                ${o.why?`<button type="button" class="small noprint" data-act="editScheduleProgram:${it.x.id}" style="margin-inline-start:auto">${T('تعديل البرنامج','Edit program')}</button>`:''}
+                ${o.why?`<button type="button" class="small noprint" data-act="editScheduleProgram:${it.x.id}" ${can('select')?'':'disabled'} style="margin-inline-start:auto">${T('تعديل البرنامج','Edit program')}</button>`:''}
               </div>`}).join('')
           : `<span class="tlhint">${T('جلسة شاغرة','Open session')}</span>`)
       : '';
     return `<div class="tlrow ${row.slot?'prog':'fixed'} ${row.slot&&!items.length?'tl-empty':''}">
       <div class="tltime">${row.t}</div>
       <div class="tldot">${tico(row.ic)}</div>
-      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${body}<button type="button" class="small noprint" data-act="editScheduleRow:${day},${idx}" title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button></div>
+      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${body}<button type="button" class="small noprint" data-act="editScheduleRow:${day},${idx}" ${can('select')?'':'disabled'} title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button></div>
     </div>`}).join('')}</div>`;
 }
 
 function editScheduleRow(day,index){
+ if(!can('select'))return toast(T('التعديل متاح لمسؤولي التخطيط.','Schedule editing is limited to planning roles.'));
  const n=Number(day),j=Number(index);
  if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length)return;
  const row=scheduleRow(n,j);
@@ -2353,6 +2356,7 @@ function editScheduleRow(day,index){
    <button class="primary" data-act="saveScheduleRow:${n},${j}">${T('حفظ التعديل','Save changes')}</button></div>`);
 }
 function saveScheduleRow(day,index){
+ if(!can('select'))return toast(T('التعديل متاح لمسؤولي التخطيط.','Schedule editing is limited to planning roles.'));
  const n=Number(day),j=Number(index);
  if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length)return;
  const t=$('#seTime')?.value.trim(),ar=$('#seAr')?.value.trim(),en=$('#seEn')?.value.trim();
@@ -2445,7 +2449,7 @@ function stepPlan(){
           <h1 style="margin-top:4px">${esc(L({ar:S.meta.campAr,en:S.meta.campEn}))}</h1>
           <p class="help">${esc(L({ar:S.meta.cityAr,en:S.meta.cityEn}))} · <span dir="ltr">${esc(S.meta.start)} — ${esc(S.meta.end)}</span> · ${S.meta.days.length} ${T('أيام','days')} · ${selCount()} ${T('برنامجًا','programs')}</p>
         </div>
-        <div style="text-align:center"><b style="font-size:22px">${rd.score}%</b><div class="help">${T('اكتمال التخطيط','Planning completion')}</div></div>
+        <div style="text-align:center"><b style="font-size:22px">${rd.score}%</b><div class="help">${T('توثيق الخطة','Plan documentation')}</div></div>
       </div>
     </div>
     <div class="row spacer noprint" style="gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
@@ -2632,7 +2636,7 @@ function campCard(c){
         <span><b>${c.meta.students}</b> ${T('طالبًا','students')}</span>
       </div>
       <div>
-        <div class="row" style="margin-bottom:4px"><span class="help">${T('اكتمال التخطيط','Planning completion')}</span><b class="mono" style="font-size:11.5px">${score}%</b></div>
+        <div class="row" style="margin-bottom:4px"><span class="help">${T('توثيق الخطة','Plan documentation')}</span><b class="mono" style="font-size:11.5px">${score}%</b></div>
         <div class="bar ${score>=80?'good':''}"><i style="width:${score}%"></i></div>
       </div>
       <div class="cc-foot">
