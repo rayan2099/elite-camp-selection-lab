@@ -2495,7 +2495,7 @@ function eliteAddSuggestion(day,slot,id){
  S.selected.push({id,pri:'support',day,slot,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
  logIt('إضافة '+it.ar+' إلى '+slot+' في اليوم '+day,'Added '+it.en+' to '+slot+' on day '+day);
  save();render();toast(T('تمت إضافة البرنامج للجلسة المحددة.','Added directly to the chosen session.'));
- if(it.t==='sport')editModal(id);
+ editModal(id);
 }
 function eliteDayAnalysis(day){
  const stat=eliteScheduleStats(day),colors={program:'#168660',other:'#2563eb',prayer:'#a16207'};
@@ -3473,7 +3473,7 @@ function pick(id,silent){
   save();
   if(!silent){toast(T(`«${it.ar}» في صندوق القطع — ركّبه على يوم`,`“${it.en}” is in the tray — snap it to a day`));render({preserveScroll:true})}
   else render({preserveScroll:true});
-  if(it.t==='sport'&&!silent)editModal(id);
+  if(!silent)editModal(id);
 }
 function unpick(id){
   if(!can('select')){toast(T('هذا الإجراء غير متاح لدورك.','This action is not available for your role.'));return}
@@ -3822,7 +3822,7 @@ function sportPicker(i,key,scope,selected=[]){
 function editModal(id){
   const x=S.selected.find(s=>s.id===id);if(!x)return;
   const i=ITEM(id);
-  openModal(`<div class="eyebrow">${T('قرار الاختيار','SELECTION DECISION')}</div>
+  openModal(`<div class="eyebrow">${T('حدد التفريعات قبل اعتماد البرنامج','CHOOSE SUBACTIVITIES FIRST')}</div>
     <h2 style="margin-top:6px">${esc(L({ar:i.ar,en:i.en}))}</h2>
     <p class="help">${esc(L(TRACK(i.t)))} · ${esc(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))}</p>
     <div class="fields spacer">
@@ -3834,7 +3834,7 @@ function editModal(id){
         ${S.meta.days.map((d,k)=>`<option value="${k+1}" ${x.day===k+1?'selected':''}>${k+1} · ${esc(L(d))}</option>`).join('')}</select></label>
       <label class="fld">${T('طبيعة النشاط','Activity format')}<select id="eActivityType"><option value="theoretical" ${(x.activityType||activityType(i))==='theoretical'?'selected':''}>${T('نظري','Theoretical')}</option><option value="practical" ${(x.activityType||activityType(i))==='practical'?'selected':''}>${T('عملي','Practical')}</option></select></label>
       <div class="fld wide elite-subactivities" dir="rtl">
-        <b>${T('التفريعات المعتمدة للبرنامج — انقر للاختيار','Approved program subactivities — click to select')}</b>
+        <b>${T('اختر التفريعات التي ستُنفّذ فعليًا في هذا المعسكر *','Select the subactivities to deliver in this camp *')}</b>
         <p class="help">${T('هذه التفريعات مأخوذة من وثيقة البرامج المعتمدة (39 صفحة). اختر ما سيُنفّذ فعليًا؛ لا يُفرض اختيار جميع التفريعات.','These options come from the 39-page approved programme document. Select what you will actually deliver.')}</p>
         ${i.t==='sport'?sportPicker(i,x.sportChoice||'', 'selectedSport',(x.activityBreakdown||'').split('\n')):''}
         <div class="elite-phase-options">
@@ -3859,7 +3859,9 @@ function saveEdit(id){
   const x=S.selected.find(s=>s.id===id);if(!x)return;
   x.pri=$('#ePri').value;x.day=$('#eDay').value?+$('#eDay').value:null;x.why=$('#eWhy').value.trim();x.activityType=$('#eActivityType').value;
   if(ITEM(id)?.t==='sport'){const chosen=$('[name="selectedSport"]:checked');if(!chosen)return toast(T('اختر رياضة واحدة أولًا.','Select one sport first.'));x.sportChoice=chosen.value;}
-  x.activityBreakdown=[...new Set([...$('[data-approved-phase]:checked').map(el=>el.value.trim()),...$('[data-sport-detail]:checked').map(el=>el.value.trim()),...$('#eBreakdown').value.split(/\r?\n/).map(v=>v.trim()).filter(Boolean)])].join('\n');
+  const chosenBreakdowns=[...new Set([...$$('[data-approved-phase]:checked').map(el=>el.value.trim()),...$$('[data-sport-detail]:checked').map(el=>el.value.trim()),...$('#eBreakdown').value.split(/\r?\n/).map(v=>v.trim()).filter(Boolean)])];
+  if(!chosenBreakdowns.length)return toast(T('اختر تفريعة واحدة على الأقل قبل الحفظ.','Select at least one subactivity before saving.'));
+  x.activityBreakdown=chosenBreakdowns.join('\n');
   logIt(`حُدّث قرار «${ITEM(id).ar}»`,`Decision updated: ${ITEM(id).en}`);
   save();closeModal();render();toast(T('حُفظ قرار الاختيار.','Decision saved.'));
 }
@@ -3986,7 +3988,7 @@ function addBrick(id){
   S.selected.push({id,pri:'support',day:null,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
   logIt(`أُضيف إلى صندوق القطع: ${it.ar}`,`Added to tray: ${it.en}`);
   save();render({preserveScroll:true});toast(T(`«${it.ar}» أُضيفت إلى الصندوق`,`“${it.en}” added to the tray`));
-  if(it.t==='sport')editModal(id);
+  editModal(id);
 }
 function placeBrick(id,day){
   const x=S.selected.find(s=>s.id===id);if(!x)return;
@@ -3995,7 +3997,7 @@ function placeBrick(id,day){
   logIt(day>0?`ثُبّتت «${it.ar}» في اليوم ${day}`:`أُعيدت «${it.ar}» إلى الصندوق`,day>0?`“${it.en}” snapped to day ${day}`:`“${it.en}” returned to tray`);
   save();render();
   toast(day>0?T(`ثُبّتت في اليوم ${day}`,`Snapped to day ${day}`):T('أُعيدت إلى الصندوق','Returned to tray'));
-  if(day>0&&it.t==='sport'&&!x.sportChoice)editModal(id);
+  if(day>0&&!(x.activityBreakdown||'').trim())editModal(id);
 }
 document.addEventListener('dragstart',e=>{
   const b=e.target.closest('[data-brick]');if(!b)return;
@@ -4035,7 +4037,7 @@ document.addEventListener('click',e=>{
   const nav=e.target.closest('[data-page]');
   if(nav){page=nav.dataset.page;if(window.innerWidth<860)$('#sidebar').classList.remove('open');render();return}
   const pickHere=e.target.closest('[data-pickhere]');
-  if(pickHere){const id=pickHere.dataset.pickhere;pick(id,true);const x=S.selected.find(s=>s.id===id);if(x)x.day=+$('#modalInner').dataset.day||1;const d=window.__pickDay;if(d&&x)x.day=d;save();closeModal();render();toast(T('أُضيف إلى اليوم.','Added to the day.'));if(ITEM(id)?.t==='sport')editModal(id);return}
+  if(pickHere){const id=pickHere.dataset.pickhere;pick(id,true);const x=S.selected.find(s=>s.id===id);if(x)x.day=+$('#modalInner').dataset.day||1;const d=window.__pickDay;if(d&&x)x.day=d;save();closeModal();render();toast(T('أُضيف إلى اليوم.','Added to the day.'));editModal(id);return}
   const el=e.target.closest('[data-act]');if(!el)return;
   const [a,arg]=el.dataset.act.split(':');
   const map={
