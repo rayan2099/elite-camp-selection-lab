@@ -4,6 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>أكاديمية النخبة | منصة تخطيط المعسكرات</title>
+<script>
+/* Remove automatically appended ChatGPT referral parameters from the displayed URL.
+   Preserve the selected section (#builder, #finance, etc.) and unrelated query options. */
+(function(){
+  try{
+    var url=new URL(window.location.href);
+    var changed=false;
+    for(var key of Array.from(url.searchParams.keys())){
+      if(/^utm_/i.test(key)&&url.searchParams.getAll(key).some(function(value){return /chatgpt(?:\.com|\.site)?/i.test(value)})){
+        url.searchParams.delete(key);changed=true;
+      }
+    }
+    if(changed){
+      window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);
+    }
+  }catch(error){console.warn('Referral URL cleanup skipped',error)}
+})();
+</script>
 <style>
 :root{
   --bg:#f4f6f9;--surface:#fff;--soft:#eef2f7;--soft2:#e7edf5;--fg:#12223a;--muted:#64748b;
