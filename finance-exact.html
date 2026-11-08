@@ -409,6 +409,47 @@ html.finance-embedded .cat.selected{outline:2px solid var(--ux-orange);outline-o
  html.finance-embedded .cat .symbol{display:none}
 }
 @media print{.ux-pulse,.ux-next,.ux-help,.ux-toast{display:none!important}}
+
+/* ===== Elite budget model ===== */
+.elite-basics{margin:0 0 14px;border-top:4px solid var(--ux-orange,#f47b36)}
+.elite-basics-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:6px}
+.elite-basics-grid .field{min-width:0;font-size:11.5px}
+.elite-basics-grid input{width:100%;min-height:40px;border:1px solid #d9e2ee;border-radius:9px;padding:8px 10px;font:inherit;font-weight:800;font-size:15px;background:#fff}
+.elite-basics-grid input:disabled{background:#f4f7fb;color:#7a8aa0}
+.elite-basics-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:10px;font-size:11.5px;color:#55677f}
+.elite-cap{font-weight:800}.elite-cap.ok{color:#13815d}.elite-cap.bad{color:#bd3d4e}
+.elite-excluded{margin-top:10px;font-size:11px;color:#6b5a3e;background:#fff8ed;border:1px dashed #efd3a6;border-radius:9px;padding:8px 11px;line-height:1.8}
+.elite-excluded span{color:#c9a46d;margin:0 4px}
+.elite-basis{color:#245bc8;font-weight:700}
+.elite-linked{margin:0 0 10px;font-size:11.5px;color:#245bc8;background:#eef4ff;border-radius:8px;padding:7px 10px}
+.elite-linked.warn{color:#9a4317;background:#fff3ea}
+.elite-linked[hidden]{display:none}
+.ux-seg button[hidden]{display:none}
+#elitePortfolio .elite-year{margin:0 0 13px}
+.elite-pf{margin:0 0 13px}
+.elite-table{width:100%;border-collapse:collapse;font-size:12px}
+.elite-table th{background:#f3f6fa;color:#536780;font-size:11px;text-align:right;padding:9px 8px;white-space:nowrap}
+.elite-table td{padding:10px 8px;border-bottom:1px solid #edf1f6;white-space:nowrap;font-variant-numeric:tabular-nums}
+.elite-table tbody tr[data-open-camp]{cursor:pointer}
+.elite-table tbody tr[data-open-camp]:hover td,.elite-table tbody tr[data-open-camp]:focus td{background:#fff6ef}
+.elite-table tr.current td{background:#f6f9ff}
+.elite-table tr.current td:first-child{box-shadow:inset -3px 0 0 #f47b36}
+.elite-table .elite-total td{font-weight:800;background:#eef3fa;border-top:2px solid #d6e0ec}
+.elite-mini{display:block;height:4px;border-radius:9px;background:#edf1f7;margin-top:5px;overflow:hidden;min-width:70px}
+.elite-mini span{display:block;height:100%;background:#13a07a;border-radius:inherit}
+.elite-costs{display:grid;gap:8px}
+.elite-cost-row{display:grid;grid-template-columns:26px 150px 1fr 120px 130px;gap:10px;align-items:center;font-size:12px}
+.elite-cost-row .rank{width:24px;height:24px;border-radius:7px;background:#edf2f9;display:grid;place-items:center;font-weight:800;color:#3f597b;font-size:11px}
+.elite-cost-row .name{font-weight:700}
+.elite-cost-row b{font-variant-numeric:tabular-nums}
+.elite-cost-row small{color:#72829a;font-size:11px}
+.elite-bar{display:block;height:10px;border-radius:9px;background:#edf1f7;overflow:hidden}
+.elite-bar span{display:block;height:100%;background:linear-gradient(90deg,#376de4,#5b8af0);border-radius:inherit}
+.elite-compare{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr);gap:14px;align-items:start}
+.elite-link{border:0;background:none;color:#245bc8;font:inherit;font-weight:700;cursor:pointer;padding:0;text-decoration:underline}
+@media(max-width:1100px){.elite-basics-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.elite-compare{grid-template-columns:1fr}}
+@media(max-width:700px){.elite-basics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.elite-cost-row{grid-template-columns:22px 1fr 90px;row-gap:3px}.elite-cost-row .elite-bar{grid-column:2/4;grid-row:2}.elite-cost-row small{grid-column:2/4}
+ #elitePortfolio .table-wrap{overflow-x:auto}.elite-table{min-width:640px}}
 </style><script>if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('finance-embedded');</script></head><body><aside><div class="brand">✦ أكاديمية النخبة</div><p class="desc">منصة إدارة المعسكرات</p><nav><a href="#overview">◫ &nbsp; نظرة عامة</a><a href="#categories">▦ &nbsp; التصنيفات المالية</a><a href="#expenses" class="active">▣ &nbsp; إدارة المصروفات</a><a href="#revenues">◈ &nbsp; الإيرادات والتسعير</a><a href="#analysis">▤ &nbsp; التحليل والتقارير</a></nav><div class="side-note">💡 كل مصروف له حالة مستقلة: تقديري، ملتزم به، أو مدفوع فعلياً؛ لضمان تقارير مالية دقيقة.</div></aside><main>
 <div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="fullReportBtn">التقرير المالي PDF</button></div></header>
 <section class="report-sheet" id="financeReportView" hidden role="region" aria-label="التقرير المالي التنفيذي">
@@ -482,7 +523,7 @@ html.finance-embedded .cat.selected{outline:2px solid var(--ux-orange);outline-o
  </details>
 </section><section id="categories"><div class="section-title"><div><h2>البنود المالية</h2><p>اضغط على تصنيف لعرض بنوده فقط في السجل أدناه.</p></div><button class="btn sm" id="customCatBtn">＋ إنشاء تصنيف مخصص</button></div><div class="categories" id="categoryGrid"></div></section>
 <section class="grid2" id="expenses"><div class="panel"><div class="panel-header"><div><h2>سجل المصروفات التفصيلي</h2><p class="sub" style="font-size:12px">تتبع كل بند من التقدير حتى الدفع</p></div><button class="btn primary sm" id="addBtn2">＋ مصروف جديد</button></div><div class="filters" id="filters"><button class="filter active" data-filter="all">جميع البنود</button><button class="filter" data-filter="estimated">تقديري</button><button class="filter" data-filter="committed">ملتزم به</button><button class="filter" data-filter="paid">مدفوع</button></div><div class="finance-empty-warning" id="expenseGettingStarted" hidden>لم تُسجّل أي بنود بعد. ابدأ ببند واحد مثل «إقامة الطلاب» أو «استئجار الحافلة»، ويمكنك تعديله لاحقاً.</div><div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>البند</th><th>التصنيف</th><th>التقديري</th><th>المدفوع</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody id="expensesBody"></tbody></table></div></div><div class="panel" id="revenues"><div class="panel-header"><h2>الإيرادات والتسعير</h2><span class="tag">حساب فوري</span></div><div class="form-grid"><label class="field">عدد الطلاب المتوقع<input id="studentCount" type="number" min="0"></label><label class="field">رسوم الاشتراك للطالب (ر.س)<input id="studentFee" type="number" min="0"></label><label class="field">الرسوم المحصلة فعلياً (ر.س)<input id="collectedFees" type="number" min="0" readonly title="تُحسب من سجل التحصيل"></label><label class="field">إيرادات / رعايات إضافية متوقعة (ر.س)<input id="otherRevenue" type="number" min="0"></label><label class="field">ضريبة المبيعات المفترضة (%)<input id="campVatRate" type="number" min="0" max="100" step=".1"></label><label class="field">معالجة الإيرادات الأخرى<select id="campOtherTaxMode"><option value="unclassified">غير مصنفة — دون استقطاع افتراضي</option><option value="inclusive">مدخلة شاملة الضريبة المفترضة</option></select></label><p class="small" style="grid-column:1/-1">رسوم الطلاب مفترضة شاملة ضريبة المبيعات وفق نماذج الموازنة المرفقة. هذه نسبة قابلة للتعديل وليست إقرارًا أو رأيًا محاسبيًا؛ صنّف الإيرادات الأخرى مع المختص.</p></div><div class="finance-ledger"><div class="between"><b>سجل التحصيل الفعلي</b><button class="btn sm" id="addCollection2">＋ تحصيل جديد</button></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>النوع</th><th>الدافع</th><th>المبلغ</th><th>الإجراء</th></tr></thead><tbody id="collectionsBody"></tbody></table></div></div><div class="summary-box"><span class="small">المبيعات المتوقعة شاملة الضريبة المفترضة</span><strong id="expectedRevenue">—</strong><span class="small" id="revenueSummary">—</span><div class="fx-fin-bridge"><span>ضريبة المبيعات المفترضة <b id="campForecastVat">—</b></span><span>الإيراد دون الضريبة المفترضة <b id="campForecastNet">—</b></span></div></div><div class="divider"></div><div class="panel-header"><h2>نقطة التعادل</h2><span class="tag">مؤشر قرار</span></div><div class="form-grid"><label class="field">نقطة التعادل المبسطة وفق صافي الرسوم<input id="breakEven" readonly></label><label class="field">صافي التحصيل المسجل<input id="cashNet" readonly></label></div><p class="small" style="margin-top:12px">تحسب نقطة التعادل وفق التكاليف الثابتة والتكاليف المتغيرة لكل طالب؛ عند تعذر تحديدها بدقة يُستخدم تقدير مبسط ويُشار إليه.</p></div></section>
-<section id="analysis" class="grid2"><div class="panel"><div class="panel-header"><h2>مؤشرات الأداء واتخاذ القرار</h2><span class="tag">تتحدث تلقائياً</span></div><div class="form-grid"><div class="summary-box" style="margin:0"><span class="small">التكلفة التقديرية للطالب</span><strong id="costPerStudent">—</strong></div><div class="summary-box" style="margin:0"><span class="small">هامش الفائض المتوقع</span><strong id="margin">—</strong></div><div class="summary-box" style="margin:0"><span class="small">إجمالي الالتزامات + المدفوع</span><strong id="obligated">—</strong></div><div class="summary-box" style="margin:0"><span class="small">الفائض النقدي المسجل</span><strong id="cashflow">—</strong></div></div></div><div class="panel"><div class="panel-header"><h2>الاحتياطي والافتراضات</h2><small>الإعدادات المالية</small></div><div class="form-grid"><label class="field">نسبة الاحتياطي (%)<input id="reservePct" type="number" min="0" max="100"></label><label class="field">مخصص احتياطي معتمد (ر.س)<input id="reserveAmount" readonly></label></div><p class="small">يُحتسب الاحتياطي من تكلفة البنود غير الاحتياطية. أي مبلغ احتياطي لا يُعد مصروفاً مدفوعاً إلا عند تسجيل عملية دفع فعلية من بند مرتبط.</p><div class="callout warn" id="alerts" style="margin-top:16px">—</div></div></section>
+<section id="analysis" class="grid2"><div class="panel"><div class="panel-header"><h2>مؤشرات الأداء واتخاذ القرار</h2><span class="tag">تتحدث تلقائياً</span></div><div class="form-grid"><div class="summary-box" style="margin:0"><span class="small">التكلفة التقديرية للطالب</span><strong id="costPerStudent">—</strong></div><div class="summary-box" style="margin:0"><span class="small">هامش الربح بعد المخصص من المبيعات</span><strong id="margin">—</strong></div><div class="summary-box" style="margin:0"><span class="small">إجمالي الالتزامات + المدفوع</span><strong id="obligated">—</strong></div><div class="summary-box" style="margin:0"><span class="small">الفائض النقدي المسجل</span><strong id="cashflow">—</strong></div></div></div><div class="panel"><div class="panel-header"><h2>الاحتياطي والافتراضات</h2><small>الإعدادات المالية</small></div><div class="form-grid"><label class="field">نسبة الاحتياطي (%)<input id="reservePct" type="number" min="0" max="100"></label><label class="field">مخصص احتياطي معتمد (ر.س)<input id="reserveAmount" readonly></label></div><p class="small">يُحتسب الاحتياطي من تكلفة البنود غير الاحتياطية. أي مبلغ احتياطي لا يُعد مصروفاً مدفوعاً إلا عند تسجيل عملية دفع فعلية من بند مرتبط.</p><div class="callout warn" id="alerts" style="margin-top:16px">—</div></div></section>
 <section class="panel finance-ledger" id="financeApproval"><div class="panel-header"><div><h2>مراجعة واعتماد الميزانية</h2><p class="fx-note">اعتماد تشغيلي محلي لا يمثل توقيعاً محاسبياً موثقاً.</p></div><span class="tag" id="financeApprovalStatus">مسودة</span></div><div class="finance-workflow"><div class="flow-step"><b>نسخة الميزانية الحالية</b><strong id="financeApprovalTotal">—</strong><p id="financeApprovalVersion">لم تعتمد بعد</p></div><div class="flow-step"><b>مراجعة التكاليف والإيرادات</b><p id="financeApprovalGuidance">راجع جميع البنود قبل الاعتماد.</p><button class="btn sm" id="financeReviewButton">إرسال للمراجعة</button></div><div class="flow-step"><b>اعتماد / إعادة فتح</b><p>تثبيت التقديرات بعد الاعتماد، مع السماح بتسجيل المدفوعات والتحصيل.</p><button class="btn primary sm" id="financeApproveButton">اعتماد الميزانية</button><button class="btn sm" id="financeReopenButton" hidden>إعادة فتح الميزانية</button></div></div><div class="callout" id="financeApprovalNotice">هذا إجراء محلي، ولا يثبت هوية المعتمد.</div></section><section class="panel finance-ledger" id="financeOperations"><div class="panel-header"><div><h2>المتابعات والالتزامات المالية</h2><p class="fx-note">مهام مشتقة من بيانات المعسكر الفعلية.</p></div><span class="tag" id="financeTasksCount">—</span></div><div id="financeTasks"></div></section><section class="panel finance-ledger" id="financeReadiness"><div class="panel-header"><div><h2>جاهزية الملف المالي</h2><p class="fx-note">مؤشرات اكتمال الإدخال للتحضير والمراجعة، وليست اعتماداً محاسبياً.</p></div><span class="tag" id="financeCompletion">—</span></div><div id="financeChecklist"></div></section>
 <section class="panel finance-ledger" id="financeAudit"><div class="panel-header"><div><h2>سجل الحركة والمراجعة المالية</h2><p class="fx-note">آخر التعديلات والتسجيلات والتصحيحات لهذا المعسكر فقط (بحد أقصى 500 عملية). السجل محلي وغير محمي من التلاعب، فلا يُعد سجل تدقيق محاسبياً معتمداً.</p></div><button class="btn sm" id="exportAudit">تصدير سجل الحركة</button></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>العملية</th><th>التفاصيل</th></tr></thead><tbody id="auditBody"></tbody></table></div></section>
 <p class="footer">أكاديمية النخبة • نموذج أولي مستقل للإدارة المالية • تخزين محلي في المتصفح • جميع القيم الأولية لأغراض العرض وليست بيانات تشغيلية معتمدة</p></main>
@@ -541,6 +582,68 @@ const financeCampName=String(financeParams.get('campName')||'').slice(0,140);
 const financeScoped=!!financeCampId;
 const financeStoreKey=financeScoped?'elitefinance-v3-camp:'+financeCampId:'elitefinance-v2';
 
+/* ===== Elite budget model 2027 — seed data from «موازنة المعسكرات 2027» (المدخلات + أوراق المعسكرات) =====
+   Each camp keeps the spreadsheet's calculation basis: ليلة / طالب يوميًا / يوم / طالب / مقطوع.
+   Seeded once per browser; edits and deletions afterwards are the user's. */
+const ELITE_SEED_CAMPS=[
+ {id:'camp-2027-buraydah',name:'معسكر بريدة · يناير 2027',city:'بريدة',month:'2027-01',monthLabel:'يناير 2027',days:5,nights:4,fee:1990,lines:[
+  ['السكن','stay','night',2000,'8000 إجمالي ÷ 4 ليالٍ'],['الوجبات والماء','meals','studentDay',33,'33 ريالًا للطالب يوميًا'],['السناكات','meals','studentDay',5,'5 ريالات يوميًا'],
+  ['مكافآت الفريق','staff','campDay',1540,'7700 إجمالي ÷ 5 أيام'],['النقل','transport','fixed',1000,'مبلغ إجمالي'],['المفارش','supplies','student',55,'55 ريالًا للمفرش'],
+  ['التصوير','marketing','fixed',1800,'مبلغ إجمالي'],['التشغيل والسلامة','safety','fixed',1500,'مبلغ إجمالي'],['تحسين التجربة','trips','fixed',4000,'إضافة على البنود الأخرى · الرحلات ضمنها']]},
+ {id:'camp-2027-sharqiyah',name:'معسكر الشرقية · فبراير 2027',city:'الشرقية',month:'2027-02',monthLabel:'فبراير 2027',days:3,nights:2,fee:1490,lines:[
+  ['السكن','stay','night',3000,'6000 إجمالي ÷ 2 ليلتين'],['الوجبات والماء','meals','studentDay',40,'40 ريالًا للطالب يوميًا'],['السناكات','meals','studentDay',5,'5 ريالات يوميًا'],
+  ['مكافآت الفريق','staff','campDay',1540,'4620 إجمالي ÷ 3 أيام'],['النقل','transport','fixed',1000,'مبلغ إجمالي'],['المفارش','supplies','student',55,'55 ريالًا للمفرش'],
+  ['التصوير','marketing','fixed',1500,'مبلغ إجمالي'],['التشغيل والسلامة','safety','fixed',1500,'مبلغ إجمالي'],['تحسين التجربة','trips','fixed',3500,'إضافة على البنود الأخرى · الرحلات ضمنها']]},
+ {id:'camp-2027-madinah',name:'معسكر المدينة · أبريل 2027',city:'المدينة المنورة',month:'2027-04',monthLabel:'أبريل 2027',days:4,nights:3,fee:2050,lines:[
+  ['السكن','stay','night',3750,'11250 إجمالي ÷ 3 ليالٍ'],['الوجبات والماء','meals','studentDay',40,'40 ريالًا للطالب يوميًا'],['السناكات','meals','studentDay',5,'5 ريالات يوميًا'],
+  ['مكافآت الفريق','staff','campDay',1540,'6160 إجمالي ÷ 4 أيام'],['النقل','transport','fixed',5000,'مبلغ إجمالي'],['المفارش','supplies','student',55,'55 ريالًا للمفرش'],
+  ['التصوير','marketing','fixed',1800,'مبلغ إجمالي'],['التشغيل والسلامة','safety','fixed',1500,'مبلغ إجمالي'],['تحسين التجربة','trips','fixed',3500,'إضافة على البنود الأخرى · الرحلات ضمنها']]},
+ {id:'camp-2027-riyadh-jul',name:'معسكر الرياض · يوليو 2027',city:'الرياض',month:'2027-07',monthLabel:'يوليو 2027',days:12,nights:11,fee:5990,lines:[
+  ['السكن','stay','night',45000/11,'45000 إجمالي ÷ 11 ليلة'],['الوجبات والماء','meals','studentDay',48,'32000 ÷ 50 ÷ 12 تقريبًا'],['السناكات','meals','studentDay',5,'5 ريالات يوميًا'],
+  ['مكافآت الفريق','staff','campDay',20000/12,'20000 إجمالي ÷ 12 يومًا'],['الرحلات والتجارب','trips','student',17100/66,'17100 ÷ 66 للطالب'],['النقل','transport','fixed',4000,'مبلغ إجمالي'],
+  ['المفارش','supplies','student',55,'55 ريالًا للمفرش'],['التصوير','marketing','fixed',3000,'مبلغ إجمالي'],['التشغيل والسلامة','safety','fixed',2000,'مبلغ إجمالي']]},
+ {id:'camp-2027-abha',name:'معسكر أبها · أغسطس 2027',city:'أبها',month:'2027-08',monthLabel:'أغسطس 2027',days:12,nights:11,fee:6290,lines:[
+  ['السكن','stay','night',32000/11,'32000 إجمالي ÷ 11 ليلة'],['الوجبات والماء','meals','studentDay',33,'33 ريالًا يوميًا · السناكات ضمنها'],
+  ['مكافآت الفريق','staff','campDay',1610,'19320 إجمالي ÷ 12 يومًا'],['الرحلات والتجارب','trips','student',150,'150 ريالًا للطالب'],['النقل','transport','fixed',4000,'مبلغ إجمالي'],
+  ['المفارش','supplies','student',55,'55 ريالًا للمفرش'],['التصوير','marketing','fixed',3000,'مبلغ إجمالي'],['التشغيل والسلامة','safety','fixed',2000,'مبلغ إجمالي'],['تحسين التجربة','trips','fixed',2000,'إضافة على البنود الأخرى']]},
+ {id:'camp-2027-riyadh-nov',name:'معسكر الرياض · نوفمبر 2027',city:'الرياض',month:'2027-11',monthLabel:'نوفمبر 2027',days:5,nights:4,fee:2400,lines:[
+  ['السكن','stay','night',4625,'18500 إجمالي ÷ 4 ليالٍ'],['الوجبات والماء','meals','studentDay',51,'51 ريالًا يوميًا · السناكات ضمنها'],
+  ['مكافآت الفريق','staff','campDay',1540,'7700 إجمالي ÷ 5 أيام'],['الرحلات والتجارب','trips','fixed',2000,'مبلغ إجمالي'],['النقل','transport','fixed',2000,'مبلغ إجمالي'],
+  ['المفارش','supplies','student',55,'55 ريالًا للمفرش'],['التصوير','marketing','fixed',1800,'مبلغ إجمالي'],['التشغيل والسلامة','safety','fixed',700,'مبلغ إجمالي']]}
+];
+/* Recorded final results of previous camps (المدخلات · الأرقام النهائية السابقة). */
+const ELITE_PAST_CAMPS=[
+ {name:'الرياض الأول',days:12,seats:37,price:5300,revenue:185000,result:75896,note:''},
+ {name:'حائل',days:5,seats:65,price:2100,revenue:126500,result:71100,note:''},
+ {name:'الرياض الثالث',days:12,seats:66,price:6299,revenue:364715,result:192196,note:'السعر الأساسي 6299 والمبكر 5920'},
+ {name:'الرياض الرابع',days:8,seats:24,price:4590,revenue:109095,result:63000,note:'24 مقعدًا مدفوعًا · النتيجة تقريبية'}
+];
+const ELITE_EXCLUDED={cancelled:'الأطقم • الجوائز • الاحتياطي • رسوم التحصيل',reminder:'الهوية • البنرات • الشكر والدروع'};
+const LINKED_METHODS={night:1,studentDay:1,campDay:1,student:1};
+function eliteLinkedQty(method,st){
+ const att=Math.max(0,Number(st.students)||0)+Math.max(0,Number(st.grants)||0),days=Math.max(0,Number(st.days)||0),nights=Math.max(0,Number(st.nights)||0);
+ return method==='night'?nights:method==='studentDay'?att*days:method==='campDay'?days:method==='student'?att:1;
+}
+function eliteSeedState(c){
+ const st={categories:structuredClone(TYPES),students:50,grants:0,fee:c.fee,days:c.days,nights:c.nights,capacity:50,collected:0,otherRevenue:0,
+  reservePct:0,vatRate:15,zakatRate:2.5,otherRevenueTaxMode:'unclassified',calcModel:'elite-2027',campName:c.name,month:c.month,monthLabel:c.monthLabel,
+  collections:[],approval:{status:'draft',version:0,approvedAt:null,snapshot:null},
+  audit:[{id:'a-seed-'+c.id,date:new Date().toISOString(),action:'استيراد موازنة 2027',detail:'من ملف «موازنة المعسكرات 2027» · '+c.lines.length+' بنود'}]};
+ st.items=c.lines.map((l,i)=>{const qty=eliteLinkedQty(l[2],st);return {id:'s'+i+'-'+c.id,name:l[0],cat:l[1],method:l[2],unitPrice:l[3],extra:0,qty,days:st.days,
+  amount:qty*l[3],paid:0,status:'estimated',vendor:'',due:'',ref:'',notes:l[4],payments:[]}});
+ return st;
+}
+(function seedElite2027(){
+ try{
+  for(const c of ELITE_SEED_CAMPS){
+   const key='elitefinance-v3-camp:'+c.id,flag='elitefinance-seeded:'+c.id;
+   if(localStorage.getItem(flag))continue;
+   if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(eliteSeedState(c)));
+   localStorage.setItem(flag,'1');
+  }
+ }catch(e){}
+})();
+
 const FINANCE_PRESETS=[
  {name:'إقامة الطلاب',cat:'stay',method:'personday',label:'طلاب × ليالي'},
  {name:'وجبات الطلاب',cat:'meals',method:'personday',label:'طلاب × أيام'},
@@ -551,7 +654,7 @@ const FINANCE_PRESETS=[
  {name:'حقائب الطلاب',cat:'supplies',method:'unit',label:'عدد الحقائب'},
  {name:'تأمين المشاركين',cat:'safety',method:'unit',label:'عدد المشاركين'}
 ];
-const EMPTY=()=>({categories:structuredClone(TYPES),items:[],students:0,fee:0,collected:0,otherRevenue:0,reservePct:10});
+const EMPTY=()=>({categories:structuredClone(TYPES),items:[],students:0,fee:0,collected:0,otherRevenue:0,reservePct:0,zakatRate:2.5,grants:0,days:0,nights:0,capacity:0,calcModel:'elite-2027'});
 let state;try{state=JSON.parse(localStorage.getItem(financeStoreKey))||(financeScoped?EMPTY():DEFAULT())}catch(e){state=financeScoped?EMPTY():DEFAULT()}
 if(!state||!Array.isArray(state.categories)||!Array.isArray(state.items))state=financeScoped?EMPTY():DEFAULT();
 let filter='all',selectedCat=null;
@@ -903,7 +1006,7 @@ function financeReportHtml(){
   ['المبيعات والإيرادات شاملة الضريبة',money(f.revenue)],['ضريبة المبيعات المفترضة',money(f.vatSales)],['الإيراد دون الضريبة',money(f.netRevenue)],
   ['الإيرادات المحصلة فعلياً',money(collected)],
   ['الرصيد النقدي المسجل',money(cash)],
-  ['الفائض المتوقع',money(f.profit)],
+  ['الربح قبل مخصص الزكاة',money(f.profit)],['مخصص الزكاة التقديري',money(f.zakat)],['الربح بعد مخصص الزكاة',money(f.profitAfter)],
   ['تكلفة الطالب المخططة',state.students?money(f.estimated/state.students):'غير متاح']
  ];
  const catRows=categories.map(c=>row([esc(c.name),String(c.count),money(c.planned),money(c.paid),money(Math.max(0,c.planned-c.paid))])).join('');
@@ -936,7 +1039,7 @@ function financeReportHtml(){
  +'<p class="report-intro">يعرض هذا التقرير وضع المعسكر استناداً إلى البنود والحركات المسجلة في هذا المتصفح. الأرقام المخططة تختلف عن المدفوعات والتحصيلات الفعلية، ولا يُعد التقرير كشفاً بنكياً أو قوائم مالية مدققة.</p>'
  +'<div class="report-metrics">'+metrics.map(([k,v])=>'<div class="report-metric"><span>'+k+'</span><b>'+v+'</b></div>').join('')+'</div>'
  +'<h2>١ · خلاصة الإدارة والتقييم المالي</h2>'
- +'<div class="report-note">عدد الطلاب المتوقع: <b>'+fmt(state.students)+'</b> · رسم الاشتراك للطالب: <b>'+money(state.fee)+'</b> · هامش الفائض المتوقع: <b>'+(f.revenue?(f.profit/f.revenue*100).toFixed(1)+'%':'غير متاح')+'</b> · نسبة الصرف المدفوع من الميزانية: <b>'+(f.estimated?(f.actual/f.estimated*100).toFixed(1)+'%':'غير متاح')+'</b>. الرصيد النقدي يحسب فقط من التحصيلات المسجلة مطروحاً منها المدفوعات المسجلة؛ لا يمثل رصيد البنك.</div>'
+ +'<div class="report-note">عدد الطلاب المتوقع: <b>'+fmt(state.students)+'</b> · رسم الاشتراك للطالب: <b>'+money(state.fee)+'</b> · هامش الربح بعد المخصص من المبيعات: <b>'+(f.revenue?(f.profitAfter/f.revenue*100).toFixed(1)+'%':'غير متاح')+'</b> · نسبة الصرف المدفوع من الميزانية: <b>'+(f.estimated?(f.actual/f.estimated*100).toFixed(1)+'%':'غير متاح')+'</b>. الرصيد النقدي يحسب فقط من التحصيلات المسجلة مطروحاً منها المدفوعات المسجلة؛ لا يمثل رصيد البنك.</div>'
  +section('٢ · توزيع الميزانية حسب التصنيف',['التصنيف','البنود','التقديري','المدفوع','فرق التقدير'],catRows+row(['الإجمالي',String(state.items.length),money(f.base+f.explicitReserve),money(f.actual),money(Math.max(0,f.base+f.explicitReserve-f.actual))],'report-subtotal'),5)
  +'<div class="report-note">مخصص الاحتياطي النسبي: '+money(f.reserve)+' · المصروفات المخططة شاملة الاحتياطي: '+money(f.estimated)+'؛ الاحتياطي ليس دفعة فعلية.</div>'
  +'<h2>تحليل بصري لتوزيع التكاليف</h2><div class="report-note">'+(costBars||'لا توجد بيانات بعد.')+'</div>'
@@ -1217,6 +1320,219 @@ const FX_CAMPS=[
  calc();
 })();
 
+/* ===== Elite budget model — same calculation as «موازنة المعسكرات 2027» =====
+   Sales include VAT · profit = sales without VAT − operating cost · zakat provision 2.5% of positive profit ·
+   margin = profit after provision ÷ sales · no automatic reserve · cost lines linked to camp basics. */
+function eliteNormalize(st){
+ if(!st||typeof st!=='object')return st;
+ if(!Array.isArray(st.items))st.items=[];if(!Array.isArray(st.collections))st.collections=[];if(!Array.isArray(st.audit))st.audit=[];
+ if(!Array.isArray(st.categories))st.categories=structuredClone(TYPES);
+ if(!Number.isFinite(Number(st.vatRate)))st.vatRate=15;
+ if(!['inclusive','unclassified'].includes(st.otherRevenueTaxMode))st.otherRevenueTaxMode='unclassified';
+ if(st.calcModel!=='elite-2027'){
+  if(Number(st.reservePct)===10)st.reservePct=0; // the old automatic default; the Elite method cancels the reserve
+  if(!Number.isFinite(Number(st.zakatRate)))st.zakatRate=2.5;
+  st.calcModel='elite-2027';st._migrated=true;
+ }
+ ['grants','days','nights','capacity'].forEach(k=>{if(!Number.isFinite(Number(st[k])))st[k]=0});
+ if(!st.approval||typeof st.approval!=='object')st.approval={status:'draft',version:0,approvedAt:null,snapshot:null};
+ return st;
+}
+eliteNormalize(state);
+if(state._migrated){delete state._migrated;if(state.items.length||n(state.students))audit('تحديث منهج الحساب','اعتماد منهج موازنة النخبة: دون احتياطي تلقائي، ومخصص زكاة 2.5% من الربح الموجب');}
+if(financeScoped&&financeCampName)state.campName=financeCampName;
+save();
+
+const eliteBaseFigures=figures;
+figures=function(){
+ const f=eliteBaseFigures();
+ const z=Math.min(100,n(state.zakatRate))/100;
+ f.zakat=Math.max(0,f.profit)*z;f.profitAfter=f.profit-f.zakat;
+ f.marginSales=f.revenue?f.profitAfter/f.revenue:null;
+ f.paidStudents=n(state.students);f.attendees=n(state.students)+n(state.grants);
+ f.costPerStudent=f.paidStudents?f.estimated/f.paidStudents:null;
+ f.profitPerStudent=f.paidStudents?f.profitAfter/f.paidStudents:null;
+ f.profitPerStudentDay=f.paidStudents&&n(state.days)?f.profitAfter/f.paidStudents/n(state.days):null;
+ return f;
+};
+/* Compute another camp's figures with the exact same code path. */
+function eliteFiguresFor(st){const keep=state;try{state=st;return figures()}finally{state=keep}}
+
+/* Linked calculation methods, matching the spreadsheet's «أساس الحساب». */
+const ELITE_METHOD_LABEL={night:'ليلة',studentDay:'طالب/يوم',campDay:'يوم',student:'طالب',fixed:'مقطوع',unit:'كمية × سعر',personday:'أشخاص × أيام',day:'أيام × تكلفة'};
+(function addMethodOptions(){
+ const sel=$('calcMethod');
+ [['studentDay','لكل طالب يوميًا'],['night','لكل ليلة'],['campDay','لكل يوم من المعسكر'],['student','لكل طالب']].forEach(([v,t])=>{if(!sel.querySelector('option[value="'+v+'"]')){const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)}});
+})();
+function eliteItemAmount(x,st){
+ if(!LINKED_METHODS[x.method])return n(x.amount);
+ return eliteLinkedQty(x.method,st)*n(x.unitPrice)+n(x.extra);
+}
+function eliteSyncLinked(){
+ if(budgetLocked())return false;let changed=false;
+ state.items.forEach(x=>{if(!LINKED_METHODS[x.method])return;const q=eliteLinkedQty(x.method,state),a=q*n(x.unitPrice)+n(x.extra);if(Math.abs(a-n(x.amount))>0.004||x.qty!==q){x.amount=a;x.qty=q;changed=true}});
+ return changed;
+}
+updateCalc=function(){
+ const m=$('calcMethod').value,status=$('itemStatus').value,editing=!!editingExpenseId,linked=!!LINKED_METHODS[m];
+ $('qtyField').style.display=m==='unit'||m==='personday'?'flex':'none';
+ $('daysField').style.display=m==='day'||m==='personday'?'flex':'none';
+ $('paidField').style.display=status==='paid'&&!editing?'flex':'none';
+ const q=n($('itemQty').value),d=n($('itemDays').value),p=n($('unitPrice').value),x=n($('extraCost').value);
+ const mult=linked?eliteLinkedQty(m,state):m==='fixed'?1:m==='day'?d:m==='personday'?q*d:q;
+ const val=mult*p+x;$('itemTotal').textContent=sar(val);
+ if(linked){$('itemQty').value=eliteLinkedQty(m,state);if(m==='studentDay')$('itemDays').value=n(state.days)}
+ return val;
+};
+if(eliteSyncLinked())save();
+
+/* ---------- Camp basics card (budget tab) ---------- */
+(function basicsCard(){
+ const host=$('categories');
+ const card=document.createElement('section');card.className='panel elite-basics';card.id='eliteBasics';card.dataset.finView='budget';card.hidden=financeActiveView!=='budget';
+ card.innerHTML='<div class="panel-header"><div><h2>أساسيات المعسكر</h2><p class="fx-note">تُدخل مرة واحدة؛ تتحدث تكاليف البنود المرتبطة (الليالي، الطالب يوميًا، اليوم، الطالب) تلقائيًا.</p></div><button type="button" class="btn primary sm" id="eliteTemplateBtn">＋ قالب موازنة النخبة</button></div>'
+ +'<div class="elite-basics-grid">'
+ +'<label class="field">الطلاب المدفوعون<input id="bStudents" class="ux-num" inputmode="decimal" autocomplete="off"></label>'
+ +'<label class="field">المنح (مقاعد مجانية)<input id="bGrants" class="ux-num" inputmode="decimal" autocomplete="off"></label>'
+ +'<label class="field">السعر للطالب شامل الضريبة (ر.س)<input id="bFee" class="ux-num" inputmode="decimal" autocomplete="off"></label>'
+ +'<label class="field">عدد الأيام<input id="bDays" class="ux-num" inputmode="decimal" autocomplete="off"></label>'
+ +'<label class="field">عدد الليالي<input id="bNights" class="ux-num" inputmode="decimal" autocomplete="off"></label>'
+ +'<label class="field">السعة المسعّرة<input id="bCapacity" class="ux-num" inputmode="decimal" autocomplete="off"></label>'
+ +'</div><div class="elite-basics-foot"><span id="bAttendees"></span><span id="bCapacityState" class="elite-cap"></span></div>'
+ +'<div class="elite-excluded"><b>غير محتسبة حاليًا:</b> '+ELITE_EXCLUDED.cancelled+' <span>·</span> <b>للتذكير دون تسعير:</b> '+ELITE_EXCLUDED.reminder+'</div>';
+ host.insertAdjacentElement('beforebegin',card);
+ const map={bStudents:'students',bGrants:'grants',bFee:'fee',bDays:'days',bNights:'nights',bCapacity:'capacity'};
+ Object.entries(map).forEach(([id,key])=>$(id).addEventListener('input',e=>{
+  if(!guardBudget()){e.target.value=state[key];return}
+  state[key]=n(e.target.value);eliteSyncLinked();save();render();
+ }));
+ $('eliteTemplateBtn').onclick=eliteApplyTemplate;
+})();
+function eliteRefreshBasics(){
+ const map={bStudents:'students',bGrants:'grants',bFee:'fee',bDays:'days',bNights:'nights',bCapacity:'capacity'},locked=budgetLocked();
+ Object.entries(map).forEach(([id,k])=>{const el=$(id);if(document.activeElement!==el)el.value=n(state[k]);el.disabled=locked});
+ $('eliteTemplateBtn').disabled=locked;
+ const att=n(state.students)+n(state.grants),cap=n(state.capacity);
+ $('bAttendees').textContent='المشاركون الفعليون: '+fmt(att)+' طالب ('+fmt(state.students)+' مدفوع + '+fmt(state.grants)+' منحة) · '+fmt(state.days)+' أيام / '+fmt(state.nights)+' ليالٍ';
+ const over=cap>0&&att>cap;
+ $('bCapacityState').textContent=!cap?'السعة غير محددة':over?'⚠ تجاوز السعة المسعّرة — حدّث السكن والفريق والنقل، لا العدد فقط':'ضمن السعة المسعّرة';
+ $('bCapacityState').className='elite-cap '+(over?'bad':cap?'ok':'');
+}
+const ELITE_TEMPLATE=[
+ ['السكن','stay','night',3000,'سعر الليلة للمجموعة — عدّله حسب عرض السكن'],['الوجبات والماء','meals','studentDay',40,'تكلفة الطالب يوميًا'],
+ ['السناكات','meals','studentDay',5,'5 ريالات يوميًا'],['مكافآت الفريق','staff','campDay',1540,'إجمالي مكافآت الفريق لليوم'],
+ ['الرحلات والتجارب','trips','student',150,'تكلفة الطالب'],['النقل','transport','fixed',2000,'مبلغ إجمالي'],['المفارش','supplies','student',55,'55 ريالًا للمفرش'],
+ ['التصوير','marketing','fixed',1800,'مبلغ إجمالي'],['التشغيل والسلامة','safety','fixed',1500,'مبلغ إجمالي'],['تحسين التجربة','trips','fixed',3000,'إضافة على البنود الأخرى']
+];
+function eliteApplyTemplate(){
+ if(!guardBudget())return;
+ const have=new Set(state.items.map(x=>x.name.trim()));
+ const add=ELITE_TEMPLATE.filter(l=>!have.has(l[0]));
+ if(!add.length){alert('بنود قالب النخبة العشرة موجودة بالفعل في هذا المعسكر.');return}
+ if(!n(state.days)||!n(state.students)){if(!confirm('لم تُحدد الأيام أو عدد الطلاب بعد؛ ستظهر البنود المرتبطة بصفر حتى تُدخلها. متابعة؟'))return}
+ const now=Date.now();
+ add.slice().reverse().forEach((l,i)=>{const q=eliteLinkedQty(l[2],state);state.items.unshift({id:'t'+now+i,name:l[0],cat:l[1],method:l[2],unitPrice:l[3],extra:0,qty:q,days:n(state.days),amount:q*l[3],paid:0,status:'estimated',vendor:'',due:'',ref:'',notes:l[4],payments:[]})});
+ audit('تطبيق قالب موازنة النخبة',add.length+' بنود بأسعار افتراضية — راجعها مع عروض الموردين');save();render();
+}
+
+/* ---------- Zakat provision setting (revenue › tax settings) ---------- */
+(function zakatField(){
+ const vat=$('campVatRate')?.closest('label');if(!vat)return;
+ const l=document.createElement('label');l.className='field';l.innerHTML='مخصص الزكاة التقديري (% من الربح الموجب)<input id="campZakatRate" class="ux-num" inputmode="decimal" autocomplete="off">';
+ vat.after(l);
+ $('campZakatRate').addEventListener('input',e=>{if(!guardBudget())return;state.zakatRate=Math.min(100,n(e.target.value));save();render()});
+})();
+
+/* ---------- All camps dashboard ---------- */
+FIN_VIEWS.push(['portfolio','جميع المعسكرات','موازنة كل المعسكرات في لوحة واحدة: المبيعات والتكلفة والربح بعد المخصص، وتحليل البنود، ومقارنة بالمعسكرات السابقة.','لوحة السنة']);
+(function portfolioView(){
+ const nav=$('finWorkspaceNav');
+ const tab=document.createElement('button');tab.type='button';tab.setAttribute('role','tab');tab.dataset.finTab='portfolio';tab.setAttribute('aria-selected','false');tab.className='fin-tab';
+ tab.innerHTML='<span class="fin-tab-icon">▤</span><span>جميع المعسكرات</span>';nav.appendChild(tab);
+ const sec=document.createElement('section');sec.id='elitePortfolio';sec.dataset.finView='portfolio';sec.hidden=true;
+ const anchor=document.querySelector('p.footer');anchor.insertAdjacentElement('beforebegin',sec);
+ sec.addEventListener('click',e=>{const r=e.target.closest('[data-open-camp]');if(r)eliteOpenCamp(r.dataset.openCamp,r.dataset.campName)});
+ sec.addEventListener('keydown',e=>{const r=e.target.closest('[data-open-camp]');if(r&&(e.key==='Enter'||e.key===' ')){e.preventDefault();eliteOpenCamp(r.dataset.openCamp,r.dataset.campName)}});
+})();
+function eliteOpenCamp(id,name){
+ if(id===financeCampId){financeActivateView('budget');return}
+ try{const b=window.parent!==window&&window.parent.document.querySelector('[data-fin-camp="'+CSS.escape(id)+'"]');if(b){b.click();return}}catch(e){}
+ location.href='finance-exact.html?embed=1&camp='+encodeURIComponent(id)+'&campName='+encodeURIComponent(name||id);
+}
+function eliteCampList(){
+ let camps=[];
+ try{const s=JSON.parse(localStorage.getItem('elite-select-v1'));if(s&&Array.isArray(s.camps))camps=s.camps.map(c=>({id:c.id,name:c.meta?.campAr||c.id,start:c.meta?.start||''}))}catch(e){}
+ if(!camps.length)camps=ELITE_SEED_CAMPS.map(c=>({id:c.id,name:c.name,start:''}));
+ return camps.map(c=>{
+  let st=null;
+  if(c.id===financeCampId)st=state;else{try{st=JSON.parse(localStorage.getItem('elitefinance-v3-camp:'+c.id))}catch(e){}}
+  if(st){st=c.id===financeCampId?st:eliteNormalize(st);if(c.id!==financeCampId)st.items.forEach(x=>{if(LINKED_METHODS[x.method])x.amount=eliteItemAmount(x,st)})}
+  const f=st?eliteFiguresFor(st):null;
+  return {...c,st,f,sort:(st&&st.month)||c.start||'9999'};
+ }).sort((a,b)=>String(a.sort).localeCompare(String(b.sort)));
+}
+function eliteRenderPortfolio(){
+ const sec=$('elitePortfolio');if(!sec||sec.hidden)return;
+ const all=eliteCampList(),rows=all.filter(c=>c.f&&c.f.estimated>0&&c.f.revenue>0),empty=all.filter(c=>!(c.f&&c.f.estimated>0&&c.f.revenue>0));
+ const pct1=v=>v===null||!Number.isFinite(v)?'—':(v*100).toFixed(1)+'%';
+ const sum=k=>rows.reduce((a,c)=>a+(c.f[k]||0),0);
+ const T={sales:sum('revenue'),cost:sum('estimated'),zakat:sum('zakat'),after:sum('profitAfter'),before:sum('profit'),vat:sum('vatSales'),net:sum('netRevenue'),collected:sum('actualRevenue'),paid:sum('actual'),seats:rows.reduce((a,c)=>a+n(c.st.students),0)};
+ const kpi=(l,v,s,cls)=>'<div class="ux-p"><small>'+l+'</small><b class="'+(cls||'')+'">'+v+'</b><span>'+(s||'')+'</span></div>';
+ let html='<section class="ux-pulse elite-year">'
+  +kpi('المعسكرات المخططة',fmt(rows.length),fmt(T.seats)+' مقعدًا مدفوعًا')
+  +kpi('المبيعات شاملة الضريبة',sar(T.sales),'ضريبة المبيعات '+sar(T.vat))
+  +kpi('التكاليف',sar(T.cost),'تكلفة الطالب '+(T.seats?sar(T.cost/T.seats):'—'))
+  +kpi('الربح بعد مخصص الزكاة',sar(T.after),'قبل المخصص '+sar(T.before)+' · المخصص '+sar(T.zakat),T.after<0?'neg':'pos')
+  +kpi('هامش الربح من المبيعات',pct1(T.sales?T.after/T.sales:null),'المحصّل حتى الآن '+sar(T.collected))+'</section>';
+ // per camp table
+ const maxAfter=Math.max(1,...rows.map(c=>Math.abs(c.f.profitAfter)));
+ html+='<div class="panel elite-pf"><div class="panel-header"><div><h2>موازنة المعسكرات</h2><p class="fx-note">اضغط على أي معسكر لفتح ميزانيته. الأرقام محسوبة من بنود كل معسكر مباشرة.</p></div></div><div class="table-wrap"><table class="elite-table"><thead><tr><th>المعسكر</th><th>الأيام</th><th>الطلاب</th><th>السعر</th><th>المبيعات</th><th>التكلفة</th><th>مخصص الزكاة</th><th>الربح بعد المخصص</th><th>الهامش</th><th>حصة الربح</th><th>تكلفة الطالب</th><th>ربح الطالب يوميًا</th></tr></thead><tbody>'
+  +rows.map(c=>{const f=c.f,st=c.st;return '<tr data-open-camp="'+esc(c.id)+'" data-camp-name="'+esc(c.name)+'" tabindex="0" class="'+(c.id===financeCampId?'current':'')+'"><td><b>'+esc(c.name)+'</b>'+(st.monthLabel?'<div class="fin-meta">'+esc(st.monthLabel)+'</div>':'')+'</td><td>'+fmt(st.days)+'</td><td>'+fmt(st.students)+(n(st.grants)?' <small>+'+fmt(st.grants)+' منحة</small>':'')+'</td><td>'+fmt(st.fee)+'</td><td>'+fmt(f.revenue)+'</td><td>'+fmt(f.estimated)+'</td><td>'+fmt(f.zakat)+'</td><td><b class="'+(f.profitAfter<0?'fx-bad':'fx-good')+'">'+fmt(f.profitAfter)+'</b><i class="elite-mini"><span style="width:'+(Math.abs(f.profitAfter)/maxAfter*100).toFixed(1)+'%"></span></i></td><td>'+pct1(f.marginSales)+'</td><td>'+pct1(T.after?f.profitAfter/T.after:null)+'</td><td>'+(f.costPerStudent===null?'—':fmt(f.costPerStudent))+'</td><td>'+(f.profitPerStudentDay===null?'—':fmt(f.profitPerStudentDay))+'</td></tr>'}).join('')
+  +(rows.length?'<tr class="elite-total"><td>الإجمالي</td><td></td><td>'+fmt(T.seats)+'</td><td></td><td>'+fmt(T.sales)+'</td><td>'+fmt(T.cost)+'</td><td>'+fmt(T.zakat)+'</td><td>'+fmt(T.after)+'</td><td>'+pct1(T.sales?T.after/T.sales:null)+'</td><td>100%</td><td>'+(T.seats?fmt(T.cost/T.seats):'—')+'</td><td></td></tr>':'<tr><td colspan="12"><div class="empty">لا توجد معسكرات بميزانية مكتملة بعد.</div></td></tr>')
+  +'</tbody></table></div>'
+  +(empty.length?'<p class="fx-note">دون ميزانية مكتملة: '+empty.map(c=>'<button type="button" class="elite-link" data-open-camp="'+esc(c.id)+'" data-camp-name="'+esc(c.name)+'">'+esc(c.name)+'</button>').join('، ')+'</p>':'')
+  +'<p class="fx-note">المبيعات شاملة ضريبة القيمة المضافة 15٪. الربح قبل المصاريف المركزية والشراكات غير المحددة. مخصص الزكاة تقديري وليس احتساب الوعاء النظامي.</p></div>';
+ // cost analysis by line
+ const lines={};rows.forEach(c=>c.st.items.forEach(x=>{const k=x.name.trim();if(!lines[k])lines[k]={total:0,count:0,per:{}};lines[k].total+=n(x.amount);if(n(x.amount)>0){lines[k].count++;}lines[k].per[c.id]=(lines[k].per[c.id]||0)+n(x.amount)}));
+ const ranked=Object.entries(lines).filter(([,v])=>v.total>0).sort((a,b)=>b[1].total-a[1].total);
+ const maxLine=Math.max(1,...ranked.map(([,v])=>v.total));
+ html+='<div class="panel elite-pf"><div class="panel-header"><div><h2>تحليل التكلفة حسب البند</h2><p class="fx-note">مرتب من الأعلى تكلفة؛ التكرار = عدد المعسكرات التي فيها تكلفة موجبة للبند.</p></div></div><div class="elite-costs">'
+  +ranked.map(([k,v],i)=>'<div class="elite-cost-row"><span class="rank">'+(i+1)+'</span><span class="name">'+esc(k)+'</span><i class="elite-bar"><span style="width:'+(v.total/maxLine*100).toFixed(1)+'%"></span></i><b>'+sar(v.total)+'</b><small>'+pct1(T.cost?v.total/T.cost:null)+' · '+v.count+' من '+rows.length+'</small></div>').join('')
+  +'</div></div>';
+ // history comparison
+ const P=ELITE_PAST_CAMPS,pSeats=P.reduce((a,c)=>a+c.seats,0),pRev=P.reduce((a,c)=>a+c.revenue,0),pRes=P.reduce((a,c)=>a+c.result,0);
+ const ind=[['عدد المعسكرات',P.length,rows.length,0],['مقاعد المشاركة',pSeats,T.seats,0],['إجمالي الإيرادات',pRev,T.sales,1],['إجمالي النتائج',pRes,T.after,1],['متوسط الإيراد للمعسكر',pRev/P.length,rows.length?T.sales/rows.length:0,1],['متوسط الربح للمعسكر',pRes/P.length,rows.length?T.after/rows.length:0,1],['الربح لكل مقعد',pRes/pSeats,T.seats?T.after/T.seats:0,1]];
+ html+='<div class="panel elite-pf"><div class="panel-header"><div><h2>مقارنة بالمعسكرات السابقة</h2><p class="fx-note">السابق: آخر نتيجة مسجلة · المخطط: الربح بعد مخصص الزكاة التقديري. المعالجة الضريبية للسابق غير موحدة مع 2027.</p></div></div>'
+  +'<div class="elite-compare"><div class="table-wrap"><table class="elite-table"><thead><tr><th>المؤشر</th><th>السابق ('+P.length+')</th><th>المخطط ('+rows.length+')</th><th>التغير</th></tr></thead><tbody>'
+  +ind.map(([l,a,b,money])=>{const ch=a?(b-a)/a:null;return '<tr><td>'+l+'</td><td>'+(money?sar(a):fmt(a))+'</td><td>'+(money?sar(b):fmt(b))+'</td><td class="'+(ch>0?'fx-good':ch<0?'fx-bad':'')+'">'+(ch===null?'—':(ch>0?'+':'')+(ch*100).toFixed(1)+'%')+'</td></tr>'}).join('')
+  +'</tbody></table></div><div class="table-wrap"><table class="elite-table"><thead><tr><th>المعسكر السابق</th><th>الأيام</th><th>المقاعد</th><th>سعر الإعلان</th><th>متوسط التحصيل</th><th>الإيراد</th><th>النتيجة</th><th>الهامش</th><th>ربح المعسكر يوميًا</th></tr></thead><tbody>'
+  +P.map(c=>'<tr><td><b>'+esc(c.name)+'</b>'+(c.note?'<div class="fin-meta">'+esc(c.note)+'</div>':'')+'</td><td>'+c.days+'</td><td>'+c.seats+'</td><td>'+fmt(c.price)+'</td><td>'+fmt(c.revenue/c.seats)+'</td><td>'+fmt(c.revenue)+'</td><td><b class="fx-good">'+fmt(c.result)+'</b></td><td>'+pct1(c.result/c.revenue)+'</td><td>'+fmt(c.result/c.days)+'</td></tr>').join('')
+  +'</tbody></table></div></div></div>';
+ sec.innerHTML=html;
+}
+/* The fixed 2027 reference tables are now live in «جميع المعسكرات»; keep only أيام النخبة and the tax calculator there. */
+(function retireFixedReference(){
+ document.querySelectorAll('[data-fx-tab="camps"],[data-fx-tab="compare"],#fx-camps,#fx-compare').forEach(el=>el.remove());
+ const rec=document.querySelector('[data-fx-tab="recurring"]');rec?.classList.add('active');$('fx-recurring')?.classList.add('active');
+ const sum=document.querySelector('.fin-reference-wrap>summary');if(sum)sum.textContent='مرجع «أيام النخبة» وحاسبة الضريبة والمخصصات — عرض اختياري';
+})();
+
+const eliteBaseRender=render;
+render=function(){
+ eliteBaseRender.apply(this,arguments);
+ try{
+  const f=figures();
+  eliteRefreshBasics();
+  if(document.activeElement!==$('campZakatRate'))$('campZakatRate').value=n(state.zakatRate);$('campZakatRate').disabled=budgetLocked();
+  $('margin').textContent=f.marginSales===null?'—':(f.marginSales*100).toFixed(1)+'%';
+  $('costPerStudent').textContent=f.costPerStudent===null?'—':sar(f.costPerStudent);
+  eliteRenderPortfolio();
+ }catch(e){console.error(e)}
+};
+const eliteBaseActivate=financeActivateView;
+financeActivateView=function(view,opts){eliteBaseActivate(view,opts);if(view==='portfolio')eliteRenderPortfolio()};
+render();
+
 /* ===== UX v5 — calm overview, live pulse, fast entry, clear follow-up =====
    Presentation and input ergonomics only: the ledger, storage format and
    calculations above are untouched. */
@@ -1241,7 +1557,7 @@ const FX_CAMPS=[
   '<div class="ux-p"><small>الميزانية التقديرية</small><b id="uxBudget">—</b><span id="uxBudgetSub"></span></div>'+
   '<div class="ux-p"><small>المدفوع للموردين</small><b id="uxPaid">—</b><i class="ux-bar"><span id="uxPaidBar"></span></i><span id="uxPaidSub"></span></div>'+
   '<div class="ux-p"><small>المحصّل فعلياً</small><b id="uxColl">—</b><i class="ux-bar coll"><span id="uxCollBar"></span></i><span id="uxCollSub"></span></div>'+
-  '<div class="ux-p"><small>الفائض / العجز المتوقع</small><b id="uxProfit">—</b><span id="uxProfitSub"></span></div>'+
+  '<div class="ux-p"><small>الربح بعد مخصص الزكاة</small><b id="uxProfit">—</b><span id="uxProfitSub"></span></div>'+
   '<div class="ux-p"><small>الرصيد النقدي الآن</small><b id="uxCash">—</b><span>المحصّل − المدفوع للموردين</span></div>');
  nav.insertAdjacentElement('afterend',pulse);
  const heading=byId('finViewHeading');
@@ -1313,9 +1629,10 @@ const FX_CAMPS=[
   const [s1,g1]=sec('١','ما هو البند؟');[labelOf('itemName'),labelOf('itemCat')].forEach(x=>x&&g1.appendChild(x));
   const [s2,g2]=sec('٢','كيف تُحسب التكلفة؟');
   const methodSeg=el('div',{class:'ux-seg',role:'group','aria-label':'طريقة الاحتساب'},[
-   ['personday','أشخاص × أيام','مثل الإقامة والوجبات'],['unit','كمية × سعر','تذاكر، حقائب، تأمين'],['day','أيام × تكلفة يومية','إيجار حافلة، قاعة'],['fixed','مبلغ ثابت','عقد أو فاتورة واحدة']]
+   ['studentDay','لكل طالب يوميًا','الوجبات، السناكات'],['night','لكل ليلة','السكن'],['campDay','لكل يوم','مكافآت الفريق'],['student','لكل طالب','المفارش، الرحلات'],['fixed','مبلغ مقطوع','النقل، التصوير، السلامة'],['unit','كمية × سعر','حساب يدوي'],['personday','أشخاص × أيام','يدوي — بند سابق'],['day','أيام × تكلفة','يدوي — بند سابق']]
    .map(([v,t,s])=>'<button type="button" data-method="'+v+'" aria-pressed="false">'+t+'<small>'+s+'</small></button>').join(''));
   s2.insertBefore(methodSeg,g2);
+  const linkedInfo=el('p',{class:'elite-linked',id:'uxLinkedInfo'});s2.insertBefore(linkedInfo,g2);
   labelOf('calcMethod')?.classList.add('ux-hide-native');g2.appendChild(labelOf('calcMethod'));
   ['itemQty','itemDays','unitPrice','extraCost'].forEach(id=>{const l=labelOf(id);if(l)g2.appendChild(l)});
   const calcTotal=el('div',{class:'ux-calc-total'});calcTotal.appendChild(summary);s2.appendChild(calcTotal);
@@ -1350,10 +1667,17 @@ const FX_CAMPS=[
   ({personday:()=>{setLabel('itemQty','عدد الأشخاص');setLabel('itemDays','عدد الأيام / الليالي');setLabel('unitPrice','تكلفة الشخص لليوم (ر.س)')},
     unit:()=>{setLabel('itemQty','الكمية');setLabel('unitPrice','سعر الوحدة (ر.س)')},
     day:()=>{setLabel('itemDays','عدد الأيام');setLabel('unitPrice','التكلفة اليومية (ر.س)')},
-    fixed:()=>{setLabel('unitPrice','المبلغ (ر.س)')}})[m]?.();
+    fixed:()=>setLabel('unitPrice','المبلغ (ر.س)'),night:()=>setLabel('unitPrice','سعر الليلة (ر.س)'),studentDay:()=>setLabel('unitPrice','التكلفة للطالب يوميًا (ر.س)'),
+    campDay:()=>setLabel('unitPrice','التكلفة لليوم (ر.س)'),student:()=>setLabel('unitPrice','التكلفة للطالب (ر.س)')})[m]?.();
+  document.querySelectorAll('[data-method]').forEach(b=>b.hidden=(b.dataset.method==='personday'||b.dataset.method==='day')&&b.dataset.method!==m);
+  const att=n(state.students)+n(state.grants),cd=n(state.days),cn=n(state.nights),info=byId('uxLinkedInfo');
+  if(LINKED_METHODS[m]){const need=m==='night'?(cn?'':'الليالي'):m==='campDay'?(cd?'':'الأيام'):m==='student'?(att?'':'الطلاب'):(!att?'الطلاب':!cd?'الأيام':'');
+   info.hidden=false;info.className='elite-linked'+(need?' warn':'');
+   info.textContent=need?'⚠ أدخل '+need+' في «أساسيات المعسكر» بتبويب الميزانية ليُحسب هذا البند.':'مرتبط بأساسيات المعسكر: '+({night:fmt(cn)+' ليلة',campDay:fmt(cd)+' يوم',student:fmt(att)+' طالب',studentDay:fmt(att)+' طالب × '+fmt(cd)+' يوم = '+fmt(att*cd)})[m]+' — يتحدث تلقائيًا عند تغييرها.';}
+  else info.hidden=true;
   const q=n(byId('itemQty').value),d=n(byId('itemDays').value),p=n(byId('unitPrice').value),x=n(byId('extraCost').value);
-  const parts=m==='personday'?[q,d,p]:m==='unit'?[q,p]:m==='day'?[d,p]:[p];
-  byId('formulaText').textContent=parts.map(fmt).join(' × ')+(x?' + '+fmt(x):'')+' = '+sar(updateCalcValue());
+  const parts=m==='personday'?[q,d,p]:m==='unit'?[q,p]:m==='day'?[d,p]:m==='studentDay'?[att,cd,p]:m==='night'?[cn,p]:m==='campDay'?[cd,p]:m==='student'?[att,p]:[p];
+  byId('formulaText').textContent=parts.map(fmt).join(' × ')+(x?' + '+fmt(x):'')+' = '+sar(updateCalc());
   byId('saveItem').textContent=editing?'حفظ التعديلات':'حفظ البند';
   byId('uxSaveNext').hidden=editing;
   if(opening){const more=byId('uxMoreDetails');more.open=s!=='estimated'||!!(byId('itemVendor').value||byId('itemDue').value||byId('itemRef').value||byId('itemNotes').value)}
@@ -1404,6 +1728,7 @@ const FX_CAMPS=[
    const x=rows[i];if(!x)return;
    const hay=[x.name,x.vendor,x.ref,x.notes,state.categories.find(c=>c.id===x.cat)?.name].join(' ').toLowerCase();
    const show=!query||hay.includes(query);tr.hidden=!show;
+   if(LINKED_METHODS[x.method]||x.method==='fixed'){const meta=tr.querySelector('td:first-child');if(meta&&!meta.querySelector('.elite-basis')){const q=LINKED_METHODS[x.method]?eliteLinkedQty(x.method,state):1;meta.insertAdjacentHTML('beforeend','<div class="fin-meta elite-basis">'+ELITE_METHOD_LABEL[x.method]+(LINKED_METHODS[x.method]?': '+fmt(q)+' × '+(Math.abs(n(x.unitPrice)-Math.round(n(x.unitPrice)))>0.004?n(x.unitPrice).toFixed(2):fmt(x.unitPrice))+(n(x.extra)?' + '+fmt(x.extra):''):'')+'</div>')}}
    if(isOverdue(x)){tr.classList.add('ux-overdue');const b=tr.querySelector('td b');if(b&&!tr.querySelector('.ux-overdue-tag'))b.insertAdjacentHTML('afterend','<span class="ux-overdue-tag">متأخر السداد</span>')}
    if(show){tot.a+=n(x.amount);tot.p+=n(x.paid);tot.r+=Math.max(0,n(x.amount)-n(x.paid));tot.c++}
   });
@@ -1422,8 +1747,8 @@ const FX_CAMPS=[
   const today=localDay();
   const overdue=state.items.filter(isOverdue);
   const tasks=[];
-  if(!state.items.length)tasks.push({t:'ابدأ بإضافة أول بند مصروف',d:'مثل إقامة الطلاب أو استئجار الحافلة — يمكنك تعديله لاحقاً.',b:'＋ إضافة بند',go:()=>newItem()});
-  if(!n(state.students)||!n(state.fee))tasks.push({t:'حدّد عدد الطلاب ورسوم الطالب',d:'بدونهما لا يمكن حساب الإيرادات المتوقعة أو الفائض أو نقطة التعادل.',b:'إدخال الطلاب والرسوم',go:()=>{financeActivateView('revenue');setTimeout(()=>{byId(n(state.students)?'studentFee':'studentCount').focus();financeBringIntoView(byId('revenues'))},50)}});
+  if(!n(state.students)||!n(state.fee)||!n(state.days))tasks.push({t:'أكمل أساسيات المعسكر',d:'الطلاب المدفوعون والسعر والأيام والليالي — تُبنى عليها التكاليف المرتبطة والإيرادات.',b:'إدخال الأساسيات',go:()=>{financeActivateView('budget');setTimeout(()=>{const id=!n(state.students)?'bStudents':!n(state.fee)?'bFee':'bDays';financeBringIntoView(byId('eliteBasics'));byId(id).focus()},60)}});
+  if(!state.items.length)tasks.push({t:'ابدأ ببنود موازنة النخبة',d:'يضيف القالب البنود العشرة المعتمدة بأسعار افتراضية تعدّلها حسب عروض الموردين.',b:'تطبيق القالب',go:()=>{financeActivateView('budget');eliteApplyTemplate()}});
   if(overdue.length)tasks.push({t:overdue.length+' التزام متأخر السداد',d:overdue.slice(0,3).map(x=>x.name+' ('+sar(n(x.amount)-n(x.paid))+')').join('، '),b:'تسجيل دفعة',go:()=>{if(overdue.length===1){financeActivateView('budget');openPayment(overdue[0].id)}else{financeActivateView('budget');filter='committed';document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.filter==='committed'));render();financeBringIntoView(byId('expenses'))}}});
   const missingRef=state.items.filter(x=>x.status!=='estimated'&&!x.ref&&!x.vendor);
   if(state.items.length&&n(state.students)&&n(state.fee)&&state.approval.status==='draft')tasks.push({t:'أرسل الميزانية للاعتماد',d:'التقديرات جاهزة: راجعها ثم أرسلها للمراجعة لتثبيتها.',b:'مراجعة واعتماد',go:()=>{financeActivateView('control');financeBringIntoView(byId('financeApproval'))}});
@@ -1442,8 +1767,8 @@ const FX_CAMPS=[
   set('uxColl',sar(f.actualRevenue));const cp=pct(f.actualRevenue,f.revenue);byId('uxCollBar').style.width=Math.min(100,cp)+'%';
   set('uxCollSub',f.revenue?cp+'% من المتوقع '+sar(f.revenue):'حدّد الطلاب والرسوم');
   const ready=f.revenue>0&&f.estimated>0;
-  set('uxProfit',ready?sar(f.profit):'—');byId('uxProfit').className=ready?(f.profit<0?'neg':'pos'):'';
-  set('uxProfitSub',ready?(f.netRevenue?'هامش '+(f.profit/f.netRevenue*100).toFixed(1)+'% بعد الضريبة المفترضة':''):'يحتاج تكاليف وإيرادات');
+  set('uxProfit',ready?sar(f.profitAfter):'—');byId('uxProfit').className=ready?(f.profitAfter<0?'neg':'pos'):'';
+  set('uxProfitSub',ready?'هامش '+(f.marginSales*100).toFixed(1)+'% من المبيعات · قبل المخصص '+sar(f.profit):'يحتاج تكاليف وإيرادات');
   const cash=f.actualRevenue-f.actual;set('uxCash',sar(cash));byId('uxCash').className=cash<0?'neg':cash>0?'pos':'';
   // revenue card
   const expT=n(state.students)*n(state.fee),gotT=actualTuition(),p2=pct(gotT,expT);
