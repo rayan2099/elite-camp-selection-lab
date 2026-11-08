@@ -350,6 +350,8 @@ td select,td input{border:1px solid var(--line);background:var(--surface);border
 
 .brick{position:relative;color:#fff;border-radius:8px;padding:8px 11px 7px;font-size:12px;line-height:1.45;cursor:grab;background:var(--bc);
   box-shadow:0 3px 0 rgba(0,0,0,.18), inset 0 -2px 0 rgba(0,0,0,.12);margin-top:11px;user-select:none;transition:transform .12s}
+.brick{border:1px solid rgba(255,255,255,.28)}
+.brick .brick-symbol{color:#fff}
 .brick:hover{transform:translateY(-1px)}
 .brick:active{cursor:grabbing}
 .brick .studs{position:absolute;top:-5px;inset-inline-start:9px;display:flex;gap:4px;pointer-events:none}
@@ -2142,12 +2144,13 @@ function uiIcon(name){
   return `<svg class="ui-line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.layers}</svg>`;
 }
 
+const ELITE_TRAY_COLORS=['#2563eb','#0f766e','#7c3aed','#be123c','#b45309','#15803d','#4338ca','#c2410c','#0369a1','#a21caf'];
 function brickEl(i,opts){
   opts=opts||{};
   const t=TRACK(i.t);
   const sub=opts.sub||'';
   const drag=opts.drag===false?'false':'true';
-  return `<div class="brick ${opts.mini?'mini':''} ${held===i.id?'held':''}" style="--bc:${t.color}" draggable="${drag}" data-brick="${i.id}" title="${esc(L({ar:i.ar,en:i.en}))}">
+  return `<div class="brick ${opts.mini?'mini':''} ${held===i.id?'held':''}" style="--bc:${opts.color||t.color}" draggable="${drag}" data-brick="${i.id}" title="${esc(L({ar:i.ar,en:i.en}))}">
     <span class="brick-symbol">${uiIcon(TRACKICON[i.t])}</span>
     <b>${esc(L({ar:i.ar,en:i.en}))}</b>
     ${sub?`<div class="meta">${sub}</div>`:''}
@@ -2267,8 +2270,7 @@ function stepBricks(){
       <div class="card">
         <div class="row"><h2>${T('البرامج غير الموزّعة','Unassigned programs')}</h2><span class="pill orange">${tray.length}</span></div>
         <p class="help" style="margin:6px 0 10px">${T('البرامج المختارة التي لم يُحدد لها يوم بعد.','Bricks not yet snapped to a day.')}</p>
-        ${tray.length?tray.slice(0,8).map(x=>brickEl(ITEM(x.id),{sub:`<span>${T('لم يُحدّد له يوم','Not yet assigned')}</span>`})).join(''):`<div class="empty">${T('لا توجد برامج تنتظر التوزيع.','No unassigned programs.')}</div>`}
-        ${tray.length>8?`<p class="help">+ ${tray.length-8}</p>`:''}
+        ${tray.length?tray.map((x,index)=>brickEl(ITEM(x.id),{color:ELITE_TRAY_COLORS[index%ELITE_TRAY_COLORS.length],sub:`<span>${T('لم يُحدّد له يوم','Not yet assigned')}</span>`})).join(''):`<div class="empty">${T('لا توجد برامج تنتظر التوزيع.','No unassigned programs.')}</div>`}
         <button class="small" data-act="step:3" style="margin-top:10px">${T('انتقل لتوزيع البرامج ←','Allocate programs ←')}</button>
       </div>
       <div class="card spacer">
