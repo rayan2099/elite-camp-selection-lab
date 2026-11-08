@@ -162,6 +162,11 @@ small{font-size:12px}
 .elite-time-analysis .elite-time-card .elite-time-card-value .elite-quantity-unit{font-size:.52em;line-height:1.2;font-weight:700;color:var(--muted)}
 @media(max-width:900px){.elite-time-analysis .elite-time-card .elite-time-card-value{font-size:clamp(30px,3.3vw,40px)}}
 @media(max-width:640px){.elite-time-analysis .elite-time-card .elite-time-card-value{font-size:clamp(32px,7vw,42px)}}
+.elite-sport-pickbox{padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--soft);direction:rtl;text-align:right}
+.elite-sport-radio{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:10px 0}
+.elite-sport-radio-item{display:flex;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);font-size:12px;cursor:pointer}
+.elite-sport-radio-item:has(input:checked){background:var(--accentsoft);border-color:var(--accent);font-weight:700}
+.elite-sport-radio-item input{accent-color:var(--accent)}
 /* ---------- contextual manager guidance ---------- */
 .admin-guide{background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid var(--accent);border-radius:12px;padding:12px 15px;margin:0 0 17px;box-shadow:var(--shadow);font-size:12.5px}
 .admin-guide-row{display:flex;gap:10px;align-items:flex-start}
@@ -2547,7 +2552,7 @@ function dayTimeline(day,opts){
                 <span class="tlname">${esc(L({ar:it.i.ar,en:it.i.en}))}</span>
                 <span class="tlmeta">${esc(L(t.short))} · ${it.x.pri==='core'?T('أساسي','core'):T('مساند','support')}</span>
                 ${o.why&&it.x.why?`<small class="tlwhy">${esc(it.x.why)}</small>`:''}
-                ${(it.x.activityBreakdown||it.i.activityBreakdown)?`<small class="tlwhy" style="display:block">${esc(it.x.activityBreakdown||it.i.activityBreakdown)}</small>`:''}
+                ${(it.x.sportChoice||it.i.sportChoice)?`<small class="tlwhy" style="display:block;font-weight:700">${esc(sportName(it.x.sportChoice||it.i.sportChoice))}</small>`:''}${(it.x.activityBreakdown||it.i.activityBreakdown)?`<small class="tlwhy" style="display:block">${esc(it.x.activityBreakdown||it.i.activityBreakdown)}</small>`:''}
                 ${o.why?`<button type="button" class="small noprint" data-act="editScheduleProgram:${it.x.id}" ${can('select')?'':'disabled'} style="margin-inline-start:auto">${T('تعديل البرنامج','Edit program')}</button>`:''}
               </div>`}).join('')
           : customActivity?`<span class="pill good">${T('نشاط مُحدد يدويًا','Custom activity assigned')}</span>`:`<span class="tlhint">${T('لم يُحدد برنامج أو نشاط بعد','No program or activity assigned')}</span>`)
@@ -3574,7 +3579,7 @@ let customProgramReturnPage='library';
 function customBreakdownSource(track,field){
  const same=LIB.filter(i=>!i.custom&&i.t===track&&i.f===field);
  const others=LIB.filter(i=>!i.custom&&i.t===track&&i.f!==field);
- const programs=[...same,...others].slice(0,12);
+ const programs=[...same,...others];
  const seen=new Set(),options=[];
  for(const program of programs){
   for(const [n,phase] of (program.ph||[]).entries()){
@@ -3591,7 +3596,7 @@ function customBreakdownSource(track,field){
    }
   }
  }
- return options.sort((a,b)=>Number(b.match)-Number(a.match)).slice(0,60);
+ return options.sort((a,b)=>Number(b.match)-Number(a.match));
 }
 function customBreakdownOptions(track,field,selected=[]){
  const chosen=new Set(selected.map(v=>String(v).trim()));
@@ -3604,7 +3609,8 @@ function refreshCustomBreakdowns(){
  const track=$('#cpTrack')?.value,field=$('#cpField')?.value;
  if(!wrap||!track||!field)return;
  // Keep existing manual entries. Selected library options are intentionally context-specific.
- wrap.innerHTML=customBreakdownOptions(track,field);
+ wrap.innerHTML=track==='sport'?'':customBreakdownOptions(track,field);
+ const picker=$('#cpSportPicker');if(picker)picker.innerHTML=track==='sport'?sportPicker({t:track,f:field},'', 'customSport'):'';
 }
 function customProgramModal(id){
   if(!id)customProgramReturnPage=page;
@@ -3625,7 +3631,7 @@ function customProgramModal(id){
       <div class="fld wide elite-subactivities" dir="rtl">
         <b>${T('تفريعات النشاط — اختر من المكتبة أو أضف يدويًا','Subactivities — select from library or add your own')}</b>
         <p class="help">${T('تظهر خيارات مستمدة من البرامج الموجودة في وثيقة الأكاديمية بحسب المسار والمجال. يمكن اختيار أكثر من تفريعة، وتُحفظ جميع الاختيارات في البرنامج.','Related options are drawn from the academy programme library for the selected track and field. Choose multiple options or enter custom ones.')}</p>
-        <div id="cpSuggestedBreakdowns" class="elite-phase-options">${customBreakdownOptions(i.t,i.f,(i.activityBreakdown||'').split('\n'))}</div>
+        <div id="cpSportPicker">${i.t==='sport'?sportPicker(i,i.sportChoice||'', 'customSport',(i.activityBreakdown||'').split('\n')):''}</div><div id="cpSuggestedBreakdowns" class="elite-phase-options">${i.t==='sport'?'':customBreakdownOptions(i.t,i.f,(i.activityBreakdown||'').split('\n'))}</div>
         <label class="fld" style="margin-top:12px">${T('تفريعات يدوية إضافية (كل تفريعة في سطر)','Additional manual subactivities (one per line)')}
           <textarea id="cpActivityBreakdown" dir="rtl" maxlength="3000" rows="3" placeholder="${T('أضف تفريعات جديدة غير موجودة في الخيارات أعلاه…','Add subactivities not offered above…')}">${esc((i.activityBreakdown||'').split('\n').filter(v=>v.trim()&&!customBreakdownSource(i.t,i.f).some(o=>o.value===v.trim())).join('\n'))}</textarea>
         </label>
@@ -3703,7 +3709,9 @@ function saveCustomProgram(id){
   if(LIB.some(x=>x.id!==id&&x.ar.trim().toLowerCase()===ar.toLowerCase()))return toast(T('يوجد برنامج بهذا الاسم في المكتبة.','A program with this name already exists.'));
   const original=id?ITEM(id):null;
   if(id&&(!original||!original.custom))return;
-  const item={id:id||newId('CUSTOM-'),custom:true,t,f,ar,en,ages:[min,max],load,activityType:v('cpActivityType'),activityBreakdown:[...new Set([...$('[data-cp-breakdown]:checked').map(el=>el.value.trim()),...v('cpActivityBreakdown').split(/\r?\n/).map(v=>v.trim()).filter(Boolean)])].join('\n'),
+  const sportChoice=t==='sport'?$('[name="customSport"]:checked')?.value||'':'';
+  if(t==='sport'&&!sportChoice)return toast(T('اختر رياضة واحدة.','Select one sport.'));
+  const item={id:id||newId('CUSTOM-'),custom:true,t,f,ar,en,ages:[min,max],load,activityType:v('cpActivityType'),sportChoice,activityBreakdown:[...new Set([...$('[data-cp-breakdown]:checked').map(el=>el.value.trim()),...v('cpActivityBreakdown').split(/\r?\n/).map(v=>v.trim()).filter(Boolean)])].join('\n'),
     goal:{ar:goal,en:goal},
     need:$$('[data-custom-need]:checked').map(x=>x.dataset.customNeed),
     tags:$$('[data-custom-tag]:checked').map(x=>x.dataset.customTag),
@@ -3771,6 +3779,41 @@ const ELITE_SPORT_SUBACTIVITIES={
  SP4:['الروح الرياضية','الانضباط','اللعب النظيف','احترام المنافس','ورشة القيم في الملعب','تحكيم الطلاب','جائزة اللاعب القدوة','ضبط الانفعالات','التعامل مع الخسارة','التفكير تحت الضغط'],
  SP5:['دوري كرة القدم','دوري كرة السلة','دوري الكرة الطائرة','بطولة اللياقة البدنية','دوري السباحة الصيفي','المباريات الودية','البطولات المحلية والإقليمية','التحكيم','نشر النتائج','الكؤوس والميداليات']
 };
+const SPORTS_SINGLE={
+ SP1:[['fitness','اللياقة البدنية']],
+ SP2:[['football','كرة القدم'],['basketball','كرة السلة'],['volleyball','كرة الطائرة'],['handball','كرة اليد'],['tug','شد الحبل'],['water','الألعاب المائية الجماعية']],
+ SP3:[['swim','السباحة'],['taekwondo','التايكوندو'],['karate','الكاراتيه'],['gymnastics','الجمباز'],['athletics','ألعاب القوى'],['tennis','التنس']],
+ SP4:[['values','القيم والتوازن في الملعب']],
+ SP5:[['footballleague','دوري كرة القدم'],['basketleague','دوري كرة السلة'],['volleyleague','دوري الكرة الطائرة'],['fitnesscup','بطولة اللياقة'],['swimleague','دوري السباحة'],['friendly','المباريات الودية']]
+};
+const SPORTS_DETAILS={
+ fitness:['التحمل','السرعة','القوة','المرونة','التوازن','كروس فت مصغر','الوثب','الضغط','الجري','اختبارات قياس التطور','سباقات جماعية','كأس اللياقة'],
+ football:['التحكم بالكرة','التمرير','المراوغة','التصويب','الدفاع','المبادئ التكتيكية','الخماسيات السريعة'],
+ basketball:['التنطيط','التمرير','التصويب','الرميات الحرة','الدفاع'],
+ volleyball:['الإرسال','الاستقبال','الضرب الساحق','حائط الصد','التمرير'],
+ handball:['التمرير','التصويب','الدفاع'],tug:['شد الحبل','التعاون'],water:['صيد الكرات','الألعاب المائية الجماعية'],
+ swim:['تعلم الأساسيات','سباقات قصيرة','مسابقات غطس','مستوى مبتدئ','مستوى متوسط','مستوى متقدم'],
+ taekwondo:['الدفاع عن النفس','حركات أساسية','عروض مهارية'],karate:['الدفاع عن النفس','حركات أساسية','عروض مهارية'],
+ gymnastics:['حركات أساسية','التوازن','عروض مهارية'],athletics:['الجري القصير','الوثب الطويل','رمي الكرة الطبية'],
+ tennis:['الإرسال','الاستقبال','ضربات أمامية وخلفية','مباراة تطبيقية'],
+ values:['الروح الرياضية','الانضباط','اللعب النظيف','احترام المنافس','ورشة القيم في الملعب','تحكيم الطلاب','جائزة اللاعب القدوة','ضبط الانفعالات','التعامل مع الخسارة','التفكير تحت الضغط'],
+ footballleague:['جدول المباريات','التحكيم','نشر النتائج','جوائز اللعب النظيف','الكؤوس والميداليات'],
+ basketleague:['جدول المباريات','التحكيم','نشر النتائج','الكؤوس والميداليات'],
+ volleyleague:['جدول المباريات','التحكيم','نشر النتائج','الكؤوس والميداليات'],
+ fitnesscup:['بطولة اللياقة البدنية','التحكيم','نشر النتائج','الكؤوس والميداليات'],
+ swimleague:['دوري السباحة الصيفي','التحكيم','نشر النتائج','الكؤوس والميداليات'],
+ friendly:['المباريات الودية','البطولات المحلية والإقليمية','التحكيم','نشر النتائج']
+};
+function sportOptions(i){return SPORTS_SINGLE[i.id]||Object.values(SPORTS_SINGLE).flat()}
+function sportName(key){const x=Object.values(SPORTS_SINGLE).flat().find(v=>v[0]===key);return x?x[1]:''}
+function sportSkillOptions(key,selected=[]){
+ const chosen=new Set(selected.map(x=>String(x).trim()));
+ return `<p class="help">${T('تفريعات النشاط المختار (اختيار متعدد)','Details of selected sport (multiple allowed)')}</p><div class="elite-phase-options">${(SPORTS_DETAILS[key]||[]).map(v=>`<label class="elite-phase-option"><input type="checkbox" data-sport-detail value="${esc(v)}" ${chosen.has(v)?'checked':''}><span><small>${esc(v)}</small></span></label>`).join('')}</div>`;
+}
+function sportPicker(i,key,scope,selected=[]){
+ const items=sportOptions(i),valid=items.some(v=>v[0]===key)?key:'';
+ return `<div class="elite-sport-pickbox" dir="rtl"><b>${T('حدد رياضة واحدة فقط','Select exactly one sport')}</b><p class="help">${T('كل رياضة مستقلة، ولا تُجمع ألعاب مختلفة في جلسة واحدة.','Sports are separate activities, never mixed in one session.')}</p><div class="elite-sport-radio">${items.map(v=>`<label class="elite-sport-radio-item"><input type="radio" name="${scope}" data-one-sport value="${v[0]}" ${valid===v[0]?'checked':''}><span>${esc(v[1])}</span></label>`).join('')}</div><div data-sport-details>${sportSkillOptions(valid,selected)}</div></div>`;
+}
 function editModal(id){
   const x=S.selected.find(s=>s.id===id);if(!x)return;
   const i=ITEM(id);
@@ -3788,9 +3831,9 @@ function editModal(id){
       <div class="fld wide elite-subactivities" dir="rtl">
         <b>${T('التفريعات المعتمدة للبرنامج — انقر للاختيار','Approved program subactivities — click to select')}</b>
         <p class="help">${T('هذه التفريعات مأخوذة من وثيقة البرامج المعتمدة (39 صفحة). اختر ما سيُنفّذ فعليًا؛ لا يُفرض اختيار جميع التفريعات.','These options come from the 39-page approved programme document. Select what you will actually deliver.')}</p>
-        ${ELITE_SPORT_SUBACTIVITIES[i.id]?.length?`<p class="help" style="margin-top:10px">${T('تفريعات الرياضة الواردة في الوثيقة — اختر اللعبة أو المهارة بالتحديد','Sports subactivities documented in the source — select games and skills')}</p><div class="elite-phase-options">${ELITE_SPORT_SUBACTIVITIES[i.id].map(v=>`<label class="elite-phase-option"><input type="checkbox" data-approved-phase value="${esc(v)}" ${(x.activityBreakdown||'').split('\n').includes(v)?'checked':''}><span><small>${esc(v)}</small></span></label>`).join('')}</div>`:''}
+        ${i.t==='sport'?sportPicker(i,x.sportChoice||'', 'selectedSport',(x.activityBreakdown||'').split('\n')):''}
         <div class="elite-phase-options">
-          ${(i.ph||[]).map((p,index)=>{const label=L({ar:p[0],en:p[1]});const existing=(x.activityBreakdown||'').split('\n').map(v=>v.trim());const checked=existing.includes(label)||existing.includes(p[0]);return `<label class="elite-phase-option"><input type="checkbox" data-approved-phase value="${esc(label)}" ${checked?'checked':''}><span><strong>${(i.t==='sport'||i.t==='trips'?T('محتوى البرنامج','Program content'):T(['الدورة التدريبية','الورشة التطبيقية','التحدي'][index]||'تفريع معتمد',['Training session','Practical workshop','Challenge'][index]||'Approved subactivity'))}</strong><small>${esc(label)}</small></span></label>`}).join('')}
+          ${(i.t==='sport'?[]:(i.ph||[])).map((p,index)=>{const label=L({ar:p[0],en:p[1]});const existing=(x.activityBreakdown||'').split('\n').map(v=>v.trim());const checked=existing.includes(label)||existing.includes(p[0]);return `<label class="elite-phase-option"><input type="checkbox" data-approved-phase value="${esc(label)}" ${checked?'checked':''}><span><strong>${(i.t==='sport'||i.t==='trips'?T('محتوى البرنامج','Program content'):T(['الدورة التدريبية','الورشة التطبيقية','التحدي'][index]||'تفريع معتمد',['Training session','Practical workshop','Challenge'][index]||'Approved subactivity'))}</strong><small>${esc(label)}</small></span></label>`}).join('')}
         </div>
         <label class="fld" style="margin-top:12px">${T('تفريعات إضافية يدوية (تفريع في كل سطر)','Additional custom subactivities (one per line)')}
           <textarea id="eBreakdown" maxlength="3000" rows="3" dir="rtl" placeholder="${T('أضف الألعاب أو الأنشطة الفرعية غير الموجودة في الوثيقة…','Enter custom activities not listed in the document…')}">${esc((x.activityBreakdown||'').split('\n').filter(v=>v.trim()&&!(i.ph||[]).some(p=>v.trim()===L({ar:p[0],en:p[1]})||v.trim()===p[0])&&!(ELITE_SPORT_SUBACTIVITIES[i.id]||[]).includes(v.trim())).join('\n'))}</textarea>
@@ -3809,7 +3852,9 @@ function editModal(id){
 }
 function saveEdit(id){
   const x=S.selected.find(s=>s.id===id);if(!x)return;
-  x.pri=$('#ePri').value;x.day=$('#eDay').value?+$('#eDay').value:null;x.why=$('#eWhy').value.trim();x.activityType=$('#eActivityType').value;x.activityBreakdown=[...new Set([...$('[data-approved-phase]:checked').map(el=>el.value.trim()),...$('#eBreakdown').value.split(/\r?\n/).map(v=>v.trim()).filter(Boolean)])].join('\n');
+  x.pri=$('#ePri').value;x.day=$('#eDay').value?+$('#eDay').value:null;x.why=$('#eWhy').value.trim();x.activityType=$('#eActivityType').value;
+  if(ITEM(id)?.t==='sport'){const chosen=$('[name="selectedSport"]:checked');if(!chosen)return toast(T('اختر رياضة واحدة أولًا.','Select one sport first.'));x.sportChoice=chosen.value;}
+  x.activityBreakdown=[...new Set([...$('[data-approved-phase]:checked').map(el=>el.value.trim()),...$('#eBreakdown').value.split(/\r?\n/).map(v=>v.trim()).filter(Boolean)])].join('\n');
   logIt(`حُدّث قرار «${ITEM(id).ar}»`,`Decision updated: ${ITEM(id).en}`);
   save();closeModal();render();toast(T('حُفظ قرار الاختيار.','Decision saved.'));
 }
@@ -4085,6 +4130,7 @@ document.addEventListener('change',e=>{
   const t=e.target;
   if(t.id==='cpTrack'){refreshCustomFields();return}
   if(t.id==='cpField'){refreshCustomBreakdowns();return}
+  if(t.matches('[data-one-sport]')){const p=t.closest('.elite-sport-pickbox')?.querySelector('[data-sport-details]');if(p)p.innerHTML=sportSkillOptions(t.value);return}
   if(t.id==='fTrack'){libFilter.track=t.value;libFilter.field='all';render();return}
   if(t.id==='fField'){libFilter.field=t.value;render();return}
   if(t.id==='fAge'){libFilter.age=t.value;render();return}
