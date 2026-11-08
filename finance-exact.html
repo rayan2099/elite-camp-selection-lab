@@ -245,6 +245,170 @@ html.finance-embedded .fin-reference-wrap>summary{background:#fff;border:1px sol
 .fin-mobile-hint{font-size:11px;color:#72829a}
 @media(max-width:930px){.fin-quick-actions{grid-template-columns:1fr}.fin-tab{flex:1 1 145px}}
 @media(max-width:590px){.fin-workspace-nav{gap:5px;padding:6px}.fin-tab{flex:1 1 calc(50% - 8px);font-size:11px;min-height:48px;padding:7px 5px}.fin-tab-icon{width:22px;height:22px}.fin-view-heading{align-items:flex-start}.fin-view-counter{display:none}}
+
+/* ===== UX v5 — calm overview, live pulse, fast entry, clear follow-up ===== */
+:root{--ux-navy:#122342;--ux-orange:#f47b36;--ux-orange-soft:#fff2e8;--ux-green:#139b73;--ux-green-soft:#e9f8f1;--ux-red:#d4485a;--ux-red-soft:#fff0f1;--ux-line:#e3e9f2;--ux-muted:#6c7c93;--ux-soft:#f4f7fb}
+.ux-num{direction:ltr;text-align:right;font-variant-numeric:tabular-nums}
+#finViewStep,#finViewCount,section.stats[data-ux-hidden]{display:none!important}
+.fin-view-heading{margin:14px 0 10px}
+
+/* Tab badges */
+.fin-tab{position:relative}
+.ux-badge{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#e8eef7;color:#41597a;font-size:10.5px;font-weight:800;display:inline-grid;place-items:center;line-height:1}
+.ux-badge.warn{background:var(--ux-orange);color:#fff}
+.fin-tab.active .ux-badge{background:#ffffff2b;color:#fff}
+.fin-tab.active .ux-badge.warn{background:var(--ux-orange)}
+.ux-badge:empty{display:none}
+
+/* Live pulse strip (all tabs) */
+.ux-pulse{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;background:#fff;border:1px solid var(--ux-line);border-radius:15px;margin:0 0 6px;overflow:hidden}
+.ux-p{padding:13px 15px;min-width:0;border-inline-start:1px solid var(--ux-line);display:flex;flex-direction:column;gap:4px}
+.ux-p:first-child{border-inline-start:0}
+.ux-p small{font-size:11px;color:var(--ux-muted);font-weight:700}
+.ux-p b{font-size:clamp(16px,1.5vw,20px);font-weight:800;color:var(--ux-navy);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ux-p span{font-size:10.5px;color:var(--ux-muted);line-height:1.5}
+.ux-p b.neg{color:var(--ux-red)}.ux-p b.pos{color:var(--ux-green)}
+.ux-bar{display:block;height:6px;border-radius:99px;background:#edf1f7;overflow:hidden;margin:2px 0}
+.ux-bar>span{display:block;height:100%;border-radius:inherit;background:var(--ux-green);width:0;transition:width .35s ease}
+.ux-bar.over>span{background:var(--ux-red)}
+.ux-bar.coll>span{background:#376de4}
+
+/* Toast (inline: the iframe grows with content, so fixed toasts would be off-screen) */
+.ux-toast{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--ux-green-soft);border:1px solid #a9dcc5;color:#0e6b4c;border-radius:12px;padding:10px 14px;font-size:12.5px;font-weight:700;margin:8px 0;animation:uxIn .25s ease}
+.ux-toast[hidden]{display:none}
+.ux-toast button{border:0;background:transparent;color:inherit;font:inherit;text-decoration:underline;cursor:pointer;padding:0}
+@keyframes uxIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+/* Next-step card */
+.ux-next{display:flex;align-items:center;gap:14px;background:linear-gradient(90deg,#fff 0%,#fff8f2 100%);border:1px solid #f5d2b8;border-inline-start:5px solid var(--ux-orange);border-radius:14px;padding:15px 17px;margin:12px 0}
+.ux-next.done{border-color:#bfe5d3;border-inline-start-color:var(--ux-green);background:linear-gradient(90deg,#fff 0%,#f1fbf6 100%)}
+.ux-next .ux-next-icon{width:40px;height:40px;flex:none;border-radius:11px;display:grid;place-items:center;background:var(--ux-orange-soft);color:#c95619;font-size:20px;font-weight:800}
+.ux-next.done .ux-next-icon{background:var(--ux-green-soft);color:var(--ux-green)}
+.ux-next .ux-next-body{flex:1;min-width:0}
+.ux-next small{display:block;font-size:11px;font-weight:800;color:#c95619;margin-bottom:2px}
+.ux-next.done small{color:var(--ux-green)}
+.ux-next b{display:block;font-size:15px;color:var(--ux-navy)}
+.ux-next p{margin:3px 0 0;font-size:12px;color:var(--ux-muted);line-height:1.6}
+.ux-next .ux-next-more{font-size:11.5px;margin-top:5px}
+.ux-next .ux-next-more button{border:0;background:none;color:#245bc8;font:inherit;font-weight:700;padding:0;cursor:pointer}
+.ux-next .btn{flex:none}
+
+/* Collapsible help on home */
+.ux-help{margin:14px 0 0;background:#fff;border:1px solid var(--ux-line);border-radius:13px}
+.ux-help>summary{list-style:none;cursor:pointer;padding:13px 16px;font-weight:800;font-size:13px;color:var(--ux-navy);display:flex;align-items:center;gap:9px}
+.ux-help>summary::-webkit-details-marker{display:none}
+.ux-help>summary:before{content:'؟';width:24px;height:24px;border-radius:7px;background:#edf2f9;display:grid;place-items:center;color:#3f597b;font-size:13px}
+.ux-help>summary span{font-weight:500;color:var(--ux-muted);font-size:11.5px}
+.ux-help>summary:after{content:'⌄';margin-inline-start:auto;color:var(--ux-muted);transition:transform .2s}
+.ux-help[open]>summary:after{transform:rotate(180deg)}
+.ux-help-body{padding:0 16px 14px}
+.ux-help-body .finance-workflow{margin:6px 0 0}
+.ux-save-note{font-size:11px;color:var(--ux-muted);display:inline-flex;align-items:center;gap:6px;margin-top:6px}
+.ux-save-note:before{content:'';width:7px;height:7px;border-radius:50%;background:var(--ux-green)}
+
+/* Entry forms appear right under the view heading */
+html.finance-embedded .modal-shell.ux-entry.open .modal{border:2px solid #f6b48a;box-shadow:0 10px 34px #f47b3622;animation:uxIn .22s ease}
+.ux-form-sec{border:1px solid var(--ux-line);border-radius:12px;padding:13px 14px;margin:11px 0;background:#fff}
+.ux-form-sec>h4{margin:0 0 10px;font-size:13px;color:var(--ux-navy);display:flex;align-items:center;gap:8px}
+.ux-form-sec>h4 i{font-style:normal;width:22px;height:22px;border-radius:50%;background:var(--ux-navy);color:#fff;font-size:11px;display:grid;place-items:center}
+.ux-form-sec .form-grid{margin:0}
+.ux-seg{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 11px}
+.ux-seg button{flex:1 1 120px;border:1px solid #d9e2ee;background:#fff;border-radius:10px;padding:9px 10px;font-weight:700;font-size:12px;color:#3b4f6b;text-align:center;line-height:1.45;cursor:pointer}
+.ux-seg button small{display:block;font-weight:500;font-size:10.5px;color:var(--ux-muted)}
+.ux-seg button:hover{border-color:#f6a46a}
+.ux-seg button[aria-pressed=true]{background:#fff3ea;border-color:var(--ux-orange);color:#a9461a;box-shadow:inset 0 0 0 1px var(--ux-orange)}
+.ux-seg button[disabled]{opacity:.45;cursor:not-allowed}
+.ux-hide-native{display:none!important}
+.ux-calc-total{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--ux-soft);border-radius:10px;padding:11px 13px;margin-top:11px}
+.ux-calc-total .summary-box{margin:0;padding:0;background:none;border:0;display:flex;flex-direction:column;gap:2px}
+.ux-calc-total #itemTotal{font-size:22px;color:var(--ux-navy)}
+.ux-calc-total #formulaText{direction:ltr;text-align:right;unicode-bidi:isolate;font-variant-numeric:tabular-nums}
+details.ux-form-sec>summary{cursor:pointer;font-weight:800;font-size:13px;color:var(--ux-navy);list-style:none;display:flex;align-items:center;gap:8px}
+details.ux-form-sec>summary::-webkit-details-marker{display:none}
+details.ux-form-sec>summary span{font-weight:500;color:var(--ux-muted);font-size:11px}
+details.ux-form-sec>summary:after{content:'⌄';margin-inline-start:auto;color:var(--ux-muted)}
+details.ux-form-sec[open]>summary{margin-bottom:10px}
+.ux-form-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.ux-form-actions .ux-kbd{font-size:10.5px;color:var(--ux-muted);margin-inline-start:auto}
+.fin-entry-modal .summary-box{display:none}
+.ux-calc-total .summary-box{display:flex!important}
+
+/* Budget: compact category tiles */
+html.finance-embedded .categories{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))!important;gap:9px!important}
+html.finance-embedded .cat{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"icon name" "icon money" "meta meta" "bar bar";column-gap:10px;row-gap:2px;padding:11px 12px!important;min-height:0}
+html.finance-embedded .cat .symbol{grid-area:icon;width:36px;height:36px;margin:0}
+html.finance-embedded .cat .symbol svg{width:20px;height:20px}
+html.finance-embedded .cat h3{grid-area:name;margin:0;font-size:12.5px!important;align-self:end}
+html.finance-embedded .cat .micro{display:none}
+html.finance-embedded .cat .money{grid-area:money;margin:0;font-size:15px!important}
+html.finance-embedded .cat .between{grid-area:meta;margin-top:6px}
+html.finance-embedded .cat .progress{grid-area:bar;margin-top:4px}
+html.finance-embedded .cat.ux-empty{opacity:.62}
+html.finance-embedded .cat.ux-empty:hover{opacity:1}
+html.finance-embedded .cat.ux-collapsed{display:none}
+html.finance-embedded .cat.selected{outline:2px solid var(--ux-orange);outline-offset:-1px;opacity:1}
+.ux-cat-toggle{border:1px dashed #c9d5e5;background:#fafcff;border-radius:12px;color:#4a6285;font-weight:700;font-size:12px;cursor:pointer;min-height:58px}
+.ux-cat-toggle:hover{border-color:var(--ux-orange);color:#a9461a}
+
+/* Ledger tools */
+.ux-ledger-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:2px 0 0}
+.ux-search{flex:1 1 220px;max-width:340px;position:relative}
+.ux-search input{width:100%;border:1px solid #d9e2ee;border-radius:9px;padding:8px 32px 8px 10px;font:inherit;font-size:12px;background:#fff}
+.ux-search:before{content:'⌕';position:absolute;right:11px;top:50%;transform:translateY(-52%);color:var(--ux-muted);font-size:15px}
+.ux-chip{display:inline-flex;align-items:center;gap:7px;background:#fff3ea;border:1px solid #f6c3a0;color:#9a4317;border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:700}
+.ux-chip button{border:0;background:none;color:inherit;cursor:pointer;font-size:13px;padding:0;line-height:1}
+.ux-overdue-tag{display:inline-block;margin-inline-start:6px;background:var(--ux-red-soft);color:var(--ux-red);border:1px solid #f3c2c8;border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800;vertical-align:middle}
+#expensesBody tr.ux-overdue td{background:#fffafa}
+#expensesBody tr.ux-flash td{animation:uxFlash 2.2s ease}
+@keyframes uxFlash{0%,40%{background:#fff1e5}100%{background:transparent}}
+.ux-tfoot td{font-weight:800;background:#f4f7fb;border-top:2px solid #dbe4ef;font-size:12px!important}
+.ux-noresult td{text-align:center;color:var(--ux-muted);padding:18px!important}
+
+/* Revenue */
+.ux-collect{border:1px solid #cfe0fb;background:#f6f9ff;border-radius:13px;padding:14px 16px;margin:14px 0}
+.ux-collect-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.ux-collect-head b{font-size:14px}
+.ux-collect-head strong{font-size:20px;font-variant-numeric:tabular-nums}
+.ux-collect .ux-bar{height:9px;margin:9px 0 7px}
+.ux-collect-meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:11.5px;color:var(--ux-muted)}
+.ux-collect-meta b{color:var(--ux-navy)}
+#revenues details.ux-tax{grid-column:1/-1;border:1px solid var(--ux-line);border-radius:10px;padding:10px 12px;background:#fbfcfe}
+#revenues details.ux-tax>summary{cursor:pointer;font-weight:700;font-size:12px;color:#3f597b}
+#revenues details.ux-tax[open]>summary{margin-bottom:10px}
+#revenues details.ux-tax .ux-tax-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+#revenues input[readonly],#financeOperations input[readonly],#analysis input[readonly]{background:var(--ux-soft)!important;border-color:transparent!important;font-weight:800;color:var(--ux-navy);cursor:default}
+.ux-field-hint{display:block;font-size:10.5px;color:var(--ux-muted);font-weight:500;margin-top:3px}
+
+/* Mobile */
+@media(max-width:1100px){.ux-pulse{grid-template-columns:repeat(3,minmax(0,1fr))}.ux-p:nth-child(4){border-inline-start:0}.ux-p:nth-child(n+4){border-top:1px solid var(--ux-line)}}
+@media(max-width:700px){
+ .fin-workspace-nav{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+ .fin-workspace-nav::-webkit-scrollbar{display:none}
+ .fin-tab{flex:0 0 auto!important;min-height:44px!important;padding:8px 12px!important}
+ .ux-pulse{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ux-p{border-inline-start:0;border-top:1px solid var(--ux-line)}
+ .ux-p:nth-child(-n+2){border-top:0}.ux-p:nth-child(even){border-inline-start:1px solid var(--ux-line)}
+ .ux-p:last-child{grid-column:1/-1}
+ .ux-next{flex-wrap:wrap}.ux-next .btn{width:100%}
+ #revenues details.ux-tax .ux-tax-grid{grid-template-columns:1fr}
+ .ux-form-actions .ux-kbd{display:none}
+ .ux-form-actions .btn{flex:1 1 auto}
+ /* ledger & collections as cards */
+ #expenses table,#revenues table{min-width:0!important}
+ #expenses thead,#revenues .finance-ledger thead{display:none}
+ #expensesBody tr,#collectionsBody tr,#expenses .ux-tfoot tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;border:1px solid var(--ux-line);border-radius:12px;padding:11px;margin:0 0 9px;background:#fff}
+ #expensesBody td,#collectionsBody td,#expenses .ux-tfoot td{display:block;border:0!important;padding:0!important;background:none!important;font-size:12px}
+ #expensesBody td:before,#collectionsBody td:before,#expenses .ux-tfoot td:before{content:attr(data-label);display:block;font-size:10px;color:var(--ux-muted);font-weight:700}
+ #expensesBody td:first-child,#expensesBody td:last-child,#collectionsBody td:last-child{grid-column:1/-1}
+ #expensesBody td:first-child:before,#expensesBody td:last-child:before,#collectionsBody td:last-child:before{display:none}
+ #expensesBody td[colspan],#collectionsBody td[colspan]{grid-column:1/-1}
+ .fin-row-actions button{padding:8px 11px;font-size:12px}
+ .ux-tfoot td:empty{display:none!important}
+ html.finance-embedded .categories{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ html.finance-embedded .cat{grid-template-columns:1fr;grid-template-areas:"name" "money" "meta" "bar"}
+ html.finance-embedded .cat .symbol{display:none}
+}
+@media print{.ux-pulse,.ux-next,.ux-help,.ux-toast{display:none!important}}
 </style><script>if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('finance-embedded');</script></head><body><aside><div class="brand">✦ أكاديمية النخبة</div><p class="desc">منصة إدارة المعسكرات</p><nav><a href="#overview">◫ &nbsp; نظرة عامة</a><a href="#categories">▦ &nbsp; التصنيفات المالية</a><a href="#expenses" class="active">▣ &nbsp; إدارة المصروفات</a><a href="#revenues">◈ &nbsp; الإيرادات والتسعير</a><a href="#analysis">▤ &nbsp; التحليل والتقارير</a></nav><div class="side-note">💡 كل مصروف له حالة مستقلة: تقديري، ملتزم به، أو مدفوع فعلياً؛ لضمان تقارير مالية دقيقة.</div></aside><main>
 <div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="fullReportBtn">التقرير المالي PDF</button></div></header>
 <section class="report-sheet" id="financeReportView" hidden role="region" aria-label="التقرير المالي التنفيذي">
@@ -316,8 +480,8 @@ html.finance-embedded .fin-reference-wrap>summary{background:#fff;border:1px sol
  <p><b>أيام النخبة:</b> أربع جمعات شهريًا على مدى 10 أشهر، و40 طالبًا مدفوعًا في السيناريو الثابت، وسعر اشتراك شهري 1,400 ر.س شامل الضريبة.</p>
  <p><b>محددات:</b> لا تخلط البرنامج الأسبوعي مع المعسكرات ذات الإقامة. يُذكر في ملف 2027 أن تجاوز 50 مقعدًا مسعّرًا يستدعي إعادة تقدير السكن والمشرفين والنقل. مخصص الزكاة 2.5% تقديري وليس طريقة احتساب الزكاة المستحقة نظامًا. بعض البنود غير محتسبة في الموازنة المرجعية.</p>
  </details>
-</section><section id="categories"><div class="section-title"><div><h2>البنود المالية</h2><p>اضغط على أي تصنيف لمراجعة بنوده أو إضافة مصروف جديد إليه.</p></div><button class="btn sm" id="customCatBtn">＋ إنشاء تصنيف مخصص</button></div><div class="categories" id="categoryGrid"></div></section>
-<section class="grid2" id="expenses"><div class="panel"><div class="panel-header"><div><h2>سجل المصروفات التفصيلي</h2><p class="sub" style="font-size:12px">تتبع كل بند من التقدير حتى الدفع</p></div><button class="btn primary sm" id="addBtn2">＋ مصروف جديد</button></div><div class="filters" id="filters"><button class="filter active" data-filter="all">جميع البنود</button><button class="filter" data-filter="estimated">تقديري</button><button class="filter" data-filter="committed">ملتزم به</button><button class="filter" data-filter="paid">مدفوع</button></div><div class="finance-empty-warning" id="expenseGettingStarted" hidden>لم تُسجّل أي بنود بعد. ابدأ ببند واحد مثل «إقامة الطلاب» أو «استئجار الحافلة»، ويمكنك تعديله لاحقاً.</div><div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>البند</th><th>التصنيف</th><th>التقديري</th><th>المدفوع</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody id="expensesBody"</tbody></table></div></div><div class="panel" id="revenues"><div class="panel-header"><h2>الإيرادات والتسعير</h2><span class="tag">حساب فوري</span></div><div class="form-grid"><label class="field">عدد الطلاب المتوقع<input id="studentCount" type="number" min="0"></label><label class="field">رسوم الاشتراك للطالب (ر.س)<input id="studentFee" type="number" min="0"></label><label class="field">الرسوم المحصلة فعلياً (ر.س)<input id="collectedFees" type="number" min="0" readonly title="تُحسب من سجل التحصيل"></label><label class="field">إيرادات / رعايات إضافية متوقعة (ر.س)<input id="otherRevenue" type="number" min="0"></label><label class="field">ضريبة المبيعات المفترضة (%)<input id="campVatRate" type="number" min="0" max="100" step=".1"></label><label class="field">معالجة الإيرادات الأخرى<select id="campOtherTaxMode"><option value="unclassified">غير مصنفة — دون استقطاع افتراضي</option><option value="inclusive">مدخلة شاملة الضريبة المفترضة</option></select></label><p class="small" style="grid-column:1/-1">رسوم الطلاب مفترضة شاملة ضريبة المبيعات وفق نماذج الموازنة المرفقة. هذه نسبة قابلة للتعديل وليست إقرارًا أو رأيًا محاسبيًا؛ صنّف الإيرادات الأخرى مع المختص.</p></div><div class="finance-ledger"><div class="between"><b>سجل التحصيل الفعلي</b><button class="btn sm" id="addCollection2">＋ تحصيل جديد</button></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>النوع</th><th>الدافع</th><th>المبلغ</th><th>الإجراء</th></tr></thead><tbody id="collectionsBody"></tbody></table></div></div><div class="summary-box"><span class="small">المبيعات المتوقعة شاملة الضريبة المفترضة</span><strong id="expectedRevenue">—</strong><span class="small" id="revenueSummary">—</span><div class="fx-fin-bridge"><span>ضريبة المبيعات المفترضة <b id="campForecastVat">—</b></span><span>الإيراد دون الضريبة المفترضة <b id="campForecastNet">—</b></span></div></div><div class="divider"></div><div class="panel-header"><h2>نقطة التعادل</h2><span class="tag">مؤشر قرار</span></div><div class="form-grid"><label class="field">نقطة التعادل المبسطة وفق صافي الرسوم<input id="breakEven" readonly></label><label class="field">صافي التحصيل المسجل<input id="cashNet" readonly></label></div><p class="small" style="margin-top:12px">تحسب نقطة التعادل وفق التكاليف الثابتة والتكاليف المتغيرة لكل طالب؛ عند تعذر تحديدها بدقة يُستخدم تقدير مبسط ويُشار إليه.</p></div></section>
+</section><section id="categories"><div class="section-title"><div><h2>البنود المالية</h2><p>اضغط على تصنيف لعرض بنوده فقط في السجل أدناه.</p></div><button class="btn sm" id="customCatBtn">＋ إنشاء تصنيف مخصص</button></div><div class="categories" id="categoryGrid"></div></section>
+<section class="grid2" id="expenses"><div class="panel"><div class="panel-header"><div><h2>سجل المصروفات التفصيلي</h2><p class="sub" style="font-size:12px">تتبع كل بند من التقدير حتى الدفع</p></div><button class="btn primary sm" id="addBtn2">＋ مصروف جديد</button></div><div class="filters" id="filters"><button class="filter active" data-filter="all">جميع البنود</button><button class="filter" data-filter="estimated">تقديري</button><button class="filter" data-filter="committed">ملتزم به</button><button class="filter" data-filter="paid">مدفوع</button></div><div class="finance-empty-warning" id="expenseGettingStarted" hidden>لم تُسجّل أي بنود بعد. ابدأ ببند واحد مثل «إقامة الطلاب» أو «استئجار الحافلة»، ويمكنك تعديله لاحقاً.</div><div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>البند</th><th>التصنيف</th><th>التقديري</th><th>المدفوع</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody id="expensesBody"></tbody></table></div></div><div class="panel" id="revenues"><div class="panel-header"><h2>الإيرادات والتسعير</h2><span class="tag">حساب فوري</span></div><div class="form-grid"><label class="field">عدد الطلاب المتوقع<input id="studentCount" type="number" min="0"></label><label class="field">رسوم الاشتراك للطالب (ر.س)<input id="studentFee" type="number" min="0"></label><label class="field">الرسوم المحصلة فعلياً (ر.س)<input id="collectedFees" type="number" min="0" readonly title="تُحسب من سجل التحصيل"></label><label class="field">إيرادات / رعايات إضافية متوقعة (ر.س)<input id="otherRevenue" type="number" min="0"></label><label class="field">ضريبة المبيعات المفترضة (%)<input id="campVatRate" type="number" min="0" max="100" step=".1"></label><label class="field">معالجة الإيرادات الأخرى<select id="campOtherTaxMode"><option value="unclassified">غير مصنفة — دون استقطاع افتراضي</option><option value="inclusive">مدخلة شاملة الضريبة المفترضة</option></select></label><p class="small" style="grid-column:1/-1">رسوم الطلاب مفترضة شاملة ضريبة المبيعات وفق نماذج الموازنة المرفقة. هذه نسبة قابلة للتعديل وليست إقرارًا أو رأيًا محاسبيًا؛ صنّف الإيرادات الأخرى مع المختص.</p></div><div class="finance-ledger"><div class="between"><b>سجل التحصيل الفعلي</b><button class="btn sm" id="addCollection2">＋ تحصيل جديد</button></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>النوع</th><th>الدافع</th><th>المبلغ</th><th>الإجراء</th></tr></thead><tbody id="collectionsBody"></tbody></table></div></div><div class="summary-box"><span class="small">المبيعات المتوقعة شاملة الضريبة المفترضة</span><strong id="expectedRevenue">—</strong><span class="small" id="revenueSummary">—</span><div class="fx-fin-bridge"><span>ضريبة المبيعات المفترضة <b id="campForecastVat">—</b></span><span>الإيراد دون الضريبة المفترضة <b id="campForecastNet">—</b></span></div></div><div class="divider"></div><div class="panel-header"><h2>نقطة التعادل</h2><span class="tag">مؤشر قرار</span></div><div class="form-grid"><label class="field">نقطة التعادل المبسطة وفق صافي الرسوم<input id="breakEven" readonly></label><label class="field">صافي التحصيل المسجل<input id="cashNet" readonly></label></div><p class="small" style="margin-top:12px">تحسب نقطة التعادل وفق التكاليف الثابتة والتكاليف المتغيرة لكل طالب؛ عند تعذر تحديدها بدقة يُستخدم تقدير مبسط ويُشار إليه.</p></div></section>
 <section id="analysis" class="grid2"><div class="panel"><div class="panel-header"><h2>مؤشرات الأداء واتخاذ القرار</h2><span class="tag">تتحدث تلقائياً</span></div><div class="form-grid"><div class="summary-box" style="margin:0"><span class="small">التكلفة التقديرية للطالب</span><strong id="costPerStudent">—</strong></div><div class="summary-box" style="margin:0"><span class="small">هامش الفائض المتوقع</span><strong id="margin">—</strong></div><div class="summary-box" style="margin:0"><span class="small">إجمالي الالتزامات + المدفوع</span><strong id="obligated">—</strong></div><div class="summary-box" style="margin:0"><span class="small">الفائض النقدي المسجل</span><strong id="cashflow">—</strong></div></div></div><div class="panel"><div class="panel-header"><h2>الاحتياطي والافتراضات</h2><small>الإعدادات المالية</small></div><div class="form-grid"><label class="field">نسبة الاحتياطي (%)<input id="reservePct" type="number" min="0" max="100"></label><label class="field">مخصص احتياطي معتمد (ر.س)<input id="reserveAmount" readonly></label></div><p class="small">يُحتسب الاحتياطي من تكلفة البنود غير الاحتياطية. أي مبلغ احتياطي لا يُعد مصروفاً مدفوعاً إلا عند تسجيل عملية دفع فعلية من بند مرتبط.</p><div class="callout warn" id="alerts" style="margin-top:16px">—</div></div></section>
 <section class="panel finance-ledger" id="financeApproval"><div class="panel-header"><div><h2>مراجعة واعتماد الميزانية</h2><p class="fx-note">اعتماد تشغيلي محلي لا يمثل توقيعاً محاسبياً موثقاً.</p></div><span class="tag" id="financeApprovalStatus">مسودة</span></div><div class="finance-workflow"><div class="flow-step"><b>نسخة الميزانية الحالية</b><strong id="financeApprovalTotal">—</strong><p id="financeApprovalVersion">لم تعتمد بعد</p></div><div class="flow-step"><b>مراجعة التكاليف والإيرادات</b><p id="financeApprovalGuidance">راجع جميع البنود قبل الاعتماد.</p><button class="btn sm" id="financeReviewButton">إرسال للمراجعة</button></div><div class="flow-step"><b>اعتماد / إعادة فتح</b><p>تثبيت التقديرات بعد الاعتماد، مع السماح بتسجيل المدفوعات والتحصيل.</p><button class="btn primary sm" id="financeApproveButton">اعتماد الميزانية</button><button class="btn sm" id="financeReopenButton" hidden>إعادة فتح الميزانية</button></div></div><div class="callout" id="financeApprovalNotice">هذا إجراء محلي، ولا يثبت هوية المعتمد.</div></section><section class="panel finance-ledger" id="financeOperations"><div class="panel-header"><div><h2>المتابعات والالتزامات المالية</h2><p class="fx-note">مهام مشتقة من بيانات المعسكر الفعلية.</p></div><span class="tag" id="financeTasksCount">—</span></div><div id="financeTasks"></div></section><section class="panel finance-ledger" id="financeReadiness"><div class="panel-header"><div><h2>جاهزية الملف المالي</h2><p class="fx-note">مؤشرات اكتمال الإدخال للتحضير والمراجعة، وليست اعتماداً محاسبياً.</p></div><span class="tag" id="financeCompletion">—</span></div><div id="financeChecklist"></div></section>
 <section class="panel finance-ledger" id="financeAudit"><div class="panel-header"><div><h2>سجل الحركة والمراجعة المالية</h2><p class="fx-note">آخر التعديلات والتسجيلات والتصحيحات لهذا المعسكر فقط (بحد أقصى 500 عملية). السجل محلي وغير محمي من التلاعب، فلا يُعد سجل تدقيق محاسبياً معتمداً.</p></div><button class="btn sm" id="exportAudit">تصدير سجل الحركة</button></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>العملية</th><th>التفاصيل</th></tr></thead><tbody id="auditBody"></tbody></table></div></section>
@@ -642,7 +806,6 @@ $('paymentSave').onclick=()=>{
  if(!x||!raw||!Number.isFinite(amount)||amount<=0){alert('أدخل قيمة دفعة صحيحة.');return;}
  if(!$('paymentDate').value||$('paymentDate').value>localDay()){alert('اختر تاريخ دفع فعلي ليس في المستقبل.');return;}
  if(n(x.paid)+amount>n(x.amount)&&!confirm('هذا السداد سيجعل المدفوع أعلى من التكلفة المقدرة. هل تؤكد الدفعة؟'))return;
- if(!confirm('تأكيد تسجيل دفعة بقيمة '+sar(amount)+' للبند «'+x.name+'»؟'))return;
  if(!Array.isArray(x.payments))x.payments=[];
  x.payments.push({id:'p'+Date.now(),date:$('paymentDate').value,amount,
   method:$('paymentMethod').value,ref:$('paymentReference').value.trim()});
@@ -1052,5 +1215,271 @@ const FX_CAMPS=[
  }
  ['fxGross','fxVat','fxCost','fxReserveRate','fxCampSelect','fxStudents','fxFee'].forEach(id=>el(id)?.addEventListener('input',calc));
  calc();
+})();
+
+/* ===== UX v5 — calm overview, live pulse, fast entry, clear follow-up =====
+   Presentation and input ergonomics only: the ledger, storage format and
+   calculations above are untouched. */
+(function financeUX(){
+ const byId=id=>document.getElementById(id);
+ const el=(tag,attrs={},html='')=>{const x=document.createElement(tag);for(const [k,v] of Object.entries(attrs))x.setAttribute(k,v);if(html)x.innerHTML=html;return x};
+ const labelOf=id=>byId(id)?.closest('label');
+ const embedded=document.documentElement.classList.contains('finance-embedded');
+ const tabKey='fin-ux-tab:'+(financeCampId||'standalone');
+ const pct=(a,b)=>b>0?Math.round(a/b*100):0;
+
+ /* ---------- 1. Numeric inputs: Arabic digits, no scroll-wheel changes, select on focus ---------- */
+ const toLatin=s=>String(s).replace(/[٠-٩]/g,d=>d.charCodeAt(0)-0x0660).replace(/[۰-۹]/g,d=>d.charCodeAt(0)-0x06F0);
+ const cleanNum=s=>{let v=toLatin(s).replace(/٫/g,'.').replace(/[٬,\s]/g,'').replace(/[^\d.]/g,'');const i=v.indexOf('.');if(i>-1)v=v.slice(0,i+1)+v.slice(i+1).replace(/\./g,'');return v};
+ document.querySelectorAll('input[type=number]').forEach(i=>{i.type='text';i.inputMode='decimal';i.autocomplete='off';i.classList.add('ux-num')});
+ document.addEventListener('input',e=>{const t=e.target;if(!t.classList||!t.classList.contains('ux-num')||t.readOnly)return;const v=cleanNum(t.value);if(v!==t.value)t.value=v},true);
+ document.addEventListener('focusin',e=>{const t=e.target;if(t.classList&&t.classList.contains('ux-num')&&!t.readOnly)setTimeout(()=>{try{t.select()}catch(_){}} ,0)});
+
+ /* ---------- 2. Live pulse strip + inline toast ---------- */
+ const nav=byId('finWorkspaceNav');
+ const pulse=el('section',{class:'ux-pulse',id:'uxPulse','aria-label':'الموقف المالي الآن'},
+  '<div class="ux-p"><small>الميزانية التقديرية</small><b id="uxBudget">—</b><span id="uxBudgetSub"></span></div>'+
+  '<div class="ux-p"><small>المدفوع للموردين</small><b id="uxPaid">—</b><i class="ux-bar"><span id="uxPaidBar"></span></i><span id="uxPaidSub"></span></div>'+
+  '<div class="ux-p"><small>المحصّل فعلياً</small><b id="uxColl">—</b><i class="ux-bar coll"><span id="uxCollBar"></span></i><span id="uxCollSub"></span></div>'+
+  '<div class="ux-p"><small>الفائض / العجز المتوقع</small><b id="uxProfit">—</b><span id="uxProfitSub"></span></div>'+
+  '<div class="ux-p"><small>الرصيد النقدي الآن</small><b id="uxCash">—</b><span>المحصّل − المدفوع للموردين</span></div>');
+ nav.insertAdjacentElement('afterend',pulse);
+ const heading=byId('finViewHeading');
+ const toast=el('div',{class:'ux-toast',id:'uxToast',role:'status','aria-live':'polite',hidden:''});
+ heading.insertAdjacentElement('afterend',toast);
+ let toastTimer;
+ function showToast(text,action){
+  toast.innerHTML='<span>✓ '+esc(text)+'</span>';
+  if(action){const b=el('button',{type:'button'});b.textContent=action[0];b.onclick=action[1];toast.appendChild(b)}
+  toast.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.hidden=true},5200);
+ }
+ const statsSection=document.querySelector('section.stats');if(statsSection)statsSection.dataset.uxHidden='1';
+
+ /* ---------- 3. Home: next step first, guidance collapsed ---------- */
+ const quick=byId('finQuickActions');
+ const next=el('section',{class:'ux-next',id:'uxNext','data-fin-view':'home','aria-live':'polite'});
+ quick.insertAdjacentElement('afterend',next);
+ const help=el('details',{class:'ux-help','data-fin-view':'home'},'<summary>طريقة العمل وملاحظات حفظ البيانات <span>— خطوات الإعداد والمتابعة والتحصيل</span></summary><div class="ux-help-body"></div>');
+ const mid=document.querySelector('div.mid');
+ (mid||next).insertAdjacentElement('afterend',help);
+ const helpBody=help.querySelector('.ux-help-body');
+ ['financeCampBanner'].forEach(id=>{const n=byId(id);if(n){delete n.dataset.finView;n.hidden=false;helpBody.appendChild(n)}});
+ const notice=document.querySelector('.finance-notice');if(notice){delete notice.dataset.finView;notice.hidden=false;helpBody.appendChild(notice)}
+ const wf=byId('financeWorkflow');if(wf){delete wf.dataset.finView;wf.hidden=false;helpBody.appendChild(wf)}
+ const guides=byId('financeStepGuides');if(guides){delete guides.dataset.finView;guides.hidden=true;helpBody.appendChild(guides)}
+ const saveNote=el('div',{class:'ux-save-note'});saveNote.textContent='كل إدخال يُحفظ تلقائياً على هذا الجهاز — صدّر نسخة CSV أو PDF بشكل دوري.';
+ heading.querySelector('div')?.appendChild(saveNote);
+ const baseGuide=financeShowGuide;
+ financeShowGuide=function(which){help.open=true;baseGuide(which)};
+
+ /* ---------- 4. Tabs: badges, remembered tab ---------- */
+ const tabBadge={};
+ document.querySelectorAll('[data-fin-tab]').forEach(t=>{const b=el('span',{class:'ux-badge','aria-hidden':'true'});t.appendChild(b);tabBadge[t.dataset.finTab]=b});
+ const baseActivate=financeActivateView;
+ financeActivateView=function(view,opts){
+  baseActivate(view,opts);
+  if(guides&&view!=='home')guides.hidden=true;
+  try{localStorage.setItem(tabKey,financeActiveView)}catch(e){}
+ };
+ if(!location.hash){let saved=null;try{saved=localStorage.getItem(tabKey)}catch(e){}if(saved&&saved!=='home')financeActivateView(saved);else financeActivateView('home')}
+
+ /* ---------- 5. Entry forms open where the user is working ---------- */
+ const baseShowEntry=financeShowEntry;
+ financeShowEntry=function(id){
+  const shell=byId(id);
+  if(!shell||!embedded)return baseShowEntry(id);
+  document.querySelectorAll('.modal-shell.open').forEach(s=>{if(s!==shell)s.classList.remove('open')});
+  toast.insertAdjacentElement('afterend',shell);
+  shell.classList.add('ux-entry');
+  if(id==='modalShell')syncExpenseForm(true);
+  financeBringIntoView(shell);
+ };
+ const closeBtn={modalShell:'closeModal',paymentShell:'paymentCancel',collectionShell:'collectionCancel',catModal:'cancelCat'};
+ const saveBtn={modalShell:'saveItem',paymentShell:'paymentSave',collectionShell:'collectionSave',catModal:'saveCat'};
+ document.addEventListener('keydown',e=>{
+  const open=[...document.querySelectorAll('.modal-shell.open')].pop();if(!open)return;
+  if(e.key==='Escape'){byId(closeBtn[open.id])?.click();return}
+  if(e.key==='Enter'&&!e.shiftKey&&open.contains(e.target)&&e.target.matches('input')&&!e.isComposing){
+   e.preventDefault();
+   if(open.id==='modalShell'&&(e.ctrlKey||e.metaKey))byId('uxSaveNext')?.click();else byId(saveBtn[open.id])?.click();
+  }
+ });
+
+ /* ---------- 6. Expense form: three short steps + optional details ---------- */
+ (function restructureExpenseForm(){
+  const modalBox=document.querySelector('#modalShell .fin-entry-modal');if(!modalBox)return;
+  const grid=modalBox.querySelector('.form-grid');const summary=modalBox.querySelector('.summary-box');const actions=modalBox.querySelector('.actions');
+  const sec=(n,title)=>{const s=el('div',{class:'ux-form-sec'},'<h4><i>'+n+'</i>'+title+'</h4>');const g=el('div',{class:'form-grid'});s.appendChild(g);return [s,g]};
+  const [s1,g1]=sec('١','ما هو البند؟');[labelOf('itemName'),labelOf('itemCat')].forEach(x=>x&&g1.appendChild(x));
+  const [s2,g2]=sec('٢','كيف تُحسب التكلفة؟');
+  const methodSeg=el('div',{class:'ux-seg',role:'group','aria-label':'طريقة الاحتساب'},[
+   ['personday','أشخاص × أيام','مثل الإقامة والوجبات'],['unit','كمية × سعر','تذاكر، حقائب، تأمين'],['day','أيام × تكلفة يومية','إيجار حافلة، قاعة'],['fixed','مبلغ ثابت','عقد أو فاتورة واحدة']]
+   .map(([v,t,s])=>'<button type="button" data-method="'+v+'" aria-pressed="false">'+t+'<small>'+s+'</small></button>').join(''));
+  s2.insertBefore(methodSeg,g2);
+  labelOf('calcMethod')?.classList.add('ux-hide-native');g2.appendChild(labelOf('calcMethod'));
+  ['itemQty','itemDays','unitPrice','extraCost'].forEach(id=>{const l=labelOf(id);if(l)g2.appendChild(l)});
+  const calcTotal=el('div',{class:'ux-calc-total'});calcTotal.appendChild(summary);s2.appendChild(calcTotal);
+  const [s3,g3]=sec('٣','ما حالة البند الآن؟');
+  const statusSeg=el('div',{class:'ux-seg',role:'group','aria-label':'حالة المصروف'},[
+   ['estimated','تقديري','تخطيط قبل الاتفاق'],['committed','ملتزم به','تم الحجز ولم يُدفع'],['paid','مدفوع','دُفع كلياً أو جزئياً']]
+   .map(([v,t,s])=>'<button type="button" data-status="'+v+'" aria-pressed="false">'+t+'<small>'+s+'</small></button>').join(''));
+  s3.insertBefore(statusSeg,g3);
+  labelOf('itemStatus')?.classList.add('ux-hide-native');g3.appendChild(labelOf('itemStatus'));
+  const paidLabel=byId('paidField');if(paidLabel)g3.appendChild(paidLabel);
+  const more=el('details',{class:'ux-form-sec',id:'uxMoreDetails'},'<summary>المورد والمرجع والتاريخ <span>اختياري — مهم عند الالتزام أو الدفع</span></summary>');
+  const g4=el('div',{class:'form-grid'});more.appendChild(g4);
+  ['itemVendor','itemDue','itemRef','itemNotes'].forEach(id=>{const l=labelOf(id);if(l)g4.appendChild(l)});
+  grid.replaceWith(s1);s1.after(s2);s2.after(s3);s3.after(more);
+  actions.classList.add('ux-form-actions');
+  const saveNext=el('button',{type:'button',class:'btn',id:'uxSaveNext'});saveNext.textContent='حفظ وإضافة بند آخر';
+  byId('saveItem').after(saveNext);
+  const kbd=el('span',{class:'ux-kbd'});kbd.textContent='Enter للحفظ · Esc للإغلاق';actions.appendChild(kbd);
+  saveNext.onclick=()=>{const before=state.items.length,cat=byId('itemCat').value;byId('saveItem').click();if(state.items.length>before)newItem(cat)};
+  methodSeg.addEventListener('click',e=>{const b=e.target.closest('[data-method]');if(!b)return;byId('calcMethod').value=b.dataset.method;byId('calcMethod').dispatchEvent(new Event('input',{bubbles:true}));syncExpenseForm();focusFirstAmount()});
+  statusSeg.addEventListener('click',e=>{const b=e.target.closest('[data-status]');if(!b||b.disabled)return;byId('itemStatus').value=b.dataset.status;byId('itemStatus').dispatchEvent(new Event('input',{bubbles:true}));syncExpenseForm();if(b.dataset.status!=='estimated')more.open=true;if(b.dataset.status==='paid'&&byId('paidField').style.display!=='none')byId('paidValue').focus()});
+  byId('presetButtons')?.addEventListener('click',e=>{if(e.target.closest('button'))setTimeout(()=>{syncExpenseForm();focusFirstAmount()},0)});
+  ['itemQty','itemDays','unitPrice','extraCost','calcMethod','itemStatus'].forEach(id=>byId(id)?.addEventListener('input',()=>syncExpenseForm()));
+ })();
+ function focusFirstAmount(){const f=['itemQty','itemDays','unitPrice'].map(byId).find(x=>x&&x.closest('label').style.display!=='none');f?.focus()}
+ const setLabel=(id,text)=>{const l=labelOf(id);if(l&&l.firstChild&&l.firstChild.nodeType===3)l.firstChild.nodeValue=text};
+ function syncExpenseForm(opening){
+  const m=byId('calcMethod').value,s=byId('itemStatus').value,editing=!!editingExpenseId;
+  document.querySelectorAll('[data-method]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.method===m)));
+  const item=editing?state.items.find(x=>x.id===editingExpenseId):null,hasPaid=item&&n(item.paid)>0;
+  document.querySelectorAll('[data-status]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.status===s));b.disabled=!!hasPaid&&b.dataset.status!=='paid'});
+  ({personday:()=>{setLabel('itemQty','عدد الأشخاص');setLabel('itemDays','عدد الأيام / الليالي');setLabel('unitPrice','تكلفة الشخص لليوم (ر.س)')},
+    unit:()=>{setLabel('itemQty','الكمية');setLabel('unitPrice','سعر الوحدة (ر.س)')},
+    day:()=>{setLabel('itemDays','عدد الأيام');setLabel('unitPrice','التكلفة اليومية (ر.س)')},
+    fixed:()=>{setLabel('unitPrice','المبلغ (ر.س)')}})[m]?.();
+  const q=n(byId('itemQty').value),d=n(byId('itemDays').value),p=n(byId('unitPrice').value),x=n(byId('extraCost').value);
+  const parts=m==='personday'?[q,d,p]:m==='unit'?[q,p]:m==='day'?[d,p]:[p];
+  byId('formulaText').textContent=parts.map(fmt).join(' × ')+(x?' + '+fmt(x):'')+' = '+sar(updateCalcValue());
+  byId('saveItem').textContent=editing?'حفظ التعديلات':'حفظ البند';
+  byId('uxSaveNext').hidden=editing;
+  if(opening){const more=byId('uxMoreDetails');more.open=s!=='estimated'||!!(byId('itemVendor').value||byId('itemDue').value||byId('itemRef').value||byId('itemNotes').value)}
+ }
+ function updateCalcValue(){const m=byId('calcMethod').value;const q=n(byId('itemQty').value),d=n(byId('itemDays').value),p=n(byId('unitPrice').value),x=n(byId('extraCost').value);return (m==='fixed'?1:m==='day'?d:m==='personday'?q*d:q)*p+x}
+
+ /* ---------- 7. Revenue: collection progress, tax settings tucked away ---------- */
+ (function revenueLayout(){
+  const rev=byId('revenues');if(!rev)return;
+  labelOf('collectedFees')?.classList.add('ux-hide-native');
+  const g=rev.querySelector('.form-grid');
+  const tax=el('details',{class:'ux-tax'},'<summary>إعدادات الضريبة المفترضة (اختياري)</summary>');
+  const tg=el('div',{class:'ux-tax-grid'});tax.appendChild(tg);
+  [labelOf('campVatRate'),labelOf('campOtherTaxMode')].forEach(l=>l&&tg.appendChild(l));
+  const note=g.querySelector('p.small');if(note)tax.appendChild(note);
+  g.appendChild(tax);
+  const hint=el('small',{class:'ux-field-hint',id:'uxFeeHint'});labelOf('studentFee')?.appendChild(hint);
+  const card=el('div',{class:'ux-collect',id:'uxCollect'},'<div class="ux-collect-head"><b>متابعة تحصيل رسوم الطلاب</b><strong id="uxCollPct">0%</strong></div><i class="ux-bar coll"><span id="uxCollBar2"></span></i><div class="ux-collect-meta"><span>المحصّل: <b id="uxCollDone">—</b></span><span>المتوقع: <b id="uxCollExp">—</b></span><span>المتبقي للتحصيل: <b id="uxCollLeft">—</b></span><span id="uxCollSeats"></span></div>');
+  rev.querySelector('.finance-ledger')?.insertAdjacentElement('beforebegin',card);
+ })();
+
+ /* ---------- 8. Budget: compact categories, search, totals, overdue flags ---------- */
+ let showAllCats=false,query='';
+ const filtersRow=byId('filters');
+ const tools=el('div',{class:'ux-ledger-tools'},'<label class="ux-search"><input id="uxSearch" type="search" placeholder="ابحث باسم البند أو المورد أو المرجع" aria-label="بحث في البنود"></label><span id="uxCatChip"></span>');
+ filtersRow.insertAdjacentElement('afterend',tools);
+ byId('uxSearch').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();decorateLedger()});
+ // The original card click scrolled with scrollIntoView; keep filtering but stay smooth inside the iframe.
+ const isOverdue=x=>x.due&&x.due<localDay()&&x.status!=='estimated'&&n(x.amount)>n(x.paid);
+ function decorateCategories(){
+  const grid=byId('categoryGrid');if(!grid)return;
+  const cards=[...grid.querySelectorAll('.cat')];
+  const used=c=>state.items.some(i=>i.cat===c.dataset.cat)||(c.dataset.cat==='reserve'&&n(state.reservePct)>0&&state.items.length>0);
+  const anyUsed=cards.some(used);let hidden=0;
+  cards.forEach(c=>{const u=used(c);c.classList.toggle('ux-empty',!u);const hide=anyUsed&&!u&&!showAllCats&&selectedCat!==c.dataset.cat;c.classList.toggle('ux-collapsed',hide);if(hide)hidden++;
+   c.tabIndex=0;c.setAttribute('role','button');c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();c.click()}};
+   c.onclick=()=>{selectedCat=selectedCat===c.dataset.cat?null:c.dataset.cat;render();financeBringIntoView(byId('expenses'))}});
+  if(anyUsed){const t=el('button',{type:'button',class:'ux-cat-toggle'});t.textContent=showAllCats?'إخفاء التصنيفات الفارغة':'＋ عرض التصنيفات الفارغة ('+hidden+')';t.onclick=()=>{showAllCats=!showAllCats;decorateCategories()};grid.querySelector('.ux-cat-toggle')?.remove();if(hidden||showAllCats)grid.appendChild(t)}
+ }
+ function decorateLedger(){
+  const body=byId('expensesBody');if(!body)return;
+  const rows=state.items.filter(x=>(filter==='all'||x.status===filter)&&(!selectedCat||x.cat===selectedCat));
+  const heads=[...document.querySelectorAll('#expenses thead th')].map(th=>th.textContent.trim());
+  const trs=[...body.querySelectorAll(':scope>tr')];let tot={a:0,p:0,r:0,c:0};
+  body.querySelector('.ux-noresult')?.remove();
+  trs.forEach((tr,i)=>{
+   [...tr.children].forEach((td,j)=>td.dataset.label=heads[j]||'');
+   const x=rows[i];if(!x)return;
+   const hay=[x.name,x.vendor,x.ref,x.notes,state.categories.find(c=>c.id===x.cat)?.name].join(' ').toLowerCase();
+   const show=!query||hay.includes(query);tr.hidden=!show;
+   if(isOverdue(x)){tr.classList.add('ux-overdue');const b=tr.querySelector('td b');if(b&&!tr.querySelector('.ux-overdue-tag'))b.insertAdjacentHTML('afterend','<span class="ux-overdue-tag">متأخر السداد</span>')}
+   if(show){tot.a+=n(x.amount);tot.p+=n(x.paid);tot.r+=Math.max(0,n(x.amount)-n(x.paid));tot.c++}
+  });
+  if(rows.length&&!tot.c)body.insertAdjacentHTML('beforeend','<tr class="ux-noresult"><td colspan="6">لا توجد نتائج لـ «'+esc(query)+'».</td></tr>');
+  const table=body.closest('table');table.querySelector('tfoot')?.remove();
+  if(tot.c>1){table.insertAdjacentHTML('beforeend','<tfoot class="ux-tfoot"><tr><td data-label="">الإجمالي ('+tot.c+' بنود)</td><td></td><td data-label="التقديري">'+fmt(tot.a)+'</td><td data-label="المدفوع">'+fmt(tot.p)+'<div class="fin-meta">المتبقي: '+fmt(tot.r)+'</div></td><td></td><td></td></tr></tfoot>')}
+  const chip=byId('uxCatChip');const cat=selectedCat&&state.categories.find(c=>c.id===selectedCat);
+  chip.innerHTML=cat?'<span class="ux-chip">التصنيف: '+esc(cat.name)+' <button type="button" aria-label="إلغاء التصفية">✕</button></span>':'';
+  chip.querySelector('button')?.addEventListener('click',()=>{selectedCat=null;render()});
+  const ch=[...byId('collectionsBody').children];const ch2=[...document.querySelectorAll('#revenues .finance-ledger thead th')].map(t=>t.textContent.trim());
+  ch.forEach(tr=>[...tr.children].forEach((td,j)=>td.dataset.label=ch2[j]||''));
+ }
+
+ /* ---------- 9. Next step + pulse + badges ---------- */
+ function nextStep(f){
+  const today=localDay();
+  const overdue=state.items.filter(isOverdue);
+  const tasks=[];
+  if(!state.items.length)tasks.push({t:'ابدأ بإضافة أول بند مصروف',d:'مثل إقامة الطلاب أو استئجار الحافلة — يمكنك تعديله لاحقاً.',b:'＋ إضافة بند',go:()=>newItem()});
+  if(!n(state.students)||!n(state.fee))tasks.push({t:'حدّد عدد الطلاب ورسوم الطالب',d:'بدونهما لا يمكن حساب الإيرادات المتوقعة أو الفائض أو نقطة التعادل.',b:'إدخال الطلاب والرسوم',go:()=>{financeActivateView('revenue');setTimeout(()=>{byId(n(state.students)?'studentFee':'studentCount').focus();financeBringIntoView(byId('revenues'))},50)}});
+  if(overdue.length)tasks.push({t:overdue.length+' التزام متأخر السداد',d:overdue.slice(0,3).map(x=>x.name+' ('+sar(n(x.amount)-n(x.paid))+')').join('، '),b:'تسجيل دفعة',go:()=>{if(overdue.length===1){financeActivateView('budget');openPayment(overdue[0].id)}else{financeActivateView('budget');filter='committed';document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.filter==='committed'));render();financeBringIntoView(byId('expenses'))}}});
+  const missingRef=state.items.filter(x=>x.status!=='estimated'&&!x.ref&&!x.vendor);
+  if(state.items.length&&n(state.students)&&n(state.fee)&&state.approval.status==='draft')tasks.push({t:'أرسل الميزانية للاعتماد',d:'التقديرات جاهزة: راجعها ثم أرسلها للمراجعة لتثبيتها.',b:'مراجعة واعتماد',go:()=>{financeActivateView('control');financeBringIntoView(byId('financeApproval'))}});
+  if(state.approval.status==='review')tasks.push({t:'الميزانية بانتظار الاعتماد',d:'اعتمد النسخة المرسلة أو عدّلها ثم أعد إرسالها.',b:'فتح الاعتماد',go:()=>{financeActivateView('control');financeBringIntoView(byId('financeApproval'))}});
+  const expected=n(state.students)*n(state.fee);
+  if(expected&&actualTuition()<expected)tasks.push({t:'تابع تحصيل رسوم الطلاب',d:'المتبقي للتحصيل '+sar(expected-actualTuition())+' من '+sar(expected)+'.',b:'＋ تسجيل تحصيل',go:()=>{financeActivateView('revenue');openCollection()}});
+  if(missingRef.length)tasks.push({t:'بنود ملتزم بها دون مورد أو مرجع ('+missingRef.length+')',d:'أضف اسم المورد أو رقم الفاتورة لتسهيل المراجعة.',b:'تعديل البند',go:()=>{financeActivateView('budget');editItem(missingRef[0].id)}});
+  return tasks;
+ }
+ function refreshUX(){
+  const f=figures();
+  const set=(id,v)=>{const x=byId(id);if(x)x.textContent=v};
+  set('uxBudget',sar(f.estimated));set('uxBudgetSub',state.items.length+' بنود · ملتزم غير مدفوع '+sar(f.committed));
+  set('uxPaid',sar(f.actual));const pp=pct(f.actual,f.estimated);byId('uxPaidBar').style.width=Math.min(100,pp)+'%';byId('uxPaidBar').parentElement.classList.toggle('over',f.actual>f.estimated&&f.estimated>0);
+  set('uxPaidSub',f.estimated?pp+'% من الميزانية':'لا توجد ميزانية بعد');
+  set('uxColl',sar(f.actualRevenue));const cp=pct(f.actualRevenue,f.revenue);byId('uxCollBar').style.width=Math.min(100,cp)+'%';
+  set('uxCollSub',f.revenue?cp+'% من المتوقع '+sar(f.revenue):'حدّد الطلاب والرسوم');
+  const ready=f.revenue>0&&f.estimated>0;
+  set('uxProfit',ready?sar(f.profit):'—');byId('uxProfit').className=ready?(f.profit<0?'neg':'pos'):'';
+  set('uxProfitSub',ready?(f.netRevenue?'هامش '+(f.profit/f.netRevenue*100).toFixed(1)+'% بعد الضريبة المفترضة':''):'يحتاج تكاليف وإيرادات');
+  const cash=f.actualRevenue-f.actual;set('uxCash',sar(cash));byId('uxCash').className=cash<0?'neg':cash>0?'pos':'';
+  // revenue card
+  const expT=n(state.students)*n(state.fee),gotT=actualTuition(),p2=pct(gotT,expT);
+  set('uxCollPct',p2+'%');byId('uxCollBar2').style.width=Math.min(100,p2)+'%';
+  set('uxCollDone',sar(gotT));set('uxCollExp',expT?sar(expT):'—');set('uxCollLeft',expT?sar(Math.max(0,expT-gotT)):'—');
+  set('uxCollSeats',n(state.fee)?'يعادل رسوم ≈ '+Math.floor(gotT/n(state.fee))+' من '+fmt(state.students)+' طالب':'');
+  set('uxFeeHint',expT?'المبيعات المتوقعة: '+fmt(state.students)+' × '+fmt(state.fee)+' = '+sar(expT):'');
+  // next step
+  const tasks=nextStep(f);
+  if(tasks.length){const t=tasks[0];
+   next.className='ux-next';next.innerHTML='<div class="ux-next-icon">→</div><div class="ux-next-body"><small>الخطوة التالية</small><b>'+esc(t.t)+'</b><p>'+esc(t.d)+'</p>'+(tasks.length>1?'<div class="ux-next-more">و'+(tasks.length-1)+' متابعات أخرى · <button type="button" id="uxAllTasks">عرض كل المتابعات</button></div>':'')+'</div><button type="button" class="btn primary" id="uxNextBtn">'+esc(t.b)+'</button>';
+   byId('uxNextBtn').onclick=t.go;byId('uxAllTasks')?.addEventListener('click',()=>{financeActivateView('control');financeBringIntoView(byId('financeOperations')||byId('financeApproval'))});
+  }else{next.className='ux-next done';next.innerHTML='<div class="ux-next-icon">✓</div><div class="ux-next-body"><small>الوضع الحالي</small><b>لا توجد متابعات عاجلة</b><p>الميزانية معتمدة والتحصيل مكتمل ولا توجد التزامات متأخرة.</p></div>'}
+  // badges
+  const overdue=state.items.filter(isOverdue).length;
+  tabBadge.budget.textContent=state.items.length||'';tabBadge.budget.classList.toggle('warn',overdue>0);if(overdue)tabBadge.budget.textContent=overdue+' متأخر';
+  tabBadge.revenue.textContent=state.collections.length||'';
+  const open=tasks.length;tabBadge.control.textContent=open||'';tabBadge.control.classList.toggle('warn',open>0);
+  decorateCategories();decorateLedger();
+ }
+
+ /* ---------- 10. Save feedback ---------- */
+ let lastAudit=state.audit[0]?.id;
+ const baseRender=render;
+ render=function(){
+  baseRender.apply(this,arguments);
+  try{refreshUX()}catch(e){console.error(e)}
+  const head=state.audit[0];
+  if(head&&head.id!==lastAudit){
+   lastAudit=head.id;
+   const act=head.action;
+   const view=act.includes('تحصيل')?'revenue':act.includes('بند')||act.includes('دفعة')||act.includes('تصنيف')?'budget':null;
+   showToast(act+' — '+head.detail,view&&view!==financeActiveView?['عرض',()=>financeActivateView(view)]:null);
+   if(act==='إضافة بند'){byId('expensesBody')?.querySelector('tr')?.classList.add('ux-flash')}
+  }
+ };
+ refreshUX();
 })();
 </script></body></html>
