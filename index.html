@@ -387,6 +387,11 @@ td select,td input{border:1px solid var(--line);background:var(--surface);border
   box-shadow:0 3px 0 rgba(0,0,0,.18), inset 0 -2px 0 rgba(0,0,0,.12);margin-top:11px;user-select:none;transition:transform .12s}
 .brick{border:1px solid rgba(255,255,255,.28)}
 .brick .brick-symbol{color:#fff}
+.brick:has(.elite-tray-remove){padding-inline-end:45px}
+.elite-tray-remove{position:absolute;inset-inline-end:9px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:31px;height:34px;padding:6px;border-radius:8px;border:1px solid #ffffff88;background:#ffffff23;color:#fff;cursor:pointer;z-index:2;transition:background .15s,transform .15s}
+.elite-tray-remove svg{width:18px;height:18px;pointer-events:none}
+.elite-tray-remove:hover{background:#fff;color:#b42318;transform:translateY(-50%) scale(1.07)}
+.elite-tray-remove:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .brick:hover{transform:translateY(-1px)}
 .brick:active{cursor:grabbing}
 .brick .studs{position:absolute;top:-5px;inset-inline-start:9px;display:flex;gap:4px;pointer-events:none}
@@ -2189,6 +2194,7 @@ function brickEl(i,opts){
     <span class="brick-symbol">${uiIcon(TRACKICON[i.t])}</span>
     <b>${esc(L({ar:i.ar,en:i.en}))}</b>
     ${sub?`<div class="meta">${sub}</div>`:''}
+    ${opts.removable?`<button type="button" class="elite-tray-remove" draggable="false" data-remove-unassigned="${esc(i.id)}" aria-label="${esc(T('إزالة '+i.ar+' من الخطة','Remove '+i.en+' from plan'))}" title="${esc(T('إزالة البرنامج','Remove program'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v7m4-7v7"/></svg></button>`:''}
   </div>`;
 }
 
@@ -2306,7 +2312,7 @@ function stepBricks(){
       <div class="card">
         <div class="row"><h2>${T('البرامج غير الموزّعة','Unassigned programs')}</h2><span class="pill orange">${tray.length}</span></div>
         <p class="help" style="margin:6px 0 10px">${T('البرامج المختارة التي لم يُحدد لها يوم بعد.','Bricks not yet snapped to a day.')}</p>
-        ${tray.length?tray.map((x,index)=>brickEl(ITEM(x.id),{color:ELITE_TRAY_COLORS[index%ELITE_TRAY_COLORS.length],sub:`<span>${T('لم يُحدّد له يوم','Not yet assigned')}</span>`})).join(''):`<div class="empty">${T('لا توجد برامج تنتظر التوزيع.','No unassigned programs.')}</div>`}
+        ${tray.length?tray.map((x,index)=>brickEl(ITEM(x.id),{removable:can('select'),color:ELITE_TRAY_COLORS[index%ELITE_TRAY_COLORS.length],sub:`<span>${T('لم يُحدّد له يوم','Not yet assigned')}</span>`})).join(''):`<div class="empty">${T('لا توجد برامج تنتظر التوزيع.','No unassigned programs.')}</div>`}
         <button class="small" data-act="step:3" style="margin-top:10px">${T('انتقل لتوزيع البرامج ←','Allocate programs ←')}</button>
       </div>
       <div class="card spacer">
@@ -4086,6 +4092,22 @@ document.addEventListener('drop',e=>{
 
 /* ============================ الأحداث ============================ */
 document.addEventListener('click',e=>{
+  const removal=e.target.closest('[data-remove-unassigned]');
+  if(removal){
+    e.preventDefault();e.stopPropagation();
+    if(!can('select'))return;
+    const id=removal.dataset.removeUnassigned;
+    const selected=S.selected.find(x=>x.id===id);
+    if(!selected||selected.day)return;
+    const item=ITEM(id);if(!item)return;
+    if(!window.confirm(T('إزالة «'+item.ar+'» من البرامج غير الموزّعة؟ سيعود البرنامج إلى البرامج المتاحة.','Remove “'+item.en+'” from unassigned programs? It will be available to add again.')))return;
+    S.selected=S.selected.filter(x=>x.id!==id);
+    S.draft=false;
+    logIt('إزالة برنامج غير موزع: '+item.ar,'Removed unassigned program: '+item.en);
+    save();render({preserveScroll:true});
+    toast(T('تمت إزالة البرنامج من الخطة.','Program removed from plan.'));
+    return;
+  }
   if(page==='builder'&&S.step===3){
     const br=e.target.closest('.tray [data-brick], .plate [data-brick]');
     if(br){e.preventDefault();const id=br.dataset.brick;held=(held===id?null:id);render();return}
