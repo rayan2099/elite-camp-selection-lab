@@ -167,6 +167,41 @@ small{font-size:12px}
 .elite-sport-radio-item{display:flex;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);font-size:12px;cursor:pointer}
 .elite-sport-radio-item:has(input:checked){background:var(--accentsoft);border-color:var(--accent);font-weight:700}
 .elite-sport-radio-item input{accent-color:var(--accent)}
+/* Distinct, clickable multi-row track filters in camp builder */
+.build2 .elite-track-heading{display:flex;justify-content:space-between;gap:9px;align-items:center;margin:12px 0 8px;color:var(--fg);font-size:13px;font-weight:800}
+.build2 .elite-track-heading small{font-size:11px;font-weight:500;color:var(--muted)}
+.build2 .seg.elite-track-filters{display:flex;flex-wrap:wrap;gap:8px;border:0;border-radius:0;background:transparent;overflow:visible;width:100%}
+.build2 .seg.elite-track-filters .elite-track-filter{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:43px;padding:9px 13px;border:1.5px solid var(--line);border-radius:11px;background:var(--surface);color:var(--fg);font-weight:700;font-size:12.5px;transition:background .15s,border-color .15s,transform .15s,box-shadow .15s}
+.build2 .seg.elite-track-filters .elite-track-filter:hover{border-color:var(--accent);background:var(--accentsoft);transform:translateY(-1px)}
+.build2 .seg.elite-track-filters .elite-track-filter:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.build2 .seg.elite-track-filters .elite-track-filter.on,html[data-theme=dark] .build2 .seg.elite-track-filters .elite-track-filter.on{border-color:var(--navy);background:var(--navy);color:#fff;box-shadow:0 3px 12px #12223a22}
+.build2 .seg.elite-track-filters .elite-track-filter-mark{display:grid;place-items:center;width:17px;height:17px;border:1px solid currentColor;border-radius:50%;font-size:12px;line-height:1}
+.build2 .seg.elite-track-filters .elite-track-filter-count{display:inline-flex;justify-content:center;align-items:center;min-width:23px;height:22px;border-radius:7px;padding:0 5px;font-size:11px;font-weight:800;background:var(--soft);color:var(--muted)}
+.build2 .seg.elite-track-filters .elite-track-filter.on .elite-track-filter-count{background:#ffffff25;color:#fff}
+/* Compact grouped subactivity selector: no options are truncated */
+.elite-branch-organizer{margin:10px 0;min-width:0}
+.elite-branch-toolbar{display:flex;align-items:end;gap:11px;flex-wrap:wrap;margin-bottom:10px}
+.elite-branch-toolbar label{display:grid;gap:4px;flex:1;min-width:210px;font-size:12px;font-weight:750}
+.elite-branch-toolbar input{width:100%;min-height:40px;padding:8px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--fg)}
+.elite-branch-selected{white-space:nowrap;background:var(--accentsoft);color:var(--fg);border-radius:9px;padding:8px 12px;font-size:12px;font-weight:800}
+.elite-branch-group-list{display:grid;gap:9px;margin:11px 0}
+.elite-branch-group{border:1px solid var(--line);background:var(--surface);border-radius:11px;overflow:hidden}
+.elite-branch-group summary{display:flex;align-items:center;gap:9px;cursor:pointer;list-style:none;padding:12px 13px;min-height:47px}
+.elite-branch-group summary::-webkit-details-marker{display:none}
+.elite-branch-group summary:hover{background:var(--soft)}
+.elite-branch-group summary strong{font-size:12.5px;flex:1;min-width:0}
+.elite-branch-group summary small{font-size:11px;color:var(--muted)}
+.elite-group-chevron{font-size:19px;color:var(--accent);transition:transform .15s}
+.elite-branch-group[open] .elite-group-chevron{transform:rotate(180deg)}
+.elite-group-count{font-size:10px;color:var(--good);white-space:nowrap}
+.elite-branch-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:9px 11px 12px;background:var(--soft)}
+.elite-branch-choice-grid .elite-phase-option{margin:0;background:var(--surface);align-items:center;min-height:44px}
+.elite-branch-choice-grid .elite-phase-option small{font-size:11.5px}
+.elite-branch-choice-grid [hidden],.elite-branch-group[hidden]{display:none!important}
+.elite-sport-radio{grid-template-columns:repeat(auto-fit,minmax(135px,1fr))}
+.elite-sport-pickbox [data-sport-details] .elite-phase-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.elite-sport-pickbox [data-sport-details] .elite-phase-option{background:var(--surface);min-height:43px;align-items:center}
+@media(max-width:620px){.elite-branch-choice-grid,.elite-sport-pickbox [data-sport-details] .elite-phase-options{grid-template-columns:1fr}.build2 .elite-track-heading{align-items:flex-start;flex-direction:column}.build2 .seg.elite-track-filters .elite-track-filter{flex:1 1 auto}}
 /* ---------- contextual manager guidance ---------- */
 .admin-guide{background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid var(--accent);border-radius:12px;padding:12px 15px;margin:0 0 17px;box-shadow:var(--shadow);font-size:12.5px}
 .admin-guide-row{display:flex;gap:10px;align-items:flex-start}
@@ -2250,8 +2285,9 @@ function stepBricks(){
         <h2>${T('البرامج المتاحة','Available programs')}</h2>
         <button class="primary" data-act="newProgram">+ ${T('إنشاء برنامج','Create program')}</button>
       </div>
-      <div class="seg">${[['all',T('الكل','All')]].concat(TRACKS.map(t=>[t.id,L(t)])).map(([id,label])=>
-          `<button class="${track===id?'on':''}" data-act="bin:${id}">${label}</button>`).join('')}</div>
+      <div class="elite-track-heading"><span>${T('اختر مسار البرامج','Choose a programme track')}</span><small>${T('اضغط على المسار لتصفية البرامج','Select a category to filter the programmes')}</small></div>
+      <div class="seg elite-track-filters" role="group" aria-label="${T('تصفية البرامج حسب المسار','Filter programmes by track')}">${[['all',T('الكل','All')]].concat(TRACKS.map(t=>[t.id,L(t)])).map(([id,label])=>
+          `<button type="button" class="elite-track-filter ${track===id?'on':''}" data-act="bin:${id}" aria-pressed="${track===id?'true':'false'}"><span class="elite-track-filter-mark" aria-hidden="true">${track===id?'✓':'◦'}</span><span>${label}</span><span class="elite-track-filter-count">${id==='all'?LIB.filter(i=>!isSel(i.id)).length:LIB.filter(i=>i.t===id&&!isSel(i.id)).length}</span></button>`).join('')}</div>
       <p class="help" style="margin:6px 0 12px">${T('أضف البرامج المناسبة إلى خطتك، ثم وزّعها على الأيام في الخطوة التالية.','Choose suitable programs for this camp, then allocate them in the next step.')}</p>
       <div style="margin:10px 0 13px"><input type="search" id="binSearch" autocomplete="off" spellcheck="false" value="${esc(binSearchQuery)}" placeholder="${T('ابحث بجزء من اسم البرنامج أو الهدف أو الوصف…','Search any part of a program name, goal or description…')}" aria-label="${T('البحث في البرامج المتاحة','Search available programs')}" style="width:100%;padding:10px 13px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--fg)"><p class="help" style="margin-top:5px">${T('ابحث بحرف واحد أو أكثر. البحث القصير في أسماء البرامج، والبحث الأطول يشمل الأهداف والأوصاف.','Results update instantly, including partial words.')}</p></div>
       <div class="bins" id="binSearchResults">
@@ -3606,8 +3642,20 @@ function customBreakdownSource(track,field){
 function customBreakdownOptions(track,field,selected=[]){
  const chosen=new Set(selected.map(v=>String(v).trim()));
  const options=customBreakdownSource(track,field);
- return options.length?options.map(o=>`<label class="elite-phase-option"><input type="checkbox" data-cp-breakdown value="${esc(o.value)}" ${chosen.has(o.value)?'checked':''}><span><strong>${esc(o.program)}</strong><small>${esc(o.value)}</small></span></label>`).join('')
-  :`<p class="help">${T('لا توجد تفريعات موثقة لهذا المجال حاليًا، ويمكنك إضافتها يدويًا.','No documented subactivities for this field. Add yours manually below.')}</p>`;
+ if(!options.length)return `<p class="help">${T('لا توجد تفريعات موثقة لهذا المجال حاليًا، ويمكنك إضافتها يدويًا.','No documented subactivities for this field. Add yours manually below.')}</p>`;
+ const groups=new Map();
+ for(const o of options){if(!groups.has(o.program))groups.set(o.program,[]);groups.get(o.program).push(o);}
+ return `<div class="elite-branch-organizer" data-branch-organizer>
+  <div class="elite-branch-toolbar"><label>${T('ابحث داخل التفريعات','Search subactivities')}<input type="search" data-branch-search autocomplete="off" placeholder="${T('ابحث عن مهارة أو نشاط أو برنامج…','Search skills, activities or programme…')}"></label>
+  <span class="elite-branch-selected" data-branch-count>${options.filter(o=>chosen.has(o.value)).length} ${T('محددة','selected')}</span></div>
+  <p class="help">${T('التفريعات مرتبة حسب البرنامج المصدر. افتح المجموعة المطلوبة واختر منها، دون الحاجة للتمرير عبر قائمة واحدة طويلة.','Options grouped by source programme. Expand a group to choose without scrolling through one long list.')}</p>
+  <div class="elite-branch-group-list">${[...groups].map(([name,items],idx)=>{
+   const active=items.filter(o=>chosen.has(o.value)).length;
+   return `<details class="elite-branch-group" ${active||idx===0?'open':''} data-branch-group><summary><span class="elite-group-chevron" aria-hidden="true">⌄</span><strong>${esc(name)}</strong><small>${items.length} ${T('تفريعات','subactivities')}</small><b class="elite-group-count" data-group-count>${active?active+' '+T('مختارة','chosen'):''}</b></summary>
+    <div class="elite-branch-choice-grid">${items.map(o=>`<label class="elite-phase-option" data-branch-item><input type="checkbox" data-cp-breakdown value="${esc(o.value)}" ${chosen.has(o.value)?'checked':''}><span><small>${esc(o.value)}</small></span></label>`).join('')}</div>
+   </details>`;
+  }).join('')}</div><p class="help" data-branch-empty hidden>${T('لا توجد تفريعات تطابق البحث.','No matching subactivities.')}</p>
+ </div>`;
 }
 function refreshCustomBreakdowns(){
  const wrap=$('#cpSuggestedBreakdowns');
@@ -4117,6 +4165,21 @@ document.addEventListener('change',e=>{const t=e.target;if(page==='opportunities
 document.addEventListener('input',e=>{
   const t=e.target;
   if(t.id==='q'){libFilter.q=t.value;renderLib()}
+  if(t.matches('[data-branch-search]')){
+    const root=t.closest('[data-branch-organizer]'),q=libSearchNormalize(t.value);
+    let shown=0;
+    root?.querySelectorAll('[data-branch-group]').forEach(group=>{
+      const title=libSearchNormalize(group.querySelector('summary strong')?.textContent||'');
+      let matches=0;
+      group.querySelectorAll('[data-branch-item]').forEach(item=>{
+        const yes=!q||title.includes(q)||libSearchNormalize(item.textContent).includes(q);
+        item.hidden=!yes;if(yes)matches++;
+      });
+      group.hidden=!matches;if(matches){shown++;if(q)group.open=true;}
+    });
+    const empty=root?.querySelector('[data-branch-empty]');if(empty)empty.hidden=shown>0;
+    return;
+  }
   if(t.id==='binSearch'){
     binSearchQuery=t.value;
     const terms=libSearchNormalize(binSearchQuery).split(/\s+/).filter(Boolean);
@@ -4137,6 +4200,18 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('change',e=>{
   const t=e.target;
+  if(t.matches('[data-cp-breakdown]')){
+    const root=t.closest('[data-branch-organizer]');
+    if(root){
+      const count=root.querySelectorAll('[data-cp-breakdown]:checked').length;
+      const badge=root.querySelector('[data-branch-count]');if(badge)badge.textContent=count+' '+T('محددة','selected');
+      root.querySelectorAll('[data-branch-group]').forEach(group=>{
+        const n=group.querySelectorAll('[data-cp-breakdown]:checked').length;
+        const label=group.querySelector('[data-group-count]');if(label)label.textContent=n?n+' '+T('مختارة','chosen'):'';
+      });
+    }
+    return;
+  }
   if(t.id==='cpTrack'){refreshCustomFields();return}
   if(t.id==='cpField'){refreshCustomBreakdowns();return}
   if(t.matches('[data-one-sport]')){const p=t.closest('.elite-sport-pickbox')?.querySelector('[data-sport-details]');if(p)p.innerHTML=sportSkillOptions(t.value);return}
