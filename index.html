@@ -3405,7 +3405,8 @@ function pageFinanceExact(){
  return '<iframe id="financeExactFrame" src="'+esc(src)+'" title="'+esc(T('الإدارة المالية: ','Finances: ')+campName(camp))+'" loading="eager"></iframe>';
 }
 const PAGES={finance:pageFinanceExact,opportunities:pageOpportunityCalendar,camps:pageCamps,builder:pageBuilder,dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
-function render(){
+function render({preserveScroll=false}={}){
+  const previousScrollY=preserveScroll?window.scrollY:0;
   if(!PAGES[page]) page='camps';
   document.body.classList.toggle('finance-exact-mode',page==='finance');
   header();
@@ -3453,7 +3454,7 @@ function render(){
   if(page==='library'){renderLib();}
   S.page=page;S.lang=lang;save();
   try{history.replaceState(null,'','#'+page)}catch(e){}
-  window.scrollTo(0,0);
+  window.scrollTo(0,preserveScroll?previousScrollY:0);
 }
 function renderLib(){
   const grid=$('#libGrid');if(!grid)return;
@@ -3470,8 +3471,8 @@ function pick(id,silent){
   S.selected.push({id,pri:'support',day:null,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
   logIt(`أُضيف إلى صندوق القطع: ${it.ar}`,`Added to tray: ${it.en}`);
   save();
-  if(!silent){toast(T(`«${it.ar}» في صندوق القطع — ركّبه على يوم`,`“${it.en}” is in the tray — snap it to a day`));render()}
-  else render();
+  if(!silent){toast(T(`«${it.ar}» في صندوق القطع — ركّبه على يوم`,`“${it.en}” is in the tray — snap it to a day`));render({preserveScroll:true})}
+  else render({preserveScroll:true});
   if(it.t==='sport'&&!silent)editModal(id);
 }
 function unpick(id){
@@ -3984,7 +3985,7 @@ function addBrick(id){
   const it=ITEM(id);
   S.selected.push({id,pri:'support',day:null,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
   logIt(`أُضيف إلى صندوق القطع: ${it.ar}`,`Added to tray: ${it.en}`);
-  save();render();toast(T(`«${it.ar}» أُضيفت إلى الصندوق`,`“${it.en}” added to the tray`));
+  save();render({preserveScroll:true});toast(T(`«${it.ar}» أُضيفت إلى الصندوق`,`“${it.en}” added to the tray`));
   if(it.t==='sport')editModal(id);
 }
 function placeBrick(id,day){
