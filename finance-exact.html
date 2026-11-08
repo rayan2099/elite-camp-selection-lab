@@ -232,7 +232,7 @@ html.finance-embedded .btn:focus-visible,html.finance-embedded .fin-tab:focus-vi
 .fin-quick-actions button{background:#fff;border:1px solid #dce5ef;border-radius:12px;padding:13px;color:#172d4e;text-align:right;font-weight:750;display:flex;align-items:center;gap:10px;min-width:0;cursor:pointer}
 .fin-quick-actions button:hover{background:#fff5ed;border-color:#f47b36}
 .fin-quick-actions button span{display:grid;place-items:center;flex:none;background:#fff0e4;color:#d85d23;border-radius:8px;width:31px;height:31px;font-size:19px}
-[data-fin-view][hidden],.fin-workspace-nav [hidden],#financeReportView[hidden]{display:none!important}
+[data-fin-view][hidden],#finQuickActions[hidden],.fin-workspace-nav [hidden],#financeReportView[hidden]{display:none!important}
 html.finance-embedded #expenses{display:block}
 html.finance-embedded #expenses>.panel{width:100%}
 html.finance-embedded #analysis{display:block}
@@ -937,7 +937,8 @@ function financeSetupWorkspaces(){
  assign(byId('financeCampBanner'),'home');
  assign(document.querySelector('.finance-notice'),'home');
  assign(byId('financeWorkflow'),'home');
- assign(byId('financeStepGuides'),'home');
+ /* Onboarding details stay collapsed until the user requests them. */
+ byId('financeStepGuides').dataset.finView='home';
  assign(document.querySelector('section.stats'),'home');
  assign(document.querySelector('div.mid'),'home');
  assign(byId('categories'),'budget');
