@@ -3523,6 +3523,18 @@ function unpick(id){
   else logIt(`أُزيل من الخطة: ${it.ar}`,`Removed from plan: ${it.en}`);
   save();render();
 }
+function confirmTrayRemove(id){
+  if(!can('select'))return;
+  const x=S.selected.find(p=>p.id===id);
+  if(!x||x.day)return closeModal();
+  const item=ITEM(id);if(!item)return closeModal();
+  S.selected=S.selected.filter(p=>p.id!==id);
+  S.draft=false;
+  logIt('إزالة برنامج غير موزع: '+item.ar,'Removed unassigned program: '+item.en);
+  closeModal();
+  save();render({preserveScroll:true});
+  toast(T('أُزيل البرنامج من الخطة، وهو متاح للإضافة مجددًا.','Program removed from plan and available to add again.'));
+}
 function patch(id,k,v){
   const x=S.selected.find(s=>s.id===id);if(!x)return;
   x[k]=k==='day'?(v?+v:null):v;S.draft=false;
@@ -4100,12 +4112,13 @@ document.addEventListener('click',e=>{
     const selected=S.selected.find(x=>x.id===id);
     if(!selected||selected.day)return;
     const item=ITEM(id);if(!item)return;
-    if(!window.confirm(T('إزالة «'+item.ar+'» من البرامج غير الموزّعة؟ سيعود البرنامج إلى البرامج المتاحة.','Remove “'+item.en+'” from unassigned programs? It will be available to add again.')))return;
-    S.selected=S.selected.filter(x=>x.id!==id);
-    S.draft=false;
-    logIt('إزالة برنامج غير موزع: '+item.ar,'Removed unassigned program: '+item.en);
-    save();render({preserveScroll:true});
-    toast(T('تمت إزالة البرنامج من الخطة.','Program removed from plan.'));
+    openModal(`<div class="eyebrow">${T('تأكيد إزالة البرنامج','CONFIRM REMOVAL')}</div>
+      <h2 style="margin-top:8px">${T('إزالة من البرامج غير الموزّعة؟','Remove from unassigned programs?')}</h2>
+      <p class="help" style="margin:12px 0 14px">${T('سيُزال برنامج «'+item.ar+'» من خطة هذا المعسكر فقط، ويبقى متاحًا في مكتبة البرامج لإضافته مجددًا.','“'+item.en+'” will be removed from this camp plan only, and remains available in the library.')}</p>
+      <div class="actions" style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap">
+        <button type="button" data-act="close">${T('إلغاء','Cancel')}</button>
+        <button type="button" class="danger" data-act="confirmTrayRemove:${esc(id)}">${T('إزالة البرنامج','Remove program')}</button>
+      </div>`);
     return;
   }
   if(page==='builder'&&S.step===3){
@@ -4136,6 +4149,7 @@ document.addEventListener('click',e=>{
     theme:()=>{S.theme=S.theme==='light'?'dark':'light';render()},
     menu:()=>{$('#sidebar').classList.toggle('open')},
     close:()=>closeModal(),
+    confirmTrayRemove:()=>confirmTrayRemove(arg),
     brief:()=>can('brief')?briefModal():toast(T('تعديل البيانات متاح للإدارة.','Editing the brief is admin-only.')),
     guide:()=>guideModal(),
     saveBrief:()=>saveBrief(),
