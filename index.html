@@ -1445,10 +1445,32 @@ function seedCamps(){
     log:[]});
   return [c2,c3,c1];
 }
+/* 2027 camps from «موازنة المعسكرات 2027»; their budgets are seeded by the finance page. */
+const CAMPS_2027=[
+ ['camp-2027-buraydah','معسكر بريدة · يناير 2027','Buraydah Camp · Jan 2027','بريدة','Buraydah',5],
+ ['camp-2027-sharqiyah','معسكر الشرقية · فبراير 2027','Eastern Province Camp · Feb 2027','الشرقية','Eastern Province',3],
+ ['camp-2027-madinah','معسكر المدينة · أبريل 2027','Madinah Camp · Apr 2027','المدينة المنورة','Madinah',4],
+ ['camp-2027-riyadh-jul','معسكر الرياض · يوليو 2027','Riyadh Camp · Jul 2027','الرياض','Riyadh',12],
+ ['camp-2027-abha','معسكر أبها · أغسطس 2027','Abha Camp · Aug 2027','أبها','Abha',12],
+ ['camp-2027-riyadh-nov','معسكر الرياض · نوفمبر 2027','Riyadh Camp · Nov 2027','الرياض','Riyadh',5]
+];
+function camps2027(){
+  const now=Date.now();
+  return CAMPS_2027.map(([id,ar,en,cityAr,cityEn,days],i)=>makeCamp({id,createdAt:now-1000*i,updatedAt:now-1000*i,status:'draft',
+    meta:{campAr:ar,campEn:en,cityAr,cityEn,start:'',end:'',ageMin:10,ageMax:15,students:50,teams:5,
+      days:Array.from({length:days},(_,d)=>DAYS_DEFAULT[d]?{...DAYS_DEFAULT[d]}:{ar:'اليوم '+(d+1),en:'Day '+(d+1)})},
+    log:[{id:now+i,at:now,ar:'أُنشئ من موازنة المعسكرات 2027',en:'Created from the 2027 camp budget',role:'director'}]}));
+}
+function addCamps2027(o){
+  if(o.seed2027)return o;
+  const have=new Set(o.camps.map(c=>c.id));
+  camps2027().forEach(c=>{if(!have.has(c.id))o.camps.push(c)});
+  o.seed2027=true;return o;
+}
 function initial(){
   const camps=seedCamps();
-  return {version:4,customPrograms:[],customLabels:{tags:{},needs:{}},role:'director',lang:'ar',theme:'light',page:'camps',
-    activeId:camps.find(c=>c.id==='camp-autumn').id,camps};
+  return addCamps2027({version:4,customPrograms:[],customLabels:{tags:{},needs:{}},role:'director',lang:'ar',theme:'light',page:'camps',
+    activeId:camps.find(c=>c.id==='camp-autumn').id,camps});
 }
 function defineActive(o){
   CAMP_FIELDS.forEach(k=>{
@@ -1468,7 +1490,7 @@ function withCamp(id,fn){
 }
 function migrate(o){
   if(!o||typeof o!=='object')return initial();
-  if(o.version===4&&Array.isArray(o.camps)&&o.camps.length){if(!Array.isArray(o.customPrograms))o.customPrograms=[];if(!o.customLabels||typeof o.customLabels!=='object')o.customLabels={tags:{},needs:{}};return o;}
+  if(o.version===4&&Array.isArray(o.camps)&&o.camps.length){if(!Array.isArray(o.customPrograms))o.customPrograms=[];if(!o.customLabels||typeof o.customLabels!=='object')o.customLabels={tags:{},needs:{}};return addCamps2027(o);}
   if(o.meta&&Array.isArray(o.selected)){
     const camp=makeCamp({id:'camp-migrated',createdAt:Date.now(),updatedAt:Date.now(),status:'draft',
       meta:o.meta,rules:o.rules||baseRules(),selected:o.selected,step:o.step||1,
@@ -1507,6 +1529,8 @@ const DAYTEXT=(i)=>{const d=S.meta.days[i-1];return d?L(d):''};
 const ROLE=id=>ROLES.find(r=>r.id===id)||ROLES[0];
 const can=cap=>(CAPS[S.role]||[]).includes(cap);
 const save=()=>{try{localStorage.setItem('elite-select-v1',JSON.stringify(S))}catch(e){toast(T('تعذّر الحفظ المحلي في هذا المتصفح.','Local storage is unavailable in this browser.'))}};
+/* Persist the 2027 camps right away so the finance «all camps» view can list them. */
+try{const raw=JSON.parse(localStorage.getItem('elite-select-v1')||'null');if(!raw||!raw.seed2027)localStorage.setItem('elite-select-v1',JSON.stringify(S))}catch(e){}
 function toast(msg){const t=document.getElementById('toasts');t.innerHTML=`<div class="toast">${esc(msg)}</div>`;clearTimeout(window.__tt);window.__tt=setTimeout(()=>t.innerHTML='',3200)}
 function logIt(ar,en){S.log.unshift({id:Date.now()+Math.random(),at:Date.now(),ar,en,role:S.role});if(S.log.length>300)S.log.length=300}
 
