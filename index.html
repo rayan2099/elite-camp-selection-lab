@@ -3711,7 +3711,7 @@ function saveCustomProgram(id){
   if(id&&(!original||!original.custom))return;
   const sportChoice=t==='sport'?$('[name="customSport"]:checked')?.value||'':'';
   if(t==='sport'&&!sportChoice)return toast(T('اختر رياضة واحدة.','Select one sport.'));
-  const item={id:id||newId('CUSTOM-'),custom:true,t,f,ar,en,ages:[min,max],load,activityType:v('cpActivityType'),sportChoice,activityBreakdown:[...new Set([...$('[data-cp-breakdown]:checked').map(el=>el.value.trim()),...v('cpActivityBreakdown').split(/\r?\n/).map(v=>v.trim()).filter(Boolean)])].join('\n'),
+  const item={id:id||newId('CUSTOM-'),custom:true,t,f,ar,en,ages:[min,max],load,activityType:v('cpActivityType'),sportChoice,activityBreakdown:[...new Set([...$('[data-cp-breakdown]:checked').map(el=>el.value.trim()),...$('[data-sport-detail]:checked').map(el=>el.value.trim()),...v('cpActivityBreakdown').split(/\r?\n/).map(v=>v.trim()).filter(Boolean)])].join('\n'),
     goal:{ar:goal,en:goal},
     need:$$('[data-custom-need]:checked').map(x=>x.dataset.customNeed),
     tags:$$('[data-custom-tag]:checked').map(x=>x.dataset.customTag),
@@ -3854,7 +3854,7 @@ function saveEdit(id){
   const x=S.selected.find(s=>s.id===id);if(!x)return;
   x.pri=$('#ePri').value;x.day=$('#eDay').value?+$('#eDay').value:null;x.why=$('#eWhy').value.trim();x.activityType=$('#eActivityType').value;
   if(ITEM(id)?.t==='sport'){const chosen=$('[name="selectedSport"]:checked');if(!chosen)return toast(T('اختر رياضة واحدة أولًا.','Select one sport first.'));x.sportChoice=chosen.value;}
-  x.activityBreakdown=[...new Set([...$('[data-approved-phase]:checked').map(el=>el.value.trim()),...$('#eBreakdown').value.split(/\r?\n/).map(v=>v.trim()).filter(Boolean)])].join('\n');
+  x.activityBreakdown=[...new Set([...$('[data-approved-phase]:checked').map(el=>el.value.trim()),...$('[data-sport-detail]:checked').map(el=>el.value.trim()),...$('#eBreakdown').value.split(/\r?\n/).map(v=>v.trim()).filter(Boolean)])].join('\n');
   logIt(`حُدّث قرار «${ITEM(id).ar}»`,`Decision updated: ${ITEM(id).en}`);
   save();closeModal();render();toast(T('حُفظ قرار الاختيار.','Decision saved.'));
 }
