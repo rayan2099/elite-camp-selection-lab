@@ -176,14 +176,14 @@ html.finance-embedded .modal-shell .modal h2{font-size:18px}
 .fx-decision .panel-header{flex-wrap:wrap;gap:10px}
 .fx-logic-guide{padding:12px 15px;background:#fff7eb;border:1px solid #f0dac0;color:#70410f;border-radius:10px;font-size:12px;line-height:1.7}
 .fx-logic-guide p{margin:5px 0}
-.fx-scenario-inputs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:14px 0}
+.fx-scenario-inputs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:14px 0}
 .fx-scenario-inputs .field{min-width:0;font-size:12px}
 .fx-scenario-inputs input{min-width:0;width:100%;min-height:40px;background:#fff;border-radius:9px;border:1px solid var(--line);padding:9px 11px}
 .fx-decision-results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:15px 0}
 .fx-decision-results>div{display:grid;gap:8px;min-width:0;padding:14px;border:1px solid var(--line);border-radius:11px;background:#f4f7fb}
 .fx-decision-results small{font-size:12px;line-height:1.5;color:var(--muted)}
 .fx-decision-results strong{font-size:clamp(16px,1.55vw,23px);font-weight:800;line-height:1.3;overflow-wrap:anywhere;direction:rtl;font-variant-numeric:tabular-nums}
-.fx-decision-risk{padding:12px 14px;border-radius:10px;background:#f0f4fb;border:1px solid var(--line);font-size:12.5px;line-height:1.75}
+.fx-capacity-alert{margin:10px 0;padding:14px 16px;border:2px solid #d95462;border-radius:10px;background:#fff0f1;color:#9f1f30;font-size:13px;font-weight:800;line-height:1.75}.fx-decision-risk{padding:12px 14px;border-radius:10px;background:#f0f4fb;border:1px solid var(--line);font-size:12.5px;line-height:1.75}
 .fx-decision-risk.fx-alert{background:#fff4e5;border-color:#f5d5ad;color:#865015}
 .fx-decision-risk.fx-good{background:#edf9f3;border-color:#a6dcc0;color:#136c48}
 .fx-source-notes{padding:12px 15px;margin-top:12px;border:1px dashed #aabbcf;border-radius:10px;font-size:12px;line-height:1.75}
@@ -239,16 +239,17 @@ html.finance-embedded .modal-shell .modal h2{font-size:18px}
   <label class="field">الطلاب في السيناريو<input id="dcStudents" type="number" min="0" max="5000" step="1"></label>
   <label class="field">السعر لكل طالب شامل الضريبة (ر.س)<input id="dcFee" type="number" min="0" step="1"></label>
   <label class="field">السعة المسعّرة (طالب)<input id="dcCapacity" type="number" min="0" max="5000" step="1"></label>
+  <label class="field">التكلفة الثابتة لهذا السيناريو (ر.س)<input id="dcFixedCost" type="number" min="0" step="1"></label>
   <label class="field">التكلفة المتغيرة لكل طالب (ر.س)<input id="dcVariableCost" type="number" min="0" step="1"></label>
  </div>
- <p class="fx-note">تقدير التكاليف يبدأ من الميزانية المدخلة للمعسكر. عند تغيير تكلفة الطالب المتغيرة، يُفصل جزء نسبي من إجمالي التكاليف ويُفترض ثبات الباقي. هذه محاكاة افتراضية؛ يجب تأكيد التكلفة الفعلية مع الموردين.</p>
+ <p class="fx-note">التكلفة الثابتة تبدأ من الميزانية المدخلة إذا كانت موجودة. عندما تضيف تكلفة متغيرة لكل طالب، افصلها يدويًا عن التكلفة الثابتة حتى لا تُحسب مرتين. لن يُعرض فائض معتبر إذا بقيت تكلفة المعسكر الأساسية صفرًا دون بنود أو افتراضات موثقة.</p>
  <div class="fx-decision-results">
   <div><small>الإيراد دون الضريبة المفترضة</small><strong id="dcNet">—</strong></div>
   <div><small>التكاليف في السيناريو</small><strong id="dcCost">—</strong></div>
   <div><small>الفائض قبل مخصص الزكاة</small><strong id="dcProfit">—</strong></div>
   <div><small>نقطة التعادل وفق الافتراضات</small><strong id="dcBreakEven">—</strong></div>
  </div>
- <div class="fx-decision-risk" id="dcWarning" role="status">أدخل بيانات السيناريو.</div>
+ <div id="dcCapacityAlert" class="fx-capacity-alert" role="alert" hidden>⚠ تجاوزت عدد الطلاب السعة المسعّرة؛ أعد تقدير السكن والمشرفين والنقل والوجبات، ولا تعتمد السيناريو قبل تحديث عروض الموردين.</div><div class="fx-decision-risk" id="dcWarning" role="status" aria-live="polite">أدخل بيانات السيناريو.</div>
  <details class="fx-source-notes"><summary>أرقام وملاحظات الموازنات التقليدية المرفقة <span>مرجع — لا تُرحّل تلقائيًا</span></summary>
  <p><b>موازنة 2027:</b> ستة معسكرات و300 مقعد مدفوع مستهدف؛ مبيعات شاملة الضريبة 1,010,500 ر.س؛ تكاليف 366,904.55 ر.س؛ فائض بعد المخصص التقديري 498,996.33 ر.س.</p>
  <p><b>أيام النخبة:</b> أربع جمعات شهريًا على مدى 10 أشهر، و40 طالبًا مدفوعًا في السيناريو الثابت، وسعر اشتراك شهري 1,400 ر.س شامل الضريبة.</p>
@@ -841,7 +842,7 @@ financialScenarioInit();
 /* Isolated what-if model; it never updates the booked budget, supplier payments or collections. */
 function financialScenarioInit(){
  const byId=id=>document.getElementById(id);
- const defaults={dcStudents:n(state.students),dcFee:n(state.fee),dcCapacity:n(state.students),dcVariableCost:0};
+ const defaults={dcStudents:n(state.students),dcFee:n(state.fee),dcCapacity:n(state.students),dcFixedCost:figures().estimated,dcVariableCost:0};
  if(!state.scenario||typeof state.scenario!=='object')state.scenario={};
  for(const [id,value] of Object.entries(defaults)){
   const stored=state.scenario[id];
@@ -850,33 +851,39 @@ function financialScenarioInit(){
  const compute=()=>{
   const d={};for(const id of Object.keys(defaults))d[id]=n(byId(id).value);
   state.scenario=d;
-  const base=figures(),baseline=n(state.students),rate=Math.min(100,n(state.vatRate))/100;
+  const base=figures(),rate=Math.min(100,n(state.vatRate))/100;
   const unitNet=d.dcFee/(1+rate);
   const otherNet=base.otherGross-(state.otherRevenueTaxMode==='inclusive'?base.otherGross-base.otherGross/(1+rate):0);
-  const variableBase=d.dcVariableCost*baseline;
-  const invalid=variableBase>base.estimated+0.01;
-  const fixed=Math.max(0,base.estimated-variableBase);
-  const expense=fixed+d.dcVariableCost*d.dcStudents;
-  const net=d.dcStudents*unitNet+otherNet,profit=net-expense;
-  const contribution=unitNet-d.dcVariableCost,breakeven=contribution>0?Math.ceil(Math.max(0,fixed-otherNet)/contribution):null;
-  byId('dcNet').textContent=sar(net);
-  byId('dcCost').textContent=invalid?'راجع الافتراض':sar(expense);
-  byId('dcProfit').textContent=invalid?'—':sar(profit);
-  byId('dcProfit').style.color=invalid?'var(--navy)':profit<0?'var(--red)':'var(--green)';
-  byId('dcBreakEven').textContent=invalid?'—':breakeven===null?'غير قابل للتعادل':breakeven+' طالب';
+  const net=d.dcStudents*unitNet+otherNet;
+  const expense=d.dcFixedCost+d.dcVariableCost*d.dcStudents;
+  const profit=net-expense;
+  const contribution=unitNet-d.dcVariableCost;
+  const breakeven=contribution>0?Math.ceil(Math.max(0,d.dcFixedCost-otherNet)/contribution):null;
+  const noCostBasis=!state.items.length&&d.dcFixedCost<=0;
+  const ready=d.dcStudents>0&&d.dcFee>0&&!noCostBasis;
+  const overCapacity=d.dcCapacity>0&&d.dcStudents>d.dcCapacity;
+  byId('dcCapacityAlert').hidden=!overCapacity;
+  byId('dcNet').textContent=d.dcFee>0?sar(net):'—';
+  byId('dcCost').textContent=noCostBasis?'لم تُحدّد بعد':sar(expense);
+  byId('dcProfit').textContent=ready?sar(profit):'—';
+  byId('dcProfit').style.color=!ready?'var(--navy)':profit<0?'var(--red)':'var(--green)';
+  byId('dcBreakEven').textContent=ready?(breakeven===null?'غير قابل للتعادل':breakeven+' طالب'):'—';
   const notes=[];
-  if(!d.dcStudents||!d.dcFee)notes.push('حدّد العدد والسعر لاستكمال السيناريو.');
+  if(!d.dcStudents||!d.dcFee)notes.push('حدّد عدد الطلاب والسعر لاستكمال السيناريو.');
+  if(noCostBasis)notes.push('لا توجد موازنة تكاليف أساسية أو تكلفة ثابتة مدخلة؛ لا تعرض تقدير الربح أو التعادل قبل تحديد التكلفة.');
   if(!d.dcCapacity)notes.push('السعة المسعّرة غير محددة.');
-  else if(d.dcStudents>d.dcCapacity)notes.push('تجاوز السعة: راجع تكاليف السكن والفريق والمواصلات قبل اعتماد الزيادة.');
-  if(invalid)notes.push('التكلفة المتغيرة تفوق الميزانية الأساسية عند عدد الطلاب المرجعي. عدّل الافتراض.');
-  if(!d.dcVariableCost)notes.push('التكلفة المتغيرة صفر؛ نقطة التعادل مبسطة ولا تلتقط مصروفات المشاركين الإضافية.');
-  if(contribution<=0&&d.dcFee)notes.push('الصافي لكل طالب لا يغطي التكلفة المتغيرة المفترضة.');
-  if(profit<0&&d.dcStudents&&d.dcFee&&!invalid)notes.push('السيناريو لا يغطي التكاليف المقدّرة.');
+  if(overCapacity)notes.push('تجاوز السعة: يلزم إعادة حساب تكاليف السكن والفريق والنقل والوجبات قبل اتخاذ قرار التسجيل.');
+  if(!d.dcVariableCost)notes.push('لم تُحدد التكلفة المتغيرة لكل طالب؛ التعادل مبسّط ولا يشمل أثر التوسع.');
+  if(contribution<=0&&d.dcFee)notes.push('إيراد الطالب الصافي لا يغطي التكلفة المتغيرة المفترضة.');
+  if(profit<0&&ready)notes.push('الفائض المتوقع سلبي حسب الافتراضات الحالية.');
   const target=byId('dcWarning');
-  target.textContent=notes.length?notes.join(' '):'المؤشرات في هذا السيناريو تغطي التكاليف المقدرة دون تجاوز السعة المسعّرة، وفق الافتراضات المدخلة.';
+  target.textContent=notes.length?notes.join(' '):'السيناريو يغطي التكلفة المحددة دون تجاوز السعة المسعّرة وفق المدخلات الحالية، ويظل خاضعًا لمراجعة عروض الموردين.';
   target.classList.toggle('fx-alert',!!notes.length);target.classList.toggle('fx-good',!notes.length);
  };
- for(const id of Object.keys(defaults))byId(id).addEventListener('input',()=>{compute();save()});
+ for(const id of Object.keys(defaults)){
+  byId(id).addEventListener('input',()=>{compute();save()});
+  byId(id).addEventListener('change',()=>{compute();save()});
+ }
  window.financialScenarioRefresh=compute;
  compute();
 }
