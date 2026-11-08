@@ -2493,6 +2493,7 @@ function eliteAddSuggestion(day,slot,id){
  S.selected.push({id,pri:'support',day,slot,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
  logIt('إضافة '+it.ar+' إلى '+slot+' في اليوم '+day,'Added '+it.en+' to '+slot+' on day '+day);
  save();render();toast(T('تمت إضافة البرنامج للجلسة المحددة.','Added directly to the chosen session.'));
+ if(it.t==='sport')editModal(id);
 }
 function eliteDayAnalysis(day){
  const stat=eliteScheduleStats(day),colors={program:'#168660',other:'#2563eb',prayer:'#a16207'};
@@ -3469,6 +3470,7 @@ function pick(id,silent){
   save();
   if(!silent){toast(T(`«${it.ar}» في صندوق القطع — ركّبه على يوم`,`“${it.en}” is in the tray — snap it to a day`));render()}
   else render();
+  if(it.t==='sport'&&!silent)editModal(id);
 }
 function unpick(id){
   if(!can('select')){toast(T('هذا الإجراء غير متاح لدورك.','This action is not available for your role.'));return}
@@ -3981,6 +3983,7 @@ function addBrick(id){
   S.selected.push({id,pri:'support',day:null,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
   logIt(`أُضيف إلى صندوق القطع: ${it.ar}`,`Added to tray: ${it.en}`);
   save();render();toast(T(`«${it.ar}» أُضيفت إلى الصندوق`,`“${it.en}” added to the tray`));
+  if(it.t==='sport')editModal(id);
 }
 function placeBrick(id,day){
   const x=S.selected.find(s=>s.id===id);if(!x)return;
@@ -3989,6 +3992,7 @@ function placeBrick(id,day){
   logIt(day>0?`ثُبّتت «${it.ar}» في اليوم ${day}`:`أُعيدت «${it.ar}» إلى الصندوق`,day>0?`“${it.en}” snapped to day ${day}`:`“${it.en}” returned to tray`);
   save();render();
   toast(day>0?T(`ثُبّتت في اليوم ${day}`,`Snapped to day ${day}`):T('أُعيدت إلى الصندوق','Returned to tray'));
+  if(day>0&&it.t==='sport'&&!x.sportChoice)editModal(id);
 }
 document.addEventListener('dragstart',e=>{
   const b=e.target.closest('[data-brick]');if(!b)return;
@@ -4028,7 +4032,7 @@ document.addEventListener('click',e=>{
   const nav=e.target.closest('[data-page]');
   if(nav){page=nav.dataset.page;if(window.innerWidth<860)$('#sidebar').classList.remove('open');render();return}
   const pickHere=e.target.closest('[data-pickhere]');
-  if(pickHere){const id=pickHere.dataset.pickhere;pick(id,true);const x=S.selected.find(s=>s.id===id);if(x)x.day=+$('#modalInner').dataset.day||1;const d=window.__pickDay;if(d&&x)x.day=d;save();closeModal();render();toast(T('أُضيف إلى اليوم.','Added to the day.'));return}
+  if(pickHere){const id=pickHere.dataset.pickhere;pick(id,true);const x=S.selected.find(s=>s.id===id);if(x)x.day=+$('#modalInner').dataset.day||1;const d=window.__pickDay;if(d&&x)x.day=d;save();closeModal();render();toast(T('أُضيف إلى اليوم.','Added to the day.'));if(ITEM(id)?.t==='sport')editModal(id);return}
   const el=e.target.closest('[data-act]');if(!el)return;
   const [a,arg]=el.dataset.act.split(':');
   const map={
