@@ -2528,10 +2528,7 @@ function eliteAddSuggestion(day,slot,id){
  const it=ITEM(id);if(!it)return;
  if((slotMap(day)[slot]||[]).length||DAY_TEMPLATE.some((r,index)=>r.slot===slot&&slotHasCustomActivity(day,index)))return toast(T('هذه الفترة تحتوي برنامجًا أو نشاطًا مُحددًا بالفعل.','This session already has an assigned program or custom activity.'));
  if(isSel(id))return toast(T('البرنامج مختار مسبقًا.','Program already selected.'));
- S.selected.push({id,pri:'support',day,slot,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
- logIt('إضافة '+it.ar+' إلى '+slot+' في اليوم '+day,'Added '+it.en+' to '+slot+' on day '+day);
- save();render();toast(T('تمت إضافة البرنامج للجلسة المحددة.','Added directly to the chosen session.'));
- editModal(id);
+ beginProgramChoice(id,{day,slot});
 }
 function eliteDayAnalysis(day){
  const stat=eliteScheduleStats(day),colors={program:'#168660',other:'#2563eb',prayer:'#a16207'};
@@ -3500,17 +3497,18 @@ function renderLib(){
 }
 
 /* ============================ الإجراءات ============================ */
-function pick(id,silent){
-  if(!can('select')){toast(T('هذا الإجراء غير متاح لدورك.','This action is not available for your role.'));return}
-  if(isSel(id))return;
-  const it=ITEM(id);
-  S.selected.push({id,pri:'support',day:null,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
-  logIt(`أُضيف إلى صندوق القطع: ${it.ar}`,`Added to tray: ${it.en}`);
-  save();
-  if(!silent){toast(T(`«${it.ar}» في صندوق القطع — ركّبه على يوم`,`“${it.en}” is in the tray — snap it to a day`));render({preserveScroll:true})}
-  else render({preserveScroll:true});
-  if(!silent)editModal(id);
+/* A new choice is a draft until Save Decision. Cancel/Escape never changes the plan. */
+let pendingProgramChoice=null;
+function beginProgramChoice(id,options={}){
+  if(!can('select'))return toast(T('هذا الإجراء غير متاح لدورك.','Not available for your role.'));
+  if(isSel(id))return toast(T('البرنامج موجود في الخطة.','Program is already selected.'));
+  if(!ITEM(id))return;
+  pendingProgramChoice={id,pri:'support',day:options.day||null,slot:options.slot||null,
+    why:'',owner:S.role,approved:false,at:Date.now()};
+  editModal(id);
 }
+function pick(id,silent){beginProgramChoice(id)}
+
 function unpick(id){
   if(!can('select')){toast(T('هذا الإجراء غير متاح لدورك.','This action is not available for your role.'));return}
   const it=ITEM(id);const was=S.selected.find(x=>x.id===id);
@@ -3548,7 +3546,8 @@ function openModal(html){
   $('#modalInner').innerHTML=`<button class="x" data-act="close" aria-label="close">✕</button>${html}`;
   const m=$('#modal');if(!m.open)m.showModal();
 }
-const closeModal=()=>{const m=$('#modal');if(m.open)m.close()};
+const closeModal=()=>{const m=$('#modal');if(m.open)m.close();pendingProgramChoice=null};
+$('#modal').addEventListener('close',()=>{pendingProgramChoice=null;});
 
 function guideModal(){
   const steps=lang==='ar'?[
@@ -3868,7 +3867,7 @@ function sportPicker(i,key,scope,selected=[]){
  return `<div class="elite-sport-pickbox" dir="rtl"><b>${T('حدد رياضة واحدة فقط','Select exactly one sport')}</b><p class="help">${T('كل رياضة مستقلة، ولا تُجمع ألعاب مختلفة في جلسة واحدة.','Sports are separate activities, never mixed in one session.')}</p><div class="elite-sport-radio">${items.map(v=>`<label class="elite-sport-radio-item"><input type="radio" name="${scope}" data-one-sport value="${v[0]}" ${valid===v[0]?'checked':''}><span>${esc(v[1])}</span></label>`).join('')}</div><div data-sport-details>${sportSkillOptions(valid,selected)}</div></div>`;
 }
 function editModal(id){
-  const x=S.selected.find(s=>s.id===id);if(!x)return;
+  const x=S.selected.find(s=>s.id===id)||(pendingProgramChoice?.id===id?pendingProgramChoice:null);if(!x)return;
   const i=ITEM(id);
   openModal(`<div class="eyebrow">${T('حدد التفريعات قبل اعتماد البرنامج','CHOOSE SUBACTIVITIES FIRST')}</div>
     <h2 style="margin-top:6px">${esc(L({ar:i.ar,en:i.en}))}</h2>
@@ -3904,14 +3903,37 @@ function editModal(id){
     </div>`);
 }
 function saveEdit(id){
-  const x=S.selected.find(s=>s.id===id);if(!x)return;
-  x.pri=$('#ePri').value;x.day=$('#eDay').value?+$('#eDay').value:null;x.why=$('#eWhy').value.trim();x.activityType=$('#eActivityType').value;
-  if(ITEM(id)?.t==='sport'){const chosen=$('[name="selectedSport"]:checked');if(!chosen)return toast(T('اختر رياضة واحدة أولًا.','Select one sport first.'));x.sportChoice=chosen.value;}
-  const chosenBreakdowns=[...new Set([...$$('[data-approved-phase]:checked').map(el=>el.value.trim()),...$$('[data-sport-detail]:checked').map(el=>el.value.trim()),...$('#eBreakdown').value.split(/\r?\n/).map(v=>v.trim()).filter(Boolean)])];
-  if(!chosenBreakdowns.length)return toast(T('اختر تفريعة واحدة على الأقل قبل الحفظ.','Select at least one subactivity before saving.'));
-  x.activityBreakdown=chosenBreakdowns.join('\n');
-  logIt(`حُدّث قرار «${ITEM(id).ar}»`,`Decision updated: ${ITEM(id).en}`);
-  save();closeModal();render();toast(T('حُفظ قرار الاختيار.','Decision saved.'));
+  const existing=S.selected.find(s=>s.id===id);
+  const isNew=!existing&&pendingProgramChoice?.id===id;
+  const x=existing||(isNew?pendingProgramChoice:null);
+  if(!x)return;
+  const item=ITEM(id);
+  const sport=item?.t==='sport'?$('[name="selectedSport"]:checked')?.value||'':'';
+  if(item?.t==='sport'&&!sport)return toast(T('اختر رياضة واحدة أولًا.','Select one sport first.'));
+  const choices=[...new Set([
+    ...$$('[data-approved-phase]:checked').map(el=>el.value.trim()),
+    ...$$('[data-sport-detail]:checked').map(el=>el.value.trim()),
+    ...($('#eBreakdown')?.value||'').split(/\r?\n/).map(v=>v.trim()).filter(Boolean)
+  ])];
+  if(!choices.length)return toast(T('اختر تفريعة واحدة على الأقل قبل الحفظ.','Select at least one subactivity before saving.'));
+  // Apply changes only after every validation succeeds.
+  x.pri=$('#ePri').value;
+  x.day=$('#eDay').value?+$('#eDay').value:null;
+  x.why=$('#eWhy').value.trim();
+  x.activityType=$('#eActivityType').value;
+  if(item?.t==='sport')x.sportChoice=sport;
+  x.activityBreakdown=choices.join('\n');
+  if(isNew){
+    if(isSel(id))return toast(T('البرنامج موجود في الخطة.','Program already selected.'));
+    S.selected.push(x);
+    S.draft=false;
+    logIt(`أُضيف إلى الخطة بعد اختيار التفريعات: ${item.ar}`,`Added to plan after choosing subactivities: ${item.en}`);
+    pendingProgramChoice=null;
+  }else{
+    logIt(`حُدّث قرار «${item.ar}»`,`Decision updated: ${item.en}`);
+  }
+  save();closeModal();render({preserveScroll:true});
+  toast(isNew?T('أُضيف البرنامج إلى الخطة بعد حفظ التفريعات.','Program added after saving subactivities.'):T('حُفظ قرار الاختيار.','Selection decision saved.'));
 }
 function pickerModal(day){
   const pool=LIB.filter(i=>!isSel(i.id));
@@ -4029,15 +4051,7 @@ function exportCsv(){
 }
 
 
-function addBrick(id){
-  if(!can('select'))return toast(T('هذا الإجراء غير متاح لدورك.','Not available for your role.'));
-  if(isSel(id))return toast(T('القطعة في صندوقك بالفعل.','Already in your tray.'));
-  const it=ITEM(id);
-  S.selected.push({id,pri:'support',day:null,why:'',owner:S.role,approved:false,at:Date.now()});S.draft=false;
-  logIt(`أُضيف إلى صندوق القطع: ${it.ar}`,`Added to tray: ${it.en}`);
-  save();render({preserveScroll:true});toast(T(`«${it.ar}» أُضيفت إلى الصندوق`,`“${it.en}” added to the tray`));
-  editModal(id);
-}
+function addBrick(id){beginProgramChoice(id)}
 function placeBrick(id,day){
   const x=S.selected.find(s=>s.id===id);if(!x)return;
   x.day=day>0?day:null;held=null;
@@ -4085,7 +4099,12 @@ document.addEventListener('click',e=>{
   const nav=e.target.closest('[data-page]');
   if(nav){page=nav.dataset.page;if(window.innerWidth<860)$('#sidebar').classList.remove('open');render();return}
   const pickHere=e.target.closest('[data-pickhere]');
-  if(pickHere){const id=pickHere.dataset.pickhere;pick(id,true);const x=S.selected.find(s=>s.id===id);if(x)x.day=+$('#modalInner').dataset.day||1;const d=window.__pickDay;if(d&&x)x.day=d;save();closeModal();render();toast(T('أُضيف إلى اليوم.','Added to the day.'));editModal(id);return}
+  if(pickHere){
+    const id=pickHere.dataset.pickhere,day=window.__pickDay||1;
+    closeModal();
+    beginProgramChoice(id,{day});
+    return;
+  }
   const el=e.target.closest('[data-act]');if(!el)return;
   const [a,arg]=el.dataset.act.split(':');
   const map={
