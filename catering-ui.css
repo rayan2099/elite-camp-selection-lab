@@ -244,3 +244,66 @@ body:has(.catering-workspace) #app{max-width:1420px}
 #modal .catering-modal .cm-special-detail .cm-ops-grid{grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr)}
 #modal .catering-modal #cm-preview{margin-top:9px}
 @media(max-width:650px){#modal .catering-modal .cm-ops-grid,#modal .catering-modal .cm-special-detail .cm-ops-grid{grid-template-columns:1fr}#modal .catering-modal .cp-form .cm-operational-panel,#modal .catering-modal .cp-form .cm-special-panel{padding:13px 12px}}
+
+
+/* Restaurant purchase order print: clean supplier-facing production brief */
+.catering-print-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 17px}
+.catering-print-fields label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#49617b;font-weight:650}
+.catering-print-fields .full{grid-column:1/-1}
+.catering-print-fields input,.catering-print-fields textarea{width:100%;font:inherit;font-size:12px;padding:11px;border:1px solid #dce5ef;border-radius:8px;background:white;color:#203a53;min-height:43px}
+@media(max-width:650px){.catering-print-fields{grid-template-columns:1fr}.catering-print-fields .full{grid-column:1}}
+@media print{
+ #catering-print-report .restaurant-order-document{font-family:Tahoma,Arial,sans-serif;direction:rtl;color:#21364b;font-size:9px;line-height:1.6}
+ #catering-print-report .restaurant-order-header{display:flex;justify-content:space-between;align-items:center;gap:20px;padding-bottom:12px;border-bottom:3px solid #213d58;margin-bottom:13px;break-after:avoid}
+ #catering-print-report .restaurant-order-header span{color:#cb692d;font-weight:800;font-size:10px}
+ #catering-print-report .restaurant-order-header h1{font-size:20px;color:#1c3651;margin:3px 0}
+ #catering-print-report .restaurant-order-header p{font-size:11px;margin:0}
+ #catering-print-report .restaurant-order-header>div:last-child{display:grid;gap:3px;text-align:left}
+ #catering-print-report .restaurant-order-header small{color:#6e7e90;font-size:8px}
+ #catering-print-report .restaurant-order-header strong{font-size:10px;color:#24415e}
+ #catering-print-report .restaurant-order-intro{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:13px}
+ #catering-print-report .restaurant-order-intro>div{border:1px solid #dce5ec;background:#f7f9fb;padding:9px 11px;border-radius:5px;display:grid;gap:3px}
+ #catering-print-report .restaurant-order-intro small{font-size:8px;color:#687e90}
+ #catering-print-report .restaurant-order-intro b{font-size:10px;overflow-wrap:anywhere}
+ #catering-print-report .restaurant-order-general{padding:9px 12px;background:#f7f9fc;border:1px solid #dfe8f0;border-radius:5px;margin-bottom:13px}
+ #catering-print-report .restaurant-order-general b{font-size:10px}
+ #catering-print-report .restaurant-order-general p{margin:4px 0 0;white-space:pre-line}
+ #catering-print-report .restaurant-order-day{break-inside:auto;margin-bottom:14px}
+ #catering-print-report .restaurant-order-dayhead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 12px;background:#e9eff5;border-right:3px solid #e47d3b;margin-bottom:9px;break-after:avoid}
+ #catering-print-report .restaurant-order-dayhead h2{font-size:12px;margin:0}
+ #catering-print-report .restaurant-order-dayhead span{font-size:9px}
+ #catering-print-report .restaurant-order-item{border:1px solid #dfe7ee;border-radius:6px;margin-bottom:9px;padding:10px 12px;break-inside:avoid-page;page-break-inside:avoid}
+ #catering-print-report .restaurant-order-top{display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid #e7edf2;padding-bottom:7px;margin-bottom:9px}
+ #catering-print-report .restaurant-order-top div{display:flex;flex-direction:column;gap:2px}
+ #catering-print-report .restaurant-order-top b{font-size:11px;color:#183952}
+ #catering-print-report .restaurant-order-top span{font-size:8px;color:#657b90}
+ #catering-print-report .restaurant-order-top strong{font-size:11px;color:#b35a20}
+ #catering-print-report .restaurant-order-food{margin:0 0 8px}
+ #catering-print-report .restaurant-order-food>b{font-size:8px;color:#60758a}
+ #catering-print-report .restaurant-order-food p{white-space:pre-line;margin:3px 0 0;font-weight:700;font-size:11px}
+ #catering-print-report .restaurant-order-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:7px}
+ #catering-print-report .restaurant-order-meta>div{display:grid;gap:3px;background:#f7f9fc;border:1px solid #e4eaf0;border-radius:5px;padding:6px 8px}
+ #catering-print-report .restaurant-order-meta small{font-size:8px;color:#6d8296}
+ #catering-print-report .restaurant-order-meta strong{font-size:10px;color:#253e59}
+ #catering-print-report .restaurant-order-special{border:1px solid #e6dcbf;background:#fff9ee;border-radius:5px;padding:8px 10px;margin:8px 0}
+ #catering-print-report .restaurant-order-special b{font-size:9px}
+ #catering-print-report .restaurant-order-special p{white-space:pre-line;font-size:9px;margin:4px 0}
+ #catering-print-report .restaurant-order-special small{font-size:8px;color:#806b49}
+ #catering-print-report .restaurant-order-notes{margin:8px 0}
+ #catering-print-report .restaurant-order-notes p{white-space:pre-line;margin:3px 0}
+ #catering-print-report .restaurant-order-delivery{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;border-top:1px dashed #dfe7ee;padding-top:8px;margin-top:7px}
+ #catering-print-report .restaurant-order-delivery>div{display:grid;gap:2px}
+ #catering-print-report .restaurant-order-delivery b{font-size:8px;color:#647a8f}
+ #catering-print-report .restaurant-order-delivery span{font-size:9px}
+ #catering-print-report .restaurant-order-price{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center;background:#f4f7fa;margin-top:8px;padding:7px 9px}
+ #catering-print-report .restaurant-order-price span{font-size:8px}
+ #catering-print-report .restaurant-order-price b{font-size:10px}
+ #catering-print-report .restaurant-order-total{display:flex;justify-content:space-between;background:#1a3854;color:white;padding:11px 15px;margin-top:10px;font-size:11px;break-inside:avoid}
+ #catering-print-report .restaurant-order-total strong{font-size:14px}
+ #catering-print-report .restaurant-order-pending{border:1px solid #ebd6bf;padding:9px 12px;background:#fff9f3;margin-top:12px;break-inside:avoid}
+ #catering-print-report .restaurant-order-pending ul{margin:6px 0;padding-inline-start:17px}
+ #catering-print-report .restaurant-order-accept{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin:20px 0 13px;font-size:9px;break-inside:avoid}
+ #catering-print-report .restaurant-order-accept>div{border-bottom:1px solid #8796a4;padding-bottom:8px}
+ #catering-print-report .restaurant-order-foot{border-top:1px solid #dfe7ed;padding-top:7px;font-size:8px;color:#687d8d;break-inside:avoid}
+ #catering-print-report .restaurant-order-empty{padding:12px;border:1px dashed #d7e1e9}
+}
