@@ -18,8 +18,33 @@ const e=box.querySelector('#eDay');if(e){const legacy=e.closest('label');if(lega
 const oldSaveEdit=saveEdit;
 saveEdit=function(id){const chosen=[...document.querySelectorAll('[data-p1day]:checked')].map(e=>+e.dataset.p1day);if(document.getElementById('p1days')){if(!chosen.length)return toast('اختر يومًا واحدًا على الأقل');document.getElementById('eDay').value=String(chosen[0])}oldSaveEdit(id);const x=S.selected.find(v=>v.id===id);if(x&&chosen.length&&!document.getElementById('modal').open){x.days=chosen;x.day=chosen[0];save();render({preserveScroll:true})}};
 const oldRender=render;
-render=function(options){oldRender(options);if(page==='days'){document.querySelectorAll('.daycol').forEach((col,i)=>{const n=i+1;const items=dayItems(n),present=new Set([...col.querySelectorAll('[data-act^="edit:"]')].map(e=>e.dataset.act.slice(5)));const anchor=col.querySelector('[data-act^="pickday:"]');items.filter(o=>!present.has(o.x.id)).forEach(o=>{const item=document.createElement('div');item.className='chip';item.innerHTML='<span>'+E(L({ar:o.i.ar,en:o.i.en}))+'</span><button class="small" data-p1="detail" data-id="'+E(o.x.id)+'">تفاصيل</button>';anchor?.before(item)});col.querySelectorAll('.chip [data-act^="edit:"]').forEach(span=>{const id=span.dataset.act.slice(5),chip=span.closest('.chip');if(chip&&!chip.querySelector('[data-p1="program-edit"]'))chip.insertAdjacentHTML('beforeend','<button class="small p1edit" data-p1="program-edit" data-id="'+E(id)+'">تعديل البرنامج</button>')});const tag=col.querySelector('.dayhead .pill');if(tag)tag.textContent=items.length+'/'+S.rules.perDayMax})}
+render=function(options){oldRender(options);phaseOneBindScheduleEditors();if(page==='days'){document.querySelectorAll('.daycol').forEach((col,i)=>{const n=i+1;const items=dayItems(n),present=new Set([...col.querySelectorAll('[data-act^="edit:"]')].map(e=>e.dataset.act.slice(5)));const anchor=col.querySelector('[data-act^="pickday:"]');items.filter(o=>!present.has(o.x.id)).forEach(o=>{const item=document.createElement('div');item.className='chip';item.innerHTML='<span>'+E(L({ar:o.i.ar,en:o.i.en}))+'</span><button class="small" data-p1="detail" data-id="'+E(o.x.id)+'">تفاصيل</button>';anchor?.before(item)});col.querySelectorAll('.chip [data-act^="edit:"]').forEach(span=>{const id=span.dataset.act.slice(5),chip=span.closest('.chip');if(chip&&!chip.querySelector('[data-p1="program-edit"]'))chip.insertAdjacentHTML('beforeend','<button class="small p1edit" data-p1="program-edit" data-id="'+E(id)+'">تعديل البرنامج</button>')});const tag=col.querySelector('.dayhead .pill');if(tag)tag.textContent=items.length+'/'+S.rules.perDayMax})}
 if(page==='outputs'||page==='dashboard'||(page==='builder'&&S.step===5)){document.querySelectorAll('.schedule-print-pages .dayblock').forEach((block,i)=>{const header=block.querySelector('.daybar');if(!header||block.dataset.p1)return;block.dataset.p1='1';const button=document.createElement('button');button.className='small noprint';button.dataset.p1='toggle';button.textContent='إخفاء التفاصيل';header.append(button);const content=document.createElement('div');content.className='p1daybody';while(header.nextSibling)content.append(header.nextSibling);block.append(content);if(mealList().some(m=>m.day===i+1)){const x=document.createElement('div');x.innerHTML=mealsPanel(i+1);block.append(x)}});const root=document.querySelector('.schedule-print-pages');if(root){const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];while(walker.nextNode())if(!walker.currentNode.parentElement.closest('button,script,style'))nodes.push(walker.currentNode);nodes.forEach(n=>n.nodeValue=clock(n.nodeValue))}}};
+/* Direct edit action bindings: avoid accidental interception by page-level handlers.
+   The action buttons remain enabled for the field-supervisor role, but other actions stay role-gated. */
+function phaseOneBindScheduleEditors(){
+ document.querySelectorAll('button[data-act^="editScheduleRow:"],button[data-act^="editScheduleProgram:"]').forEach(btn=>{
+   if(!(can('select')||can('scheduleEdit')))return;
+   btn.disabled=false;
+   btn.removeAttribute('aria-disabled');
+   if(btn.dataset.p1EditWired)return;
+   btn.dataset.p1EditWired='1';
+   btn.addEventListener('click',function(event){
+     event.preventDefault();event.stopImmediatePropagation();
+     if(!(can('select')||can('scheduleEdit')))return toast('التعديل غير متاح لهذا الدور.');
+     const action=this.dataset.act||'';
+     if(action.startsWith('editScheduleRow:')){
+       const [day,index]=action.slice('editScheduleRow:'.length).split(',');
+       return editScheduleRow(Number(day),Number(index));
+     }
+     if(action.startsWith('editScheduleProgram:')){
+       const id=action.slice('editScheduleProgram:'.length);
+       return editModal(id);
+     }
+   });
+ });
+}
+
 document.addEventListener('click',e=>{const b=e.target.closest('[data-p1]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();const m=mealList().find(x=>x.id===b.dataset.id);
 if(b.dataset.p1==='new'||b.dataset.p1==='edit')return mealModal(b.dataset.day,b.dataset.id);if(b.dataset.p1==='program-edit')return editModal(b.dataset.id);
 if(b.dataset.p1==='save'){const type=document.getElementById('p1type').value,time=document.getElementById('p1time').value,supervisor=document.getElementById('p1super').value.trim(),details=document.getElementById('p1details').value.trim();if(!time||!supervisor)return toast('الوقت والمشرف حقول مطلوبة');const v={id:m?.id||'meal-'+Date.now(),day:+b.dataset.day,type,time,supervisor,details};if(m)Object.assign(m,v);else mealList().push(v);save();closeModal();render({preserveScroll:true});return}
