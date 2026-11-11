@@ -39,8 +39,8 @@ const supervisorOptions=id=>'<option value="">اختر المسؤول من فر�
 const participants=()=>[...(S.students||[]).map(x=>({id:'s-'+x.id,name:L({ar:x.ar,en:x.en}),demo:true})),...db().people.map(x=>({id:x.id,name:x.name,demo:false}))];
 const pname=id=>participants().find(x=>x.id===id)?.name||'مشارك غير معروف';
 const total=()=>n(S.meta.students)+Object.values(db().staff).reduce((s,v)=>s+n(v),0);
-const specialsOf=m=>db().special.filter(r=>(m.specialIds||[]).includes(r.id));
-const servings=m=>m.servings===null||m.servings===undefined?total():n(m.servings);
+const specialsOf=m=>db().special.filter(r=>(m.specialIds||[]).includes(r.id)&&(m.audienceMode!=='selected'||(m.audienceIds||[]).includes(r.id)));
+const servings=m=>m.audienceMode==='selected'?new Set((m.audienceIds||[]).filter(id=>participants().some(p=>p.id===id))).size:(m.servings===null||m.servings===undefined?total():n(m.servings));
 const regularCount=m=>Math.max(0,servings(m)-specialsOf(m).length);
 const sharedSize=m=>Math.max(1,n(m.peoplePerTray)||1);
 const regularUnits=m=>m.serviceMode==='shared'?Math.ceil(regularCount(m)/sharedSize(m)):regularCount(m);
@@ -54,7 +54,9 @@ function issues(m){
  if(!m.time)arr.push('التوقيت');
  if(!m.deliveryTime)arr.push('موعد وصول المورد');
  if(!m.serviceLocation?.trim())arr.push('موقع تقديم الطعام');
- if(servings(m)<=0)arr.push('عدد المستفيدين');
+ if(servings(m)<=0)arr.push(m.audienceMode==='selected'?'اختر الطلاب المستفيدين من الوجبة':'عدد المستفيدين');
+ if(m.audienceMode==='selected'&&(m.audienceIds||[]).some(id=>!participants().some(p=>p.id===id)))arr.push('مشارك محدد غير موجود في القائمة');
+ if(m.audienceMode==='selected'&&(m.specialIds||[]).some(id=>!(m.audienceIds||[]).includes(id)))arr.push('حالة غذائية خاصة خارج قائمة المستفيدين');
  if(specialsOf(m).length>servings(m))arr.push('الحالات الخاصة أكثر من المستفيدين');
  if(m.serviceMode==='shared'&&(!n(m.peoplePerTray)||n(m.peoplePerTray)<2))arr.push('عدد الأفراد لكل طبق جماعي');
  if(m.serviceMode==='shared'&&!m.servingNotes?.trim())arr.push('طريقة توزيع الأطباق الجماعية');
@@ -140,12 +142,18 @@ function auditView(){
  '<div class="catering-insight"><span>!</span><div><b>قاعدة الاعتماد:</b> هذه لوحة متابعة، وليست شهادة سلامة غذائية. تأكيد التوريد والأعداد والحساسيات والتجهيز في الميدان مسؤولية الفريق المختص ومقدم الطعام.</div></div>';
 }
 function mealModal(id){
- const d=db(),m=d.meals.find(x=>x.id===id),v=m||{day:dayChoice==='all'?1:Number(dayChoice),type:'lunch',time:'13:00',menu:'',supplier:'',supervisorId:'',serviceMode:'individual',peoplePerTray:5,servingNotes:'',deliveryTime:'',serviceLocation:'',equipment:'',servings:total(),unitPrice:0,specialPrice:0,specialMenu:'',specialIds:d.special.map(s=>s.id),confirmed:false};
+ const d=db(),m=d.meals.find(x=>x.id===id),v=m||{audienceMode:'all',audienceIds:[],day:dayChoice==='all'?1:Number(dayChoice),type:'lunch',time:'13:00',menu:'',supplier:'',supervisorId:'',serviceMode:'individual',peoplePerTray:5,servingNotes:'',deliveryTime:'',serviceLocation:'',equipment:'',servings:total(),unitPrice:0,specialPrice:0,specialMenu:'',specialIds:d.special.map(s=>s.id),confirmed:false};
  openModal('<div class="catering-modal"><div class="catering-modal-head"><div class="catering-kicker">التجهيز التشغيلي</div><h2>'+(m?'تعديل الوجبة':'إضافة وجبة جديدة')+'</h2><p>حدد يوم الوجبة وطريقة تقديمها، ثم كمياتها والمورد والمشرف.</p></div><div class="catering-modal-step">01 · توقيت الوجبة وطريقة التقديم</div><div class="cp-form">'+
  '<label>اليوم<select id="cm-day">'+S.meta.days.map((day,i)=>'<option value="'+(i+1)+'" '+(v.day===i+1?'selected':'')+'>اليوم '+(i+1)+' · '+e(L(day))+'</option>').join('')+'</select></label>'+
  '<label>نوع الوجبة<select id="cm-type">'+types.map(([id,label])=>'<option value="'+id+'" '+(v.type===id?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+
  '<label>وقت التقديم<input type="time" id="cm-time" value="'+e(v.time)+'"></label>'+
- '<label>إجمالي المستفيدين من الوجبة<input type="number" min="0" id="cm-servings" value="'+servings(v)+'"></label>'+
+ '<label id="cm-servings-field">إجمالي المستفيدين من الوجبة<input type="number" min="0" id="cm-servings" value="'+(v.audienceMode==='selected'?(v.audienceIds||[]).length:servings(v))+'"><small class="help" id="cm-servings-explain">يشمل الطلاب والطاقم ما لم تحدد مجموعة طلاب معينة.</small></label>'+
+ '<div class="full cm-audience-box"><div class="cm-audience-header"><div><b>لمن ستُقدم هذه الوجبة؟</b><small>اختر جميع المستفيدين أو مجموعة محددة من الطلاب. يفصل النظام الحالات الغذائية الخاصة تلقائيًا.</small></div><span class="cm-count-badge" id="cm-audience-label">جميع المستفيدين</span></div><div class="cm-audience-switch" role="group" aria-label="نطاق المستفيدين">'+
+ '<label class="cm-audience-choice"><input name="cm-audience-mode" type="radio" value="all" '+((v.audienceMode||'all')==='all'?'checked':'')+'><span><strong>جميع المستفيدين</strong><small>الطلاب والطاقم بحسب العدد المسجل</small></span></label>'+
+ '<label class="cm-audience-choice"><input name="cm-audience-mode" type="radio" value="selected" '+(v.audienceMode==='selected'?'checked':'')+'><span><strong>طلاب محددون</strong><small>اختر الأسماء لهذه الوجبة فقط</small></span></label></div>'+
+ '<div id="cm-student-picker" class="cm-student-picker" '+(v.audienceMode==='selected'?'':'hidden')+'><div class="cm-student-tools"><input type="search" id="cm-student-search" autocomplete="off" placeholder="ابحث باسم الطالب…"><button type="button" data-catering="select-visible">تحديد الظاهر</button><button type="button" data-catering="clear-students">إلغاء التحديد</button></div><div class="cm-student-list" id="cm-student-list">'+
+ (participants().length?participants().map(p=>'<label class="cm-student-option" data-student-name="'+e(p.name.toLowerCase())+'"><input type="checkbox" data-cm-student="'+e(p.id)+'" '+((v.audienceIds||[]).includes(p.id)?'checked':'')+'><span>'+e(p.name)+(p.demo?' <small>تجريبي</small>':'')+'</span></label>').join(''):'<div class="cm-student-empty">لا توجد أسماء في قائمة المعسكر. أضف أسماء من «الأعداد والفريق» أولًا.</div>')+
+ '</div><div class="cm-student-foot"><span id="cm-students-selected">0 طالب محدد</span><span>لا يُضاف الطاقم تلقائيًا إلى وجبة الطلاب المحددين</span></div></div></div>'+
  '<label>طريقة التقديم<select id="cm-mode"><option value="individual" '+((v.serviceMode||'individual')==='individual'?'selected':'')+'>وجبات فردية (وجبة لكل شخص)</option><option value="shared" '+(v.serviceMode==='shared'?'selected':'')+'>أطباق جماعية (طبق لمجموعة)</option></select></label>'+
  '<label class="cm-shared">الطبق الجماعي يكفي كم شخصًا؟<input type="number" min="2" max="100" id="cm-group-size" value="'+Math.max(2,n(v.peoplePerTray)||5)+'"></label>'+
  '<label class="cm-shared full">طريقة التوزيع والتجهيز<textarea id="cm-serving-notes" rows="2" placeholder="مثال: صحن رز ودجاج لكل 5 طلاب، يقدم على الطاولات حسب الفرق">'+e(v.servingNotes||'')+'</textarea></label>'+
@@ -169,7 +177,23 @@ function updateMealPreview(){
  const group=mode==='shared',field=$('#cm-group-size'),notes=$('#cm-serving-notes');
  document.querySelectorAll('.cm-shared').forEach(el=>el.hidden=!group);
  if(field)field.disabled=!group;if(notes)notes.disabled=!group;
- const count=n($('#cm-servings')?.value),ids=[...document.querySelectorAll('[data-cm-special]:checked')].map(el=>el.dataset.cmSpecial);
+ const selectedMode=document.querySelector('input[name="cm-audience-mode"]:checked')?.value==='selected';
+ const studentChecks=[...document.querySelectorAll('[data-cm-student]:checked')];
+ const chosenIds=studentChecks.map(el=>el.dataset.cmStudent);
+ const count=selectedMode?chosenIds.length:n($('#cm-servings')?.value);
+ const servingsField=$('#cm-servings-field'),countInput=$('#cm-servings'),studentPanel=$('#cm-student-picker');
+ if(servingsField)servingsField.hidden=selectedMode;
+ if(countInput&&selectedMode)countInput.value=String(count);
+ if(studentPanel)studentPanel.hidden=!selectedMode;
+ const audienceLabel=$('#cm-audience-label');if(audienceLabel)audienceLabel.textContent=selectedMode?count+' طلاب محددين':'جميع المستفيدين';
+ const selectedLabel=$('#cm-students-selected');if(selectedLabel)selectedLabel.textContent=count+' طالب محدد';
+ document.querySelectorAll('[data-cm-special]').forEach(el=>{
+   const permitted=!selectedMode||chosenIds.includes(el.dataset.cmSpecial);
+   el.disabled=!permitted;
+   if(!permitted)el.checked=false;
+   const label=el.closest('label');if(label)label.classList.toggle('cm-special-not-eligible',!permitted);
+ });
+ const ids=[...document.querySelectorAll('[data-cm-special]:checked')].map(el=>el.dataset.cmSpecial);
  const special=ids.length,regular=Math.max(0,count-special),size=Math.max(2,n(field?.value)||5),units=group?Math.ceil(regular/size):regular;
  const estimate=units*money($('#cm-price')?.value)+special*money($('#cm-special-price')?.value);
  const preview=$('#cm-preview');if(preview)preview.innerHTML='<b>ملخص التجهيز</b><div class="cp-quant"><span>المستفيدون <b>'+count+'</b></span><span>'+(group?'الأطباق الجماعية':'الوجبات الفردية')+' <b>'+units+'</b></span><span>الوجبات الخاصة <b>'+special+'</b></span><span>التكلفة <b>'+fmt(estimate)+' ر.س</b></span></div>'+(group?'<p class="help">الحساب: '+regular+' مستفيدًا من الطعام العادي ÷ '+size+' أشخاص للطبق، مع التقريب للأعلى. الوجبات الخاصة تُحسب منفصلة.</p>':'');
@@ -208,8 +232,14 @@ function handle(b){
  if(a==='del-meal'){if(confirm('حذف الوجبة من الخطة؟')){d.meals=d.meals.filter(m=>m.id!==id);commit()}return}
  if(a==='del-special'){if(confirm('حذف الحالة الغذائية؟')){d.special=d.special.filter(s=>s.id!==id);d.meals.forEach(m=>m.specialIds=(m.specialIds||[]).filter(x=>x!==id));commit()}return}
  if(a==='save-meal'){
-  const m=d.meals.find(x=>x.id===id),newValue={id:m?.id||newId('meal-'),day:n($('#cm-day').value),type:$('#cm-type').value,time:$('#cm-time').value,menu:$('#cm-menu').value.trim(),supplier:$('#cm-supplier').value.trim(),supervisorId:$('#cm-supervisor').value,serviceMode:$('#cm-mode').value,peoplePerTray:n($('#cm-group-size').value),servingNotes:$('#cm-serving-notes').value.trim(),deliveryTime:$('#cm-delivery').value,serviceLocation:$('#cm-location').value.trim(),equipment:$('#cm-equipment').value.trim(),servings:n($('#cm-servings').value),unitPrice:money($('#cm-price').value),specialPrice:money($('#cm-special-price').value),specialMenu:$('#cm-special-menu').value.trim(),specialIds:$$('[data-cm-special]:checked').map(x=>x.dataset.cmSpecial),confirmed:$('#cm-confirmed').checked};
+  const m=d.meals.find(x=>x.id===id),newValue={id:m?.id||newId('meal-'),day:n($('#cm-day').value),type:$('#cm-type').value,time:$('#cm-time').value,menu:$('#cm-menu').value.trim(),supplier:$('#cm-supplier').value.trim(),supervisorId:$('#cm-supervisor').value,audienceMode:document.querySelector('input[name="cm-audience-mode"]:checked')?.value||'all',audienceIds:[...document.querySelectorAll('[data-cm-student]:checked')].map(el=>el.dataset.cmStudent),serviceMode:$('#cm-mode').value,peoplePerTray:n($('#cm-group-size').value),servingNotes:$('#cm-serving-notes').value.trim(),deliveryTime:$('#cm-delivery').value,serviceLocation:$('#cm-location').value.trim(),equipment:$('#cm-equipment').value.trim(),servings:n($('#cm-servings').value),unitPrice:money($('#cm-price').value),specialPrice:money($('#cm-special-price').value),specialMenu:$('#cm-special-menu').value.trim(),specialIds:$$('[data-cm-special]:checked').map(x=>x.dataset.cmSpecial),confirmed:$('#cm-confirmed').checked};
   if(!newValue.day||!newValue.menu||!newValue.time)return toast('اليوم وقائمة الطعام والتوقيت مطلوبة.');
+  if(newValue.audienceMode==='selected'){
+   newValue.servings=newValue.audienceIds.length;
+   if(!newValue.audienceIds.length)return toast('اختر طالبًا واحدًا على الأقل لهذه الوجبة.');
+   if(newValue.audienceIds.some(studentId=>!participants().some(p=>p.id===studentId)))return toast('بعض الطلاب المحددين لم يعودوا في القائمة.');
+   if(newValue.specialIds.some(studentId=>!newValue.audienceIds.includes(studentId)))return toast('يجب أن يكون الطالب ذو الوجبة الخاصة ضمن الطلاب المحددين.');
+  }else newValue.audienceIds=[];
   if(newValue.specialIds.length>newValue.servings)return toast('عدد المستفيدين أقل من الحالات الخاصة.');
   if(!newValue.supervisorId||!supervisorName(newValue.supervisorId))return toast('اختر المشرف المسؤول من فريق المعسكر قبل حفظ الوجبة.');
   if(newValue.serviceMode==='shared'&&(newValue.peoplePerTray<2||!newValue.servingNotes))return toast('حدد عدد الأشخاص لكل طبق وطريقة التقديم الجماعي.');
@@ -229,6 +259,16 @@ const st=document.createElement('style');
 st.textContent='.cp-privacy{background:#fff4e8;color:#734414;border:1px solid #f2d5b9;border-radius:9px;padding:12px 15px;font-size:12.5px;margin:15px 0}.cp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.cp-stat{padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;gap:6px}.cp-stat strong{font-size:26px}.cp-stat small{color:var(--muted)}.cp-tabs{display:flex;flex-wrap:wrap;gap:9px;margin:18px 0;border-bottom:1px solid var(--line);padding-bottom:13px}.cp-tabs button{font:inherit;padding:10px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);cursor:pointer}.cp-tabs button.active{background:var(--accent);color:white}.cp-head h2{font-size:19px}.cp-actions{display:flex;justify-content:flex-end;gap:9px;margin:12px 0}.cp-list{display:grid;gap:12px}.cp-record{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:17px}.cp-record h3{margin:5px 0}.cp-between{display:flex;justify-content:space-between;gap:10px}.cp-accent{color:var(--accent);font-size:12px;font-weight:700}.cp-quant{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:15px 0}.cp-quant span{background:var(--soft);border-radius:7px;padding:10px;font-size:12px}.cp-highlight{background:var(--accentsoft);border-radius:7px;padding:10px;font-size:12px}.cp-cols{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}.cp-cols .card{display:flex;flex-direction:column;gap:10px}.cp-cols label,.cp-form label{display:grid;gap:6px;font-size:13px}.cp-cols input,.cp-form input,.cp-form select,.cp-form textarea{font:inherit;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);padding:8px;width:100%}.cp-names{max-height:240px;overflow:auto;display:grid;gap:6px}.cp-names>div{border-bottom:1px solid var(--line);padding:6px}.cp-form{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:15px 0}.cp-form .full{grid-column:1/-1}.cp-checkboxes{display:flex;flex-wrap:wrap;gap:11px;margin-top:9px}.cp-checkboxes label,.cp-check{display:flex!important;align-items:center;gap:7px}.cp-checkboxes input,.cp-check input{width:auto}@media(max-width:800px){.cp-stats,.cp-cols{grid-template-columns:repeat(2,1fr)}}@media(max-width:540px){.cp-stats,.cp-cols,.cp-form{grid-template-columns:1fr}.cp-quant{grid-template-columns:repeat(2,1fr)}.cp-between{flex-direction:column}}';
 document.head.append(st);
 const extra=document.createElement('style');extra.textContent='.cp-team{margin-top:14px;display:grid;gap:10px}.cp-team label{display:grid;gap:5px}.cp-team select{font:inherit;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}.cp-team-list{display:grid;gap:7px}.cp-team-item{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:5px}.cp-calc{background:var(--accentsoft);padding:12px;border-radius:9px}.cm-shared[hidden]{display:none!important}';document.head.append(extra);
+document.addEventListener('change',ev=>{if(ev.target.closest('#modal')&&(ev.target.name==='cm-audience-mode'||ev.target.hasAttribute('data-cm-student')))updateMealPreview()},true);
+document.addEventListener('input',ev=>{if(ev.target.id==='cm-student-search'){const query=ev.target.value.trim().toLocaleLowerCase();document.querySelectorAll('.cm-student-option').forEach(el=>el.hidden=!!query&&!el.dataset.studentName.includes(query));}},true);
+document.addEventListener('click',ev=>{
+ const btn=ev.target.closest('[data-catering]');if(!btn||!btn.closest('#modal'))return;
+ ev.preventDefault();ev.stopImmediatePropagation();
+ const visible=[...document.querySelectorAll('.cm-student-option')].filter(el=>!el.hidden);
+ if(btn.dataset.catering==='select-visible')visible.forEach(el=>{const box=el.querySelector('[data-cm-student]');if(box)box.checked=true});
+ if(btn.dataset.catering==='clear-students')document.querySelectorAll('[data-cm-student]').forEach(box=>box.checked=false);
+ updateMealPreview();
+},true);
 document.addEventListener('input',ev=>{if(ev.target.closest('#modal')&&['cm-servings','cm-group-size','cm-price','cm-special-price'].includes(ev.target.id))updateMealPreview()},true);
 document.addEventListener('change',ev=>{if(ev.target.closest('#modal')&&(ev.target.id==='cm-mode'||ev.target.hasAttribute('data-cm-special')))updateMealPreview()},true);
 NAV[1][1].push(['meals','إدارة الوجبات والتغذية','Meals & catering']);
