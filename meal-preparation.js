@@ -226,13 +226,13 @@ function mealModal(id){
  '<div class="full catering-modal-step">02 · قائمة الطعام والتوريد</div>'+ '<label class="full">القائمة الغذائية ومكوناتها<textarea id="cm-menu" rows="3">'+e(v.menu)+'</textarea></label>'+
  '<label>المورد / المطبخ<input id="cm-supplier" maxlength="120" value="'+e(v.supplier)+'"></label>'+
  '<label>موعد وصول الطعام<input id="cm-delivery" type="time" value="'+e(v.deliveryTime||'')+'"></label>'+
- '<label>موقع تقديم الطعام<input id="cm-location" maxlength="120" placeholder="صالة الطعام، الاستراحة، موقع الرحلة…" value="'+e(v.serviceLocation||'')+'"></label>'+
- '<label class="full">أدوات وتجهيزات التقديم<textarea id="cm-equipment" rows="2" placeholder="صحون مشتركة، ملاعق، قفازات، طاولات، ماء، أدوات تقديم منفصلة للحالات الخاصة…">'+e(v.equipment||'')+'</textarea></label>'+
- '<label>المشرف المسؤول عن الاستلام والتوزيع<select id="cm-supervisor">'+supervisorOptions(v.supervisorId)+'</select><small class="help">الاختيار من فريق المعسكر؛ أضف الأسماء من تبويب الأعداد والمستفيدون.</small></label>'+
- '<label>سعر الوجبة الفردية أو الطبق الجماعي (ر.س)<input type="number" step=".01" min="0" id="cm-price" value="'+money(v.unitPrice)+'"><small class="help">للتقديم الجماعي يُحسب سعر الطبق الواحد، وليس سعر الشخص.</small></label>'+
- '<label>سعر الحصة الخاصة (ر.س)<input type="number" step=".01" min="0" id="cm-special-price" value="'+money(v.specialPrice)+'"></label>'+
- '<div class="full catering-modal-step">03 · الوجبات الخاصة والتكلفة</div>'+ '<div class="full"><b>الطلاب الذين يحتاجون وجبات مخصصة لهذه الوجبة</b><div class="cp-checkboxes">'+(d.special.length?d.special.map(s=>'<label><input type="checkbox" data-cm-special="'+e(s.id)+'" '+(v.specialIds?.includes(s.id)?'checked':'')+'>'+e(pname(s.id))+'</label>').join(''):'لا توجد حالات خاصة مسجلة حتى الآن.')+'</div></div>'+
- '<label class="full">محتوى الوجبة الخاصة وطريقة تجهيزها<textarea id="cm-special-menu" rows="2">'+e(v.specialMenu)+'</textarea></label>'+
+ '<label>موقع التقديم<input id="cm-location" maxlength="120" placeholder="مثال: صالة الطعام" value="'+e(v.serviceLocation||'')+'"></label>'+
+ '<label>تجهيزات التقديم<textarea id="cm-equipment" rows="2" placeholder="صحون، أدوات تقديم، طاولات…">'+e(v.equipment||'')+'</textarea></label>'+
+ '<label>مشرف الاستلام والتوزيع<select id="cm-supervisor">'+supervisorOptions(v.supervisorId)+'</select><small class="help">من قائمة فريق المعسكر</small></label>'+
+ '<label>سعر الوجبة / الطبق (ر.س)<input type="number" step=".01" min="0" id="cm-price" value="'+money(v.unitPrice)+'"><small class="help" id="cm-price-hint">السعر للوحدة، وليس للشخص في الأطباق الجماعية</small></label>'+
+ '<label>سعر الوجبة الخاصة (ر.س)<input type="number" step=".01" min="0" id="cm-special-price" value="'+money(v.specialPrice)+'"></label>'+
+ '<div class="full catering-modal-step">03 · الوجبات الخاصة والمراجعة</div>'+ '<div class="full"><b>الطلاب الذين يحتاجون وجبات مخصصة لهذه الوجبة</b><div class="cp-checkboxes">'+(d.special.length?d.special.map(s=>'<label><input type="checkbox" data-cm-special="'+e(s.id)+'" '+(v.specialIds?.includes(s.id)?'checked':'')+'>'+e(pname(s.id))+'</label>').join(''):'لا توجد حالات خاصة مسجلة حتى الآن.')+'</div></div>'+
+ '<label class="full">تفاصيل الوجبة البديلة<textarea id="cm-special-menu" rows="2">'+e(v.specialMenu)+'</textarea></label>'+
  '<div class="full cp-calc" id="cm-preview" aria-live="polite"></div>'+
  '<label class="full cp-check"><input type="checkbox" id="cm-confirmed" '+(v.confirmed?'checked':'')+'> تم تأكيد الكميات والمكونات والتوقيت مع المورد</label></div>'+
  '<div class="cp-actions"><button data-act="close">إلغاء</button><button class="primary" data-cp="save-meal" data-id="'+e(id||'')+'">حفظ الوجبة</button></div></div>');
