@@ -40,6 +40,8 @@ function issues(m){
  if(!m.supplier?.trim())arr.push('المورد');
  if(!m.supervisorId||!supervisorName(m.supervisorId))arr.push('المشرف المسؤول من الفريق');
  if(!m.time)arr.push('التوقيت');
+ if(!m.deliveryTime)arr.push('موعد وصول المورد');
+ if(!m.serviceLocation?.trim())arr.push('موقع تقديم الطعام');
  if(servings(m)<=0)arr.push('عدد المستفيدين');
  if(specialsOf(m).length>servings(m))arr.push('الحالات الخاصة أكثر من المستفيدين');
  if(m.serviceMode==='shared'&&(!n(m.peoplePerTray)||n(m.peoplePerTray)<2))arr.push('عدد الأفراد لكل طبق جماعي');
@@ -63,12 +65,12 @@ function pageMeals(){
 }
 function scheduleView(){
  const list=[...db().meals].sort((a,b)=>a.day-b.day||a.time.localeCompare(b.time));
- return head('خطة الوجبات اليومية','نوع الوجبة، وقتها، محتواها، حصصها، المسؤول عنها، والمطبخ المجهّز.')+
+ return head('خطة الوجبات اليومية','نوع الوجبة، وقت الاستلام والتقديم، حجم الطبق الجماعي أو الفردي، الكمية، المسؤول، وتجهيزات التوزيع.')+
  '<div class="cp-actions"><button class="primary" data-cp="new-meal">+ تخطيط وجبة جديدة</button></div>'+
  (!list.length?'<div class="card">لم تُخطط وجبات هذا المعسكر بعد. ابدأ بإضافة وجبة وربطها باليوم.</div>':
  '<div class="cp-list">'+list.map(m=>{const special=specialsOf(m),missing=issues(m);return '<article class="cp-record"><div class="cp-between"><div><span class="cp-accent">اليوم '+m.day+' · '+e(type(m.type))+' · '+e(m.time)+'</span><h3>'+e(m.menu||'لم تحدد قائمة الطعام')+'</h3><p class="help">المورد: '+e(m.supplier||'غير محدد')+' | المشرف: '+e(supervisorName(m.supervisorId)||'غير محدد')+'</p></div><span class="pill '+(missing.length?'orange':'good')+'">'+(missing.length?'ناقص '+missing.length+' متطلبات':'مستوفٍ')+'</span></div>'+
  '<div class="cp-quant"><span>المستفيدون <b>'+servings(m)+'</b></span><span>'+(m.serviceMode==='shared'?'أطباق جماعية':'وجبات فردية')+' <b>'+regularUnits(m)+'</b></span><span>وجبات خاصة <b>'+special.length+'</b></span><span>التكلفة <b>'+fmt(cost(m))+' ر.س</b></span></div>'+
- '<p class="help">نوع التقديم: '+(m.serviceMode==='shared'?'جماعي · الطبق الواحد يكفي '+sharedSize(m)+' أشخاص':'فردي · لكل شخص وجبة')+(m.servingNotes?' · '+e(m.servingNotes):'')+'</p>'+
+ '<p class="help">الوصول: '+e(m.deliveryTime||'غير محدد')+' · موقع التقديم: '+e(m.serviceLocation||'غير محدد')+(m.equipment?' · التجهيزات: '+e(m.equipment):'')+'</p>'+ '<p class="help">نوع التقديم: '+(m.serviceMode==='shared'?'جماعي · الطبق الواحد يكفي '+sharedSize(m)+' أشخاص':'فردي · لكل شخص وجبة')+(m.servingNotes?' · '+e(m.servingNotes):'')+'</p>'+
  (special.length?'<p class="cp-highlight">الحالات الخاصة: '+e(special.map(s=>pname(s.id)).join('، '))+' — الوجبة البديلة: '+e(m.specialMenu||'غير محددة')+'</p>':'')+
  (missing.length?'<p class="help">يلزم استكمال: '+e(missing.join('، '))+'</p>':'')+
  '<div class="cp-actions"><button class="small" data-cp="edit-meal" data-id="'+e(m.id)+'">تعديل التفاصيل</button><button class="small danger" data-cp="del-meal" data-id="'+e(m.id)+'">حذف</button></div></article>'}).join('')+'</div>')+
@@ -103,7 +105,7 @@ function auditView(){
  '<div class="cp-privacy">لإقفال التجهيز تشغيليًا يلزم اعتماد العدد الفعلي، خطة الوجبات لجميع الأيام، توقيت التوريد، مراجعة الحساسية، والوجبات البديلة. هذه أداة متابعة وليست اعتمادًا طبيًا أو موافقة تلقائية.</div>';
 }
 function mealModal(id){
- const d=db(),m=d.meals.find(x=>x.id===id),v=m||{day:1,type:'lunch',time:'13:00',menu:'',supplier:'',supervisorId:'',serviceMode:'individual',peoplePerTray:5,servingNotes:'',servings:total(),unitPrice:0,specialPrice:0,specialMenu:'',specialIds:d.special.map(s=>s.id),confirmed:false};
+ const d=db(),m=d.meals.find(x=>x.id===id),v=m||{day:1,type:'lunch',time:'13:00',menu:'',supplier:'',supervisorId:'',serviceMode:'individual',peoplePerTray:5,servingNotes:'',deliveryTime:'',serviceLocation:'',equipment:'',servings:total(),unitPrice:0,specialPrice:0,specialMenu:'',specialIds:d.special.map(s=>s.id),confirmed:false};
  openModal('<h2>'+(m?'تعديل الوجبة':'تخطيط وجبة جديدة')+'</h2><p class="help">حدد محتوى الوجبة وحصصها، وخصص قوائم بديلة للحالات المسجلة.</p><div class="cp-form">'+
  '<label>اليوم<select id="cm-day">'+S.meta.days.map((day,i)=>'<option value="'+(i+1)+'" '+(v.day===i+1?'selected':'')+'>اليوم '+(i+1)+' · '+e(L(day))+'</option>').join('')+'</select></label>'+
  '<label>نوع الوجبة<select id="cm-type">'+types.map(([id,label])=>'<option value="'+id+'" '+(v.type===id?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+
@@ -114,6 +116,9 @@ function mealModal(id){
  '<label class="cm-shared full">طريقة التوزيع والتجهيز<textarea id="cm-serving-notes" rows="2" placeholder="مثال: صحن رز ودجاج لكل 5 طلاب، يقدم على الطاولات حسب الفرق">'+e(v.servingNotes||'')+'</textarea></label>'+
  '<label class="full">القائمة الغذائية ومكوناتها<textarea id="cm-menu" rows="3">'+e(v.menu)+'</textarea></label>'+
  '<label>المورد / المطبخ<input id="cm-supplier" maxlength="120" value="'+e(v.supplier)+'"></label>'+
+ '<label>موعد وصول الطعام<input id="cm-delivery" type="time" value="'+e(v.deliveryTime||'')+'"></label>'+
+ '<label>موقع تقديم الطعام<input id="cm-location" maxlength="120" placeholder="صالة الطعام، الاستراحة، موقع الرحلة…" value="'+e(v.serviceLocation||'')+'"></label>'+
+ '<label class="full">أدوات وتجهيزات التقديم<textarea id="cm-equipment" rows="2" placeholder="صحون مشتركة، ملاعق، قفازات، طاولات، ماء، أدوات تقديم منفصلة للحالات الخاصة…">'+e(v.equipment||'')+'</textarea></label>'+
  '<label>المشرف المسؤول عن الاستلام والتوزيع<select id="cm-supervisor">'+supervisorOptions(v.supervisorId)+'</select><small class="help">الاختيار من فريق المعسكر؛ أضف الأسماء من تبويب الأعداد والمستفيدون.</small></label>'+
  '<label>سعر الوجبة الفردية أو الطبق الجماعي (ر.س)<input type="number" step=".01" min="0" id="cm-price" value="'+money(v.unitPrice)+'"><small class="help">للتقديم الجماعي يُحسب سعر الطبق الواحد، وليس سعر الشخص.</small></label>'+
  '<label>سعر الحصة الخاصة (ر.س)<input type="number" step=".01" min="0" id="cm-special-price" value="'+money(v.specialPrice)+'"></label>'+
@@ -167,7 +172,7 @@ function handle(b){
  if(a==='del-meal'){if(confirm('حذف الوجبة من الخطة؟')){d.meals=d.meals.filter(m=>m.id!==id);commit()}return}
  if(a==='del-special'){if(confirm('حذف الحالة الغذائية؟')){d.special=d.special.filter(s=>s.id!==id);d.meals.forEach(m=>m.specialIds=(m.specialIds||[]).filter(x=>x!==id));commit()}return}
  if(a==='save-meal'){
-  const m=d.meals.find(x=>x.id===id),newValue={id:m?.id||newId('meal-'),day:n($('#cm-day').value),type:$('#cm-type').value,time:$('#cm-time').value,menu:$('#cm-menu').value.trim(),supplier:$('#cm-supplier').value.trim(),supervisorId:$('#cm-supervisor').value,serviceMode:$('#cm-mode').value,peoplePerTray:n($('#cm-group-size').value),servingNotes:$('#cm-serving-notes').value.trim(),servings:n($('#cm-servings').value),unitPrice:money($('#cm-price').value),specialPrice:money($('#cm-special-price').value),specialMenu:$('#cm-special-menu').value.trim(),specialIds:$$('[data-cm-special]:checked').map(x=>x.dataset.cmSpecial),confirmed:$('#cm-confirmed').checked};
+  const m=d.meals.find(x=>x.id===id),newValue={id:m?.id||newId('meal-'),day:n($('#cm-day').value),type:$('#cm-type').value,time:$('#cm-time').value,menu:$('#cm-menu').value.trim(),supplier:$('#cm-supplier').value.trim(),supervisorId:$('#cm-supervisor').value,serviceMode:$('#cm-mode').value,peoplePerTray:n($('#cm-group-size').value),servingNotes:$('#cm-serving-notes').value.trim(),deliveryTime:$('#cm-delivery').value,serviceLocation:$('#cm-location').value.trim(),equipment:$('#cm-equipment').value.trim(),servings:n($('#cm-servings').value),unitPrice:money($('#cm-price').value),specialPrice:money($('#cm-special-price').value),specialMenu:$('#cm-special-menu').value.trim(),specialIds:$$('[data-cm-special]:checked').map(x=>x.dataset.cmSpecial),confirmed:$('#cm-confirmed').checked};
   if(!newValue.day||!newValue.menu||!newValue.time)return toast('اليوم وقائمة الطعام والتوقيت مطلوبة.');
   if(newValue.specialIds.length>newValue.servings)return toast('عدد المستفيدين أقل من الحالات الخاصة.');
   if(!newValue.supervisorId||!supervisorName(newValue.supervisorId))return toast('اختر المشرف المسؤول من فريق المعسكر قبل حفظ الوجبة.');
