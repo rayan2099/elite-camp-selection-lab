@@ -14,7 +14,14 @@ function db(){
  }
  return S.prep.__catering;
 }
-const team=()=>{const d=db();if(!Array.isArray(d.team))d.team=[];return d.team};
+const team=()=>{const d=db();if(!Array.isArray(d.team))d.team=[];
+ // Preserve existing supervisor assignments from the earlier free-text form.
+ d.meals.forEach(m=>{if(!m.supervisorId&&typeof m.supervisor==='string'&&m.supervisor.trim()){
+   let member=d.team.find(t=>t.name===m.supervisor.trim());
+   if(!member){member={id:newId('staff-'),name:m.supervisor.trim(),role:'مشرف (سجل سابق)'};d.team.push(member)}
+   m.supervisorId=member.id;
+ }});
+ return d.team};
 const supervisorName=id=>team().find(x=>x.id===id)?.name||'';
 const supervisorOptions=id=>'<option value="">اختر المسؤول من فريق المعسكر</option>'+team().map(x=>'<option value="'+e(x.id)+'" '+(id===x.id?'selected':'')+'>'+e(x.name)+' · '+e(x.role)+'</option>').join('');
 const participants=()=>[...(S.students||[]).map(x=>({id:'s-'+x.id,name:L({ar:x.ar,en:x.en}),demo:true})),...db().people.map(x=>({id:x.id,name:x.name,demo:false}))];
@@ -163,7 +170,7 @@ function handle(b){
   const m=d.meals.find(x=>x.id===id),newValue={id:m?.id||newId('meal-'),day:n($('#cm-day').value),type:$('#cm-type').value,time:$('#cm-time').value,menu:$('#cm-menu').value.trim(),supplier:$('#cm-supplier').value.trim(),supervisorId:$('#cm-supervisor').value,serviceMode:$('#cm-mode').value,peoplePerTray:n($('#cm-group-size').value),servingNotes:$('#cm-serving-notes').value.trim(),servings:n($('#cm-servings').value),unitPrice:money($('#cm-price').value),specialPrice:money($('#cm-special-price').value),specialMenu:$('#cm-special-menu').value.trim(),specialIds:$$('[data-cm-special]:checked').map(x=>x.dataset.cmSpecial),confirmed:$('#cm-confirmed').checked};
   if(!newValue.day||!newValue.menu||!newValue.time)return toast('اليوم وقائمة الطعام والتوقيت مطلوبة.');
   if(newValue.specialIds.length>newValue.servings)return toast('عدد المستفيدين أقل من الحالات الخاصة.');
-  if(newValue.supervisorId&&!supervisorName(newValue.supervisorId))return toast('اختر مشرفًا مسجلًا في فريق المعسكر.');
+  if(!newValue.supervisorId||!supervisorName(newValue.supervisorId))return toast('اختر المشرف المسؤول من فريق المعسكر قبل حفظ الوجبة.');
   if(newValue.serviceMode==='shared'&&(newValue.peoplePerTray<2||!newValue.servingNotes))return toast('حدد عدد الأشخاص لكل طبق وطريقة التقديم الجماعي.');
   if(m)Object.assign(m,newValue);else d.meals.push(newValue);closeModal();commit();return;
  }
