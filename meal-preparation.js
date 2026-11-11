@@ -5,7 +5,7 @@ const e=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&g
 const types=[['breakfast','إفطار'],['lunch','غداء'],['dinner','عشاء'],['snack','وجبة خفيفة'],['other','أخرى']];
 const needs=['المكسرات','الحليب','البيض','القمح/الجلوتين','السمسم','الأسماك','المحار','الصويا','أخرى'];
 const n=v=>Math.max(0,Math.floor(Number(v)||0)),money=v=>Math.max(0,Number(v)||0),fmt=v=>money(v).toLocaleString('en-US',{maximumFractionDigits:2});
-let section='schedule';
+let section='schedule',dayChoice='all';
 function db(){
  S.prep??={};
  if(!S.prep.__catering){
@@ -67,26 +67,47 @@ function issues(m){
 function card(label,value,detail){return '<div class="cp-stat"><small>'+label+'</small><strong>'+e(value)+'</strong><small>'+detail+'</small></div>'}
 function head(text,hint){return '<div class="cp-head"><h2>'+text+'</h2><p class="help">'+hint+'</p></div>'}
 function pageMeals(){
- const d=db(),ready=d.meals.filter(m=>!issues(m).length).length,staff=total()-n(S.meta.students);
- return pageHead('إدارة الوجبات والتغذية','Meal preparation','تجهيز غذائي شامل مرتبط بالمعسكر الحالي، من عدد المستفيدين إلى التوريد والحساسية الغذائية.','Camp-specific meals, catering and dietary planning.',
- '<button class="primary" data-cp="new-meal">+ إضافة وجبة</button>')+
- '<div class="cp-privacy">تنبيه خصوصية: تحتوي ترتيبات الحساسية على بيانات حساسة لطلاب قُصّر. هذه نسخة تجريبية تحفظ البيانات محليًا في المتصفح دون نظام صلاحيات أو تخزين طبي آمن. لا تُدخل بيانات صحية حقيقية قبل توفير الحماية المناسبة. يجب التحقق من المكونات والتحضير مع ولي الأمر ومقدم الطعام.</div>'+
- '<div class="cp-stats">'+card('الطلاب المتوقعون',n(S.meta.students),'من بيانات المعسكر')+card('الطاقم',staff,'مشرفون ومدربون ومرافقون')+card('المستفيدون لكل وجبة',total(),'العدد الافتراضي')+card('حالات غذائية خاصة',d.special.length,'مسجلة بالاسم')+card('وجبات مستوفية',ready+' / '+d.meals.length,'وفق متطلبات التجهيز')+card('ميزانية الوجبات',fmt(d.meals.reduce((a,m)=>a+cost(m),0))+' ر.س','تكلفة تقديرية')+'</div>'+
- '<div class="cp-tabs">'+[['schedule','خطة الوجبات'],['counts','الأعداد والمستفيدون'],['special','الحساسية والتغذية الخاصة'],['audit','مراجعة الجاهزية']].map(([id,t])=>'<button data-cp="tab" data-val="'+id+'" class="'+(section===id?'active':'')+'">'+t+'</button>').join('')+'</div>'+
- (section==='schedule'?scheduleView():section==='counts'?countsView():section==='special'?specialView():auditView());
+ const d=db(),planned=d.meals.length,ready=d.meals.filter(m=>issues(m).length===0).length;
+ const participantsCount=total(),plannedDays=new Set(d.meals.map(m=>m.day)).size,days=S.meta.days.length;
+ const completion=planned?Math.round(ready/planned*100):0;
+ const sum=d.meals.reduce((x,m)=>x+cost(m),0),pending=planned-ready,notPlanned=Math.max(0,days-plannedDays);
+ const tabs=[['schedule','خطة الوجبات',planned],['counts','الأعداد والفريق',participantsCount],['special','التغذية الخاصة',d.special.length],['audit','مراجعة الجاهزية',pending+notPlanned]];
+ return '<div class="catering-workspace">'+
+ '<section class="catering-hero"><div><div class="catering-kicker">أكاديمية النخبة · الإدارة التشغيلية</div><h1>تجهيز الوجبات والتغذية</h1><p>نظرة واحدة على خطة الطعام: ماذا سيُقدَّم، ولمن، وكم نحتاج، ومن المسؤول عن الاستلام والتوزيع.</p></div>'+
+ '<div class="catering-hero-actions"><button type="button" class="primary" data-cp="new-meal">+ إضافة وجبة</button><button type="button" class="catering-secondary" data-cp="tab" data-val="audit">فحص الجاهزية</button></div></section>'+
+ '<section class="catering-summary" aria-label="مؤشرات تجهيز الوجبات">'+
+ '<div class="catering-summary-item"><small>إجمالي المستفيدين</small><strong>'+participantsCount+'</strong><span>'+n(S.meta.students)+' طالب · '+(participantsCount-n(S.meta.students))+' طاقم</span></div>'+
+ '<div class="catering-summary-item"><small>الوجبات المخططة</small><strong>'+planned+'</strong><span>'+plannedDays+' من '+days+' أيام بها وجبات</span></div>'+
+ '<div class="catering-summary-item"><small>الاحتياجات الغذائية الخاصة</small><strong>'+d.special.length+'</strong><span>يلزم توثيقها مع الأسرة والمورد</span></div>'+
+ '<div class="catering-summary-item"><small>التكلفة التقديرية</small><strong>'+fmt(sum)+' <small>ر.س</small></strong><span>تشمل الأطباق الجماعية والفردية والخاصة</span></div></section>'+
+ '<section class="catering-progress"><div><div class="catering-progress-title"><strong>جاهزية الوجبات المسجلة</strong><span>'+ready+' من '+planned+' مستوفية</span></div><div class="catering-progress-track" role="progressbar" aria-valuenow="'+completion+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+completion+'%"></span></div><small>'+(pending?pending+' وجبة تحتاج استكمال المتطلبات. ':'')+(notPlanned?notPlanned+' أيام لم تُسجّل لها وجبات.':'راجع أعداد الحضور قبل تأكيد الكميات.')+'</small></div><button type="button" data-cp="tab" data-val="audit">عرض النواقص ←</button></section>'+
+ '<nav class="cp-tabs" aria-label="أقسام إدارة التغذية">'+tabs.map(([id,label,num])=>'<button type="button" data-cp="tab" data-val="'+id+'" class="'+(section===id?'active':'')+'" aria-current="'+(section===id?'page':'false')+'">'+label+' <span class="number">'+num+'</span></button>').join('')+'</nav>'+
+ '<main class="catering-section">'+(section==='schedule'?scheduleView():section==='counts'?countsView():section==='special'?specialView():auditView())+'</main>'+
+ '<div class="catering-insight"><span>ⓘ</span><div><b>خصوصية وسلامة التغذية</b> — بيانات الطلاب في هذه النسخة تجريبية وتُحفظ محليًا في المتصفح. لا تُدخل بيانات حساسية حقيقية لقُصّر قبل إضافة ضوابط الصلاحيات والتخزين الآمن. يجب تأكيد الاحتياجات الغذائية مع ولي الأمر ومقدم الطعام، والتحقق من تجنب التلوث التبادلي.</div></div></div>';
 }
 function scheduleView(){
- const list=[...db().meals].sort((a,b)=>a.day-b.day||a.time.localeCompare(b.time));
- return head('خطة الوجبات اليومية','نوع الوجبة، وقت الاستلام والتقديم، حجم الطبق الجماعي أو الفردي، الكمية، المسؤول، وتجهيزات التوزيع.')+
- '<div class="cp-actions"><button class="primary" data-cp="new-meal">+ تخطيط وجبة جديدة</button></div>'+
- (!list.length?'<div class="card">لم تُخطط وجبات هذا المعسكر بعد. ابدأ بإضافة وجبة وربطها باليوم.</div>':
- '<div class="cp-list">'+list.map(m=>{const special=specialsOf(m),missing=issues(m);return '<article class="cp-record"><div class="cp-between"><div><span class="cp-accent">اليوم '+m.day+' · '+e(type(m.type))+' · '+e(m.time)+'</span><h3>'+e(m.menu||'لم تحدد قائمة الطعام')+'</h3><p class="help">المورد: '+e(m.supplier||'غير محدد')+' | المشرف: '+e(supervisorName(m.supervisorId)||'غير محدد')+'</p></div><span class="pill '+(missing.length?'orange':'good')+'">'+(missing.length?'ناقص '+missing.length+' متطلبات':'مستوفٍ')+'</span></div>'+
- '<div class="cp-quant"><span>المستفيدون <b>'+servings(m)+'</b></span><span>'+(m.serviceMode==='shared'?'أطباق جماعية':'وجبات فردية')+' <b>'+regularUnits(m)+'</b></span><span>وجبات خاصة <b>'+special.length+'</b></span><span>التكلفة <b>'+fmt(cost(m))+' ر.س</b></span></div>'+
- '<p class="help">الوصول: '+e(m.deliveryTime||'غير محدد')+' · موقع التقديم: '+e(m.serviceLocation||'غير محدد')+(m.equipment?' · التجهيزات: '+e(m.equipment):'')+'</p>'+ '<p class="help">نوع التقديم: '+(m.serviceMode==='shared'?'جماعي · الطبق الواحد يكفي '+sharedSize(m)+' أشخاص':'فردي · لكل شخص وجبة')+(m.servingNotes?' · '+e(m.servingNotes):'')+'</p>'+
- (special.length?'<p class="cp-highlight">الحالات الخاصة: '+e(special.map(s=>pname(s.id)).join('، '))+' — الوجبة البديلة: '+e(m.specialMenu||'غير محددة')+'</p>':'')+
- (missing.length?'<p class="help">يلزم استكمال: '+e(missing.join('، '))+'</p>':'')+
- '<div class="cp-actions"><button class="small" data-cp="edit-meal" data-id="'+e(m.id)+'">تعديل التفاصيل</button><button class="small danger" data-cp="del-meal" data-id="'+e(m.id)+'">حذف</button></div></article>'}).join('')+'</div>')+
- '<div class="cp-privacy">يجب مطابقة عدد الحصص مع الحضور الفعلي والطاقم، وليس العدد المتوقع فقط، قبل تأكيد الطلب.</div>';
+ const all=db().meals.slice().sort((a,b)=>a.day-b.day||String(a.time).localeCompare(String(b.time)));
+ const activeDay=dayChoice==='all'?'all':Number(dayChoice);
+ const items=all.filter(m=>activeDay==='all'||m.day===activeDay);
+ const dayButtons='<div class="catering-day-strip" aria-label="تصفية الوجبات حسب اليوم">'+
+ '<button type="button" class="catering-day '+(dayChoice==='all'?'active':'')+'" data-cp="day" data-val="all"><b>جميع الأيام</b><small>الخطة كاملة</small><span class="catering-day-count">'+all.length+' وجبة</span></button>'+
+ S.meta.days.map((d,i)=>{const count=all.filter(m=>m.day===i+1).length;return '<button type="button" class="catering-day '+(activeDay===i+1?'active':'')+'" data-cp="day" data-val="'+(i+1)+'"><b>اليوم '+(i+1)+'</b><small>'+e(L(d))+'</small><span class="catering-day-count">'+count+' وجبة</span></button>'}).join('')+'</div>';
+ const list=items.map(m=>{
+   const missing=issues(m),special=specialsOf(m),group=m.serviceMode==='shared';
+   return '<article class="catering-meal"><div class="catering-meal-top"><span class="catering-meal-type">'+(group?'◉':'◌')+' '+e(type(m.type))+' · اليوم '+m.day+'</span><span class="catering-meal-status '+(!missing.length?'ready':'')+'">'+(missing.length?missing.length+' متطلبات ناقصة':'مستوفية المتطلبات')+'</span></div>'+
+   '<div class="catering-meal-body"><h3>'+e(m.menu||'لم تُحدد قائمة الطعام')+'</h3><div class="catering-meal-sub">'+e(m.time||'الوقت غير محدد')+' · '+(group?'تقديم جماعي · طبق لكل '+sharedSize(m)+' أشخاص':'تقديم فردي')+'</div>'+
+   '<div class="catering-meal-kpis"><div><small>المستفيدون</small><b>'+servings(m)+'</b></div><div><small>'+(group?'الأطباق الجماعية':'الوجبات الفردية')+'</small><b>'+regularUnits(m)+'</b></div><div><small>وجبات خاصة</small><b>'+special.length+'</b></div></div>'+
+   '<div class="catering-meal-sub"><b>المشرف:</b> '+e(supervisorName(m.supervisorId)||'لم يحدد')+' <span style="margin:0 4px">·</span> <b>المورد:</b> '+e(m.supplier||'لم يحدد')+'</div>'+
+   '<div class="catering-meal-sub"><b>موعد الوصول:</b> '+e(m.deliveryTime||'لم يحدد')+' <span style="margin:0 4px">·</span> <b>الموقع:</b> '+e(m.serviceLocation||'لم يحدد')+'</div>'+
+   (special.length?'<div class="catering-insight" style="margin:10px 0 0"><span>!</span><span>'+special.length+' وجبات خاصة منفصلة: '+e(special.map(x=>pname(x.id)).join('، '))+'.</span></div>':'')+
+   (missing.length?'<div class="catering-meal-sub" style="margin-top:8px;color:#a05e25">يلزم استكمال: '+e(missing.slice(0,3).join('، '))+(missing.length>3?' وغيرها':'')+'</div>':'')+
+   '</div><div class="catering-meal-footer"><div><span class="catering-badge">التكلفة: '+fmt(cost(m))+' ر.س</span></div><div class="cp-actions"><button type="button" class="small" data-cp="edit-meal" data-id="'+e(m.id)+'">تعديل الوجبة</button><button type="button" class="small danger" data-cp="del-meal" data-id="'+e(m.id)+'">حذف</button></div></div></article>';
+ }).join('');
+ return '<div class="catering-section-head"><div><h2>خطة الوجبات اليومية</h2><p>اختر اليوم لمعرفة الوجبات المقررة، والكميات، والتكلفة، وحالة جاهزية كل طلب.</p></div><div class="cp-actions"><button type="button" class="primary" data-cp="new-meal">+ وجبة جديدة</button></div></div>'+
+ dayButtons+
+ (items.length?'<div class="catering-grid">'+list+'</div>':
+ '<div class="catering-empty"><div class="catering-empty-icon">♧</div><h3>لا توجد وجبات مخططة '+(activeDay==='all'?'بعد':'لهذا اليوم')+'</h3><p>أضف الإفطار والغداء والعشاء أو أي وجبة أخرى، وحدد الأعداد والمورد والمشرف واحتياجات التغذية الخاصة.</p><button type="button" class="primary" data-cp="new-meal">+ إضافة أول وجبة</button></div>')+
+ '<div class="catering-insight"><span>ⓘ</span><span>الوجبات الجماعية تُحسب بعدد الأطباق وفق سعة الطبق، وتُفصل عنها الوجبات الخاصة بالحساسية. راجع الحضور والطاقم قبل إرسال الطلب النهائي.</span></div>';
 }
 function countsView(){
  const d=db(),people=participants();
@@ -108,13 +129,15 @@ function specialView(){
  '<div class="cp-privacy">يجب التحقق من التحسس والتلوث التبادلي وتعليمات التحضير والتقديم مع الأسرة والمختصين ومقدم الطعام. تأكيد الحقول ليس ضمانًا طبيًا.</div>';
 }
 function auditView(){
- const d=db(),days=S.meta.days.map((day,i)=>({day:i+1,label:L(day),list:d.meals.filter(m=>m.day===i+1)}));
- const failures=d.meals.filter(m=>issues(m).length);
- return head('تدقيق جاهزية التغذية','لا يتحول تجهيز الوجبات إلى حالة جاهزة لمجرد وجود أزرار أو حقول.')+
- '<div class="cp-cols"><div class="card"><h3>تغطية أيام المعسكر</h3>'+days.map(x=>'<p>اليوم '+x.day+' · '+e(x.label)+': <b>'+x.list.length+' وجبة</b></p>').join('')+'</div>'+
- '<div class="card"><h3>الوجبات التي تحتاج استكمالًا</h3>'+(failures.length?failures.map(m=>'<p><b>اليوم '+m.day+' · '+e(type(m.type))+'</b>: '+e(issues(m).join('، '))+'</p>').join(''):'لا توجد نواقص في الوجبات المسجلة.')+'</div>'+
- '<div class="card"><h3>مراجعة الحالات الخاصة</h3><p>إجمالي الحالات: '+d.special.length+'</p><p>تأكيد ولي الأمر: '+d.special.filter(s=>s.parentOK).length+'</p><p>تأكيد المطبخ: '+d.special.filter(s=>s.kitchenOK).length+'</p><p>عدد الطلاب المتوقع: '+n(S.meta.students)+'</p><p>الأسماء المسجلة: '+participants().length+'</p></div></div>'+
- '<div class="cp-privacy">لإقفال التجهيز تشغيليًا يلزم اعتماد العدد الفعلي، خطة الوجبات لجميع الأيام، توقيت التوريد، مراجعة الحساسية، والوجبات البديلة. هذه أداة متابعة وليست اعتمادًا طبيًا أو موافقة تلقائية.</div>';
+ const d=db(),days=S.meta.days.map((label,i)=>({day:i+1,title:L(label),list:d.meals.filter(m=>m.day===i+1)}));
+ const pending=d.meals.filter(m=>issues(m).length),unconfirmed=d.special.filter(s=>!s.parentOK||!s.kitchenOK);
+ const line=(name,detail,ok)=>'<div class="catering-check"><div><b>'+e(name)+'</b><div><span>'+e(detail)+'</span></div></div><em class="'+(ok?'okay':'')+'">'+(ok?'مستوفٍ':'يحتاج متابعة')+'</em></div>';
+ return '<div class="catering-section-head"><div><h2>مراجعة جاهزية التغذية</h2><p>قائمة تحقق تشغيلية تساعد الإدارة على معرفة النواقص قبل المعسكر، دون إصدار اعتماد آلي.</p></div></div>'+
+ '<div class="catering-review"><section class="catering-review-card"><h3>تغطية أيام المعسكر</h3>'+days.map(x=>line('اليوم '+x.day+' · '+x.title,x.list.length+' وجبة مسجلة',x.list.length>0)).join('')+'</section>'+
+ '<section class="catering-review-card"><h3>توثيق التغذية الخاصة</h3>'+line('حالات الاحتياج الغذائي','إجمالي الحالات: '+d.special.length,unconfirmed.length===0)+line('تأكيدات ولي الأمر',d.special.filter(s=>s.parentOK).length+' من '+d.special.length,d.special.every(s=>s.parentOK))+line('تأكيدات المطبخ',d.special.filter(s=>s.kitchenOK).length+' من '+d.special.length,d.special.every(s=>s.kitchenOK))+
+ line('أعداد المستفيدين','متوقع '+n(S.meta.students)+' طالب و '+(total()-n(S.meta.students))+' طاقم',total()>0)+'</section></div>'+
+ '<section class="catering-review-card" style="margin-top:13px"><h3>نواقص الوجبات المسجلة</h3>'+(pending.length?pending.map(m=>line('اليوم '+m.day+' · '+type(m.type),issues(m).join(' · '),false)).join(''):'<p class="help">لا توجد نواقص في حقول الوجبات المسجلة. تأكد من خطة جميع الأيام ومطابقة العدد الفعلي.</p>')+'</section>'+
+ '<div class="catering-insight"><span>!</span><div><b>قاعدة الاعتماد:</b> هذه لوحة متابعة، وليست شهادة سلامة غذائية. تأكيد التوريد والأعداد والحساسيات والتجهيز في الميدان مسؤولية الفريق المختص ومقدم الطعام.</div></div>';
 }
 function mealModal(id){
  const d=db(),m=d.meals.find(x=>x.id===id),v=m||{day:1,type:'lunch',time:'13:00',menu:'',supplier:'',supervisorId:'',serviceMode:'individual',peoplePerTray:5,servingNotes:'',deliveryTime:'',serviceLocation:'',equipment:'',servings:total(),unitPrice:0,specialPrice:0,specialMenu:'',specialIds:d.special.map(s=>s.id),confirmed:false};
@@ -166,6 +189,7 @@ function commit(){save();render({preserveScroll:true})}
 function handle(b){
  const a=b.dataset.cp,id=b.dataset.id,d=db();
  if(a==='tab'){section=b.dataset.val;render({preserveScroll:true});return}
+ if(a==='day'){dayChoice=b.dataset.val;render({preserveScroll:true});return}
  if(a==='new-meal'||a==='edit-meal'){mealModal(id);return}
  if(a==='new-special'||a==='edit-special'){specialModal(id);return}
  if(a==='save-counts'){S.meta.students=n($('#cp-students').value);d.staff={supervisors:n($('#cp-supervisors').value),trainers:n($('#cp-trainers').value),other:n($('#cp-other').value)};commit();toast('حُفظت أعداد المستفيدين.');return}
