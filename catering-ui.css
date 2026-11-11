@@ -148,3 +148,51 @@ body:has(.catering-workspace) #app{max-width:1420px}
 #modal .catering-modal .cp-actions{bottom:-22px;box-shadow:0 -8px 18px rgba(255,255,255,.94);padding:16px 0 3px;margin-bottom:0}
 #modal .catering-modal .cp-actions button{min-height:44px;border-radius:9px;padding:10px 18px}
 @media(max-width:650px){#modal:has(.catering-modal) .inner{padding:17px 15px}#modal .catering-modal .cm-audience-switch,#modal .catering-modal .cm-student-list{grid-template-columns:1fr}#modal .catering-modal .cm-audience-header{flex-direction:column}#modal .catering-modal .cp-form{grid-template-columns:1fr}#modal .catering-modal .cp-form .full{grid-column:1}}
+
+
+/* Select scope and print-ready catering summary */
+.catering-print-options{direction:rtl;text-align:right;max-width:620px;margin:auto;padding:15px 4px 4px}
+.catering-print-options h2{font-weight:800;font-size:23px;color:#18314b;margin:0 0 8px}
+.catering-print-options p{font-size:13px;line-height:1.8;color:#677b90}
+.catering-print-label{display:grid;gap:9px;margin:22px 0 15px;font-weight:800;font-size:13px;color:#233f5a}
+.catering-print-label select{padding:12px 14px;min-height:48px;border:1px solid #d9e4ee;border-radius:10px;background:#fff;color:#1d3852;font:inherit}
+.catering-print-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:18px}
+.catering-print-preview>div{display:flex;flex-direction:column;gap:7px;border:1px solid #e2eaf1;background:#f7f9fb;border-radius:11px;padding:15px}
+.catering-print-preview b{font-size:22px;color:#15334f}.catering-print-preview span{font-size:11px;color:#6d7f90}
+.catering-print-note{font-size:12px;color:#6b8095;line-height:1.85;border-radius:8px;background:#f3f7fa;padding:12px;margin-bottom:15px}
+.catering-print-options .cp-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap}
+.catering-print-options .cp-actions button{padding:10px 16px;border-radius:9px}
+#catering-print-report{display:none}
+@media(max-width:560px){.catering-print-preview{grid-template-columns:1fr 1fr}.catering-print-options{padding:0}}
+@media print{
+ @page{size:A4 landscape;margin:10mm}
+ html,body{background:#fff!important;margin:0!important;padding:0!important;overflow:visible!important;max-width:none!important}
+ body:has(> #catering-print-report)>*:not(#catering-print-report){display:none!important}
+ body>#catering-print-report{display:block!important;position:static!important;visibility:visible!important;direction:rtl!important;color:#172c43!important;background:white!important;font-family:Tahoma,Arial,sans-serif!important}
+ #catering-print-report,#catering-print-report *{box-sizing:border-box}
+ #catering-print-report .catering-print-document{direction:rtl;font-size:10px;line-height:1.6}
+ #catering-print-report .catering-print-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;border-bottom:2px solid #193751;padding-bottom:10px;margin-bottom:12px;page-break-after:avoid}
+ #catering-print-report .catering-print-brand{color:#df7335;font-weight:800;font-size:11px}
+ #catering-print-report h1{font-size:20px;margin:3px 0;color:#162e47}
+ #catering-print-report .catering-print-head p{margin:0;font-size:11px;color:#53687d}
+ #catering-print-report .catering-print-date{text-align:left;color:#708195;font-size:9px;white-space:nowrap}
+ #catering-print-report .catering-print-date b{color:#1c3550;font-size:10px}
+ #catering-print-report .catering-print-totals{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:13px}
+ #catering-print-report .catering-print-totals>div{border:1px solid #dee8f0;background:#f7f9fb;padding:8px 10px;border-radius:6px;display:grid;gap:3px}
+ #catering-print-report .catering-print-totals span{font-size:8px;color:#687d90}
+ #catering-print-report .catering-print-totals strong{font-size:14px;color:#19334e}
+ #catering-print-report .catering-print-day{break-inside:avoid-page;page-break-inside:avoid;margin:0 0 12px}
+ #catering-print-report .catering-print-dayhead{display:flex;align-items:center;justify-content:space-between;background:#eaf0f5;border-right:3px solid #e97b3f;padding:7px 9px;break-after:avoid}
+ #catering-print-report .catering-print-dayhead h2{font-size:12px;color:#1b3651;margin:0}
+ #catering-print-report .catering-print-dayhead p{font-size:9px;color:#64788d;margin:1px 0}
+ #catering-print-report .catering-print-dayhead strong{font-size:11px;color:#1d3955}
+ #catering-print-report table{width:100%;table-layout:fixed;border-collapse:collapse;margin:0}
+ #catering-print-report th,#catering-print-report td{border:1px solid #dce5ec;padding:6px 5px;vertical-align:top;overflow-wrap:anywhere;word-break:normal;line-height:1.5}
+ #catering-print-report th{background:#f1f5f8;color:#3b526c;font-size:8px;font-weight:800;text-align:right}
+ #catering-print-report td{font-size:9px;color:#213b55}
+ #catering-print-report td small{display:block;color:#78899a;font-size:8px;margin-top:3px}
+ #catering-print-report td.num{text-align:center;font-weight:800}
+ #catering-print-report tfoot td{background:#f7f9fc;font-weight:800}
+ #catering-print-report .catering-print-blank{padding:11px;border:1px solid #e4e9ee;color:#6b7e92}
+ #catering-print-report .catering-print-foot{margin-top:15px;border-top:1px solid #dce5ec;padding-top:8px;color:#5f7488;font-size:9px;break-inside:avoid}
+}
