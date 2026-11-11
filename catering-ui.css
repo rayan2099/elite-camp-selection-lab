@@ -104,3 +104,47 @@ body:has(.catering-workspace) #app{max-width:1420px}
 @media(max-width:720px){.catering-hero{padding:23px 20px;flex-direction:column;align-items:stretch}.catering-hero-actions{justify-content:flex-start}.catering-workspace .cp-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.catering-review,.catering-workspace .cp-cols{grid-template-columns:1fr}.catering-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.catering-progress{grid-template-columns:1fr}.catering-meal-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}#modal:has(.catering-modal) .inner{padding:20px 16px}}
 @media(max-width:450px){.catering-summary{grid-template-columns:1fr 1fr;gap:8px}.catering-summary-item{padding:13px}.catering-summary-item strong{font-size:22px}.catering-hero h1{font-size:22px}.catering-workspace .cp-tabs button{font-size:11px;padding:10px 4px}.catering-meal-footer{align-items:flex-start;flex-direction:column}.catering-meal-kpis b{font-size:16px}}
 @media print{.catering-hero-actions,.catering-workspace .cp-tabs,.catering-day-strip,.catering-workspace .cp-actions{display:none!important}.catering-hero{background:#fff;color:#111;border:1px solid #ddd;padding:13px}.catering-hero h1,.catering-hero p{color:#111}.catering-grid{display:block}.catering-meal{break-inside:avoid;margin-bottom:11px}.catering-summary{grid-template-columns:repeat(4,1fr)}}
+
+/* Meal audience selection & redesigned guided form */
+#modal:has(.catering-modal){width:min(960px,calc(100vw - 24px));max-width:960px;border-radius:20px;padding:0;box-shadow:0 24px 75px rgba(13,37,61,.22)}
+#modal:has(.catering-modal) .inner{padding:25px 29px 22px}
+#modal .catering-modal{color:#223851}
+#modal .catering-modal .catering-modal-head{margin-bottom:24px}
+#modal .catering-modal .catering-modal-head h2{font-weight:800;font-size:25px}
+#modal .catering-modal .catering-modal-step{font-size:13px;background:#f4f7fa;color:#1b3854;border:1px solid #e6edf3;border-radius:10px;padding:12px 15px;margin:14px 0 4px}
+#modal .catering-modal .cp-form{column-gap:18px;row-gap:16px}
+#modal .catering-modal .cp-form label{line-height:1.65}
+#modal .catering-modal .cp-form input:focus,#modal .catering-modal .cp-form select:focus,#modal .catering-modal .cp-form textarea:focus{border-color:#b3c4d6;outline:3px solid #e8f0f7}
+#modal .catering-modal .cm-audience-box{border:1px solid #dce7f0;background:#f8fafc;border-radius:14px;padding:18px;margin:3px 0 9px}
+#modal .catering-modal .cm-audience-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:13px}
+#modal .catering-modal .cm-audience-header b{font-size:15px;font-weight:800;color:#1b344f}
+#modal .catering-modal .cm-audience-header small{display:block;color:#6c7f92;font-weight:400;margin-top:4px;font-size:12px}
+#modal .catering-modal .cm-count-badge{display:inline-flex;flex-shrink:0;padding:6px 11px;border-radius:7px;background:#e5eef6;color:#395a77;font-size:11px;font-weight:800}
+#modal .catering-modal .cm-audience-switch{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#modal .catering-modal .cm-audience-choice{display:flex!important;align-items:center;gap:10px;border:1px solid #dce6ef;border-radius:11px;background:white;padding:14px 13px;cursor:pointer;min-height:75px}
+#modal .catering-modal .cm-audience-choice:has(input:checked){border-color:#ec8a4b;background:#fff8f2;box-shadow:0 0 0 1px #f3c39d}
+#modal .catering-modal .cm-audience-choice input{accent-color:#e87735;width:17px;height:17px;flex-shrink:0}
+#modal .catering-modal .cm-audience-choice strong{display:block;color:#243c54;font-size:12.5px}
+#modal .catering-modal .cm-audience-choice small{display:block;font-size:11px;color:#657a8d;font-weight:400}
+#modal .catering-modal .cm-student-picker{margin-top:14px;background:white;border:1px solid #e2eaf2;border-radius:11px;padding:12px}
+#modal .catering-modal .cm-student-picker[hidden],#modal .catering-modal #cm-servings-field[hidden]{display:none!important}
+#modal .catering-modal .cm-student-tools{display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap}
+#modal .catering-modal .cm-student-tools input{flex:1;min-width:140px}
+#modal .catering-modal .cm-student-tools button{border:1px solid #dfe7ef;color:#415970;background:#f8fafc;padding:9px 10px;font-size:11px;border-radius:8px}
+#modal .catering-modal .cm-student-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:220px;overflow:auto;padding:3px;scrollbar-width:thin}
+#modal .catering-modal .cm-student-option{display:flex!important;align-items:center;gap:9px;background:#fff;border:1px solid #e6edf3;border-radius:9px;padding:10px 11px;font-size:12px;cursor:pointer}
+#modal .catering-modal .cm-student-option[hidden]{display:none!important}
+#modal .catering-modal .cm-student-option:has(input:checked){background:#fff8f2;border-color:#eeb88e}
+#modal .catering-modal .cm-student-option input{width:17px;height:17px;accent-color:#e87735;flex-shrink:0}
+#modal .catering-modal .cm-student-option small{font-size:10px;color:#8695a6}
+#modal .catering-modal .cm-student-foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px;margin-top:12px;font-size:11px;color:#718499}
+#modal .catering-modal #cm-students-selected{color:#263f5a;font-weight:800}
+#modal .catering-modal .cm-special-not-eligible{opacity:.45}
+#modal .catering-modal .cm-student-empty{color:#7c8796;text-align:center;padding:19px;grid-column:1/-1;font-size:12px}
+#modal .catering-modal .cp-calc{background:#edf4f8;border-radius:13px;padding:18px}
+#modal .catering-modal .cp-calc>b{font-size:14px;color:#1d3952}
+#modal .catering-modal .cp-calc .cp-quant{margin:13px 0 4px}
+#modal .catering-modal .cp-calc .cp-quant span{background:white;border:1px solid #e3ebf3;border-radius:9px}
+#modal .catering-modal .cp-actions{bottom:-22px;box-shadow:0 -8px 18px rgba(255,255,255,.94);padding:16px 0 3px;margin-bottom:0}
+#modal .catering-modal .cp-actions button{min-height:44px;border-radius:9px;padding:10px 18px}
+@media(max-width:650px){#modal:has(.catering-modal) .inner{padding:17px 15px}#modal .catering-modal .cm-audience-switch,#modal .catering-modal .cm-student-list{grid-template-columns:1fr}#modal .catering-modal .cm-audience-header{flex-direction:column}#modal .catering-modal .cp-form{grid-template-columns:1fr}#modal .catering-modal .cp-form .full{grid-column:1}}
