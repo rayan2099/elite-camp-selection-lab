@@ -146,12 +146,14 @@ function auditView(){
 function printMealOptions(){
  const numDays=S.meta.days.length;
  const defaultDay=dayChoice==='all'?'all':String(dayChoice);
- openModal('<div class="catering-print-options"><h2>طباعة ملخص الوجبات</h2><p class="help">اختر نطاق التقرير. سيُطبع الملخص فقط دون أزرار التحكم، وتُجمع الكميات والتكاليف لكل يوم.</p>'+
+ openModal('<div class="catering-print-options"><h2>تجهيز طلب المطعم</h2><p class="help">اختر الأيام، ثم اطبع أمر توريد مفصل يتضمن الكميات، والمواعيد، ومعلومات التسليم. يمكنك أيضًا اختيار التقرير المالي الداخلي.</p>'+
  '<label class="catering-print-label">نطاق التقرير<select id="cp-print-scope"><option value="all" '+(defaultDay==='all'?'selected':'')+'>جميع أيام المعسكر ('+numDays+' أيام)</option>'+
  S.meta.days.map((day,i)=>'<option value="'+(i+1)+'" '+(defaultDay===String(i+1)?'selected':'')+'>اليوم '+(i+1)+' · '+e(L(day))+'</option>').join('')+'</select></label>'+
+ '<label class="catering-print-label">نوع التقرير<select id="cp-print-kind"><option value="restaurant">طلب توريد للمطعم (مفصل)</option><option value="internal">ملخص إداري داخلي</option></select></label>'+
+ '<div class="catering-print-fields"><label>اسم المطعم / المورد<input id="cp-print-supplier" maxlength="120" placeholder="يُترك فارغًا لاستخدام المورد المسجل لكل وجبة"></label><label>هاتف التواصل مع المطعم<input id="cp-print-contact" maxlength="70" placeholder="اختياري"></label><label class="full">تعليمات عامة للمورد<textarea id="cp-print-instructions" rows="2" maxlength="600" placeholder="مثل تعليمات التغليف، تقسيم الطلبات، والتواصل قبل الوصول"></textarea></label></div>'+
  '<div class="catering-print-preview" id="cp-print-preview" aria-live="polite"></div>'+
- '<div class="catering-print-note">تتضمن الطباعة العدد الإجمالي للمستفيدين، والكميات، والوجبات الخاصة بعددها فقط، والمورد، والمشرف، والموقع، والتكلفة. لا تتضمن أسماء الطلاب أو تفاصيل الحساسية.</div>'+
- '<div class="cp-actions"><button type="button" data-act="close">إلغاء</button><button type="button" class="primary" data-cp="print-report">طباعة الملخص / حفظ PDF</button></div></div>');
+ '<div class="catering-print-note">تقرير المطعم يتضمن تفاصيل كل وجبة والتوريد والتجهيز، مع إظهار العدد والتعليمات البديلة فقط دون أسماء الطلاب أو بياناتهم الصحية. يُرجى التأكد مع المطبخ من سلامة البدائل قبل التنفيذ.</div>'+
+ '<div class="cp-actions"><button type="button" data-act="close">إلغاء</button><button type="button" class="primary" data-cp="print-report">طباعة الطلب / حفظ PDF</button></div></div>');
  refreshPrintPreview();
 }
 function mealsForPrint(scope){
@@ -195,13 +197,58 @@ function printableReport(scope){
  sections+
  '<footer class="catering-print-foot"><b>تنبيه تشغيلي:</b> إجماليات المستفيدين بالجدول هي عدد الحصص المخططة لكل وجبة وليست عدد أشخاص فريدين. يجب مراجعة الحضور والكميات والتوريد الفعلي قبل التنفيذ. تم إخفاء هويات الطلاب ومعلومات الحساسية من التقرير.</footer></div>';
 }
+
+function restaurantOrderReport(scope, options={}){
+ const days=scope==='all'?S.meta.days.map((d,i)=>({day:i+1,title:L(d)})):
+  [{day:Number(scope),title:L(S.meta.days[Number(scope)-1]||{ar:'اليوم'})}];
+ const meals=mealsForPrint(scope), sum=(list,fn)=>list.reduce((acc,m)=>acc+fn(m),0);
+ const date=new Date().toLocaleString('ar-SA-u-ca-gregory-nu-latn',{dateStyle:'medium',timeStyle:'short'});
+ const names= [...new Set(meals.map(m=>m.supplier).filter(Boolean))];
+ const supplier=options.supplier||((names.length===1)?names[0]:'وفق المورد المحدد بكل وجبة');
+ const details=m=>{
+  const special=specialsOf(m), group=m.serviceMode==='shared';
+  const regular=regularUnits(m), regularPeople=Math.max(0,servings(m)-special.length);
+  const itemLabel=group?'طبق جماعي':'وجبة فردية';
+  return '<article class="restaurant-order-item"><div class="restaurant-order-top"><div><b>'+e(type(m.type))+'</b><span>التقديم '+e(m.time||'—')+' · الوصول '+e(m.deliveryTime||'غير محدد')+'</span></div>'+
+   '<strong>'+regular+' '+itemLabel+(special.length?' + '+special.length+' وجبة خاصة':'')+'</strong></div>'+
+   '<div class="restaurant-order-food"><b>قائمة الطعام المطلوبة</b><p>'+e(m.menu||'غير محددة')+'</p></div>'+
+   '<div class="restaurant-order-meta"><div><small>المستفيدون</small><strong>'+servings(m)+'</strong></div>'+
+   '<div><small>الكمية العادية المطلوبة</small><strong>'+regular+' '+itemLabel+'</strong></div>'+
+   '<div><small>حجم الطبق</small><strong>'+(group?sharedSize(m)+' أشخاص':'شخص واحد')+'</strong></div>'+
+   '<div><small>العدد المخصص لوجبات خاصة</small><strong>'+special.length+'</strong></div></div>'+
+   (special.length?'<div class="restaurant-order-special"><b>وجبات بديلة مطلوبة — '+special.length+' وجبة</b><p>'+e(m.specialMenu||'لم تُحدد تفاصيل البدائل؛ يلزم التأكيد قبل التوريد')+'</p><small>تُجهز وتُغلف بصورة منفصلة، مع التحقق من المكونات ومنع التلوث التبادلي مع المسؤول المعني.</small></div>':'')+
+   (m.servingNotes||m.equipment?'<div class="restaurant-order-notes"><b>طريقة التقديم والأدوات</b><p>'+e([m.servingNotes,m.equipment].filter(Boolean).join(' · '))+'</p></div>':'')+
+   '<div class="restaurant-order-delivery"><div><b>موقع التسليم</b><span>'+e(m.serviceLocation||'غير محدد')+'</span></div>'+
+   '<div><b>المستلم المسؤول</b><span>'+e(supervisorName(m.supervisorId)||'غير محدد')+'</span></div>'+
+   '<div><b>المورد المسجل</b><span>'+e(m.supplier||'غير محدد')+'</span></div></div>'+
+   '<div class="restaurant-order-price"><span>سعر '+itemLabel+': '+fmt(m.unitPrice)+' ر.س × '+regular+' = '+fmt(regular*money(m.unitPrice))+' ر.س</span>'+
+   (special.length?'<span>الوجبة الخاصة: '+fmt(m.specialPrice)+' ر.س × '+special.length+' = '+fmt(special.length*money(m.specialPrice))+' ر.س</span>':'')+
+   '<b>الإجمالي: '+fmt(cost(m))+' ر.س</b></div></article>';
+ };
+ const sections=days.map(day=>{const group=meals.filter(m=>m.day===day.day);
+  return '<section class="restaurant-order-day"><div class="restaurant-order-dayhead"><h2>اليوم '+day.day+' · '+e(day.title)+'</h2><span>'+group.length+' وجبة · إجمالي '+fmt(sum(group,cost))+' ر.س</span></div>'+
+  (group.length?group.map(details).join(''):'<p class="restaurant-order-empty">لا توجد وجبات مسجلة لهذا اليوم.</p>')+'</section>';
+ }).join('');
+ const missing=meals.flatMap(m=>{
+  const x=[];if(!m.menu)x.push('القائمة الغذائية');if(!m.deliveryTime)x.push('موعد الوصول');if(!m.serviceLocation)x.push('موقع التقديم');if(!supervisorName(m.supervisorId))x.push('المشرف المستلم');if(specialsOf(m).length&&!m.specialMenu)x.push('تفاصيل البدائل');return x.length?['اليوم '+m.day+' · '+type(m.type)+': '+x.join('، ')]:[];
+ });
+ return '<div class="restaurant-order-document" dir="rtl"><header class="restaurant-order-header"><div><span>أكاديمية النخبة · طلب توريد غذائي</span><h1>أمر تجهيز وتوريد الوجبات</h1><p>'+e(S.meta.campAr||'المعسكر')+' · '+e(scope==='all'?'جميع أيام المعسكر':'اليوم '+scope)+'</p></div><div><small>تاريخ إعداد الطلب</small><strong>'+e(date)+'</strong><small>الحالة: طلب للمراجعة والتأكيد</small></div></header>'+
+ '<div class="restaurant-order-intro"><div><small>المطعم / المورد</small><b>'+e(supplier)+'</b></div><div><small>رقم التواصل</small><b>'+e(options.contact||'غير محدد')+'</b></div><div><small>عدد أيام الطلب</small><b>'+days.length+'</b></div><div><small>إجمالي الوجبات المسجلة</small><b>'+meals.length+'</b></div></div>'+
+ (options.instructions?'<div class="restaurant-order-general"><b>تعليمات عامة للمورد</b><p>'+e(options.instructions)+'</p></div>':'')+
+ sections+'<div class="restaurant-order-total"><span>الإجمالي المالي التقديري للطلب</span><strong>'+fmt(sum(meals,cost))+' ر.س</strong></div>'+
+ (missing.length?'<section class="restaurant-order-pending"><b>بيانات يلزم استكمالها قبل اعتماد الطلب</b><ul>'+missing.map(x=>'<li>'+e(x)+'</li>').join('')+'</ul></section>':'')+
+ '<div class="restaurant-order-accept"><div>اسم ممثل المطعم: __________________</div><div>تاريخ ووقت تأكيد الاستلام: __________________</div><div>توقيع / ختم المطعم: __________________</div></div>'+
+ '<footer class="restaurant-order-foot">يُرجى مراجعة أصناف الطعام والعدد الفعلي ومواعيد التسليم والتغليف قبل تأكيد الطلب. الأعداد لكل وجبة ولا تمثل عدد أشخاص فريدين. لا تتضمن هذه النسخة أسماء الطلاب أو تفاصيل تشخيصاتهم الصحية. ينبغي تنسيق ترتيبات الحساسية مع المسؤول المختص بصورة آمنة.</footer></div>';
+}
+
 function printMealReport(){
  const scope=$('#cp-print-scope')?.value||'all';
  if(scope!=='all'&&(!Number.isInteger(Number(scope))||Number(scope)<1||Number(scope)>S.meta.days.length))
    return toast('اختر يومًا صحيحًا للطباعة.');
  let printable=document.getElementById('catering-print-report');
  if(!printable){printable=document.createElement('div');printable.id='catering-print-report';document.body.appendChild(printable)}
- printable.innerHTML=printableReport(scope);
+ const kind=$('#cp-print-kind')?.value||'restaurant';
+ printable.innerHTML=kind==='restaurant'?restaurantOrderReport(scope,{supplier:$('#cp-print-supplier')?.value.trim(),contact:$('#cp-print-contact')?.value.trim(),instructions:$('#cp-print-instructions')?.value.trim()}):printableReport(scope);
  closeModal();
  window.print();
 }
