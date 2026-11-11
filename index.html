@@ -2620,14 +2620,14 @@ function dayTimeline(day,opts){
                 <span class="tlmeta">${esc(L(t.short))} · ${it.x.pri==='core'?T('أساسي','core'):T('مساند','support')}</span>
                 ${o.why&&it.x.why?`<small class="tlwhy">${esc(it.x.why)}</small>`:''}
                 ${(it.x.sportChoice||it.i.sportChoice)?`<small class="tlwhy" style="display:block;font-weight:700">${esc(sportName(it.x.sportChoice||it.i.sportChoice))}</small>`:''}${(it.x.activityBreakdown||it.i.activityBreakdown)?`<small class="tlwhy" style="display:block">${esc(it.x.activityBreakdown||it.i.activityBreakdown)}</small>`:''}
-                <button type="button" class="small primary noprint" data-act="editScheduleProgram:${it.x.id}" ${(can('select')||can('scheduleEdit'))?'':'disabled'} title="${T('تعديل البرنامج وتفريعاته وأيام تنفيذه','Edit program, subactivities and delivery days')}">${T('تعديل البرنامج','Edit program')}</button>
+                <button type="button" class="small primary noprint" data-act="editScheduleProgram:${it.x.id}" title="${T('تعديل البرنامج وتفريعاته وأيام تنفيذه','Edit program, subactivities and delivery days')}">${T('تعديل البرنامج','Edit program')}</button>
               </div>`}).join('')
           : customActivity?`<span class="pill good">${T('نشاط مُحدد يدويًا','Custom activity assigned')}</span>`:`<span class="tlhint">${T('لم يُحدد برنامج أو نشاط بعد','No program or activity assigned')}</span>`)
       : '';
     return `<div class="tlrow ${row.slot?'prog':'fixed'} ${row.slot&&!items.length?'tl-empty':''}">
       <div class="tltime">${row.t}</div>
       <div class="tldot">${tico(row.ic)}</div>
-      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${row.slot&&!items.length&&!customActivity?`<small class="tlwhy" style="display:block">${T('هذا عنوان فترة في قالب الجدول، وليس نشاطًا مُعيّنًا.','This is a timetable category, not an assigned activity.')}</small>`:''}${body}<button type="button" class="small primary noprint" data-act="editScheduleRow:${day},${idx}" ${(can('select')||can('scheduleEdit'))?'':'disabled'} title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button></div>
+      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${row.slot&&!items.length&&!customActivity?`<small class="tlwhy" style="display:block">${T('هذا عنوان فترة في قالب الجدول، وليس نشاطًا مُعيّنًا.','This is a timetable category, not an assigned activity.')}</small>`:''}${body}<button type="button" class="small primary noprint" data-act="editScheduleRow:${day},${idx}" title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button></div>
     </div>`}).join('')}</div>`;
 }
 
@@ -4185,7 +4185,7 @@ document.addEventListener('click',e=>{
     newProgram:()=>customProgramModal(),
     editScheduleRow:()=>{const [day,index]=arg.split(',');editScheduleRow(day,index)},
     saveScheduleRow:()=>{const [day,index]=arg.split(',');saveScheduleRow(day,index)},
-    editScheduleProgram:()=>editModal(arg),
+    editScheduleProgram:()=>{if(!(can('select')||can('scheduleEdit')))return toast(T('لا تملك صلاحية تعديل البرامج.','No program edit permission.'));editModal(arg)},
     eliteAddSuggestion:()=>{const [day,slot,id]=arg.split(',');eliteAddSuggestion(day,slot,id)},
     newPrepRequirement:()=>newPrepRequirementModal(),
     savePrepRequirement:()=>savePrepRequirement(),
