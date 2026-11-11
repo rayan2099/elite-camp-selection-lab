@@ -15,6 +15,18 @@ function db(){
  return S.prep.__catering;
 }
 const team=()=>{const d=db();if(!Array.isArray(d.team))d.team=[];
+ // Seed a few clearly labelled demo supervisors only once per camp.
+ // They can be deleted/replaced from the team-management section.
+ if(!d.demoTeamSeeded){
+   const examples=[
+     {id:'demo-meals-1',name:'أحمد العتيبي',role:'مشرف ميداني',demo:true},
+     {id:'demo-meals-2',name:'خالد القحطاني',role:'مسؤول التغذية',demo:true},
+     {id:'demo-meals-3',name:'محمد الحربي',role:'مدرب',demo:true},
+     {id:'demo-meals-4',name:'عبدالله الدوسري',role:'مشرف التوزيع',demo:true}
+   ];
+   examples.forEach(member=>{if(!d.team.some(x=>x.id===member.id||x.name===member.name))d.team.push(member)});
+   d.demoTeamSeeded=true;
+ }
  // Preserve existing supervisor assignments from the earlier free-text form.
  d.meals.forEach(m=>{if(!m.supervisorId&&typeof m.supervisor==='string'&&m.supervisor.trim()){
    let member=d.team.find(t=>t.name===m.supervisor.trim());
@@ -23,7 +35,7 @@ const team=()=>{const d=db();if(!Array.isArray(d.team))d.team=[];
  }});
  return d.team};
 const supervisorName=id=>team().find(x=>x.id===id)?.name||'';
-const supervisorOptions=id=>'<option value="">اختر المسؤول من فريق المعسكر</option>'+team().map(x=>'<option value="'+e(x.id)+'" '+(id===x.id?'selected':'')+'>'+e(x.name)+' · '+e(x.role)+'</option>').join('');
+const supervisorOptions=id=>'<option value="">اختر المسؤول من فريق المعسكر</option>'+team().map(x=>'<option value="'+e(x.id)+'" '+(id===x.id?'selected':'')+'>'+e(x.name)+' · '+e(x.role)+(x.demo?' (تجريبي)':'')+'</option>').join('');
 const participants=()=>[...(S.students||[]).map(x=>({id:'s-'+x.id,name:L({ar:x.ar,en:x.en}),demo:true})),...db().people.map(x=>({id:x.id,name:x.name,demo:false}))];
 const pname=id=>participants().find(x=>x.id===id)?.name||'مشارك غير معروف';
 const total=()=>n(S.meta.students)+Object.values(db().staff).reduce((s,v)=>s+n(v),0);
@@ -82,7 +94,7 @@ function countsView(){
  '<div class="cp-cols"><div class="card"><h3>حساب الحصص والمستفيدين</h3><label>عدد الطلاب المتوقع<input id="cp-students" type="number" min="0" value="'+n(S.meta.students)+'"></label><label>عدد المشرفين<input id="cp-supervisors" type="number" min="0" value="'+n(d.staff.supervisors)+'"></label><label>عدد المدربين<input id="cp-trainers" type="number" min="0" value="'+n(d.staff.trainers)+'"></label><label>المرافقون والسائقون<input id="cp-other" type="number" min="0" value="'+n(d.staff.other)+'"></label><button class="primary" data-cp="save-counts">حفظ أعداد المستفيدين</button><p class="help">تحديث الطلاب يغيّر بيانات المعسكر أيضًا، والعدد يصبح الأساس الافتراضي لحصص الوجبات الجديدة.</p></div>'+
  '<div class="card"><h3>الأسماء المتاحة للتغذية الخاصة</h3><div class="cp-names">'+people.map(p=>'<div>'+e(p.name)+(p.demo?' <small>تجريبي</small>':' <button class="small danger" data-cp="del-person" data-id="'+e(p.id)+'">حذف</button>')+'</div>').join('')+'</div><label>إضافة مشارك للتجهيز<input id="cp-person-name" maxlength="100" placeholder="اسم أو معرف المشارك"></label><button class="primary" data-cp="add-person">إضافة مشارك</button><p class="help">الأسماء المسجلة: '+people.length+' | الطلاب المتوقعون: '+n(S.meta.students)+'. قائمة الأسماء الحالية تجريبية أو مدخلة يدويًا.</p></div></div>'+
  '<div class="card cp-team"><h3>فريق الإشراف والتوزيع</h3><p class="help">أضف أسماء أعضاء فريق هذا المعسكر لتظهر ضمن قائمة المشرف المسؤول عند تجهيز كل وجبة.</p>'+
- '<div class="cp-team-list">'+team().map(t=>'<div class="cp-team-item"><span>'+e(t.name)+' · '+e(t.role)+'</span><button class="small danger" data-cp="del-team" data-id="'+e(t.id)+'">حذف</button></div>').join('')+'</div>'+
+ '<div class="cp-team-list">'+team().map(t=>'<div class="cp-team-item"><span>'+e(t.name)+' · '+e(t.role)+(t.demo?' (تجريبي)':'')+'</span><button class="small danger" data-cp="del-team" data-id="'+e(t.id)+'">حذف</button></div>').join('')+'</div>'+
  '<label>اسم عضو الفريق<input id="ct-name" maxlength="100" placeholder="اسم المشرف أو المدرب"></label>'+
  '<label>دوره في المعسكر<select id="ct-role"><option>مشرف ميداني</option><option>مدرب</option><option>مسؤول التغذية</option><option>قائد برامج</option><option>مدير معسكر</option><option>مرافق</option></select></label>'+
  '<button class="primary" data-cp="add-team">إضافة للفريق</button></div>';
