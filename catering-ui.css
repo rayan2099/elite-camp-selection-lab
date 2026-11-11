@@ -307,3 +307,5 @@ body:has(.catering-workspace) #app{max-width:1420px}
  #catering-print-report .restaurant-order-foot{border-top:1px solid #dfe7ed;padding-top:7px;font-size:8px;color:#687d8d;break-inside:avoid}
  #catering-print-report .restaurant-order-empty{padding:12px;border:1px dashed #d7e1e9}
 }
+
+.catering-print-label[hidden]{display:none!important}
