@@ -196,3 +196,22 @@ body:has(.catering-workspace) #app{max-width:1420px}
  #catering-print-report .catering-print-blank{padding:11px;border:1px solid #e4e9ee;color:#6b7e92}
  #catering-print-report .catering-print-foot{margin-top:15px;border-top:1px solid #dce5ec;padding-top:8px;color:#5f7488;font-size:9px;break-inside:avoid}
 }
+
+
+/* Catering form density refinement: compact field labels, quieter help, consistent baseline. */
+#modal:has(.catering-modal){font-size:13px;line-height:1.5}
+#modal .catering-modal .cp-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px;row-gap:14px;align-items:start}
+#modal .catering-modal .cp-form>label{display:flex;flex-direction:column;gap:7px;min-width:0;font-size:12.5px!important;line-height:1.5!important;font-weight:600!important;color:#465c73!important}
+#modal .catering-modal .cp-form>label.full{grid-column:1/-1}
+#modal .catering-modal .cp-form input:not([type="checkbox"]):not([type="radio"]),#modal .catering-modal .cp-form select{height:44px;min-height:44px;padding:9px 12px;border:1px solid #dfe7ee;border-radius:9px;color:#243e57;font-size:13px!important;font-weight:500!important}
+#modal .catering-modal .cp-form textarea{min-height:76px!important;max-height:160px;resize:vertical;font-size:13px!important;font-weight:400!important;line-height:1.6!important;padding:11px 13px}
+#modal .catering-modal .cp-form input::placeholder,#modal .catering-modal .cp-form textarea::placeholder{font-size:12px!important;color:#9aa9b8!important;font-weight:400!important}
+#modal .catering-modal .cp-form label>.help,#modal .catering-modal .cp-form label>small.help{font-size:10.5px!important;font-weight:400!important;color:#8a99a8!important;line-height:1.45!important;margin-top:-3px}
+#modal .catering-modal .catering-modal-step{font-size:12.5px!important;font-weight:750!important;margin:16px 0 3px!important;padding:11px 14px!important;background:#f6f8fa!important;color:#314d69!important;border:1px solid #e5ebf0!important}
+#modal .catering-modal .cp-form .cm-audience-box{margin:5px 0!important}
+#modal .catering-modal .cp-form .cp-check{flex-direction:row!important;align-items:center!important;font-size:12px!important;background:#f8fafc;padding:12px 14px;border-radius:10px}
+#modal .catering-modal .cp-form .cp-check input{width:17px;height:17px;flex:0 0 auto}
+#modal .catering-modal .cp-form .cp-checkboxes label{font-size:12px!important;font-weight:500!important}
+#modal .catering-modal .cp-form .cp-calc{margin-top:3px}
+#modal .catering-modal .cp-actions{justify-content:flex-end;gap:10px}
+@media(max-width:650px){#modal .catering-modal .cp-form{grid-template-columns:1fr;row-gap:12px}#modal .catering-modal .cp-form>label,#modal .catering-modal .cp-form>label.full{grid-column:1}}
