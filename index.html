@@ -1547,7 +1547,7 @@ const trackCovered=()=>TRACKS.filter(t=>trackCount(t.id)>0).length;
 
 function activityType(i){return i?.activityType==='practical'?'practical':i?.activityType==='theoretical'?'theoretical':(i?.t==='sport'||i?.t==='trips'?'practical':'theoretical')}
 function programBalance(){
- const types={sport:0,skills:0,culture:0,trips:0},modes={theoretical:0,practical:0};
+ const types={sport:0,skills:0,culture:0,trips:0},modes={theoretical:0,practical:0,recreational:0};
  const days=S.meta.days.map((_,j)=>({day:j+1,activities:0,types:{sport:0,skills:0,culture:0,trips:0},modes:{theoretical:0,practical:0},notes:[]}));
  S.selected.forEach(x=>{const i=ITEM(x.id);if(!i)return;
   const type=i.t==='sport'?'sport':i.t==='trips'?'trips':i.t==='values'?'culture':'skills';
@@ -2616,7 +2616,7 @@ function dayTimeline(day,opts){
           ? items.map(it=>{
               const t=TRACK(it.i.t);
               return `<div class="tlprog" style="--bc:${t.color}">
-                <span class="tlname">${esc(L({ar:it.i.ar,en:it.i.en}))}</span>
+                <span class="tlname">${esc(L({ar:it.i.ar,en:it.i.en}))}</span><button type="button" class="small noprint" data-p1="detail" data-id="${esc(it.x.id)}">${T('تفاصيل','Details')}</button>
                 <span class="tlmeta">${esc(L(t.short))} · ${it.x.pri==='core'?T('أساسي','core'):T('مساند','support')}</span>
                 ${o.why&&it.x.why?`<small class="tlwhy">${esc(it.x.why)}</small>`:''}
                 ${(it.x.sportChoice||it.i.sportChoice)?`<small class="tlwhy" style="display:block;font-weight:700">${esc(sportName(it.x.sportChoice||it.i.sportChoice))}</small>`:''}${(it.x.activityBreakdown||it.i.activityBreakdown)?`<small class="tlwhy" style="display:block">${esc(it.x.activityBreakdown||it.i.activityBreakdown)}</small>`:''}
