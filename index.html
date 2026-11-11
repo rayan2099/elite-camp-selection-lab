@@ -4332,8 +4332,29 @@ document.addEventListener('keydown',e=>{
   if(!S.seenGuide&&!location.hash){S.seenGuide=true;setTimeout(()=>{if(!$('#modal').open)guideModal()},400)}
   render();
 })();
+/* Guided program chooser and orange meal button */
+(function(){
+const escP=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+pickerModal=function(day){
+const pool=LIB.filter(i=>!isSel(i.id));
+openModal('<div class="guided-picker"><h2>إضافة برنامج · اليوم '+day+' · '+escP(DAYTEXT(day))+'</h2><p class="help">استعرض تفاصيل البرنامج وتفريعاته ومتطلباته، ثم اضغط تخصيص وإضافة لتحديد الأيام والتفريعات ونوع النشاط قبل الحفظ.</p><div class="guided-filters"><input id="pkQ" placeholder="ابحث باسم البرنامج أو التفريعات…"><select id="guidedTrack"><option value="all">جميع المسارات</option>'+TRACKS.map(t=>'<option value="'+escP(t.id)+'">'+escP(L(t))+'</option>').join('')+'</select></div><div id="pkList" class="guided-list">'+pool.map(i=>{
+ const name=L({ar:i.ar,en:i.en}),goal=L(i.goal)||'غير محدد',track=L(TRACK(i.t)),subs=(i.ph||[]).map(p=>L({ar:p[0],en:p[1]})).filter(Boolean),needs=(i.need||[]).map(n=>NEEDS[n]?L({ar:NEEDS[n][0],en:NEEDS[n][1]}):n);
+ return '<article class="guided-item" data-pk="'+escP(i.id)+'" data-track="'+escP(i.t)+'" data-keywords="'+escP([name,goal,track,...subs].join(' ').toLowerCase())+'"><div class="guided-row"><div class="guided-info"><b>'+escP(name)+'</b><div class="help">'+escP(track)+' · '+escP(L({ar:FIELDOF(i.t,i.f),en:FIELDEN(i.t,i.f)}))+'</div><p>'+escP(goal)+'</p><span class="pill line">'+subs.length+' تفريعات</span> <span class="pill line">'+needs.length+' متطلبات</span></div><div class="guided-actions"><button class="small" data-guided-details aria-expanded="false">عرض التفريعات</button><button class="small primary" data-pickhere="'+escP(i.id)+'">تخصيص وإضافة</button></div></div><div class="guided-details" hidden><b>التفريعات المتاحة</b>'+(subs.length?'<ul>'+subs.map(v=>'<li>'+escP(v)+'</li>').join('')+'</ul>':'<p>يمكن إضافة تفريعات يدوية.</p>')+'<b>متطلبات التنفيذ</b><p>'+escP(needs.join('، ')||'لا يوجد متطلب محدد')+'</p></div></article>';
+}).join('')+'</div><div id="guidedEmpty" class="empty" hidden>لا توجد نتائج مطابقة</div><div class="guided-footer"><span id="guidedCount">'+pool.length+' برنامج متاح</span><button data-act="close">إغلاق</button></div></div>');
+};
+function applyGuidedFilter(){
+const text=(document.getElementById('pkQ')?.value||'').trim().toLowerCase(),track=document.getElementById('guidedTrack')?.value||'all';let count=0;
+document.querySelectorAll('#pkList [data-pk]').forEach(row=>{const ok=(track==='all'||row.dataset.track===track)&&(row.dataset.keywords||'').includes(text);row.hidden=!ok;if(ok)count++});
+const label=document.getElementById('guidedCount');if(label)label.textContent=count+' برنامج ظاهر';const empty=document.getElementById('guidedEmpty');if(empty)empty.hidden=count>0;
+}
+document.addEventListener('input',e=>{if(e.target?.id==='pkQ')applyGuidedFilter()},true);
+document.addEventListener('change',e=>{if(e.target?.id==='guidedTrack')applyGuidedFilter()},true);
+document.addEventListener('click',e=>{const btn=e.target.closest('[data-guided-details]');if(!btn)return;e.preventDefault();e.stopImmediatePropagation();const panel=btn.closest('.guided-item')?.querySelector('.guided-details');if(!panel)return;panel.hidden=!panel.hidden;btn.setAttribute('aria-expanded',String(!panel.hidden));btn.textContent=panel.hidden?'عرض التفريعات':'إخفاء التفريعات'},true);
+const style=document.createElement('style');
+style.textContent='.p1meals [data-p1="new"]{background:var(--accent)!important;color:white!important;border:1px solid var(--accent)!important;font-weight:700}.guided-picker{text-align:right}.guided-picker h2{font-size:22px}.guided-filters{display:grid;grid-template-columns:1fr 200px;gap:10px;margin:15px 0}.guided-filters input,.guided-filters select{font:inherit;padding:11px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--fg)}.guided-list{display:grid;gap:10px;max-height:55vh;overflow:auto}.guided-item{border:1px solid var(--line);border-radius:10px;padding:13px;background:var(--surface)}.guided-item[hidden],.guided-details[hidden],#guidedEmpty[hidden]{display:none!important}.guided-row{display:flex;align-items:center;justify-content:space-between;gap:14px}.guided-info{flex:1}.guided-info b{font-size:15px}.guided-info p{font-size:12px;margin:6px 0}.guided-actions{display:flex;gap:7px;flex-wrap:wrap}.guided-details{padding:10px 0;border-top:1px dashed var(--line);margin-top:10px;font-size:12px}.guided-details ul{padding-inline-start:24px}.guided-footer{display:flex;justify-content:space-between;margin-top:14px}@media(max-width:650px){.guided-filters{grid-template-columns:1fr}.guided-row{flex-direction:column;align-items:stretch}}';
+document.head.append(style);
+})();
 </script>
 <script src="./phase-one.js" defer></script>
-<script src="./phase-one-picker.js" defer></script>
 </body>
 </html>
