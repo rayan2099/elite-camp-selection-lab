@@ -96,21 +96,36 @@ function auditView(){
  '<div class="cp-privacy">لإقفال التجهيز تشغيليًا يلزم اعتماد العدد الفعلي، خطة الوجبات لجميع الأيام، توقيت التوريد، مراجعة الحساسية، والوجبات البديلة. هذه أداة متابعة وليست اعتمادًا طبيًا أو موافقة تلقائية.</div>';
 }
 function mealModal(id){
- const d=db(),m=d.meals.find(x=>x.id===id),v=m||{day:1,type:'lunch',time:'13:00',menu:'',supplier:'',supervisor:'',servings:total(),unitPrice:0,specialPrice:0,specialMenu:'',specialIds:d.special.map(s=>s.id),confirmed:false};
+ const d=db(),m=d.meals.find(x=>x.id===id),v=m||{day:1,type:'lunch',time:'13:00',menu:'',supplier:'',supervisorId:'',serviceMode:'individual',peoplePerTray:5,servingNotes:'',servings:total(),unitPrice:0,specialPrice:0,specialMenu:'',specialIds:d.special.map(s=>s.id),confirmed:false};
  openModal('<h2>'+(m?'تعديل الوجبة':'تخطيط وجبة جديدة')+'</h2><p class="help">حدد محتوى الوجبة وحصصها، وخصص قوائم بديلة للحالات المسجلة.</p><div class="cp-form">'+
  '<label>اليوم<select id="cm-day">'+S.meta.days.map((day,i)=>'<option value="'+(i+1)+'" '+(v.day===i+1?'selected':'')+'>اليوم '+(i+1)+' · '+e(L(day))+'</option>').join('')+'</select></label>'+
  '<label>نوع الوجبة<select id="cm-type">'+types.map(([id,label])=>'<option value="'+id+'" '+(v.type===id?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+
  '<label>وقت التقديم<input type="time" id="cm-time" value="'+e(v.time)+'"></label>'+
- '<label>إجمالي الحصص<input type="number" min="0" id="cm-servings" value="'+n(v.servings)+'"></label>'+
+ '<label>إجمالي المستفيدين من الوجبة<input type="number" min="0" id="cm-servings" value="'+servings(v)+'"></label>'+
+ '<label>طريقة التقديم<select id="cm-mode"><option value="individual" '+((v.serviceMode||'individual')==='individual'?'selected':'')+'>وجبات فردية (وجبة لكل شخص)</option><option value="shared" '+(v.serviceMode==='shared'?'selected':'')+'>أطباق جماعية (طبق لمجموعة)</option></select></label>'+
+ '<label class="cm-shared">الطبق الجماعي يكفي كم شخصًا؟<input type="number" min="2" max="100" id="cm-group-size" value="'+Math.max(2,n(v.peoplePerTray)||5)+'"></label>'+
+ '<label class="cm-shared full">طريقة التوزيع والتجهيز<textarea id="cm-serving-notes" rows="2" placeholder="مثال: صحن رز ودجاج لكل 5 طلاب، يقدم على الطاولات حسب الفرق">'+e(v.servingNotes||'')+'</textarea></label>'+
  '<label class="full">القائمة الغذائية ومكوناتها<textarea id="cm-menu" rows="3">'+e(v.menu)+'</textarea></label>'+
  '<label>المورد / المطبخ<input id="cm-supplier" maxlength="120" value="'+e(v.supplier)+'"></label>'+
- '<label>المشرف المسؤول<input id="cm-supervisor" maxlength="120" value="'+e(v.supervisor)+'"></label>'+
- '<label>سعر الحصة العادية (ر.س)<input type="number" step=".01" min="0" id="cm-price" value="'+money(v.unitPrice)+'"></label>'+
+ '<label>المشرف المسؤول عن الاستلام والتوزيع<select id="cm-supervisor">'+supervisorOptions(v.supervisorId)+'</select><small class="help">الاختيار من فريق المعسكر؛ أضف الأسماء من تبويب الأعداد والمستفيدون.</small></label>'+
+ '<label>سعر الوجبة الفردية أو الطبق الجماعي (ر.س)<input type="number" step=".01" min="0" id="cm-price" value="'+money(v.unitPrice)+'"><small class="help">للتقديم الجماعي يُحسب سعر الطبق الواحد، وليس سعر الشخص.</small></label>'+
  '<label>سعر الحصة الخاصة (ر.س)<input type="number" step=".01" min="0" id="cm-special-price" value="'+money(v.specialPrice)+'"></label>'+
  '<div class="full"><b>الطلاب الذين يحتاجون وجبات مخصصة لهذه الوجبة</b><div class="cp-checkboxes">'+(d.special.length?d.special.map(s=>'<label><input type="checkbox" data-cm-special="'+e(s.id)+'" '+(v.specialIds?.includes(s.id)?'checked':'')+'>'+e(pname(s.id))+'</label>').join(''):'لا توجد حالات خاصة مسجلة حتى الآن.')+'</div></div>'+
  '<label class="full">محتوى الوجبة الخاصة وطريقة تجهيزها<textarea id="cm-special-menu" rows="2">'+e(v.specialMenu)+'</textarea></label>'+
+ '<div class="full cp-calc" id="cm-preview" aria-live="polite"></div>'+
  '<label class="full cp-check"><input type="checkbox" id="cm-confirmed" '+(v.confirmed?'checked':'')+'> تم تأكيد الكميات والمكونات والتوقيت مع المورد</label></div>'+
  '<div class="cp-actions"><button data-act="close">إلغاء</button><button class="primary" data-cp="save-meal" data-id="'+e(id||'')+'">حفظ الوجبة</button></div>');
+ updateMealPreview();
+}
+function updateMealPreview(){
+ const mode=$('#cm-mode')?.value;if(!mode)return;
+ const group=mode==='shared',field=$('#cm-group-size'),notes=$('#cm-serving-notes');
+ document.querySelectorAll('.cm-shared').forEach(el=>el.hidden=!group);
+ if(field)field.disabled=!group;if(notes)notes.disabled=!group;
+ const count=n($('#cm-servings')?.value),ids=$('[data-cm-special]:checked').map(el=>el.dataset.cmSpecial);
+ const special=ids.length,regular=Math.max(0,count-special),size=Math.max(2,n(field?.value)||5),units=group?Math.ceil(regular/size):regular;
+ const estimate=units*money($('#cm-price')?.value)+special*money($('#cm-special-price')?.value);
+ const preview=$('#cm-preview');if(preview)preview.innerHTML='<b>ملخص التجهيز</b><div class="cp-quant"><span>المستفيدون <b>'+count+'</b></span><span>'+(group?'الأطباق الجماعية':'الوجبات الفردية')+' <b>'+units+'</b></span><span>الوجبات الخاصة <b>'+special+'</b></span><span>التكلفة <b>'+fmt(estimate)+' ر.س</b></span></div>'+(group?'<p class="help">الحساب: '+regular+' مستفيدًا من الطعام العادي ÷ '+size+' أشخاص للطبق، مع التقريب للأعلى. الوجبات الخاصة تُحسب منفصلة.</p>':'');
 }
 function specialModal(id){
  const d=db(),v=d.special.find(s=>s.id===id)||{id:'',kind:'حساسية غذائية',allergens:[],notes:'',parentOK:false,kitchenOK:false};
@@ -130,14 +145,26 @@ function handle(b){
  if(a==='new-meal'||a==='edit-meal'){mealModal(id);return}
  if(a==='new-special'||a==='edit-special'){specialModal(id);return}
  if(a==='save-counts'){S.meta.students=n($('#cp-students').value);d.staff={supervisors:n($('#cp-supervisors').value),trainers:n($('#cp-trainers').value),other:n($('#cp-other').value)};commit();toast('حُفظت أعداد المستفيدين.');return}
+ if(a==='add-team'){
+  const name=$('#ct-name')?.value.trim(),role=$('#ct-role')?.value;
+  if(!name||name.length<2)return toast('أدخل اسم المسؤول.');
+  if(team().some(x=>x.name===name))return toast('هذا العضو مسجل مسبقًا.');
+  team().push({id:newId('staff-'),name,role});commit();toast('تمت إضافة عضو الفريق.');return;
+ }
+ if(a==='del-team'){
+  if(d.meals.some(m=>m.supervisorId===id))return toast('هذا العضو مسؤول عن وجبة. أسند الوجبات إلى مسؤول آخر أولًا.');
+  if(confirm('حذف العضو من فريق المعسكر؟')){d.team=team().filter(x=>x.id!==id);commit()}return;
+ }
  if(a==='add-person'){const name=$('#cp-person-name').value.trim();if(name.length<2)return toast('اكتب اسمًا واضحًا.');if(participants().some(p=>p.name===name))return toast('الاسم موجود مسبقًا.');d.people.push({id:newId('guest-'),name});commit();return}
  if(a==='del-person'){if(d.special.some(s=>s.id===id))return toast('احذف احتياج التغذية الخاص لهذا المشارك أولًا.');d.people=d.people.filter(p=>p.id!==id);commit();return}
  if(a==='del-meal'){if(confirm('حذف الوجبة من الخطة؟')){d.meals=d.meals.filter(m=>m.id!==id);commit()}return}
  if(a==='del-special'){if(confirm('حذف الحالة الغذائية؟')){d.special=d.special.filter(s=>s.id!==id);d.meals.forEach(m=>m.specialIds=(m.specialIds||[]).filter(x=>x!==id));commit()}return}
  if(a==='save-meal'){
-  const m=d.meals.find(x=>x.id===id),newValue={id:m?.id||newId('meal-'),day:n($('#cm-day').value),type:$('#cm-type').value,time:$('#cm-time').value,menu:$('#cm-menu').value.trim(),supplier:$('#cm-supplier').value.trim(),supervisor:$('#cm-supervisor').value.trim(),servings:n($('#cm-servings').value),unitPrice:money($('#cm-price').value),specialPrice:money($('#cm-special-price').value),specialMenu:$('#cm-special-menu').value.trim(),specialIds:$$('[data-cm-special]:checked').map(x=>x.dataset.cmSpecial),confirmed:$('#cm-confirmed').checked};
+  const m=d.meals.find(x=>x.id===id),newValue={id:m?.id||newId('meal-'),day:n($('#cm-day').value),type:$('#cm-type').value,time:$('#cm-time').value,menu:$('#cm-menu').value.trim(),supplier:$('#cm-supplier').value.trim(),supervisorId:$('#cm-supervisor').value,serviceMode:$('#cm-mode').value,peoplePerTray:n($('#cm-group-size').value),servingNotes:$('#cm-serving-notes').value.trim(),servings:n($('#cm-servings').value),unitPrice:money($('#cm-price').value),specialPrice:money($('#cm-special-price').value),specialMenu:$('#cm-special-menu').value.trim(),specialIds:$$('[data-cm-special]:checked').map(x=>x.dataset.cmSpecial),confirmed:$('#cm-confirmed').checked};
   if(!newValue.day||!newValue.menu||!newValue.time)return toast('اليوم وقائمة الطعام والتوقيت مطلوبة.');
-  if(newValue.specialIds.length>newValue.servings)return toast('عدد الحصص أقل من الحالات الخاصة.');
+  if(newValue.specialIds.length>newValue.servings)return toast('عدد المستفيدين أقل من الحالات الخاصة.');
+  if(newValue.supervisorId&&!supervisorName(newValue.supervisorId))return toast('اختر مشرفًا مسجلًا في فريق المعسكر.');
+  if(newValue.serviceMode==='shared'&&(newValue.peoplePerTray<2||!newValue.servingNotes))return toast('حدد عدد الأشخاص لكل طبق وطريقة التقديم الجماعي.');
   if(m)Object.assign(m,newValue);else d.meals.push(newValue);closeModal();commit();return;
  }
  if(a==='save-special'){
@@ -153,6 +180,9 @@ function handle(b){
 const st=document.createElement('style');
 st.textContent='.cp-privacy{background:#fff4e8;color:#734414;border:1px solid #f2d5b9;border-radius:9px;padding:12px 15px;font-size:12.5px;margin:15px 0}.cp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.cp-stat{padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;gap:6px}.cp-stat strong{font-size:26px}.cp-stat small{color:var(--muted)}.cp-tabs{display:flex;flex-wrap:wrap;gap:9px;margin:18px 0;border-bottom:1px solid var(--line);padding-bottom:13px}.cp-tabs button{font:inherit;padding:10px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);cursor:pointer}.cp-tabs button.active{background:var(--accent);color:white}.cp-head h2{font-size:19px}.cp-actions{display:flex;justify-content:flex-end;gap:9px;margin:12px 0}.cp-list{display:grid;gap:12px}.cp-record{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:17px}.cp-record h3{margin:5px 0}.cp-between{display:flex;justify-content:space-between;gap:10px}.cp-accent{color:var(--accent);font-size:12px;font-weight:700}.cp-quant{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:15px 0}.cp-quant span{background:var(--soft);border-radius:7px;padding:10px;font-size:12px}.cp-highlight{background:var(--accentsoft);border-radius:7px;padding:10px;font-size:12px}.cp-cols{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}.cp-cols .card{display:flex;flex-direction:column;gap:10px}.cp-cols label,.cp-form label{display:grid;gap:6px;font-size:13px}.cp-cols input,.cp-form input,.cp-form select,.cp-form textarea{font:inherit;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);padding:8px;width:100%}.cp-names{max-height:240px;overflow:auto;display:grid;gap:6px}.cp-names>div{border-bottom:1px solid var(--line);padding:6px}.cp-form{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:15px 0}.cp-form .full{grid-column:1/-1}.cp-checkboxes{display:flex;flex-wrap:wrap;gap:11px;margin-top:9px}.cp-checkboxes label,.cp-check{display:flex!important;align-items:center;gap:7px}.cp-checkboxes input,.cp-check input{width:auto}@media(max-width:800px){.cp-stats,.cp-cols{grid-template-columns:repeat(2,1fr)}}@media(max-width:540px){.cp-stats,.cp-cols,.cp-form{grid-template-columns:1fr}.cp-quant{grid-template-columns:repeat(2,1fr)}.cp-between{flex-direction:column}}';
 document.head.append(st);
+const extra=document.createElement('style');extra.textContent='.cp-team{margin-top:14px;display:grid;gap:10px}.cp-team label{display:grid;gap:5px}.cp-team select{font:inherit;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}.cp-team-list{display:grid;gap:7px}.cp-team-item{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:5px}.cp-calc{background:var(--accentsoft);padding:12px;border-radius:9px}.cm-shared[hidden]{display:none!important}';document.head.append(extra);
+document.addEventListener('input',ev=>{if(ev.target.closest('#modal')&&['cm-servings','cm-group-size','cm-price','cm-special-price'].includes(ev.target.id))updateMealPreview()},true);
+document.addEventListener('change',ev=>{if(ev.target.closest('#modal')&&(ev.target.id==='cm-mode'||ev.target.hasAttribute('data-cm-special')))updateMealPreview()},true);
 NAV[1][1].push(['meals','إدارة الوجبات والتغذية','Meals & catering']);
 PAGE_TITLES.meals=['إدارة الوجبات والتغذية','Meal preparation'];
 PAGES.meals=pageMeals;
