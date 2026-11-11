@@ -228,11 +228,16 @@ function mealModal(id){
  '<label>موعد وصول الطعام<input id="cm-delivery" type="time" value="'+e(v.deliveryTime||'')+'"></label>'+
  '<label>موقع التقديم<input id="cm-location" maxlength="120" placeholder="مثال: صالة الطعام" value="'+e(v.serviceLocation||'')+'"></label>'+
  '<label>تجهيزات التقديم<textarea id="cm-equipment" rows="2" placeholder="صحون، أدوات تقديم، طاولات…">'+e(v.equipment||'')+'</textarea></label>'+
- '<label>مشرف الاستلام والتوزيع<select id="cm-supervisor">'+supervisorOptions(v.supervisorId)+'</select><small class="help">من قائمة فريق المعسكر</small></label>'+
- '<label>سعر الوجبة / الطبق (ر.س)<input type="number" step=".01" min="0" id="cm-price" value="'+money(v.unitPrice)+'"><small class="help" id="cm-price-hint">السعر للوحدة، وليس للشخص في الأطباق الجماعية</small></label>'+
- '<label>سعر الوجبة الخاصة (ر.س)<input type="number" step=".01" min="0" id="cm-special-price" value="'+money(v.specialPrice)+'"></label>'+
- '<div class="full catering-modal-step">03 · الوجبات الخاصة والمراجعة</div>'+ '<div class="full"><b>الطلاب الذين يحتاجون وجبات مخصصة لهذه الوجبة</b><div class="cp-checkboxes">'+(d.special.length?d.special.map(s=>'<label><input type="checkbox" data-cm-special="'+e(s.id)+'" '+(v.specialIds?.includes(s.id)?'checked':'')+'>'+e(pname(s.id))+'</label>').join(''):'لا توجد حالات خاصة مسجلة حتى الآن.')+'</div></div>'+
- '<label class="full">تفاصيل الوجبة البديلة<textarea id="cm-special-menu" rows="2">'+e(v.specialMenu)+'</textarea></label>'+
+ '<div class="full cm-operational-panel"><div class="cm-panel-heading"><div><b>المسؤول والتكلفة</b><span>حدد المشرف والسعر، ثم راجع الإجمالي أدناه</span></div></div>'+
+ '<div class="cm-ops-grid"><label class="cm-compact-field"><span>مشرف الاستلام والتوزيع</span><select id="cm-supervisor">'+supervisorOptions(v.supervisorId)+'</select></label>'+
+ '<label class="cm-compact-field"><span id="cm-price-label">سعر الوجبة / الطبق <small>ر.س</small></span><input type="number" step=".01" min="0" id="cm-price" value="'+money(v.unitPrice)+'"></label></div></div>'+
+ '<div class="full cm-special-panel"><div class="cm-panel-heading"><div><b>الوجبات الخاصة</b><span>حالات التغذية الخاصة المسجلة لهذا المعسكر</span></div><span class="cm-panel-count">'+d.special.length+' حالات</span></div>'+
+ (d.special.length?
+ '<div class="cm-special-select"><div class="cm-special-list-title">حدد الطلاب الذين يحتاجون وجبة بديلة</div><div class="cp-checkboxes cm-special-choices">'+d.special.map(s=>'<label><input type="checkbox" data-cm-special="'+e(s.id)+'" '+(v.specialIds?.includes(s.id)?'checked':'')+'>'+e(pname(s.id))+'</label>').join('')+'</div></div>':
+ '<div class="cm-special-empty"><span class="cm-special-empty-symbol">✓</span><div><b>لا توجد حالات خاصة مسجلة</b><small>يمكن إضافة الحالات من تبويب «التغذية الخاصة» عند الحاجة.</small></div></div>')+
+ '<div id="cm-special-detail" class="cm-special-detail" '+(v.specialIds?.length&&d.special.length?'':'hidden')+'><div class="cm-ops-grid"><label class="cm-compact-field"><span>سعر الوجبة الخاصة <small>ر.س</small></span><input type="number" step=".01" min="0" id="cm-special-price" value="'+money(v.specialPrice)+'"></label>'+
+ '<label class="cm-compact-field cm-special-menu"><span>تفاصيل الوجبة البديلة</span><textarea id="cm-special-menu" rows="2" placeholder="مكونات الوجبة البديلة وطريقة تجهيزها">'+e(v.specialMenu)+'</textarea></label></div></div>'+
+ '</div>'+
  '<div class="full cp-calc" id="cm-preview" aria-live="polite"></div>'+
  '<label class="full cp-check"><input type="checkbox" id="cm-confirmed" '+(v.confirmed?'checked':'')+'> تم تأكيد الكميات والمكونات والتوقيت مع المورد</label></div>'+
  '<div class="cp-actions"><button data-act="close">إلغاء</button><button class="primary" data-cp="save-meal" data-id="'+e(id||'')+'">حفظ الوجبة</button></div></div>');
@@ -260,6 +265,9 @@ function updateMealPreview(){
    const label=el.closest('label');if(label)label.classList.toggle('cm-special-not-eligible',!permitted);
  });
  const ids=[...document.querySelectorAll('[data-cm-special]:checked')].map(el=>el.dataset.cmSpecial);
+ const specialDetail=$('#cm-special-detail');if(specialDetail)specialDetail.hidden=ids.length===0;
+ const priceLabel=$('#cm-price-label');if(priceLabel)priceLabel.innerHTML=group?'سعر الطبق الجماعي <small>ر.س</small>':'سعر الوجبة الفردية <small>ر.س</small>';
+
  const special=ids.length,regular=Math.max(0,count-special),size=Math.max(2,n(field?.value)||5),units=group?Math.ceil(regular/size):regular;
  const estimate=units*money($('#cm-price')?.value)+special*money($('#cm-special-price')?.value);
  const preview=$('#cm-preview');if(preview)preview.innerHTML='<b>ملخص التجهيز</b><div class="cp-quant"><span>المستفيدون <b>'+count+'</b></span><span>'+(group?'الأطباق الجماعية':'الوجبات الفردية')+' <b>'+units+'</b></span><span>الوجبات الخاصة <b>'+special+'</b></span><span>التكلفة <b>'+fmt(estimate)+' ر.س</b></span></div>'+(group?'<p class="help">الحساب: '+regular+' مستفيدًا من الطعام العادي ÷ '+size+' أشخاص للطبق، مع التقريب للأعلى. الوجبات الخاصة تُحسب منفصلة.</p>':'');
