@@ -140,8 +140,8 @@ function auditView(){
  '<div class="catering-insight"><span>!</span><div><b>قاعدة الاعتماد:</b> هذه لوحة متابعة، وليست شهادة سلامة غذائية. تأكيد التوريد والأعداد والحساسيات والتجهيز في الميدان مسؤولية الفريق المختص ومقدم الطعام.</div></div>';
 }
 function mealModal(id){
- const d=db(),m=d.meals.find(x=>x.id===id),v=m||{day:1,type:'lunch',time:'13:00',menu:'',supplier:'',supervisorId:'',serviceMode:'individual',peoplePerTray:5,servingNotes:'',deliveryTime:'',serviceLocation:'',equipment:'',servings:total(),unitPrice:0,specialPrice:0,specialMenu:'',specialIds:d.special.map(s=>s.id),confirmed:false};
- openModal('<h2>'+(m?'تعديل الوجبة':'تخطيط وجبة جديدة')+'</h2><p class="help">حدد محتوى الوجبة وحصصها، وخصص قوائم بديلة للحالات المسجلة.</p><div class="cp-form">'+
+ const d=db(),m=d.meals.find(x=>x.id===id),v=m||{day:dayChoice==='all'?1:Number(dayChoice),type:'lunch',time:'13:00',menu:'',supplier:'',supervisorId:'',serviceMode:'individual',peoplePerTray:5,servingNotes:'',deliveryTime:'',serviceLocation:'',equipment:'',servings:total(),unitPrice:0,specialPrice:0,specialMenu:'',specialIds:d.special.map(s=>s.id),confirmed:false};
+ openModal('<div class="catering-modal"><div class="catering-modal-head"><div class="catering-kicker">التجهيز التشغيلي</div><h2>'+(m?'تعديل الوجبة':'إضافة وجبة جديدة')+'</h2><p>حدد يوم الوجبة وطريقة تقديمها، ثم كمياتها والمورد والمشرف.</p></div><div class="catering-modal-step">01 · توقيت الوجبة وطريقة التقديم</div><div class="cp-form">'+
  '<label>اليوم<select id="cm-day">'+S.meta.days.map((day,i)=>'<option value="'+(i+1)+'" '+(v.day===i+1?'selected':'')+'>اليوم '+(i+1)+' · '+e(L(day))+'</option>').join('')+'</select></label>'+
  '<label>نوع الوجبة<select id="cm-type">'+types.map(([id,label])=>'<option value="'+id+'" '+(v.type===id?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+
  '<label>وقت التقديم<input type="time" id="cm-time" value="'+e(v.time)+'"></label>'+
@@ -149,7 +149,7 @@ function mealModal(id){
  '<label>طريقة التقديم<select id="cm-mode"><option value="individual" '+((v.serviceMode||'individual')==='individual'?'selected':'')+'>وجبات فردية (وجبة لكل شخص)</option><option value="shared" '+(v.serviceMode==='shared'?'selected':'')+'>أطباق جماعية (طبق لمجموعة)</option></select></label>'+
  '<label class="cm-shared">الطبق الجماعي يكفي كم شخصًا؟<input type="number" min="2" max="100" id="cm-group-size" value="'+Math.max(2,n(v.peoplePerTray)||5)+'"></label>'+
  '<label class="cm-shared full">طريقة التوزيع والتجهيز<textarea id="cm-serving-notes" rows="2" placeholder="مثال: صحن رز ودجاج لكل 5 طلاب، يقدم على الطاولات حسب الفرق">'+e(v.servingNotes||'')+'</textarea></label>'+
- '<label class="full">القائمة الغذائية ومكوناتها<textarea id="cm-menu" rows="3">'+e(v.menu)+'</textarea></label>'+
+ '<div class="full catering-modal-step">02 · قائمة الطعام والتوريد</div>'+ '<label class="full">القائمة الغذائية ومكوناتها<textarea id="cm-menu" rows="3">'+e(v.menu)+'</textarea></label>'+
  '<label>المورد / المطبخ<input id="cm-supplier" maxlength="120" value="'+e(v.supplier)+'"></label>'+
  '<label>موعد وصول الطعام<input id="cm-delivery" type="time" value="'+e(v.deliveryTime||'')+'"></label>'+
  '<label>موقع تقديم الطعام<input id="cm-location" maxlength="120" placeholder="صالة الطعام، الاستراحة، موقع الرحلة…" value="'+e(v.serviceLocation||'')+'"></label>'+
@@ -157,11 +157,11 @@ function mealModal(id){
  '<label>المشرف المسؤول عن الاستلام والتوزيع<select id="cm-supervisor">'+supervisorOptions(v.supervisorId)+'</select><small class="help">الاختيار من فريق المعسكر؛ أضف الأسماء من تبويب الأعداد والمستفيدون.</small></label>'+
  '<label>سعر الوجبة الفردية أو الطبق الجماعي (ر.س)<input type="number" step=".01" min="0" id="cm-price" value="'+money(v.unitPrice)+'"><small class="help">للتقديم الجماعي يُحسب سعر الطبق الواحد، وليس سعر الشخص.</small></label>'+
  '<label>سعر الحصة الخاصة (ر.س)<input type="number" step=".01" min="0" id="cm-special-price" value="'+money(v.specialPrice)+'"></label>'+
- '<div class="full"><b>الطلاب الذين يحتاجون وجبات مخصصة لهذه الوجبة</b><div class="cp-checkboxes">'+(d.special.length?d.special.map(s=>'<label><input type="checkbox" data-cm-special="'+e(s.id)+'" '+(v.specialIds?.includes(s.id)?'checked':'')+'>'+e(pname(s.id))+'</label>').join(''):'لا توجد حالات خاصة مسجلة حتى الآن.')+'</div></div>'+
+ '<div class="full catering-modal-step">03 · الوجبات الخاصة والتكلفة</div>'+ '<div class="full"><b>الطلاب الذين يحتاجون وجبات مخصصة لهذه الوجبة</b><div class="cp-checkboxes">'+(d.special.length?d.special.map(s=>'<label><input type="checkbox" data-cm-special="'+e(s.id)+'" '+(v.specialIds?.includes(s.id)?'checked':'')+'>'+e(pname(s.id))+'</label>').join(''):'لا توجد حالات خاصة مسجلة حتى الآن.')+'</div></div>'+
  '<label class="full">محتوى الوجبة الخاصة وطريقة تجهيزها<textarea id="cm-special-menu" rows="2">'+e(v.specialMenu)+'</textarea></label>'+
  '<div class="full cp-calc" id="cm-preview" aria-live="polite"></div>'+
  '<label class="full cp-check"><input type="checkbox" id="cm-confirmed" '+(v.confirmed?'checked':'')+'> تم تأكيد الكميات والمكونات والتوقيت مع المورد</label></div>'+
- '<div class="cp-actions"><button data-act="close">إلغاء</button><button class="primary" data-cp="save-meal" data-id="'+e(id||'')+'">حفظ الوجبة</button></div>');
+ '<div class="cp-actions"><button data-act="close">إلغاء</button><button class="primary" data-cp="save-meal" data-id="'+e(id||'')+'">حفظ الوجبة</button></div></div>');
  updateMealPreview();
 }
 function updateMealPreview(){
@@ -177,13 +177,13 @@ function updateMealPreview(){
 function specialModal(id){
  const d=db(),v=d.special.find(s=>s.id===id)||{id:'',kind:'حساسية غذائية',allergens:[],notes:'',parentOK:false,kitchenOK:false};
  if(!participants().length)return toast('أضف مشاركين أولًا.');
- openModal('<h2>'+(id?'تعديل الحالة الغذائية':'تحديد مشارك بتغذية خاصة')+'</h2><div class="cp-form"><label>الطالب / المشارك<select id="cs-id" '+(id?'disabled':'')+'><option value="">اختر المشارك</option>'+participants().map(p=>'<option value="'+e(p.id)+'" '+(p.id===v.id?'selected':'')+'>'+e(p.name)+(p.demo?' (تجريبي)':'')+'</option>').join('')+'</select></label>'+
+ openModal('<div class="catering-modal"><div class="catering-modal-head"><div class="catering-kicker">تجهيز غذائي خاص</div><h2>'+(id?'تعديل الحالة الغذائية':'تحديد مشارك بتغذية خاصة')+'</h2><p>وثّق الاحتياج الغذائي مع ولي الأمر والمطبخ قبل إعداد الوجبات.</p></div><div class="cp-form"><label>الطالب / المشارك<select id="cs-id" '+(id?'disabled':'')+'><option value="">اختر المشارك</option>'+participants().map(p=>'<option value="'+e(p.id)+'" '+(p.id===v.id?'selected':'')+'>'+e(p.name)+(p.demo?' (تجريبي)':'')+'</option>').join('')+'</select></label>'+
  '<label>نوع الاحتياج<select id="cs-kind">'+['حساسية غذائية','عدم تحمل غذائي','نظام غذائي خاص','حسب توجيه طبي'].map(t=>'<option '+(t===v.kind?'selected':'')+'>'+t+'</option>').join('')+'</select></label>'+
  '<div class="full"><b>المكونات التي يجب تجنبها</b><div class="cp-checkboxes">'+needs.map(t=>'<label><input type="checkbox" data-cs-allergen="'+e(t)+'" '+(v.allergens.includes(t)?'checked':'')+'>'+t+'</label>').join('')+'</div></div>'+
  '<label class="full">تعليمات معتمدة من ولي الأمر<textarea id="cs-notes" rows="3">'+e(v.notes)+'</textarea></label>'+
  '<label class="full cp-check"><input type="checkbox" id="cs-parent" '+(v.parentOK?'checked':'')+'> تم التحقق مع ولي الأمر</label>'+
  '<label class="full cp-check"><input type="checkbox" id="cs-kitchen" '+(v.kitchenOK?'checked':'')+'> أكد المطبخ القدرة على تجهيز الوجبة دون مكونات محظورة وتجنب التلوث التبادلي</label></div>'+
- '<div class="cp-actions"><button data-act="close">إلغاء</button><button class="primary" data-cp="save-special" data-id="'+e(id||'')+'">حفظ الحالة</button></div>');
+ '<div class="cp-actions"><button data-act="close">إلغاء</button><button class="primary" data-cp="save-special" data-id="'+e(id||'')+'">حفظ الحالة</button></div></div>');
 }
 function commit(){save();render({preserveScroll:true})}
 function handle(b){
