@@ -215,3 +215,32 @@ body:has(.catering-workspace) #app{max-width:1420px}
 #modal .catering-modal .cp-form .cp-calc{margin-top:3px}
 #modal .catering-modal .cp-actions{justify-content:flex-end;gap:10px}
 @media(max-width:650px){#modal .catering-modal .cp-form{grid-template-columns:1fr;row-gap:12px}#modal .catering-modal .cp-form>label,#modal .catering-modal .cp-form>label.full{grid-column:1}}
+
+
+/* Compact operational & dietary panels — supersedes legacy form-wide type rules */
+#modal .catering-modal .cp-form .cm-operational-panel,
+#modal .catering-modal .cp-form .cm-special-panel{grid-column:1/-1;display:block;background:#fff;border:1px solid #e0e8f0;border-radius:13px;padding:17px 18px;margin:7px 0 0;min-width:0}
+#modal .catering-modal .cp-form .cm-special-panel{background:#fcfdfe;margin-top:4px}
+#modal .catering-modal .cm-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+#modal .catering-modal .cm-panel-heading b{display:block!important;color:#1e3650!important;font-size:14px!important;line-height:1.4!important;font-weight:750!important}
+#modal .catering-modal .cm-panel-heading span:not(.cm-panel-count){display:block;color:#8594a4!important;font-size:11px!important;font-weight:400!important;line-height:1.5;margin-top:3px}
+#modal .catering-modal .cm-panel-count{display:inline-flex;white-space:nowrap;color:#657d92;background:#edf2f6;border-radius:8px;padding:5px 10px;font-size:11px!important;font-weight:700}
+#modal .catering-modal .cm-ops-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+#modal .catering-modal .cm-compact-field{display:flex!important;flex-direction:column!important;gap:7px!important;min-width:0;font-weight:500!important;font-size:12px!important;color:#4d6278!important;line-height:1.5!important}
+#modal .catering-modal .cm-compact-field>span{font-size:12px!important;color:#4c627a!important;font-weight:600!important;line-height:1.5!important}
+#modal .catering-modal .cm-compact-field small{font-size:10px!important;color:#8897a7!important;font-weight:400!important}
+#modal .catering-modal .cm-compact-field>select,
+#modal .catering-modal .cm-compact-field>input{min-height:42px!important;height:42px!important;width:100%!important;border:1px solid #dce6ef!important;border-radius:8px!important;padding:9px 11px!important;font:500 13px/1.45 Tahoma,Arial,sans-serif!important;color:#223b55!important;background:#fff!important;box-shadow:none!important}
+#modal .catering-modal .cm-compact-field>textarea{width:100%!important;min-height:65px!important;height:65px!important;padding:10px 12px!important;border:1px solid #dce6ef!important;border-radius:8px!important;font:400 12px/1.5 Tahoma,Arial,sans-serif!important;resize:vertical!important}
+#modal .catering-modal .cm-special-empty{display:flex;align-items:center;gap:11px;background:#f5f8fa;border:1px solid #edf1f5;border-radius:10px;padding:13px}
+#modal .catering-modal .cm-special-empty-symbol{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#e8f3ec;color:#35845d;font-size:15px;font-weight:700;flex:0 0 auto}
+#modal .catering-modal .cm-special-empty b{font-size:12px!important;font-weight:650!important;color:#304a63!important;line-height:1.5!important;display:block}
+#modal .catering-modal .cm-special-empty small{font-size:11px!important;line-height:1.5!important;color:#7d91a4!important;font-weight:400!important;display:block;margin-top:3px}
+#modal .catering-modal .cm-special-list-title{font-size:12px;font-weight:650;color:#455d76;margin-bottom:10px}
+#modal .catering-modal .cm-special-choices{display:flex;gap:8px;flex-wrap:wrap;margin:0}
+#modal .catering-modal .cm-special-choices label{font-size:11px!important;font-weight:500!important;background:#f7fafc;border:1px solid #e3eaf0;border-radius:8px;padding:8px 10px!important;display:flex;align-items:center;gap:6px}
+#modal .catering-modal .cm-special-detail{border-top:1px solid #e8eef3;padding-top:13px;margin-top:14px}
+#modal .catering-modal .cm-special-detail[hidden]{display:none!important}
+#modal .catering-modal .cm-special-detail .cm-ops-grid{grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr)}
+#modal .catering-modal #cm-preview{margin-top:9px}
+@media(max-width:650px){#modal .catering-modal .cm-ops-grid,#modal .catering-modal .cm-special-detail .cm-ops-grid{grid-template-columns:1fr}#modal .catering-modal .cp-form .cm-operational-panel,#modal .catering-modal .cp-form .cm-special-panel{padding:13px 12px}}
