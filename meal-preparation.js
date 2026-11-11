@@ -146,10 +146,12 @@ function auditView(){
 function printMealOptions(){
  const numDays=S.meta.days.length;
  const defaultDay=dayChoice==='all'?'all':String(dayChoice);
+ const supplierNames=[...new Set(db().meals.map(m=>String(m.supplier||'').trim()).filter(Boolean))].sort();
  openModal('<div class="catering-print-options"><h2>تجهيز طلب المطعم</h2><p class="help">اختر الأيام، ثم اطبع أمر توريد مفصل يتضمن الكميات، والمواعيد، ومعلومات التسليم. يمكنك أيضًا اختيار التقرير المالي الداخلي.</p>'+
  '<label class="catering-print-label">نطاق التقرير<select id="cp-print-scope"><option value="all" '+(defaultDay==='all'?'selected':'')+'>جميع أيام المعسكر ('+numDays+' أيام)</option>'+
  S.meta.days.map((day,i)=>'<option value="'+(i+1)+'" '+(defaultDay===String(i+1)?'selected':'')+'>اليوم '+(i+1)+' · '+e(L(day))+'</option>').join('')+'</select></label>'+
  '<label class="catering-print-label">نوع التقرير<select id="cp-print-kind"><option value="restaurant">طلب توريد للمطعم (مفصل)</option><option value="internal">ملخص إداري داخلي</option></select></label>'+
+ '<label class="catering-print-label" id="cp-print-supplier-wrap">المورد المطلوب إرسال التقرير إليه<select id="cp-print-supplier-filter"><option value="all">كل الموردين (تقرير شامل)</option>'+supplierNames.map(v=>'<option value="'+e(v)+'" '+(supplierNames.length===1?'selected':'')+'>'+e(v)+'</option>').join('')+'</select></label>'+
  '<div class="catering-print-fields"><label>اسم المطعم / المورد<input id="cp-print-supplier" maxlength="120" placeholder="يُترك فارغًا لاستخدام المورد المسجل لكل وجبة"></label><label>هاتف التواصل مع المطعم<input id="cp-print-contact" maxlength="70" placeholder="اختياري"></label><label class="full">تعليمات عامة للمورد<textarea id="cp-print-instructions" rows="2" maxlength="600" placeholder="مثل تعليمات التغليف، تقسيم الطلبات، والتواصل قبل الوصول"></textarea></label></div>'+
  '<div class="catering-print-preview" id="cp-print-preview" aria-live="polite"></div>'+
  '<div class="catering-print-note">تقرير المطعم يتضمن تفاصيل كل وجبة والتوريد والتجهيز، مع إظهار العدد والتعليمات البديلة فقط دون أسماء الطلاب أو بياناتهم الصحية. يُرجى التأكد مع المطبخ من سلامة البدائل قبل التنفيذ.</div>'+
@@ -162,7 +164,8 @@ function mealsForPrint(scope){
 }
 function refreshPrintPreview(){
  const target=$('#cp-print-preview');if(!target)return;
- const scope=$('#cp-print-scope')?.value||'all',list=mealsForPrint(scope);
+ const scope=$('#cp-print-scope')?.value||'all',filter=$('#cp-print-supplier-filter')?.value||'all',kind=$('#cp-print-kind')?.value||'restaurant';
+ const list=mealsForPrint(scope).filter(m=>kind==='internal'||filter==='all'||String(m.supplier||'').trim()===filter);
  const days=scope==='all'?S.meta.days.length:1;
  target.innerHTML='<div><b>'+list.length+'</b><span>وجبة مسجلة</span></div>'+
  '<div><b>'+days+'</b><span>'+(scope==='all'?'أيام معسكر':'يوم محدد')+'</span></div>'+
@@ -201,7 +204,7 @@ function printableReport(scope){
 function restaurantOrderReport(scope, options={}){
  const days=scope==='all'?S.meta.days.map((d,i)=>({day:i+1,title:L(d)})):
   [{day:Number(scope),title:L(S.meta.days[Number(scope)-1]||{ar:'اليوم'})}];
- const meals=mealsForPrint(scope), sum=(list,fn)=>list.reduce((acc,m)=>acc+fn(m),0);
+ const meals=mealsForPrint(scope).filter(m=>!options.supplierFilter||options.supplierFilter==='all'||String(m.supplier||'').trim()===options.supplierFilter), sum=(list,fn)=>list.reduce((acc,m)=>acc+fn(m),0);
  const date=new Date().toLocaleString('ar-SA-u-ca-gregory-nu-latn',{dateStyle:'medium',timeStyle:'short'});
  const names= [...new Set(meals.map(m=>m.supplier).filter(Boolean))];
  const supplier=options.supplier||((names.length===1)?names[0]:'وفق المورد المحدد بكل وجبة');
@@ -248,11 +251,17 @@ function printMealReport(){
  let printable=document.getElementById('catering-print-report');
  if(!printable){printable=document.createElement('div');printable.id='catering-print-report';document.body.appendChild(printable)}
  const kind=$('#cp-print-kind')?.value||'restaurant';
- printable.innerHTML=kind==='restaurant'?restaurantOrderReport(scope,{supplier:$('#cp-print-supplier')?.value.trim(),contact:$('#cp-print-contact')?.value.trim(),instructions:$('#cp-print-instructions')?.value.trim()}):printableReport(scope);
+ printable.innerHTML=kind==='restaurant'?restaurantOrderReport(scope,{supplierFilter:$('#cp-print-supplier-filter')?.value||'all',supplier:$('#cp-print-supplier')?.value.trim(),contact:$('#cp-print-contact')?.value.trim(),instructions:$('#cp-print-instructions')?.value.trim()}):printableReport(scope);
  closeModal();
  window.print();
 }
-document.addEventListener('change',event=>{if(event.target?.id==='cp-print-scope')refreshPrintPreview()},true);
+document.addEventListener('change',event=>{
+ if(['cp-print-scope','cp-print-kind','cp-print-supplier-filter'].includes(event.target?.id)){
+   const restaurant=($('#cp-print-kind')?.value||'restaurant')==='restaurant';
+   const scopeField=$('#cp-print-supplier-wrap');if(scopeField)scopeField.hidden=!restaurant;
+   refreshPrintPreview();
+ }
+},true);
 
 function mealModal(id){
  const d=db(),m=d.meals.find(x=>x.id===id),v=m||{audienceMode:'all',audienceIds:[],day:dayChoice==='all'?1:Number(dayChoice),type:'lunch',time:'13:00',menu:'',supplier:'',supervisorId:'',serviceMode:'individual',peoplePerTray:5,servingNotes:'',deliveryTime:'',serviceLocation:'',equipment:'',servings:total(),unitPrice:0,specialPrice:0,specialMenu:'',specialIds:d.special.map(s=>s.id),confirmed:false};
