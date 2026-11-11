@@ -1,0 +1,106 @@
+
+/* Elite Camp Catering Command Center — 2026 UI system */
+body:has(.catering-workspace) #app{max-width:1420px}
+.catering-workspace{--c-navy:#132941;--c-ink:#1b3047;--c-muted:#63768b;--c-border:#e4eaf0;--c-accent:#ef7a35;--c-mist:#f5f8fb;--c-soft:#fff7f1;color:var(--c-ink);direction:rtl;min-width:0}
+.catering-workspace *{box-sizing:border-box}
+.catering-workspace .cp-privacy{border-radius:12px;background:#fff9f2;border:1px solid #efdfcc;color:#79552e;padding:12px 16px;margin:15px 0;font-size:12px;line-height:1.9}
+.catering-hero{display:flex;justify-content:space-between;align-items:center;gap:24px;background:linear-gradient(117deg,#10253e 0%,#1e3d5c 100%);color:#fff;border-radius:22px;padding:27px 32px;margin-bottom:18px;position:relative;overflow:hidden}
+.catering-hero:after{content:"";position:absolute;width:280px;height:280px;border:40px solid rgba(255,255,255,.035);border-radius:50%;left:-90px;top:-140px;pointer-events:none}
+.catering-kicker{font-size:11px;color:#f8ba94;letter-spacing:.04em;font-weight:800}
+.catering-hero h1{font-size:clamp(22px,2.5vw,31px);font-weight:800;color:white;margin:7px 0}
+.catering-hero p{margin:0;color:#d5e0eb;font-size:13px;max-width:630px;line-height:1.85}
+.catering-hero-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;position:relative;z-index:1}
+.catering-workspace .catering-hero-actions .primary{background:#ee7b39!important;color:#172a3b!important;border-color:#ee7b39!important;padding:11px 17px;border-radius:10px;font-weight:800}
+.catering-hero-actions .catering-secondary{color:white;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.22);padding:11px 16px;border-radius:10px}
+.catering-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:19px}
+.catering-summary-item{background:var(--surface,#fff);border:1px solid var(--c-border);border-radius:15px;padding:16px 18px;min-width:0;display:flex;flex-direction:column;gap:5px}
+.catering-summary-item small{color:var(--c-muted);font-weight:600;font-size:12px}
+.catering-summary-item strong{font-size:26px;color:var(--c-navy);line-height:1.3;font-weight:800;white-space:nowrap}
+.catering-summary-item span{font-size:11px;color:var(--c-muted)}
+.catering-progress{background:var(--surface,#fff);border:1px solid var(--c-border);padding:18px 20px;border-radius:15px;margin-bottom:17px;display:grid;grid-template-columns: minmax(0,1fr) auto;gap:12px;align-items:center}
+.catering-progress-title{display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:13px}
+.catering-progress strong{font-size:13px}
+.catering-progress small{font-size:12px;color:var(--c-muted)}
+.catering-progress-track{width:100%;height:8px;border-radius:100px;background:#eaf0f5;overflow:hidden;margin:10px 0}
+.catering-progress-track span{display:block;height:100%;border-radius:100px;background:#ef7b3b;min-width:0;transition:width .2s}
+.catering-progress button{border:1px solid var(--c-border);background:#fff;color:var(--c-navy);border-radius:9px;padding:9px 13px;font-size:12px;font-weight:700}
+.catering-workspace .cp-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:19px 0 22px;border:0;padding:6px;background:#eaf0f5;border-radius:13px}
+.catering-workspace .cp-tabs button{margin:0;display:flex;align-items:center;justify-content:center;gap:7px;border:0!important;border-radius:9px;padding:12px 8px;background:transparent;color:#52667c;min-height:42px;font-weight:700;font-size:12.5px}
+.catering-workspace .cp-tabs button.active{background:#fff;color:#162c45;box-shadow:0 2px 8px rgba(20,43,65,.09)}
+.catering-workspace .cp-tabs button .number{border-radius:30px;background:#dae4ed;color:#49627a;padding:1px 8px;font-size:11px}
+.catering-workspace .cp-tabs button.active .number{background:#fff0e4;color:#bc5c23}
+.catering-section{margin-bottom:15px}
+.catering-section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.catering-section-head h2{font-size:19px;letter-spacing:-.02em;margin:0 0 3px;color:var(--c-navy)}
+.catering-section-head p{color:var(--c-muted);font-size:12px;margin:0;line-height:1.8}
+.catering-workspace .cp-head{margin:0 0 15px}
+.catering-workspace .cp-head h2{font-size:19px;font-weight:800;color:var(--c-navy)}
+.catering-workspace .cp-head p{color:var(--c-muted)}
+.catering-workspace .cp-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-start;margin:13px 0}
+.catering-workspace .cp-actions button:not(.danger){border-radius:9px}
+.catering-workspace .cp-actions .small{background:#fff;color:#334c66;border:1px solid #d8e2ec}
+.catering-workspace .cp-actions .danger{background:#fff;color:#bc4b46;border:1px solid #ecd5d4}
+.catering-workspace .cp-actions .primary{color:#1c2936;background:#f1813e;border-color:#f1813e;font-weight:800}
+.catering-day-strip{display:flex;align-items:center;gap:8px;overflow-x:auto;padding:2px 1px 12px;scrollbar-width:thin}
+.catering-day{border:1px solid #dfe6ee;border-radius:11px;background:#fff;color:#415670;min-width:125px;padding:12px 14px;text-align:right;cursor:pointer;flex-shrink:0;display:grid;gap:2px;line-height:1.4}
+.catering-day b{font-size:13px}.catering-day small{color:#718397;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+.catering-day.active{background:#17334f;border-color:#17334f;color:#fff}.catering-day.active small{color:#cbd8e4}
+.catering-day-count{font-size:10px;font-weight:700;color:#9a6943}
+.catering-day.active .catering-day-count{color:#f6b48b}
+.catering-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.catering-meal{background:var(--surface,#fff);border:1px solid var(--c-border);border-radius:15px;overflow:hidden;min-width:0;box-shadow:0 3px 12px rgba(13,37,61,.025)}
+.catering-meal-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:15px 17px 0}
+.catering-meal-type{display:inline-flex;align-items:center;gap:6px;background:#eff4f8;color:#3b5874;border-radius:7px;padding:5px 10px;font-weight:800;font-size:12px}
+.catering-meal-status{font-size:11px;color:#966021;background:#fff1de;padding:5px 10px;border-radius:9px;font-weight:700}
+.catering-meal-status.ready{background:#eaf5ed;color:#2e7950}
+.catering-meal-body{padding:11px 18px 15px}
+.catering-meal-body h3{font-size:17px;line-height:1.6;font-weight:800;color:var(--c-navy);margin:4px 0}
+.catering-meal-sub{font-size:11px;color:var(--c-muted);line-height:1.8}
+.catering-meal-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px 0;margin:9px 0;border-top:1px solid #edf1f5;border-bottom:1px solid #edf1f5}
+.catering-meal-kpis div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.catering-meal-kpis small{font-size:11px;color:var(--c-muted)}.catering-meal-kpis b{font-size:18px;color:var(--c-navy)}
+.catering-meal-footer{background:#f8fafc;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid #edf1f5}
+.catering-meal-footer .cp-actions{margin:0}
+.catering-badge{display:inline-flex;align-items:center;font-size:11px;font-weight:700;color:#62758a;padding:5px 9px;background:#eef2f6;border-radius:7px}
+.catering-empty{padding:38px 22px;text-align:center;background:#fff;border:1px dashed #cddae5;border-radius:15px}
+.catering-empty-icon{display:inline-flex;align-items:center;justify-content:center;background:#fff1e7;color:#ce6b2c;font-size:25px;width:60px;height:60px;border-radius:16px;margin-bottom:12px}
+.catering-empty h3{margin:2px 0 6px;font-size:17px;color:var(--c-navy)}
+.catering-empty p{color:var(--c-muted);font-size:12px;max-width:430px;margin:0 auto 16px;line-height:1.8}
+.catering-empty .primary{padding:10px 17px;border-radius:9px}
+.catering-insight{display:flex;gap:12px;align-items:flex-start;border:1px solid #e5edf4;border-radius:12px;background:#f7fafc;color:#51667d;padding:12px 15px;font-size:12px;line-height:1.9;margin:17px 0}
+.catering-insight b{color:#263e56}
+.catering-workspace .cp-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.catering-workspace .cp-cols .card,.catering-workspace .cp-team{border-radius:14px;border:1px solid var(--c-border);background:#fff;box-shadow:none;padding:20px}
+.catering-workspace .cp-cols h3,.catering-workspace .cp-team h3{font-size:15px;font-weight:800;color:var(--c-navy);margin:0 0 9px}
+.catering-workspace .cp-cols label,.catering-workspace .cp-team label{font-size:12px;color:#49627c;font-weight:700}
+.catering-workspace input,.catering-workspace select,.catering-workspace textarea{max-width:100%}
+.catering-workspace .cp-cols input,.catering-workspace .cp-team input,.catering-workspace .cp-team select{background:#fff;border:1px solid #dce4ed;border-radius:9px;min-height:42px;padding:9px 12px}
+.catering-workspace .cp-record{border-radius:14px;border-color:#e3e9ef;box-shadow:none}
+.catering-workspace .cp-record h3{color:var(--c-navy)}
+.catering-workspace .cp-quant{gap:8px}.catering-workspace .cp-quant span{border:1px solid #ecf1f5;background:#f7f9fb}
+.catering-workspace .cp-names{border:1px solid #edf0f4;border-radius:10px;padding:6px 10px}
+.catering-workspace .cp-team{margin:15px 0}
+.catering-workspace .cp-team-item{padding:9px 3px}
+.catering-special-head{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.catering-review{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.catering-review-card{background:#fff;border:1px solid #e4eaf0;border-radius:14px;padding:20px}
+.catering-review-card h3{margin:0 0 15px;font-size:15px;color:var(--c-navy)}
+.catering-check{display:flex;justify-content:space-between;align-items:center;gap:13px;padding:10px 0;border-bottom:1px solid #edf0f3;font-size:12px}
+.catering-check:last-child{border-bottom:0}
+.catering-check b{color:#1c3047}.catering-check span{color:#688096}
+.catering-check em{font-style:normal;color:#b06120;background:#fff4e6;border-radius:7px;padding:4px 8px;font-size:11px}
+.catering-check .okay{color:#26834f;background:#eaf6ee}
+.catering-workspace .cp-form{gap:14px}
+#modal:has(.catering-modal) {width:min(940px,calc(100vw - 30px));max-width:940px;border-radius:18px;max-height:92vh;overflow-y:auto}
+#modal:has(.catering-modal) .inner{padding:24px 30px}
+.catering-modal-head{padding:0 28px 13px 0;border-bottom:1px solid #e6edf2;margin-bottom:15px}
+.catering-modal-head h2{font-size:22px;margin:4px 0;color:#142c43}.catering-modal-head p{font-size:12px;color:#708197;margin:4px 0}
+.catering-modal-step{font-weight:800;font-size:12px;color:#dc7439;background:#fff3e8;border-radius:7px;padding:5px 9px;display:inline-block;margin:12px 0 5px}
+#modal .catering-modal .cp-form>label,#modal .catering-modal .cp-form>.full{color:#41566e;font-size:12px;font-weight:700}
+#modal .catering-modal .cp-form input,#modal .catering-modal .cp-form select,#modal .catering-modal .cp-form textarea{font-size:13px;border-radius:9px;border:1px solid #dae3eb;padding:10px;background:#fff}
+#modal .catering-modal .cp-calc{background:#f4f8fa;border:1px solid #deebf0}
+#modal .catering-modal .cp-actions{position:sticky;bottom:-24px;background:#fff;padding:14px 0;z-index:1;border-top:1px solid #e7edf2}
+@media(max-width:1050px){.catering-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.catering-grid{grid-template-columns:1fr}}
+@media(max-width:720px){.catering-hero{padding:23px 20px;flex-direction:column;align-items:stretch}.catering-hero-actions{justify-content:flex-start}.catering-workspace .cp-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.catering-review,.catering-workspace .cp-cols{grid-template-columns:1fr}.catering-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.catering-progress{grid-template-columns:1fr}.catering-meal-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}#modal:has(.catering-modal) .inner{padding:20px 16px}}
+@media(max-width:450px){.catering-summary{grid-template-columns:1fr 1fr;gap:8px}.catering-summary-item{padding:13px}.catering-summary-item strong{font-size:22px}.catering-hero h1{font-size:22px}.catering-workspace .cp-tabs button{font-size:11px;padding:10px 4px}.catering-meal-footer{align-items:flex-start;flex-direction:column}.catering-meal-kpis b{font-size:16px}}
+@media print{.catering-hero-actions,.catering-workspace .cp-tabs,.catering-day-strip,.catering-workspace .cp-actions{display:none!important}.catering-hero{background:#fff;color:#111;border:1px solid #ddd;padding:13px}.catering-hero h1,.catering-hero p{color:#111}.catering-grid{display:block}.catering-meal{break-inside:avoid;margin-bottom:11px}.catering-summary{grid-template-columns:repeat(4,1fr)}}
