@@ -2620,14 +2620,14 @@ function dayTimeline(day,opts){
                 <span class="tlmeta">${esc(L(t.short))} · ${it.x.pri==='core'?T('أساسي','core'):T('مساند','support')}</span>
                 ${o.why&&it.x.why?`<small class="tlwhy">${esc(it.x.why)}</small>`:''}
                 ${(it.x.sportChoice||it.i.sportChoice)?`<small class="tlwhy" style="display:block;font-weight:700">${esc(sportName(it.x.sportChoice||it.i.sportChoice))}</small>`:''}${(it.x.activityBreakdown||it.i.activityBreakdown)?`<small class="tlwhy" style="display:block">${esc(it.x.activityBreakdown||it.i.activityBreakdown)}</small>`:''}
-                ${o.why?`<button type="button" class="small noprint" data-act="editScheduleProgram:${it.x.id}" ${can('select')?'':'disabled'} style="margin-inline-start:auto">${T('تعديل البرنامج','Edit program')}</button>`:''}
+                <button type="button" class="small primary noprint" data-act="editScheduleProgram:${it.x.id}" ${can('select')?'':'disabled'} title="${T('تعديل البرنامج وتفريعاته وأيام تنفيذه','Edit program, subactivities and delivery days')}">${T('تعديل البرنامج','Edit program')}</button>
               </div>`}).join('')
           : customActivity?`<span class="pill good">${T('نشاط مُحدد يدويًا','Custom activity assigned')}</span>`:`<span class="tlhint">${T('لم يُحدد برنامج أو نشاط بعد','No program or activity assigned')}</span>`)
       : '';
     return `<div class="tlrow ${row.slot?'prog':'fixed'} ${row.slot&&!items.length?'tl-empty':''}">
       <div class="tltime">${row.t}</div>
       <div class="tldot">${tico(row.ic)}</div>
-      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${row.slot&&!items.length&&!customActivity?`<small class="tlwhy" style="display:block">${T('هذا عنوان فترة في قالب الجدول، وليس نشاطًا مُعيّنًا.','This is a timetable category, not an assigned activity.')}</small>`:''}${body}<button type="button" class="small noprint" data-act="editScheduleRow:${day},${idx}" ${can('select')?'':'disabled'} title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button></div>
+      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${row.slot&&!items.length&&!customActivity?`<small class="tlwhy" style="display:block">${T('هذا عنوان فترة في قالب الجدول، وليس نشاطًا مُعيّنًا.','This is a timetable category, not an assigned activity.')}</small>`:''}${body}<button type="button" class="small primary noprint" data-act="editScheduleRow:${day},${idx}" ${can('select')?'':'disabled'} title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button></div>
     </div>`}).join('')}</div>`;
 }
 
@@ -2711,6 +2711,7 @@ function programSection(){
         <div><span>${T('اليوم من المعسكر','Day in camp')}</span><b>${n} / ${S.meta.days.length}</b></div>
       </div>
       <div class="printonly print-section-label"><b>${T('التسلسل الزمني للأنشطة','ACTIVITY TIMELINE')}</b><span>${T('الوقت / الفعالية / البرنامج','Time / Activity / Program')}</span></div>
+      <div class="noprint" style="display:flex;align-items:center;gap:8px;margin:9px 0 10px"><span class="pill orange">${T("جدول قابل للتعديل","Editable schedule")}</span><span class="help">${T("اضغط تعديل بجانب أي فترة لتغيير وقتها أو اسم الفعالية، أو تعديل البرنامج لتغيير التفريعات والأيام.","Select Edit next to any slot to change its time or activity; Edit program changes subactivities and days.")}</span></div>
       ${dayTimeline(n,{why:true})}
       <div class="noprint" style="padding:11px 13px;border:1px solid var(--line);border-radius:10px;margin-top:10px">
          <div class="row wrap" style="gap:8px"><b>${T('تحليل اليوم','Daily schedule analysis')}</b><span class="pill">${T('دون احتساب الصلوات في تحليل التكرار','Prayers excluded from repetition counts')}</span></div>
