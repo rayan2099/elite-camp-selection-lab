@@ -122,7 +122,7 @@ function updateMealPreview(){
  const group=mode==='shared',field=$('#cm-group-size'),notes=$('#cm-serving-notes');
  document.querySelectorAll('.cm-shared').forEach(el=>el.hidden=!group);
  if(field)field.disabled=!group;if(notes)notes.disabled=!group;
- const count=n($('#cm-servings')?.value),ids=$('[data-cm-special]:checked').map(el=>el.dataset.cmSpecial);
+ const count=n($('#cm-servings')?.value),ids=[...document.querySelectorAll('[data-cm-special]:checked')].map(el=>el.dataset.cmSpecial);
  const special=ids.length,regular=Math.max(0,count-special),size=Math.max(2,n(field?.value)||5),units=group?Math.ceil(regular/size):regular;
  const estimate=units*money($('#cm-price')?.value)+special*money($('#cm-special-price')?.value);
  const preview=$('#cm-preview');if(preview)preview.innerHTML='<b>ملخص التجهيز</b><div class="cp-quant"><span>المستفيدون <b>'+count+'</b></span><span>'+(group?'الأطباق الجماعية':'الوجبات الفردية')+' <b>'+units+'</b></span><span>الوجبات الخاصة <b>'+special+'</b></span><span>التكلفة <b>'+fmt(estimate)+' ر.س</b></span></div>'+(group?'<p class="help">الحساب: '+regular+' مستفيدًا من الطعام العادي ÷ '+size+' أشخاص للطبق، مع التقريب للأعلى. الوجبات الخاصة تُحسب منفصلة.</p>':'');
