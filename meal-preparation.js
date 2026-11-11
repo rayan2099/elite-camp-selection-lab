@@ -76,7 +76,7 @@ function pageMeals(){
  const tabs=[['schedule','خطة الوجبات',planned],['counts','الأعداد والفريق',participantsCount],['special','التغذية الخاصة',d.special.length],['audit','مراجعة الجاهزية',pending+notPlanned]];
  return '<div class="catering-workspace">'+
  '<section class="catering-hero"><div><div class="catering-kicker">أكاديمية النخبة · الإدارة التشغيلية</div><h1>تجهيز الوجبات والتغذية</h1><p>نظرة واحدة على خطة الطعام: ماذا سيُقدَّم، ولمن، وكم نحتاج، ومن المسؤول عن الاستلام والتوزيع.</p></div>'+
- '<div class="catering-hero-actions"><button type="button" class="primary" data-cp="new-meal">+ إضافة وجبة</button><button type="button" class="catering-secondary" data-cp="tab" data-val="audit">فحص الجاهزية</button></div></section>'+
+ '<div class="catering-hero-actions"><button type="button" class="primary" data-cp="new-meal">+ إضافة وجبة</button><button type="button" class="catering-secondary" data-cp="print-options">طباعة ملخص الوجبات</button><button type="button" class="catering-secondary" data-cp="tab" data-val="audit">فحص الجاهزية</button></div></section>'+
  '<section class="catering-summary" aria-label="مؤشرات تجهيز الوجبات">'+
  '<div class="catering-summary-item"><small>إجمالي المستفيدين</small><strong>'+participantsCount+'</strong><span>'+n(S.meta.students)+' طالب · '+(participantsCount-n(S.meta.students))+' طاقم</span></div>'+
  '<div class="catering-summary-item"><small>الوجبات المخططة</small><strong>'+planned+'</strong><span>'+plannedDays+' من '+days+' أيام بها وجبات</span></div>'+
@@ -141,6 +141,72 @@ function auditView(){
  '<section class="catering-review-card" style="margin-top:13px"><h3>نواقص الوجبات المسجلة</h3>'+(pending.length?pending.map(m=>line('اليوم '+m.day+' · '+type(m.type),issues(m).join(' · '),false)).join(''):'<p class="help">لا توجد نواقص في حقول الوجبات المسجلة. تأكد من خطة جميع الأيام ومطابقة العدد الفعلي.</p>')+'</section>'+
  '<div class="catering-insight"><span>!</span><div><b>قاعدة الاعتماد:</b> هذه لوحة متابعة، وليست شهادة سلامة غذائية. تأكيد التوريد والأعداد والحساسيات والتجهيز في الميدان مسؤولية الفريق المختص ومقدم الطعام.</div></div>';
 }
+
+/* Separate professional print report, filtered without changing the live day selection. */
+function printMealOptions(){
+ const numDays=S.meta.days.length;
+ const defaultDay=dayChoice==='all'?'all':String(dayChoice);
+ openModal('<div class="catering-print-options"><h2>طباعة ملخص الوجبات</h2><p class="help">اختر نطاق التقرير. سيُطبع الملخص فقط دون أزرار التحكم، وتُجمع الكميات والتكاليف لكل يوم.</p>'+
+ '<label class="catering-print-label">نطاق التقرير<select id="cp-print-scope"><option value="all" '+(defaultDay==='all'?'selected':'')+'>جميع أيام المعسكر ('+numDays+' أيام)</option>'+
+ S.meta.days.map((day,i)=>'<option value="'+(i+1)+'" '+(defaultDay===String(i+1)?'selected':'')+'>اليوم '+(i+1)+' · '+e(L(day))+'</option>').join('')+'</select></label>'+
+ '<div class="catering-print-preview" id="cp-print-preview" aria-live="polite"></div>'+
+ '<div class="catering-print-note">تتضمن الطباعة العدد الإجمالي للمستفيدين، والكميات، والوجبات الخاصة بعددها فقط، والمورد، والمشرف، والموقع، والتكلفة. لا تتضمن أسماء الطلاب أو تفاصيل الحساسية.</div>'+
+ '<div class="cp-actions"><button type="button" data-act="close">إلغاء</button><button type="button" class="primary" data-cp="print-report">طباعة الملخص / حفظ PDF</button></div></div>');
+ refreshPrintPreview();
+}
+function mealsForPrint(scope){
+ return db().meals.filter(m=>scope==='all'||m.day===Number(scope))
+  .slice().sort((a,b)=>a.day-b.day||String(a.time||'').localeCompare(String(b.time||'')));
+}
+function refreshPrintPreview(){
+ const target=$('#cp-print-preview');if(!target)return;
+ const scope=$('#cp-print-scope')?.value||'all',list=mealsForPrint(scope);
+ const days=scope==='all'?S.meta.days.length:1;
+ target.innerHTML='<div><b>'+list.length+'</b><span>وجبة مسجلة</span></div>'+
+ '<div><b>'+days+'</b><span>'+(scope==='all'?'أيام معسكر':'يوم محدد')+'</span></div>'+
+ '<div><b>'+fmt(list.reduce((sum,m)=>sum+cost(m),0))+'</b><span>ريال إجمالي تقديري</span></div>';
+}
+function printableReport(scope){
+ const days=scope==='all'?S.meta.days.map((day,i)=>({day:i+1,name:L(day)})):
+  [{day:Number(scope),name:L(S.meta.days[Number(scope)-1]||{ar:'اليوم المحدد'})}];
+ const list=mealsForPrint(scope);
+ const rowsForDay=day=>list.filter(m=>m.day===day);
+ const sum=(items,field)=>items.reduce((acc,m)=>acc+field(m),0);
+ const title=scope==='all'?'جميع أيام المعسكر':'اليوم '+scope;
+ const camp=S.meta.campAr||'المعسكر';
+ const printedAt=new Date().toLocaleString('ar-SA-u-ca-gregory-nu-latn',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+ const row=m=>'<tr><td>'+e(type(m.type))+'<small>'+e(m.time||'—')+'</small></td>'+
+ '<td>'+e(m.menu||'لم تحدد')+'<small>'+e(m.serviceMode==='shared'?'جماعية · طبق لكل '+sharedSize(m)+' أشخاص':'فردية')+'</small></td>'+
+ '<td class="num">'+servings(m)+'</td><td class="num">'+regularUnits(m)+'</td><td class="num">'+specialsOf(m).length+'</td>'+
+ '<td>'+e(m.supplier||'—')+'<small>'+e(m.deliveryTime||'')+'</small></td>'+
+ '<td>'+e(supervisorName(m.supervisorId)||'—')+'<small>'+e(m.serviceLocation||'')+'</small></td>'+
+ '<td class="num">'+fmt(cost(m))+'</td></tr>';
+ const sections=days.map(day=>{
+   const m=rowsForDay(day.day);
+   return '<section class="catering-print-day"><div class="catering-print-dayhead"><div><h2>اليوم '+day.day+' · '+e(day.name)+'</h2><p>'+m.length+' وجبة مسجلة</p></div><strong>'+fmt(sum(m,cost))+' ر.س</strong></div>'+
+   (m.length?'<table><thead><tr><th>الوجبة والوقت</th><th>القائمة وطريقة التقديم</th><th>مستفيدون</th><th>وجبات / أطباق عادية</th><th>وجبات خاصة</th><th>المورد / الوصول</th><th>المشرف / الموقع</th><th>التكلفة (ر.س)</th></tr></thead><tbody>'+m.map(row).join('')+
+   '</tbody><tfoot><tr><td colspan="2">مجموع اليوم</td><td class="num">'+sum(m,servings)+'</td><td class="num">'+sum(m,regularUnits)+'</td><td class="num">'+sum(m,x=>specialsOf(x).length)+'</td><td colspan="2"></td><td class="num">'+fmt(sum(m,cost))+'</td></tr></tfoot></table>':
+   '<div class="catering-print-blank">لا توجد وجبات مخططة لهذا اليوم.</div>')+'</section>';
+ }).join('');
+ return '<div class="catering-print-document" dir="rtl"><header class="catering-print-head"><div><div class="catering-print-brand">أكاديمية النخبة | إدارة التغذية</div><h1>ملخص خطة الوجبات</h1><p>'+e(camp)+' · '+e(title)+'</p></div><div class="catering-print-date">تاريخ إعداد التقرير<br><b>'+e(printedAt)+'</b></div></header>'+
+ '<div class="catering-print-totals"><div><span>الأيام المشمولة</span><strong>'+days.length+'</strong></div><div><span>الوجبات المسجلة</span><strong>'+list.length+'</strong></div>'+
+ '<div><span>الوجبات/الأطباق العادية</span><strong>'+sum(list,regularUnits)+'</strong></div><div><span>الوجبات الخاصة</span><strong>'+sum(list,m=>specialsOf(m).length)+'</strong></div>'+
+ '<div><span>إجمالي التكلفة التقديرية</span><strong>'+fmt(sum(list,cost))+' ر.س</strong></div></div>'+
+ sections+
+ '<footer class="catering-print-foot"><b>تنبيه تشغيلي:</b> إجماليات المستفيدين بالجدول هي عدد الحصص المخططة لكل وجبة وليست عدد أشخاص فريدين. يجب مراجعة الحضور والكميات والتوريد الفعلي قبل التنفيذ. تم إخفاء هويات الطلاب ومعلومات الحساسية من التقرير.</footer></div>';
+}
+function printMealReport(){
+ const scope=$('#cp-print-scope')?.value||'all';
+ if(scope!=='all'&&(!Number.isInteger(Number(scope))||Number(scope)<1||Number(scope)>S.meta.days.length))
+   return toast('اختر يومًا صحيحًا للطباعة.');
+ let printable=document.getElementById('catering-print-report');
+ if(!printable){printable=document.createElement('div');printable.id='catering-print-report';document.body.appendChild(printable)}
+ printable.innerHTML=printableReport(scope);
+ closeModal();
+ window.print();
+}
+document.addEventListener('change',event=>{if(event.target?.id==='cp-print-scope')refreshPrintPreview()},true);
+
 function mealModal(id){
  const d=db(),m=d.meals.find(x=>x.id===id),v=m||{audienceMode:'all',audienceIds:[],day:dayChoice==='all'?1:Number(dayChoice),type:'lunch',time:'13:00',menu:'',supplier:'',supervisorId:'',serviceMode:'individual',peoplePerTray:5,servingNotes:'',deliveryTime:'',serviceLocation:'',equipment:'',servings:total(),unitPrice:0,specialPrice:0,specialMenu:'',specialIds:d.special.map(s=>s.id),confirmed:false};
  openModal('<div class="catering-modal"><div class="catering-modal-head"><div class="catering-kicker">التجهيز التشغيلي</div><h2>'+(m?'تعديل الوجبة':'إضافة وجبة جديدة')+'</h2><p>حدد يوم الوجبة وطريقة تقديمها، ثم كمياتها والمورد والمشرف.</p></div><div class="catering-modal-step">01 · توقيت الوجبة وطريقة التقديم</div><div class="cp-form">'+
@@ -213,6 +279,8 @@ function commit(){save();render({preserveScroll:true})}
 function handle(b){
  const a=b.dataset.cp,id=b.dataset.id,d=db();
  if(a==='tab'){section=b.dataset.val;render({preserveScroll:true});return}
+ if(a==='print-options'){printMealOptions();return}
+ if(a==='print-report'){printMealReport();return}
  if(a==='day'){dayChoice=b.dataset.val;render({preserveScroll:true});return}
  if(a==='new-meal'||a==='edit-meal'){mealModal(id);return}
  if(a==='new-special'||a==='edit-special'){specialModal(id);return}
