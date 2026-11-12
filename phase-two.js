@@ -43,6 +43,16 @@ function assignmentIssues(){
    }
   }
  }
+ for(const [staffId,slots] of Object.entries(d.activityAssignments||{})){
+   if(!staff().some(x=>x.id===staffId))result.push('تكليف نشاط لعضو غير موجود ضمن فريق المعسكر');
+   const seen=new Set();
+   for(const key of slots||[]){
+    if(seen.has(key))result.push('نشاط مكرر في تكليف العضو: '+staffId);seen.add(key);
+    const [day,index]=key.split(':').map(Number);
+    if(!Number.isInteger(day)||day<1||day>S.meta.days.length||!Number.isInteger(index)||index<0||index>=DAY_TEMPLATE.length)
+       result.push('نشاط غير صالح أو يوم خارج المعسكر لدى: '+staffId);
+   }
+ }
  return result;
 }
 const persist=()=>{db().audit=null;save();render({preserveScroll:true})};
@@ -362,7 +372,7 @@ document.addEventListener('click',e=>{
  if(!row)return;
  const main=row.querySelector('input[data-p2-program]'),days=[...row.querySelectorAll('[data-p2-day]')];
  const current=days.find(x=>Number(x.value)===day);if(!main||!current)return;
- p2SetActivity(id,day,!current.checked);
+ p2SetActivity(id,day,!(main.checked&&current.checked));
 },true);
 document.addEventListener('change',e=>{if(e.target.matches('[data-p2-bulk-choice]'))p2UpdateBulkCount()},true);
 document.addEventListener('change',e=>{
