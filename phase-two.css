@@ -1,0 +1,48 @@
+
+/* Phase 2 — independent operational readiness UI */
+.p2-workspace{direction:rtl;color:#20354c;max-width:1300px;margin:auto}
+.p2-workspace *{box-sizing:border-box}
+.p2-hero{display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(115deg,#18334f,#254e70);border-radius:17px;color:#fff;padding:23px 26px;margin:14px 0 17px}
+.p2-hero .eyebrow{color:#ffc095;font-size:11px;font-weight:700}.p2-hero h1{font-size:24px;color:white;margin:4px 0}.p2-hero p{font-size:12px;color:#d4e1ec;margin:4px 0}
+.p2-hero .p2-actions{display:flex;gap:8px;flex-wrap:wrap}.p2-hero button{border-radius:9px;padding:10px 13px;background:rgba(255,255,255,.1);color:white;border:1px solid rgba(255,255,255,.3)}
+.p2-hero button.primary{background:#f0803d;border-color:#f0803d;color:#142b42}
+.p2-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:12px 0 17px}
+.p2-metrics>div{background:var(--surface,#fff);border:1px solid var(--line,#e1e7ed);border-radius:11px;padding:14px 15px;display:flex;flex-direction:column;gap:4px}
+.p2-metrics small{font-size:11px;color:#728398}.p2-metrics b{font-size:25px;color:#1c344d}
+.p2-tabs{display:flex;gap:7px;flex-wrap:wrap;background:#ebf1f6;border-radius:12px;padding:6px;margin-bottom:20px}
+.p2-tabs button{flex:1;min-width:135px;border:0;background:transparent;color:#516a80;padding:11px;font-size:12px;font-weight:700;border-radius:9px;cursor:pointer}
+.p2-tabs button.active{background:#fff;color:#162c43;box-shadow:0 1px 8px #18324b18}
+.p2-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:20px 0 13px}
+.p2-heading h2{font-size:20px;color:#1d3550;margin:0 0 4px}
+.p2-heading p{font-size:12px;color:#748599;margin:0}
+.p2-heading button.primary,.p2-modal .primary{background:#f0803d;color:#172a3d;border:1px solid #f0803d;border-radius:8px;padding:10px 16px;font-weight:750}
+.p2-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.p2-card{background:var(--surface,#fff);border:1px solid var(--line,#e1e7ed);border-radius:13px;padding:17px;min-width:0}
+.p2-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
+.p2-card h3{font-size:15px;margin:0;line-height:1.6;color:#223b54}
+.p2-card-header button,.p2-actions button:not(.primary){background:#fff;color:#435b73;border:1px solid #dce5ec;border-radius:8px;padding:7px 12px;font-size:12px}
+.p2-card p{font-size:12px;line-height:1.8;color:#52687d;margin:8px 0}
+.p2-card p b{color:#253d55}
+.p2-card .p2-actions{display:flex;gap:8px;margin-top:13px}
+.p2-team{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0 17px}
+.p2-team>span{display:inline-flex;align-items:center;gap:7px;background:#f0f4f8;border:1px solid #e2eaf1;border-radius:40px;padding:6px 11px;font-size:12px;color:#35506b}
+.p2-team button{border:0;background:transparent;color:#9d5151;cursor:pointer}
+.p2-audit{background:#fff;border:1px solid #dfe7ee;border-radius:12px;padding:19px}
+.p2-audit>b{display:block;color:#1e3852;font-size:18px}
+.p2-audit p{font-size:12px;color:#637991}
+.p2-issue{border-bottom:1px solid #e9eef3;padding:10px 6px;font-size:12px;color:#475d74}
+.p2-foot{font-size:11px;color:#8190a1;margin:20px 0}
+.p2-modal{direction:rtl;text-align:right;color:#223a52}
+.p2-modal h2{font-size:21px;margin:0 0 10px}
+.p2-modal h3{font-size:13px;margin:13px 0}
+.p2-modal label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:12px;color:#4e6277;margin:8px 0}
+.p2-modal input:not([type=checkbox]),.p2-modal select,.p2-modal textarea{padding:10px 12px;border:1px solid #dce5ee;background:#fff;border-radius:8px;color:#213a53;font:inherit;width:100%;font-size:13px}
+.p2-modal .p2-inline,.p2-checks label{display:flex;flex-direction:row;align-items:center;gap:7px}
+.p2-modal input[type=checkbox]{width:16px;height:16px;accent-color:#ed7b38}
+.p2-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:8px 0;margin:6px 0 13px;max-height:200px;overflow:auto}
+.p2-checks label{background:#f7f9fc;border:1px solid #e6edf3;border-radius:7px;padding:9px;font-weight:500;margin:0}
+.p2-modal .p2-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:15px}
+.p2-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:12px}
+.p2-form .full{grid-column:1/-1}
+@media(max-width:950px){.p2-metrics{grid-template-columns:repeat(3,1fr)}.p2-grid{grid-template-columns:1fr}}
+@media(max-width:620px){.p2-hero{flex-direction:column;align-items:stretch}.p2-metrics{grid-template-columns:repeat(2,1fr)}.p2-heading{align-items:flex-start;flex-direction:column}.p2-form,.p2-checks{grid-template-columns:1fr}}
