@@ -34,8 +34,8 @@ function pageOperations(){
  const d=db(),pg=items(),req=requirements(),ext=pg.filter(p=>info(p.id).outdoor).length,safe=pg.filter(p=>info(p.id).safety).length,errors=selectedChecks();
  return '<div class="p2-workspace"><div class="p2-hero"><div><div class="eyebrow">المرحلة الثانية · التشغيل</div><h1>جاهزية المعسكر ومتطلبات التشغيل</h1><p>توزيع الكوادر، الأمن والسلامة، المساحات، الأدوات، النقل، والمتابعة التنفيذية.</p></div><div class="p2-actions"><button data-p2="back">العودة إلى الجدول</button><button class="primary" data-p2="tab" data-value="audit">تدقيق الجاهزية</button></div></div>'+
  '<div class="p2-metrics"><div><small>البرامج</small><b>'+pg.length+'</b></div><div><small>تحتاج أمن وسلامة</small><b>'+safe+'</b></div><div><small>تحتاج مساحة خارجية</small><b>'+ext+'</b><small>بحسب البرامج المختارة</small></div><div><small>المتطلبات</small><b>'+req.length+'</b></div><div><small>ملاحظات التدقيق</small><b>'+errors.length+'</b></div></div>'+
- '<nav class="p2-tabs">'+[['programs','البرامج والمدربون'],['requirements','المتطلبات التشغيلية'],['transport','النقل والمشاركون'],['audit','تدقيق الجاهزية']].map(([key,text])=>'<button data-p2="tab" data-value="'+key+'" class="'+(tab===key?'active':'')+'">'+text+'</button>').join('')+'</nav>'+
- (tab==='programs'?programsPage():tab==='requirements'?requirementsPage():tab==='transport'?transportPage():auditPage())+
+ '<nav class="p2-tabs">'+[['programs','البرامج والمدربون'],['team','الفريق والصلاحيات'],['requirements','المتطلبات التشغيلية'],['transport','النقل والمشاركون'],['audit','تدقيق الجاهزية']].map(([key,text])=>'<button data-p2="tab" data-value="'+key+'" class="'+(tab===key?'active':'')+'">'+text+'</button>').join('')+'</nav>'+
+ (tab==='programs'?programsPage():tab==='team'?teamPage():tab==='requirements'?requirementsPage():tab==='transport'?transportPage():auditPage())+
  '<p class="p2-foot">التدقيق التشغيلي مستقل عن فحص اكتمال خطة البرامج. البيانات تحفظ في هذا المتصفح، ولا تمثل تصريحًا أو فحص سلامة ميدانيًا.</p></div>';
 }
 function programsPage(){
@@ -75,7 +75,38 @@ function programModal(id){
  '<label class="p2-inline"><input type="checkbox" id="p2-outdoor" '+(a.outdoor?'checked':'')+'> يحتاج مساحة خارجية</label><label>سبب المساحة وعدد المشاركين<textarea id="p2-outdoorwhy" rows="2">'+H(a.outdoorWhy)+'</textarea></label>'+
  '<div class="p2-actions"><button data-act="close">إلغاء</button><button class="primary" data-p2="save-program" data-id="'+H(id)+'">حفظ</button></div>');
 }
-function staffModal(){modal('<h2>إضافة مدرب / مشرف</h2><label>الاسم<input id="p2-staff-name" maxlength="100"></label><label>الدور<select id="p2-staff-role"><option>مدرب</option><option>مشرف ميداني</option><option>أمن وسلامة</option><option>مسؤول نقل</option></select></label><div class="p2-actions"><button data-act="close">إلغاء</button><button class="primary" data-p2="save-staff">إضافة</button></div>')}
+
+const p2RoleOptions=["مدرب","مشرف ميداني","مسؤول أمن وسلامة","مسؤول نقل","مسؤول تجهيزات","مسؤول التغذية"];
+const p2Permissions=[["schedule","عرض جداول البرامج"],["activities","تسجيل تنفيذ الأنشطة"],["attendance","متابعة الحضور"],["safety","تسجيل بلاغات السلامة"],["resources","متابعة التجهيزات"],["transport","متابعة النقل"],["meals","متابعة الوجبات"],["reports","رفع التقارير"]];
+const p2Duties=[["teach","تقديم البرامج"],["supervise","الإشراف على الطلاب"],["safety","متابعة السلامة"],["materials","تجهيز الأدوات"],["transport","مرافقة النقل"],["meals","استلام الوجبات"],["reports","تسليم التقرير اليومي"]];
+const p2StaffPrograms=id=>items().filter(p=>info(p.id).trainers.includes(id)).map(p=>p.id);
+const p2Checks=(attr,values,options)=>'<div class="p2-checks">'+options.map(([id,label])=>'<label><input type="checkbox" '+attr+'="'+H(id)+'" '+((values||[]).includes(id)?'checked':'')+'>'+H(label)+'</label>').join('')+'</div>';
+function teamPage(){
+ const all=staff(),local=db().staff;
+ return '<div class="p2-heading"><div><h2>الفريق والصلاحيات والمسؤوليات</h2><p>سجل تفصيلي يربط الأعضاء بالبرامج والمهام والصلاحيات التشغيلية.</p></div><button class="primary" data-p2="add-staff">+ إضافة عضو</button></div>'+
+ '<div class="card p2-notice">الصلاحيات المعروضة تكليفات تشغيلية للتخطيط، ولا تمنح حساب دخول أو تفويضًا تقنيًا داخل النظام.</div>'+
+ '<div class="p2-grid">'+all.map(x=>'<article class="p2-card"><div class="p2-card-header"><h3>'+H(x.name)+'</h3><span class="pill">'+H(x.role||'عضو فريق')+'</span></div>'+
+ '<p><b>البرامج:</b> '+H(labelIds(p2StaffPrograms(x.id)))+'</p>'+
+ '<p><b>المسؤوليات:</b> '+H(p2Duties.filter(a=>(x.duties||[]).includes(a[0])).map(a=>a[1]).join('، ')||'لم تحدد')+'</p>'+
+ '<p><b>الصلاحيات التشغيلية:</b> '+H(p2Permissions.filter(a=>(x.permissions||[]).includes(a[0])).map(a=>a[1]).join('، ')||'لم تحدد')+'</p>'+
+ '<p><b>حالة العضو:</b> '+(x.active===false?'غير نشط':'نشط')+'</p>'+
+ (local.some(m=>m.id===x.id)?'<div class="p2-actions"><button data-p2="edit-staff" data-id="'+H(x.id)+'">تعديل التكليفات</button><button data-p2="delete-staff" data-id="'+H(x.id)+'">حذف</button></div>':'<p class="help">عضو مستورد من قائمة التغذية؛ تعديل بياناته الأساسية يتم من مصدره.</p>')+
+ '</article>').join('')+'</div>';
+}
+function staffModal(id){
+ const p=db().staff.find(x=>x.id===id)||{name:'',role:'مدرب',permissions:[],duties:[],active:true,notes:'',shift:'',contact:''};
+ modal('<h2>'+(id?'تعديل عضو الفريق':'إضافة مدرب / مشرف')+'</h2><p class="help">حدد تفاصيل التكليف وليس الاسم والدور فقط.</p><div class="p2-form">'+
+ '<label>الاسم<input id="p2-staff-name" maxlength="100" value="'+H(p.name)+'"></label>'+
+ '<label>الدور<select id="p2-staff-role">'+p2RoleOptions.map(r=>'<option '+(r===p.role?'selected':'')+'>'+H(r)+'</option>').join('')+'</select></label>'+
+ '<label>التواصل<input id="p2-staff-contact" maxlength="80" value="'+H(p.contact||'')+'"></label>'+
+ '<label>فترة العمل<input id="p2-staff-shift" maxlength="100" value="'+H(p.shift||'')+'"></label>'+
+ '<label class="full">تعليمات التكليف<textarea id="p2-staff-notes" rows="2">'+H(p.notes||'')+'</textarea></label>'+
+ '<div class="full"><h3>المسؤوليات</h3>'+p2Checks('data-p2-duty',p.duties,p2Duties)+'</div>'+
+ '<div class="full"><h3>الصلاحيات التشغيلية</h3><p class="help">توثيق فقط، وليس تفويضًا للدخول.</p>'+p2Checks('data-p2-permission',p.permissions,p2Permissions)+'</div>'+
+ '<div class="full"><h3>البرامج المكلف بها</h3>'+checkPrograms(id?p2StaffPrograms(id):[])+'</div>'+
+ '<label class="full p2-inline"><input type="checkbox" id="p2-staff-active" '+(p.active===false?'':'checked')+'> نشط</label></div>'+
+ '<div class="p2-actions"><button data-act="close">إلغاء</button><button class="primary" data-p2="save-staff" data-id="'+H(id||'')+'">حفظ بيانات العضو</button></div>');
+}
 function requirementModal(id){
  const r=requirements().find(x=>x.id===id)||{name:'',category:'general',quantity:1,unit:'متطلب',owner:'',details:'',reason:'',status:'pending',linked:[],derived:false};
  return modal('<h2>'+(id?'تعديل متطلب':'إضافة متطلب تشغيلي')+'</h2><div class="p2-form">'+
@@ -101,16 +132,26 @@ function act(b){
  if(a==='back'){S.step=5;page='builder';save();render();return}
  if(!canEdit())return toast('التعديل غير متاح لهذا الدور');
  if(a==='add-staff')return staffModal();
+ if(a==='edit-staff')return staffModal(id);
  if(a==='edit-program')return programModal(id);
  if(a==='add-requirement'||a==='edit-requirement')return requirementModal(id);
  if(a==='add-transport'||a==='edit-transport')return transportModal(id);
+
  if(a==='save-staff'){
-  const name=input('p2-staff-name').trim(),role=input('p2-staff-role');
-  if(name.length<2||staff().some(x=>x.name===name))return toast('الاسم غير صالح أو موجود بالفعل');
-  d.staff.push({id:newId('trainer-'),name,role});closeModal();persist();return;
+  const person=db().staff.find(x=>x.id===id),name=input('p2-staff-name').trim(),role=input('p2-staff-role');
+  if(name.length<2||staff().some(x=>x.name===name&&x.id!==id))return toast('تحقق من الاسم أو التكرار');
+  const linked=selected('data-p2-program'),active=document.getElementById('p2-staff-active').checked;
+  if(!active&&linked.length)return toast('لا يمكن إسناد برامج لعضو غير نشط');
+  const staffId=person?.id||newId('trainer-');
+  const value={id:staffId,name,role,contact:input('p2-staff-contact').trim(),shift:input('p2-staff-shift').trim(),notes:input('p2-staff-notes').trim(),active,
+    permissions:selected('data-p2-permission').filter(v=>p2Permissions.some(x=>x[0]===v)),
+    duties:selected('data-p2-duty').filter(v=>p2Duties.some(x=>x[0]===v))};
+  if(person)Object.assign(person,value);else d.staff.push(value);
+  items().forEach(p=>{const old=info(p.id),trainers=new Set(old.trainers);if(linked.includes(p.id))trainers.add(staffId);else trainers.delete(staffId);d.programs[p.id]={...old,trainers:[...trainers]};});
+  closeModal();persist();return;
  }
  if(a==='delete-staff'){
-  if(Object.values(d.programs).some(p=>p.trainers.includes(id)))return toast('المدرب مرتبط ببرنامج، أزل الارتباط أولًا');
+  if(Object.values(d.programs).some(p=>(p.trainers||[]).includes(id)))return toast('المدرب مرتبط ببرنامج، أزل الارتباط أولًا');
   if(confirm('حذف عضو الفريق؟')){d.staff=d.staff.filter(x=>x.id!==id);persist()}return;
  }
  if(a==='save-program'){
