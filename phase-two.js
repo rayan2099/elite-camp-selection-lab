@@ -12,7 +12,7 @@ let tab='programs';
 function db(){
  S.prep??={};
  const d=S.prep.__phase2??(S.prep.__phase2={staff:[],programs:{},custom:[],overrides:{},hidden:[],transport:[],audit:null});
- d.staff??=[];d.programs??={};d.custom??=[];d.overrides??={};d.hidden??=[];d.transport??=[];d.assignmentDetails??={};
+ d.staff??=[];d.programs??={};d.custom??=[];d.overrides??={};d.hidden??=[];d.transport??=[];d.assignmentDetails??={};d.activityAssignments??={};
  if(!d.migrated){(S.prep.__manual||[]).forEach(r=>d.custom.push({id:r.id,name:r.name,category:'general',linked:[],owner:S.prep[r.id]?.owner||'',quantity:1,unit:'متطلب',details:'',reason:'',status:S.prep[r.id]?.done?'ready':'pending'}));d.migrated=true;}
  return d;
 }
@@ -104,6 +104,8 @@ const p2ProgramDays=p=>{
  const unique=[...new Set(days.map(Number).filter(n=>n>=1&&n<=all.length))];
  return unique.length?unique:all.map((_,i)=>i+1);
 };
+const p2FixedKey=(day,index)=>day+':'+index;
+const p2FixedAssignments=staffId=>db().activityAssignments?.[staffId]||[];
 const p2Details=(staffId,programId)=>db().assignmentDetails?.[staffId]?.[programId]||{};
 const p2AssignedDays=(staffId,p)=>{const available=p2ProgramDays(p),detail=p2Details(staffId,p.id);
  return Array.isArray(detail.days)&&detail.days.length?detail.days.map(Number).filter(d=>available.includes(d)):available;
@@ -133,30 +135,32 @@ function p2SchedulePrograms(day){
   const row=typeof scheduleRow==='function'?scheduleRow(day,index):template[index];
   const ids=row.slot?(source[row.slot]||[]).map(o=>o.x?.id||o.id):[];
   const shown=ids.filter(id=>eligible.has(id)&&!placed.has(id));shown.forEach(id=>placed.add(id));
-  rows.push({time:row.t||'',title:row.ar||'فترة',ids:shown,fixed:!row.slot});
+  rows.push({time:row.t||'',title:row.ar||'فترة',ids:shown,index,fixed:!row.slot,custom:!!(row.slot&&typeof slotHasCustomActivity==='function'&&slotHasCustomActivity(day,index))});
  }
  return {rows,unplaced:dayPrograms.filter(p=>!placed.has(p.id))};
 }
 function p2ScheduleAssignmentWidget(staffId){
- const all=S.meta?.days||[],assigned=new Set(staffId?p2StaffPrograms(staffId):[]);
+ const all=S.meta?.days||[],assigned=new Set(staffId?p2StaffPrograms(staffId):[]),fixedAssigned=new Set(staffId?p2FixedAssignments(staffId):[]);
  const blocks=all.map((dayObj,index)=>{
   const day=index+1,schedule=p2SchedulePrograms(day);
   const entry=(id,time)=>{
    const p=items().find(x=>x.id===id);if(!p)return '';
    const active=assigned.has(id)&&p2AssignedDays(staffId,p).includes(day);
    return '<div class="p2-sched-program"><div><b>'+H(name(id))+'</b><small>'+H(time||'الوقت غير محدد')+'</small></div>'+
-    '<button type="button" data-p2-assign-day="'+H(id)+'" data-p2-assign-num="'+day+'" aria-pressed="'+active+'" class="'+(active?'assigned':'')+'">'+(active?'✓ مكلف':'+ إسناد')+'</button></div>';
+    '<div class="p2-sched-actions"><label class="p2-bulk-pick"><input type="checkbox" data-p2-bulk-choice data-p2-bulk-type="program" data-p2-id="'+H(id)+'" data-p2-num="'+day+'"><span>تحديد</span></label><button type="button" data-p2-assign-day="'+H(id)+'" data-p2-assign-num="'+day+'" aria-pressed="'+active+'" class="'+(active?'assigned':'')+'">'+(active?'✓ مكلف':'+ إسناد')+'</button></div></div>';
   };
+  const fixedEntry=r=>{const key=p2FixedKey(day,r.index),active=fixedAssigned.has(key);
+   return '<div class="p2-sched-program p2-fixed-entry"><div><b>'+H(r.title)+'</b><small>نشاط تشغيلي · '+H(r.time||'الوقت غير محدد')+'</small></div><div class="p2-sched-actions"><label class="p2-bulk-pick"><input type="checkbox" data-p2-bulk-choice data-p2-bulk-type="fixed" data-p2-id="'+H(key)+'" data-p2-num="'+day+'"><span>تحديد</span></label><button type="button" data-p2-fixed="'+H(key)+'" aria-pressed="'+active+'" class="'+(active?'assigned':'')+'">'+(active?'✓ مكلف':'+ إسناد')+'</button></div></div>';};
   return '<section class="p2-schedule-day" data-p2-day-panel="'+day+'" '+(index?'hidden':'')+'>'+
    '<div class="p2-schedule-daytitle"><h5>اليوم '+day+' · '+H(L(dayObj))+'</h5><small>اضغط إسناد بجانب النشاط لتكليف العضو</small></div>'+
    '<div class="p2-schedule-rows">'+schedule.rows.map(r=>'<div class="p2-schedule-row '+(r.ids.length?'with-program':'')+'"><time dir="ltr">'+H(r.time)+'</time><div class="p2-schedule-activity"><span>'+H(r.title)+'</span>'+
-     (r.ids.length?r.ids.map(id=>entry(id,r.time)).join(''):'<small>'+(r.fixed?'فترة ثابتة':'لا يوجد برنامج مسند لهذه الفترة')+'</small>')+'</div></div>').join('')+'</div>'+
+     (r.ids.length?r.ids.map(id=>entry(id,r.time)).join(''):(r.fixed||r.custom)?fixedEntry(r):'<small>لا يوجد نشاط محدد في هذه الفترة</small>')+'</div></div>').join('')+'</div>'+
    (schedule.unplaced.length?'<div class="p2-schedule-unplaced"><b>برامج مرتبطة باليوم دون وقت محدد</b>'+schedule.unplaced.map(p=>entry(p.id,'لم يحدد الوقت بعد')).join('')+'</div>':'')+
    '</section>';
  }).join('');
  return '<div class="p2-schedule-box"><div class="p2-schedule-top"><h4>جدول المعسكر · إسناد مباشر</h4><p>مستمد من خطة المعسكر الحالية. اختر اليوم ثم اضغط إسناد بجانب البرنامج.</p></div>'+
  '<div class="p2-schedule-day-tabs">'+all.map((d,i)=>'<button type="button" data-p2-daytab="'+(i+1)+'" class="'+(i===0?'active':'')+'">اليوم '+(i+1)+'</button>').join('')+'</div>'+
- '<div class="p2-schedule-panels">'+blocks+'</div></div>';
+ '<div class="p2-schedule-bulk"><div><b id="p2-bulk-count">لم تحدد أنشطة للإسناد الجماعي</b><small>حدد عدة أنشطة من يوم واحد أو أكثر، ثم اسندها دفعة واحدة.</small></div><div class="p2-schedule-bulk-actions"><button type="button" data-p2-bulk="select-day">تحديد أنشطة اليوم</button><button type="button" class="primary" data-p2-bulk="assign">إسناد المحدد</button><button type="button" data-p2-bulk="unassign">إلغاء إسناد المحدد</button><button type="button" data-p2-bulk="clear">مسح الاختيار</button></div></div><div class="p2-schedule-panels">'+blocks+'</div><div class="p2-schedule-live" id="p2-schedule-live" aria-live="polite"></div></div>';
 }
 function p2SyncScheduleButtons(id,day,active){
  document.querySelectorAll('[data-p2-assign-day]').forEach(b=>{
@@ -199,6 +203,7 @@ function teamPage(){
  '<p><b>البرامج والتكليفات:</b> '+(p2StaffPrograms(x.id).length?p2StaffPrograms(x.id).map(pid=>{const d=p2Details(x.id,pid),p=items().find(p=>p.id===pid);return '<span class="p2-assignment-tag">'+H(name(pid))+' · '+H(p2AssignmentRoles.find(r=>r[0]===d.role)?.[1]||'مدرب')+' · '+H(p2AssignedDays(x.id,p).map(n=>'يوم '+n).join('، '))+'</span>'}).join(''):'لم تحدد')+'</p>'+
  '<p><b>المسؤوليات:</b> '+H(p2Duties.filter(a=>(x.duties||[]).includes(a[0])).map(a=>a[1]).join('، ')||'لم تحدد')+'</p>'+
  '<p><b>الصلاحيات التشغيلية:</b> '+H(p2Permissions.filter(a=>(x.permissions||[]).includes(a[0])).map(a=>a[1]).join('، ')||'لم تحدد')+'</p>'+
+ '<p><b>الأنشطة التشغيلية:</b> '+H((db().activityAssignments?.[x.id]||[]).map(key=>{const [day,index]=key.split(':').map(Number);const r=typeof scheduleRow==='function'?scheduleRow(day,index):null;return r?'اليوم '+day+' · '+r.ar:'نشاط غير متاح'}).join('، ')||'لا يوجد')+'</p>'+
  '<p><b>حالة العضو:</b> '+(x.active===false?'غير نشط':'نشط')+'</p>'+
  (local.some(m=>m.id===x.id)?'<div class="p2-actions"><button data-p2="edit-staff" data-id="'+H(x.id)+'">تعديل التكليفات</button><button data-p2="delete-staff" data-id="'+H(x.id)+'">حذف</button></div>':'<div class="p2-actions"><button data-p2="edit-staff" data-id="'+H(x.id)+'">تحديد الصلاحيات والمسؤوليات</button></div>')+
  '</article>').join('')+'</div>';
@@ -258,11 +263,13 @@ function act(b){
     duties:selected('data-p2-duty').filter(v=>p2Duties.some(x=>x[0]===v))};
   if(person)Object.assign(person,value);else d.staff.push(value);
   d.assignmentDetails[staffId]=assignment.details;
+  d.activityAssignments[staffId]=[...document.querySelectorAll('[data-p2-fixed][aria-pressed="true"]')].map(b=>b.getAttribute('data-p2-fixed'));
+
   items().forEach(p=>{const old=info(p.id),trainers=new Set(old.trainers);if(linked.includes(p.id))trainers.add(staffId);else trainers.delete(staffId);d.programs[p.id]={...old,trainers:[...trainers]};});
   closeModal();persist();return;
  }
  if(a==='delete-staff'){
-  if(Object.values(d.programs).some(p=>(p.trainers||[]).includes(id)))return toast('المدرب مرتبط ببرنامج، أزل الارتباط أولًا');
+  if(Object.values(d.programs).some(p=>(p.trainers||[]).includes(id))||(d.activityAssignments?.[id]||[]).length)return toast('أزل البرامج والأنشطة المكلف بها العضو قبل حذفه');
   if(confirm('حذف عضو الفريق؟')){d.staff=d.staff.filter(x=>x.id!==id);persist()}return;
  }
  if(a==='save-program'){
