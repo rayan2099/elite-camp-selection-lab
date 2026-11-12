@@ -911,7 +911,7 @@ body{font-size:var(--type-body);line-height:1.7}
 
 </style>
 <link rel="stylesheet" href="./catering-ui.css?v=restaurant7">
-<link rel="stylesheet" href="./phase-two.css?v=assign8">
+<link rel="stylesheet" href="./phase-two.css?v=assign9">
 </head>
 <body>
 <div id="shell">
@@ -4132,6 +4132,22 @@ document.addEventListener('drop',e=>{
   if(id)placeBrick(id,+p.dataset.plate);
 });
 
+/* Stable schedule assignment routing. Handle before generic page click handlers. */
+document.addEventListener('click',function(event){
+ const button=event.target.closest('button[data-p2-schedule-assign]');
+ if(!button)return;
+ event.preventDefault();event.stopImmediatePropagation();
+ if(typeof window.campScheduleAssignModal!=='function'){
+   toast('تعذر فتح الإسناد. يرجى تحديث الصفحة وإعادة المحاولة.');
+   return;
+ }
+ try{
+   window.campScheduleAssignModal(button.dataset.p2ScheduleAssign,button.dataset.day,button.dataset.token);
+ }catch(err){
+   console.error('Camp schedule assignment failure:',err);
+   toast('حدث خطأ عند فتح الإسناد. يرجى إعادة المحاولة.');
+ }
+},true);
 /* Dedicated schedule edit click handling, prior to the other action handlers. */
 document.addEventListener('click',function(event){
  const control=event.target.closest('button[data-act^="editScheduleRow:"],button[data-act^="editScheduleProgram:"]');
@@ -4381,6 +4397,6 @@ document.head.append(style);
 </script>
 <script src="./phase-one.js?v=ad48ef5b" defer></script>
 <script src="./meal-preparation.js?v=restaurant7" defer></script>
-<script src="./phase-two.js?v=assign8" defer></script>
+<script src="./phase-two.js?v=assign9" defer></script>
 </body>
 </html>
