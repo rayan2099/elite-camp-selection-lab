@@ -403,7 +403,7 @@ document.addEventListener('click',ev=>{
 },true);
 document.addEventListener('input',ev=>{if(ev.target.closest('#modal')&&['cm-servings','cm-group-size','cm-price','cm-special-price'].includes(ev.target.id))updateMealPreview()},true);
 document.addEventListener('change',ev=>{if(ev.target.closest('#modal')&&(ev.target.id==='cm-mode'||ev.target.hasAttribute('data-cm-special')))updateMealPreview()},true);
-NAV[1][1].push(['meals','إدارة الوجبات والتغذية','Meals & catering']);
+/* Navigation is centrally ordered in index.html. */
 PAGE_TITLES.meals=['إدارة الوجبات والتغذية','Meal preparation'];
 PAGES.meals=pageMeals;
 document.addEventListener('click',event=>{const b=event.target.closest('[data-cp]');if(!b)return;event.preventDefault();event.stopImmediatePropagation();handle(b)},true);
