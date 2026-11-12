@@ -72,3 +72,31 @@
 .p2-modal .p2-member-section-head h3{margin:0}
 .p2-modal .p2-member-section-head button{background:#fff;border:1px solid #d9e4ee;border-radius:8px;color:#4c647b;padding:7px 11px;font-size:11px}
 .p2-modal .p2-member-section-head button:hover{background:#f5f8fc}
+
+
+/* Specific program assignments within team roles */
+.p2-modal .p2-assignment-widget{background:#f8fafc;border:1px solid #dfe8f1;border-radius:14px;padding:17px;margin:12px 0}
+.p2-modal .p2-assignment-summary{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:13px}
+.p2-modal .p2-assignment-summary h4{font-size:15px;color:#1c354e;margin:0 0 4px}
+.p2-modal .p2-assignment-summary p{font-size:11px;color:#77899c;margin:0}
+.p2-modal #p2-assignment-count{background:#e6eef7;border-radius:20px;padding:6px 11px;font-size:12px;font-weight:700;white-space:nowrap}
+.p2-modal .p2-assignment-list{display:grid;gap:10px;max-height:480px;overflow:auto;padding:3px}
+.p2-modal .p2-assignment{border:1px solid #e0e8f0;border-radius:11px;background:white;overflow:hidden}
+.p2-modal .p2-assignment[hidden]{display:none!important}
+.p2-modal .p2-assignment-select{display:flex!important;flex-direction:row!important;align-items:center;gap:10px;padding:14px;margin:0!important;cursor:pointer}
+.p2-modal .p2-assignment-select:has(input:checked){background:#fff7f0}
+.p2-modal .p2-assignment-select span{display:grid;gap:3px}
+.p2-modal .p2-assignment-select b{font-size:13px;color:#1f3850}
+.p2-modal .p2-assignment-select small{font-size:11px;color:#8492a0}
+.p2-modal .p2-assignment-details{padding:13px 16px 15px;border-top:1px solid #e8edf3}
+.p2-modal .p2-assignment-details[hidden]{display:none!important}
+.p2-modal .p2-assignment-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.p2-modal .p2-assignment-columns label,.p2-modal .p2-assignment-note{font-size:12px}
+.p2-modal .p2-assignment-days{margin:11px 0}
+.p2-modal .p2-assignment-days>b{font-size:12px;color:#455b70}
+.p2-modal .p2-assignment-day-options{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
+.p2-modal .p2-assignment-day-options label{display:flex;flex-direction:row;align-items:center;gap:6px;margin:0;background:#f5f8fb;border:1px solid #e5eaf0;border-radius:8px;padding:7px 11px;font-size:11px}
+.p2-modal .p2-assignment-day-options label:has(input:checked){background:#fff3e9;border-color:#f0bf97}
+.p2-modal .p2-assignment-empty{padding:17px;color:#708399;font-size:12px}
+.p2-assignment-tag{display:inline-flex;flex-wrap:wrap;gap:4px;background:#edf3f8;border:1px solid #e0e8f1;border-radius:7px;padding:5px 8px;font-size:11px;color:#2b4e68;margin:3px}
+@media(max-width:680px){.p2-modal .p2-assignment-columns{grid-template-columns:1fr}.p2-modal .p2-assignment-summary{align-items:flex-start;flex-direction:column}}
