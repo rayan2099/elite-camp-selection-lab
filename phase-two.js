@@ -484,6 +484,109 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-p2-tool]')
  if(b.dataset.p2Tool==='clear-assignments'){document.querySelectorAll('.p2-assignment-select input[data-p2-program]').forEach(box=>box.checked=false);document.querySelectorAll('.p2-assignment-details').forEach(x=>x.hidden=true);document.querySelectorAll('[data-p2-assign-day]').forEach(x=>{x.setAttribute('aria-pressed','false');x.classList.remove('assigned');x.textContent='+ إسناد'});p2UpdateAssignmentSummary();return;}
  if(b.dataset.p2Tool==='clear-programs')holder?.querySelectorAll('[data-p2-program]').forEach(box=>box.checked=false);const count=holder?.querySelector('.p2-program-count');if(count)count.textContent='0 برنامج محدد';},true);
 document.addEventListener('click',e=>{const b=e.target.closest('[data-p2]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();act(b)},true);
+
+/* Optional assignment directly from step 5 schedule preview.
+   Uses the same underlying Phase 2 staff/program/day records. */
+function scheduleAssignStaffList(){
+ return staff().filter(x=>x.active!==false);
+}
+function scheduleAssignAssignees(kind,day,token){
+ const d=db();
+ if(kind==='activity'){
+  const key=String(day)+':'+String(token);
+  return scheduleAssignStaffList().filter(m=>(d.activityAssignments[m.id]||[]).includes(key));
+ }
+ return scheduleAssignStaffList().filter(m=>{
+  if(!(info(token).trainers||[]).includes(m.id))return false;
+  const item=items().find(p=>String(p.id)===String(token));
+  if(!item)return false;
+  return p2AssignedDays(m.id,item).includes(Number(day));
+ });
+}
+function scheduleAssignInline(kind,day,token){
+ const selected=scheduleAssignAssignees(kind,day,token);
+ return '<span class="p2-inline-assignment noprint"><button type="button" class="p2-inline-assign-button" data-p2-schedule-assign="'+H(kind)+'" data-day="'+Number(day)+'" data-token="'+H(token)+'">'+(selected.length?'إسناد · '+selected.length:'إسناد')+'</button>'+
+ (selected.length?'<small class="p2-inline-assignees" title="'+H(selected.map(m=>m.name).join('، '))+'">'+H(selected.map(m=>m.name).join('، '))+'</small>':'')+'</span>';
+}
+function scheduleAssignModal(kind,day,token){
+ const n=Number(day),id=String(token);
+ if(!canEdit())return toast('الإسناد غير متاح لهذا الدور');
+ if(!Number.isInteger(n)||n<1||n>S.meta.days.length)return toast('اليوم غير صالح');
+ let activity='';
+ if(kind==='activity'){
+  const index=Number(id);
+  if(!Number.isInteger(index)||index<0||index>=DAY_TEMPLATE.length)return toast('النشاط غير موجود');
+  const row=scheduleRow(n,index),listed=row.slot?(slotMap(n)[row.slot]||[]):[];
+  if(row.slot&&listed.length)return toast('اختر إسناد البرنامج مباشرة من البطاقة');
+  if(row.slot&&!slotHasCustomActivity(n,index))return toast('أضف نشاطًا لهذه الفترة قبل إسناده');
+  activity=row.ar;
+ }else if(kind==='program'){
+  const p=items().find(x=>String(x.id)===id);
+  if(!p||!p2ProgramDays(p).includes(n))return toast('البرنامج غير موجود في هذا اليوم');
+  activity=name(id);
+ }else return toast('نوع التكليف غير صالح');
+ const chosen=new Set(scheduleAssignAssignees(kind,n,id).map(m=>m.id));
+ const members=scheduleAssignStaffList();
+ const key=kind==='activity'?n+':'+id:id;
+ openModal('<div class="p2-schedule-assign-modal" dir="rtl"><div class="p2-schedule-assign-header"><small>الجدول · اليوم '+n+'</small><h2>إسناد '+H(activity)+'</h2><p>اختر شخصًا أو أكثر. الإسناد اختياري، ويمكنك ترك النشاط دون مسؤول.</p></div>'+
+ '<div class="p2-schedule-assign-toolbar"><span id="p2-schedule-assign-count">'+chosen.size+' أعضاء محددين</span><button type="button" data-p2-schedule-select="all">تحديد الكل</button><button type="button" data-p2-schedule-select="none">مسح الاختيار</button></div>'+
+ '<div class="p2-schedule-assign-search"><input type="search" id="p2-schedule-assign-search" placeholder="البحث باسم المدرب أو المشرف" aria-label="البحث في أعضاء الفريق"></div>'+
+ '<div class="p2-schedule-assign-members">'+(members.length?members.map(m=>'<label class="p2-schedule-assign-member" data-member-search="'+H((m.name+' '+(m.role||'')).toLowerCase())+'"><input type="checkbox" data-p2-schedule-member="'+H(m.id)+'" '+(chosen.has(m.id)?'checked':'')+'><span><b>'+H(m.name)+'</b><small>'+H(m.role||'عضو الفريق')+'</small></span></label>').join(''):'<div class="p2-assignment-empty">لا يوجد مدربون أو مشرفون مسجلون. أضفهم من تبويب «الفريق والصلاحيات» أولًا.</div>')+'</div>'+
+ '<p class="p2-schedule-assign-note">التعديل يخص هذا اليوم فقط، ولا يغيّر تكليفات بقية الأيام أو حالة جاهزية الخطة.</p>'+
+ '<div class="p2-schedule-assign-actions"><button type="button" data-act="close">إلغاء</button><button type="button" class="primary" data-p2-schedule-save="'+H(kind)+'" data-day="'+n+'" data-token="'+H(id)+'">حفظ الإسناد</button></div></div>');
+}
+function scheduleAssignSave(kind,day,token,ids){
+ const d=db(),n=Number(day),id=String(token),valid=new Set(scheduleAssignStaffList().map(m=>m.id));
+ const selectedIds=new Set(ids.filter(x=>valid.has(x)));
+ if(kind==='activity'){
+  const key=n+':'+id;
+  staff().forEach(m=>{
+   const values=new Set(d.activityAssignments[m.id]||[]);
+   if(selectedIds.has(m.id))values.add(key);else values.delete(key);
+   d.activityAssignments[m.id]=[...values];
+  });
+ }else if(kind==='program'){
+  const p=items().find(x=>String(x.id)===id);
+  if(!p)return false;
+  for(const m of staff()){
+   const prior=info(id),trainers=new Set(prior.trainers||[]);
+   const details=d.assignmentDetails[m.id]||{};
+   const existing=details[id];
+   const chosenDays=new Set(existing?.days?.length?existing.days.map(Number):trainers.has(m.id)?p2ProgramDays(p):[]);
+   if(selectedIds.has(m.id))chosenDays.add(n);else chosenDays.delete(n);
+   if(chosenDays.size){trainers.add(m.id);details[id]={role:'lead',status:'planned',note:'',...existing,days:[...chosenDays].sort((a,b)=>a-b)};}
+   else{trainers.delete(m.id);delete details[id];}
+   d.assignmentDetails[m.id]=details;
+   d.programs[id]={...prior,trainers:[...trainers]};
+  }
+ }else return false;
+ d.audit=null;save();render({preserveScroll:true});return true;
+}
+function scheduleAssignUpdateCount(){
+ const count=document.querySelectorAll('[data-p2-schedule-member]:checked').length,node=document.getElementById('p2-schedule-assign-count');
+ if(node)node.textContent=count+' أعضاء محددين';
+}
+document.addEventListener('click',event=>{
+ const button=event.target.closest('[data-p2-schedule-assign]');
+ if(button){event.preventDefault();event.stopImmediatePropagation();scheduleAssignModal(button.dataset.p2ScheduleAssign,button.dataset.day,button.dataset.token);return;}
+ const control=event.target.closest('[data-p2-schedule-select]');
+ if(control){event.preventDefault();event.stopImmediatePropagation();document.querySelectorAll('[data-p2-schedule-member]').forEach(el=>{if(control.dataset.p2ScheduleSelect==='none'||!el.closest('label')?.hidden)el.checked=control.dataset.p2ScheduleSelect==='all'});scheduleAssignUpdateCount();return;}
+ const saveButton=event.target.closest('[data-p2-schedule-save]');
+ if(saveButton){event.preventDefault();event.stopImmediatePropagation();
+  if(!canEdit())return toast('الإسناد غير متاح لهذا الدور');
+  const ids=[...document.querySelectorAll('[data-p2-schedule-member]:checked')].map(el=>el.dataset.p2ScheduleMember);
+  if(!scheduleAssignSave(saveButton.dataset.p2ScheduleSave,saveButton.dataset.day,saveButton.dataset.token,ids))return toast('تعذر حفظ الإسناد');
+  closeModal();toast('تم حفظ الإسناد الاختياري');return;
+ }
+},true);
+document.addEventListener('change',event=>{if(event.target.matches('[data-p2-schedule-member]'))scheduleAssignUpdateCount()},true);
+document.addEventListener('input',event=>{
+ if(event.target.id!=='p2-schedule-assign-search')return;
+ const q=event.target.value.trim().toLowerCase();
+ document.querySelectorAll('.p2-schedule-assign-member').forEach(el=>el.hidden=!!q&&!el.dataset.memberSearch.includes(q));
+},true);
+window.campScheduleAssignInline=scheduleAssignInline;
+
 NAV[2][1].push(['operations','الجاهزية ومتطلبات التشغيل','Operational readiness']);
 PAGE_TITLES.operations=['الجاهزية ومتطلبات التشغيل','Operational readiness'];
 PAGES.operations=pageOperations;
