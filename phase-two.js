@@ -30,7 +30,7 @@ const selected=attr=>[...document.querySelectorAll('['+attr+']:checked')].map(e=
 const input=id=>document.getElementById(id)?.value||'';
 const selectedChecks=()=>{const d=db(),errors=[];items().forEach(p=>{const a=info(p.id);if(!a.trainers.length)errors.push('لم يحدد مدرب: '+name(p.id));if(a.trainers.some(id=>!staff().some(x=>x.id===id)))errors.push('مدرب غير موجود: '+name(p.id));if(a.safety&&!a.safetyWhy.trim())errors.push('سبب الأمن والسلامة ناقص: '+name(p.id));if(a.outdoor&&!a.outdoorWhy.trim())errors.push('سبب المساحة الخارجية ناقص: '+name(p.id))});requirements().forEach(r=>{if(!r.owner?.trim())errors.push('المسؤول غير محدد: '+r.name);if(!r.details?.trim())errors.push('تفاصيل ناقصة: '+r.name);if(r.status!=='ready')errors.push('المتطلب غير مكتمل: '+r.name);if(['materials','safety','transport'].includes(r.category)&&!r.linked.length)errors.push('غير مرتبط ببرنامج: '+r.name)});d.transport.forEach(t=>{if(!t.linked?.length||!t.owner||N(t.seats)<1)errors.push('بيانات نقل ناقصة: '+t.name);if(N(t.passengers)>N(t.seats))errors.push('سعة النقل أقل من عدد المشاركين: '+t.name)});return errors};
 const persist=()=>{db().audit=null;save();render({preserveScroll:true})};
-function page(){
+function pageOperations(){
  const d=db(),pg=items(),req=requirements(),ext=pg.filter(p=>info(p.id).outdoor).length,safe=pg.filter(p=>info(p.id).safety).length,errors=selectedChecks();
  return '<div class="p2-workspace"><div class="p2-hero"><div><div class="eyebrow">المرحلة الثانية · التشغيل</div><h1>جاهزية المعسكر ومتطلبات التشغيل</h1><p>توزيع الكوادر، الأمن والسلامة، المساحات، الأدوات، النقل، والمتابعة التنفيذية.</p></div><div class="p2-actions"><button data-p2="back">العودة إلى الجدول</button><button class="primary" data-p2="tab" data-value="audit">تدقيق الجاهزية</button></div></div>'+
  '<div class="p2-metrics"><div><small>البرامج</small><b>'+pg.length+'</b></div><div><small>تحتاج أمن وسلامة</small><b>'+safe+'</b></div><div><small>تحتاج مساحة خارجية</small><b>'+ext+'</b><small>بحسب البرامج المختارة</small></div><div><small>المتطلبات</small><b>'+req.length+'</b></div><div><small>ملاحظات التدقيق</small><b>'+errors.length+'</b></div></div>'+
@@ -156,7 +156,7 @@ function act(b){
 document.addEventListener('click',e=>{const b=e.target.closest('[data-p2]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();act(b)},true);
 NAV[2][1].push(['operations','الجاهزية ومتطلبات التشغيل','Operational readiness']);
 PAGE_TITLES.operations=['الجاهزية ومتطلبات التشغيل','Operational readiness'];
-PAGES.operations=page;
+PAGES.operations=pageOperations;
 if(location.hash==='#operations')page='operations';
 render({preserveScroll:true});
 })();
