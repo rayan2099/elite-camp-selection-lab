@@ -66,3 +66,9 @@
 .p2-modal .p2-program-count{display:block;font-size:11px;color:#667d90;margin-top:7px}
 .p2-modal .p2-form .p2-inline{display:flex;flex-direction:row;gap:9px;align-items:center;background:#f5f8fb;border-radius:9px;padding:10px 12px}
 @media(max-width:700px){.p2-modal .p2-form .p2-checks{grid-template-columns:1fr}.p2-modal .p2-program-toolbar input{width:100%}}
+
+
+.p2-modal .p2-member-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:11px 0 7px}
+.p2-modal .p2-member-section-head h3{margin:0}
+.p2-modal .p2-member-section-head button{background:#fff;border:1px solid #d9e4ee;border-radius:8px;color:#4c647b;padding:7px 11px;font-size:11px}
+.p2-modal .p2-member-section-head button:hover{background:#f5f8fc}
