@@ -100,3 +100,37 @@
 .p2-modal .p2-assignment-empty{padding:17px;color:#708399;font-size:12px}
 .p2-assignment-tag{display:inline-flex;flex-wrap:wrap;gap:4px;background:#edf3f8;border:1px solid #e0e8f1;border-radius:7px;padding:5px 8px;font-size:11px;color:#2b4e68;margin:3px}
 @media(max-width:680px){.p2-modal .p2-assignment-columns{grid-template-columns:1fr}.p2-modal .p2-assignment-summary{align-items:flex-start;flex-direction:column}}
+
+
+/* Embedded operational timetable in staff assignments */
+.p2-modal .p2-schedule-box{border:1px solid #dde8f0;border-radius:13px;background:white;overflow:hidden;margin:14px 0 12px}
+.p2-modal .p2-schedule-top{padding:15px 17px;border-bottom:1px solid #e7edf3}
+.p2-modal .p2-schedule-top h4{font-size:15px;color:#1a3650;margin:0 0 4px}
+.p2-modal .p2-schedule-top p{font-size:11px;color:#75889b;margin:0;line-height:1.7}
+.p2-modal .p2-schedule-day-tabs{display:flex;gap:7px;overflow:auto;background:#f4f7fa;padding:10px;scrollbar-width:thin}
+.p2-modal .p2-schedule-day-tabs button{white-space:nowrap;border:1px solid #dce5ed;background:white;color:#506781;border-radius:8px;padding:9px 13px;font-size:11px;cursor:pointer}
+.p2-modal .p2-schedule-day-tabs button.active{background:#203e59;border-color:#203e59;color:white}
+.p2-modal .p2-schedule-day[hidden]{display:none!important}
+.p2-modal .p2-schedule-daytitle{padding:13px 17px;border-bottom:1px solid #edf1f5;display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap}
+.p2-modal .p2-schedule-daytitle h5{font-size:13px;color:#243d56;margin:0}
+.p2-modal .p2-schedule-daytitle small{font-size:10px;color:#8798a8}
+.p2-modal .p2-schedule-rows{max-height:410px;overflow:auto;scrollbar-width:thin}
+.p2-modal .p2-schedule-row{display:grid;grid-template-columns:112px minmax(0,1fr);gap:14px;align-items:start;border-bottom:1px solid #edf1f5;padding:10px 15px}
+.p2-modal .p2-schedule-row:last-child{border-bottom:0}
+.p2-modal .p2-schedule-row time{font-size:11px;color:#728499;padding-top:5px;text-align:left;white-space:normal}
+.p2-modal .p2-schedule-activity{min-width:0}
+.p2-modal .p2-schedule-activity>span{display:block;font-size:12px;color:#3b536b;font-weight:600;line-height:1.5}
+.p2-modal .p2-schedule-activity>small{display:block;font-size:10px;color:#a0acb8;margin-top:3px}
+.p2-modal .p2-schedule-row.with-program{background:#fcfdff}
+.p2-modal .p2-sched-program{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 0;flex-wrap:wrap}
+.p2-modal .p2-sched-program>div{display:grid;gap:3px}
+.p2-modal .p2-sched-program b{font-size:12px;color:#1e3a54}
+.p2-modal .p2-sched-program small{font-size:10px;color:#8898a8}
+.p2-modal .p2-sched-program button{white-space:nowrap;font-size:11px;font-weight:750;border:1px solid #de9c6d;color:#bd672d;background:#fff7f0;border-radius:8px;padding:8px 14px;cursor:pointer}
+.p2-modal .p2-sched-program button.assigned{background:#eaf5ef;border-color:#b8dcc6;color:#28764a}
+.p2-modal .p2-schedule-unplaced{border-top:1px solid #e5edf5;padding:13px 16px;background:#fafbfd}
+.p2-modal .p2-schedule-unplaced>b{font-size:11px;display:block;color:#60758a;margin-bottom:9px}
+.p2-modal .p2-assignment-advanced{border:1px solid #e0e8f0;border-radius:11px;background:#fff;overflow:hidden}
+.p2-modal .p2-assignment-advanced>summary{padding:14px 17px;cursor:pointer;font-size:12px;font-weight:750;color:#284560;background:#f8fafc}
+.p2-modal .p2-assignment-advanced>.p2-program-toolbar,.p2-modal .p2-assignment-advanced>.p2-assignment-list{margin:12px 15px}
+@media(max-width:620px){.p2-modal .p2-schedule-row{grid-template-columns:73px minmax(0,1fr);gap:8px;padding:9px}.p2-modal .p2-sched-program button{padding:7px 10px}.p2-modal .p2-schedule-daytitle{padding:11px}}
