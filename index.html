@@ -911,6 +911,7 @@ body{font-size:var(--type-body);line-height:1.7}
 
 </style>
 <link rel="stylesheet" href="./catering-ui.css?v=restaurant7">
+<link rel="stylesheet" href="./phase-two.css?v=phase2a">
 </head>
 <body>
 <div id="shell">
@@ -2083,15 +2084,11 @@ function pageReadiness(){
       </div>
     </div>
     <div class="card spacer">
-      <div class="row wrap" style="justify-content:space-between;gap:12px"><h2>${T('جاهزية المعسكر ومتطلبات التشغيل','Camp operational readiness and requirements')}</h2>
-        <button class="primary small noprint" data-act="newPrepRequirement">+ ${T('إضافة متطلب تشغيلي','Add operational requirement')}</button></div>
-      <p class="help" style="margin:6px 0 12px">${T('تابع جميع متطلبات تشغيل المعسكر، وحدّد المسؤول عن كل متطلب، وتأكد من جاهزيته قبل بدء التنفيذ. يمكنك إضافة متطلبات جديدة حسب احتياجات المعسكر.','Track all operational requirements, assign an owner and verify readiness before delivery. You can add camp-specific requirements.')}</p>
-      ${na.length?`<div class="tablewrap"><table><thead><tr><th>${T('المتطلب التشغيلي','Operational requirement')}</th><th>${T('البرامج المرتبطة','Related programs')}</th><th>${T('المسؤول عن التنفيذ','Responsible owner')}</th><th>${T('حالة الجاهزية','Readiness')}</th></tr></thead><tbody>
-        ${na.map(([k,n])=>`<tr><td><b>${esc(L({ar:NEEDS[k][0],en:NEEDS[k][1]}))}</b></td>
-          <td>${n===null?`<span class="pill line">${T('إضافة يدوية','Manually added')}</span>`:`<span class="pill">${n}</span>`}</td>
-          <td><input data-prep="owner:${k}" value="${esc((S.prep[k]||{}).owner||'')}" placeholder="${T('اسم المسؤول','Owner name')}" style="width:150px"></td>
-          <td><label class="pill ${((S.prep[k]||{}).done)?'good':'line'}" style="cursor:pointer"><input type="checkbox" data-prep="done:${k}" ${((S.prep[k]||{}).done)?'checked':''} style="margin:0"> ${((S.prep[k]||{}).done)?T('جاهز للتنفيذ','Ready for delivery'):T('جارٍ التجهيز','In preparation')}</label></td></tr>`).join('')}
-      </tbody></table></div>`:`<div class="empty">${T('لا متطلبات لأن الخطة فارغة.','No requirements yet because the plan is empty.')}</div>`}
+      <div class="row wrap" style="justify-content:space-between;gap:12px">
+        <div><h2>${T('الجاهزية ومتطلبات التشغيل','Operational readiness')}</h2>
+          <p class="help">${T('أصبحت مراجعة المدربين والسلامة والمعدات والنقل في تبويب مستقل. الفحص هنا يختص باكتمال الخطة فقط.','Staff, safety, supplies and transport now have a separate operational workflow. This page checks plan completeness only.')}</p></div>
+        <button class="primary" data-page="operations">${T('فتح الجاهزية التشغيلية','Open operational readiness')}</button>
+      </div>
     </div>
     <div class="grid cols2 spacer">
       <div class="card"><h2>${T('قرار اعتماد البرامج','Program approval decision')}</h2>
@@ -4383,5 +4380,6 @@ document.head.append(style);
 </script>
 <script src="./phase-one.js?v=ad48ef5b" defer></script>
 <script src="./meal-preparation.js?v=restaurant7" defer></script>
+<script src="./phase-two.js?v=phase2a" defer></script>
 </body>
 </html>
