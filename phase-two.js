@@ -16,7 +16,8 @@ function db(){
  if(!d.migrated){(S.prep.__manual||[]).forEach(r=>d.custom.push({id:r.id,name:r.name,category:'general',linked:[],owner:S.prep[r.id]?.owner||'',quantity:1,unit:'متطلب',details:'',reason:'',status:S.prep[r.id]?.done?'ready':'pending'}));d.migrated=true;}
  return d;
 }
-const staff=()=>{const all=[...(S.prep.__catering?.team||[])];db().staff.forEach(m=>{const i=all.findIndex(x=>x.id===m.id);if(i>=0)all[i]={...all[i],...m};else all.push(m)});return all};
+const staff=()=>{const base=typeof window.campCateringTeamMembers==='function'?window.campCateringTeamMembers():(S.prep.__catering?.team||[]);
+ const all=[...base];db().staff.forEach(m=>{const i=all.findIndex(x=>x.id===m.id);if(i>=0)all[i]={...all[i],...m};else all.push(m)});return all;};
 const member=id=>staff().find(x=>x.id===id)?.name||'غير محدد';
 const info=id=>{const x=ITEM(id),d=db();return {trainers:[],safety:x?.need.includes('safety')||false,outdoor:x?.need.includes('outdoor')||false,safetyWhy:'',outdoorWhy:'',...(d.programs[id]||{})}};
 const related=k=>items().filter(p=>ITEM(p.id).need.includes(k)).map(x=>x.id);
@@ -102,7 +103,7 @@ function programModal(id){
  '<div class="p2-actions"><button data-act="close">إلغاء</button><button class="primary" data-p2="save-program" data-id="'+H(id)+'">حفظ</button></div>');
 }
 
-const p2RoleOptions=["مدرب","مشرف ميداني","مسؤول أمن وسلامة","مسؤول نقل","مسؤول تجهيزات","مسؤول التغذية"];
+const p2RoleOptions=["مدرب","مشرف ميداني","مشرف التوزيع","مسؤول أمن وسلامة","مسؤول نقل","مسؤول تجهيزات","مسؤول التغذية","قائد برامج","مدير معسكر","مرافق","سائق"];
 const p2Permissions=[["schedule","عرض جداول البرامج"],["activities","تسجيل تنفيذ الأنشطة"],["attendance","متابعة الحضور"],["safety","تسجيل بلاغات السلامة"],["resources","متابعة التجهيزات"],["transport","متابعة النقل"],["meals","متابعة الوجبات"],["reports","رفع التقارير"]];
 const p2RoleDefaults={"مدرب":{"duties":["teach","reports"],"permissions":["schedule","activities","reports"]},"مشرف ميداني":{"duties":["supervise","reports"],"permissions":["schedule","attendance","activities","safety","reports"]},"مسؤول أمن وسلامة":{"duties":["safety","reports"],"permissions":["schedule","safety","reports"]},"مسؤول نقل":{"duties":["transport"],"permissions":["schedule","transport"]},"مسؤول تجهيزات":{"duties":["materials"],"permissions":["schedule","resources"]},"مسؤول التغذية":{"duties":["meals"],"permissions":["schedule","meals"]}};
 const p2Duties=[["teach","تقديم البرامج"],["supervise","الإشراف على الطلاب"],["safety","متابعة السلامة"],["materials","تجهيز الأدوات"],["transport","مرافقة النقل"],["meals","استلام الوجبات"],["reports","تسليم التقرير اليومي"]];
@@ -232,7 +233,7 @@ function teamPage(){
  '<p><b>الصلاحيات التشغيلية:</b> '+H(p2Permissions.filter(a=>(x.permissions||[]).includes(a[0])).map(a=>a[1]).join('، ')||'لم تحدد')+'</p>'+
  '<p><b>الأنشطة التشغيلية:</b> '+H((db().activityAssignments?.[x.id]||[]).map(key=>{const [day,index]=key.split(':').map(Number);const r=typeof scheduleRow==='function'?scheduleRow(day,index):null;return r?'اليوم '+day+' · '+r.ar:'نشاط غير متاح'}).join('، ')||'لا يوجد')+'</p>'+
  '<p><b>حالة العضو:</b> '+(x.active===false?'غير نشط':'نشط')+'</p>'+
- (local.some(m=>m.id===x.id)?'<div class="p2-actions"><button data-p2="edit-staff" data-id="'+H(x.id)+'">تعديل التكليفات</button><button data-p2="delete-staff" data-id="'+H(x.id)+'">حذف</button></div>':'<div class="p2-actions"><button data-p2="edit-staff" data-id="'+H(x.id)+'">تحديد الصلاحيات والمسؤوليات</button></div>')+
+ ('<div class="p2-actions"><button data-p2="edit-staff" data-id="'+H(x.id)+'">تعديل البيانات والتكليفات</button><button data-p2="delete-staff" data-id="'+H(x.id)+'">حذف</button></div>')+
  '</article>').join('')+'</div>';
 }
 function staffModal(id){
@@ -304,7 +305,14 @@ function act(b){
  }
  if(a==='delete-staff'){
   if(Object.values(d.programs).some(p=>(p.trainers||[]).includes(id))||(d.activityAssignments?.[id]||[]).length)return toast('أزل البرامج والأنشطة المكلف بها العضو قبل حذفه');
-  if(confirm('حذف عضو الفريق؟')){d.staff=d.staff.filter(x=>x.id!==id);persist()}return;
+  if((S.prep.__catering?.meals||[]).some(m=>m.supervisorId===id))return toast('هذا العضو مسؤول عن وجبات. غيّر مسؤول الوجبات قبل حذفه.');
+  if(!staff().some(m=>m.id===id))return toast('العضو غير موجود.');
+  if(confirm('حذف العضو من فريق المعسكر؟')){
+    d.staff=d.staff.filter(x=>x.id!==id);
+    if(Array.isArray(S.prep.__catering?.team))S.prep.__catering.team=S.prep.__catering.team.filter(x=>x.id!==id);
+    delete d.assignmentDetails[id];delete d.activityAssignments[id];
+    persist();
+  }return;
  }
  if(a==='save-program'){
   const trainers=selected('data-p2-staff'),safety=document.getElementById('p2-safety').checked,outdoor=document.getElementById('p2-outdoor').checked;
