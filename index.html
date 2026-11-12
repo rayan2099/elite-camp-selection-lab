@@ -1623,10 +1623,29 @@ function icon(name){
   return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
 }
 const NAV=[
-  ['start',[['opportunities','١. اختر موعد المعسكر','1. Choose camp dates'],['camps','٢. أنشئ المعسكر أو اختره','2. Create or select a camp'],['finance','الإدارة المالية للمعسكرات','Camp financial management']]],
-  ['plan',[['builder','٣. صمّم خطة المعسكر','3. Build the camp plan'],['library','مكتبة البرامج','Program library'],['selection','البرامج المختارة','Selected programs'],['days','توزيع البرامج على الأيام','Daily program allocation']]],
-  ['verify',[['fit','٤. افحص مواءمة الطلاب','4. Check student alignment'],['readiness','٥. راجع اكتمال الخطة','5. Review plan completeness']]],
-  ['out',[['dashboard','٦. استعرض ملخص الخطة','6. Review plan overview'],['outputs','٧. جهّز الملفات وشاركها','7. Export and share']]]
+  ['start',[
+    ['opportunities','١. اختر موعد المعسكر','1. Choose camp dates'],
+    ['camps','٢. أنشئ المعسكر أو اختره','2. Create or select a camp']
+  ]],
+  ['plan',[
+    ['builder','٣. صمّم خطة المعسكر','3. Design the camp plan'],
+    ['library','مكتبة البرامج','Program library'],
+    ['selection','البرامج المختارة','Selected programs'],
+    ['days','توزيع البرامج على الأيام','Allocate programs to days']
+  ]],
+  ['prepare',[
+    ['meals','إدارة الوجبات والتغذية','Meals and catering'],
+    ['operations','الجاهزية ومتطلبات التشغيل','Operational readiness'],
+    ['finance','الإدارة المالية للمعسكرات','Camp financial management']
+  ]],
+  ['verify',[
+    ['fit','٤. افحص مواءمة الطلاب','4. Review student alignment'],
+    ['readiness','٥. راجع اكتمال الخطة','5. Review plan completeness']
+  ]],
+  ['out',[
+    ['dashboard','٦. استعرض ملخص الخطة','6. Review plan overview'],
+    ['outputs','٧. جهّز الملفات وشاركها','7. Export and share']
+  ]]
 ];
 const PAGE_TITLES={
   camps:['إدارة المعسكرات','Manage camps'],
@@ -1649,8 +1668,8 @@ function header(){
       <svg viewBox="0 0 92 46" aria-hidden="true"><path fill="currentColor" d="M2 40 24 6l10 16 6-9 20 27H46L34 23l-8 17H2Z"/><path fill="currentColor" opacity=".45" d="M62 40 80 12l10 28H62Z"/></svg>
       <div><b>${T('أكاديمية النخبة','Elite Academy')}</b><small>CAMP PLANNER</small></div>
     </div>
-    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({start:'ابدأ من هنا',plan:'صمّم الخطة',verify:'تحقق من الخطة',out:'النتائج والمشاركة'}[g],{start:'START HERE',plan:'BUILD THE PLAN',verify:'CHECK THE PLAN',out:'RESULTS & SHARING'}[g])}</div>
-      ${items.map(([id,ar,en])=>id==='finance'?`<div><button class="navbtn ${page==='finance'?'active':''}" data-act="toggleFinanceNav" aria-expanded="${financeNavOpen}" aria-controls="financeCampLinks">${icon('export')}<span>${T(ar,en)}</span><span class="finance-toggle">${financeNavOpen?'⌄':'›'}</span></button>${financeNavOpen?`<div class="finance-sublist" id="financeCampLinks">${S.camps.map(c=>`<button class="finance-subitem ${page==='finance'&&c.id===S.activeId?'active':''}" data-fin-camp="${esc(c.id)}" title="${esc(campName(c))}"><span class="camp-marker">▣</span><span class="camp-label">${esc(campName(c))}</span></button>`).join('')}</div>`:''}</div>`:`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='camps'?'collection':id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='opportunities'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}${id==='camps'?`<span class="cnt">${S.camps.length}</span>`:''}</button>`).join('')}
+    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({start:'١ · إعداد المعسكر',plan:'٢ · تصميم البرنامج والجدول',prepare:'٣ · تجهيز التشغيل',verify:'٤ · المراجعة والتحقق',out:'٥ · النتائج والمشاركة'}[g],{start:'1 · CAMP SETUP',plan:'2 · PROGRAMS & SCHEDULE',prepare:'3 · OPERATIONS',verify:'4 · REVIEW',out:'5 · RESULTS & SHARING'}[g])}</div>
+      ${items.map(([id,ar,en])=>id==='finance'?`<div><button class="navbtn ${page==='finance'?'active':''}" data-act="toggleFinanceNav" aria-expanded="${financeNavOpen}" aria-controls="financeCampLinks">${icon('export')}<span>${T(ar,en)}</span><span class="finance-toggle">${financeNavOpen?'⌄':'›'}</span></button>${financeNavOpen?`<div class="finance-sublist" id="financeCampLinks">${S.camps.map(c=>`<button class="finance-subitem ${page==='finance'&&c.id===S.activeId?'active':''}" data-fin-camp="${esc(c.id)}" title="${esc(campName(c))}"><span class="camp-marker">▣</span><span class="camp-label">${esc(campName(c))}</span></button>`).join('')}</div>`:''}</div>`:`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='camps'?'collection':id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='meals'?'utensils':id==='operations'?'clipboard-check':id==='opportunities'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}${id==='camps'?`<span class="cnt">${S.camps.length}</span>`:''}</button>`).join('')}
     </div>`).join('')}
     <div class="navgroup"><div class="navlabel">متابعة التنفيذ والجودة</div><a class="navbtn" href="./execution-phases.html" style="text-decoration:none;display:flex;align-items:center;gap:10px">${icon('check')}<span>مراحل تنفيذ التعديلات (30)</span></a></div>
     <div class="sidefoot">
