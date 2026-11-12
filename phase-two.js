@@ -124,7 +124,7 @@ const p2AssignmentRows=(staffId,chosen)=>{
  const selectedIds=new Set(chosen||[]);
  return items().map(p=>{
    const selected=selectedIds.has(p.id),detail=p2Details(staffId,p.id),days=p2ProgramDays(p);
-   const chosenDays=p2AssignedDays(staffId,p);
+   const chosenDays=selected?p2AssignedDays(staffId,p):[];
    return '<article class="p2-assignment" data-p2-assignment="'+H(p.id)+'" data-program-title="'+H(name(p.id).toLowerCase())+'">'+
     '<label class="p2-assignment-select"><input type="checkbox" data-p2-program="'+H(p.id)+'" '+(selected?'checked':'')+'><span><b>'+H(name(p.id))+'</b><small>الأيام المخصصة للبرنامج: '+H(days.map(d=>'اليوم '+d).join('، '))+'</small></span></label>'+
     '<div class="p2-assignment-details" '+(selected?'':'hidden')+'><div class="p2-assignment-columns">'+
