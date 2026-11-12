@@ -171,6 +171,9 @@ function p2SyncScheduleButtons(id,day,active){
 function p2UpdateAssignmentSummary(){
  const count=document.querySelectorAll('.p2-assignment-select input[data-p2-program]:checked').length;
  const node=document.getElementById('p2-assignment-count');if(node)node.textContent=count+' برنامج';
+ const fixedCount=document.querySelectorAll('[data-p2-fixed][aria-pressed="true"]').length;
+ const live=document.getElementById('p2-schedule-live');
+ if(live)live.textContent='تم إسناد '+count+' برامج و'+fixedCount+' أنشطة تشغيلية. احفظ بيانات العضو لتثبيت التكليفات.';
 }
 function p2AssignmentsWidget(staffId){
  const assigned=staffId?p2StaffPrograms(staffId):[];
@@ -312,11 +315,46 @@ function act(b){
   d.audit={at:Date.now(),role:S.role};save();render({preserveScroll:true});toast('تم توثيق التدقيق');
  }
 }
+
+function p2SetActivity(id,day,active){
+ if(id.includes(':')){
+  const btn=[...document.querySelectorAll('[data-p2-fixed]')].find(x=>x.getAttribute('data-p2-fixed')===id);
+  if(!btn)return;
+  btn.setAttribute('aria-pressed',String(active));btn.classList.toggle('assigned',active);btn.textContent=active?'✓ مكلف':'+ إسناد';
+ }else{
+  const row=[...document.querySelectorAll('.p2-assignment')].find(r=>r.getAttribute('data-p2-assignment')===id);
+  if(!row)return;
+  const main=row.querySelector('input[data-p2-program]'),dayBoxes=[...row.querySelectorAll('[data-p2-day]')],box=dayBoxes.find(x=>Number(x.value)===day);
+  if(!main||!box)return;
+  box.checked=active;
+  main.checked=dayBoxes.some(x=>x.checked);
+  const details=row.querySelector('.p2-assignment-details');if(details)details.hidden=!main.checked;
+  p2SyncScheduleButtons(id,day,active);
+ }
+ p2UpdateAssignmentSummary();
+}
+function p2SelectedBulkChoices(){
+ return [...document.querySelectorAll('[data-p2-bulk-choice]:checked')].map(x=>({id:x.getAttribute('data-p2-id'),day:Number(x.getAttribute('data-p2-num'))}));
+}
+function p2UpdateBulkCount(){
+ const count=p2SelectedBulkChoices().length,node=document.getElementById('p2-bulk-count');
+ if(node)node.textContent=count?count+' نشاط محدد للإسناد الجماعي':'لم تحدد أنشطة للإسناد الجماعي';
+}
 document.addEventListener('click',e=>{
  const tab=e.target.closest('[data-p2-daytab]');
  if(tab){e.preventDefault();e.stopImmediatePropagation();const day=tab.getAttribute('data-p2-daytab');
  document.querySelectorAll('[data-p2-daytab]').forEach(b=>b.classList.toggle('active',b===tab));
  document.querySelectorAll('[data-p2-day-panel]').forEach(p=>p.hidden=p.getAttribute('data-p2-day-panel')!==day);return;}
+ const fixed=e.target.closest('[data-p2-fixed]');
+ if(fixed){e.preventDefault();e.stopImmediatePropagation();const key=fixed.getAttribute('data-p2-fixed');p2SetActivity(key,Number(key.split(':')[0]),fixed.getAttribute('aria-pressed')!=='true');return;}
+ const bulk=e.target.closest('[data-p2-bulk]');
+ if(bulk){e.preventDefault();e.stopImmediatePropagation();const op=bulk.getAttribute('data-p2-bulk');
+  if(op==='select-day'){const panel=document.querySelector('[data-p2-day-panel]:not([hidden])');panel?.querySelectorAll('[data-p2-bulk-choice]').forEach(x=>x.checked=true);}
+  else if(op==='clear'){document.querySelectorAll('[data-p2-bulk-choice]').forEach(x=>x.checked=false);}
+  else{const choices=p2SelectedBulkChoices();if(!choices.length){toast('حدد نشاطًا واحدًا على الأقل من الجدول.');return;}
+    choices.forEach(x=>p2SetActivity(x.id,x.day,op==='assign'));}
+  p2UpdateBulkCount();return;
+ }
  const button=e.target.closest('[data-p2-assign-day]');if(!button)return;
  e.preventDefault();e.stopImmediatePropagation();
  const id=button.getAttribute('data-p2-assign-day'),day=Number(button.getAttribute('data-p2-assign-num'));
@@ -324,13 +362,9 @@ document.addEventListener('click',e=>{
  if(!row)return;
  const main=row.querySelector('input[data-p2-program]'),days=[...row.querySelectorAll('[data-p2-day]')];
  const current=days.find(x=>Number(x.value)===day);if(!main||!current)return;
- if(!main.checked){main.checked=true;days.forEach(x=>x.checked=false);current.checked=true;}
- else current.checked=!current.checked;
- if(!days.some(x=>x.checked))main.checked=false;
- const details=row.querySelector('.p2-assignment-details');if(details)details.hidden=!main.checked;
- p2SyncScheduleButtons(id,day,main.checked&&current.checked);
- p2UpdateAssignmentSummary();
+ p2SetActivity(id,day,!current.checked);
 },true);
+document.addEventListener('change',e=>{if(e.target.matches('[data-p2-bulk-choice]'))p2UpdateBulkCount()},true);
 document.addEventListener('change',e=>{
  if(!e.target.matches('[data-p2-day]'))return;
  const row=e.target.closest('.p2-assignment');if(!row)return;
