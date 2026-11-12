@@ -586,6 +586,7 @@ document.addEventListener('input',event=>{
  document.querySelectorAll('.p2-schedule-assign-member').forEach(el=>el.hidden=!!q&&!el.dataset.memberSearch.includes(q));
 },true);
 window.campScheduleAssignInline=scheduleAssignInline;
+window.campScheduleAssignModal=scheduleAssignModal;
 
 NAV[2][1].push(['operations','الجاهزية ومتطلبات التشغيل','Operational readiness']);
 PAGE_TITLES.operations=['الجاهزية ومتطلبات التشغيل','Operational readiness'];
