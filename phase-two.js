@@ -123,11 +123,57 @@ const p2AssignmentRows=(staffId,chosen)=>{
     '</article>';
  }).join('');
 };
+
+function p2SchedulePrograms(day){
+ const dayPrograms=items().filter(p=>p2ProgramDays(p).includes(day));
+ const eligible=new Set(dayPrograms.map(p=>p.id)),placed=new Set(),rows=[];
+ const source=typeof slotMap==='function'?slotMap(day):{};
+ const template=typeof DAY_TEMPLATE!=='undefined'?DAY_TEMPLATE:[];
+ for(let index=0;index<template.length;index++){
+  const row=typeof scheduleRow==='function'?scheduleRow(day,index):template[index];
+  const ids=row.slot?(source[row.slot]||[]).map(o=>o.x?.id||o.id):[];
+  const shown=ids.filter(id=>eligible.has(id)&&!placed.has(id));shown.forEach(id=>placed.add(id));
+  rows.push({time:row.t||'',title:row.ar||'فترة',ids:shown,fixed:!row.slot});
+ }
+ return {rows,unplaced:dayPrograms.filter(p=>!placed.has(p.id))};
+}
+function p2ScheduleAssignmentWidget(staffId){
+ const all=S.meta?.days||[],assigned=new Set(staffId?p2StaffPrograms(staffId):[]);
+ const blocks=all.map((dayObj,index)=>{
+  const day=index+1,schedule=p2SchedulePrograms(day);
+  const entry=(id,time)=>{
+   const p=items().find(x=>x.id===id);if(!p)return '';
+   const active=assigned.has(id)&&p2AssignedDays(staffId,p).includes(day);
+   return '<div class="p2-sched-program"><div><b>'+H(name(id))+'</b><small>'+H(time||'الوقت غير محدد')+'</small></div>'+
+    '<button type="button" data-p2-assign-day="'+H(id)+'" data-p2-assign-num="'+day+'" aria-pressed="'+active+'" class="'+(active?'assigned':'')+'">'+(active?'✓ مكلف':'+ إسناد')+'</button></div>';
+  };
+  return '<section class="p2-schedule-day" data-p2-day-panel="'+day+'" '+(index?'hidden':'')+'>'+
+   '<div class="p2-schedule-daytitle"><h5>اليوم '+day+' · '+H(L(dayObj))+'</h5><small>اضغط إسناد بجانب النشاط لتكليف العضو</small></div>'+
+   '<div class="p2-schedule-rows">'+schedule.rows.map(r=>'<div class="p2-schedule-row '+(r.ids.length?'with-program':'')+'"><time dir="ltr">'+H(r.time)+'</time><div class="p2-schedule-activity"><span>'+H(r.title)+'</span>'+
+     (r.ids.length?r.ids.map(id=>entry(id,r.time)).join(''):'<small>'+(r.fixed?'فترة ثابتة':'لا يوجد برنامج مسند لهذه الفترة')+'</small>')+'</div></div>').join('')+'</div>'+
+   (schedule.unplaced.length?'<div class="p2-schedule-unplaced"><b>برامج مرتبطة باليوم دون وقت محدد</b>'+schedule.unplaced.map(p=>entry(p.id,'لم يحدد الوقت بعد')).join('')+'</div>':'')+
+   '</section>';
+ }).join('');
+ return '<div class="p2-schedule-box"><div class="p2-schedule-top"><h4>جدول المعسكر · إسناد مباشر</h4><p>مستمد من خطة المعسكر الحالية. اختر اليوم ثم اضغط إسناد بجانب البرنامج.</p></div>'+
+ '<div class="p2-schedule-day-tabs">'+all.map((d,i)=>'<button type="button" data-p2-daytab="'+(i+1)+'" class="'+(i===0?'active':'')+'">اليوم '+(i+1)+'</button>').join('')+'</div>'+
+ '<div class="p2-schedule-panels">'+blocks+'</div></div>';
+}
+function p2SyncScheduleButtons(id,day,active){
+ document.querySelectorAll('[data-p2-assign-day]').forEach(b=>{
+  if(b.getAttribute('data-p2-assign-day')!==id||Number(b.getAttribute('data-p2-assign-num'))!==day)return;
+  b.setAttribute('aria-pressed',String(active));b.classList.toggle('assigned',active);b.textContent=active?'✓ مكلف':'+ إسناد';
+ });
+}
+function p2UpdateAssignmentSummary(){
+ const count=document.querySelectorAll('.p2-assignment-select input[data-p2-program]:checked').length;
+ const node=document.getElementById('p2-assignment-count');if(node)node.textContent=count+' برنامج';
+}
 function p2AssignmentsWidget(staffId){
  const assigned=staffId?p2StaffPrograms(staffId):[];
  return '<div class="p2-assignment-widget"><div class="p2-assignment-summary"><div><h4>البرامج المرتبطة بهذا العضو</h4><p>حدد البرنامج، ثم دوره وأيام مشاركته ومهمته وحالة التكليف.</p></div><span id="p2-assignment-count">'+assigned.length+' برنامج</span></div>'+
- '<div class="p2-program-toolbar"><input type="search" data-p2-assignment-search placeholder="بحث باسم البرنامج"><button type="button" data-p2-tool="clear-assignments">إلغاء الاختيار</button></div>'+
- '<div class="p2-assignment-list">'+(items().length?p2AssignmentRows(staffId,assigned):'<div class="p2-assignment-empty">لا توجد برامج معتمدة في خطة المعسكر. أضفها من تخطيط البرامج أولًا.</div>')+'</div></div>';
+ p2ScheduleAssignmentWidget(staffId)+
+ '<details class="p2-assignment-advanced"><summary>تفاصيل التكليفات: الأدوار والمهام والحالة</summary><div class="p2-program-toolbar"><input type="search" data-p2-assignment-search placeholder="بحث باسم البرنامج"><button type="button" data-p2-tool="clear-assignments">إلغاء الاختيار</button></div>'+
+ '<div class="p2-assignment-list">'+(items().length?p2AssignmentRows(staffId,assigned):'<div class="p2-assignment-empty">لا توجد برامج معتمدة في خطة المعسكر. أضفها من تخطيط البرامج أولًا.</div>')+'</div></details></div>';
 }
 function p2ReadAssignments(){
  const ids=selected('data-p2-program'),result={},valid=[];
