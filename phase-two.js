@@ -588,7 +588,7 @@ document.addEventListener('input',event=>{
 window.campScheduleAssignInline=scheduleAssignInline;
 window.campScheduleAssignModal=scheduleAssignModal;
 
-NAV[2][1].push(['operations','الجاهزية ومتطلبات التشغيل','Operational readiness']);
+/* Navigation is centrally ordered in index.html. */
 PAGE_TITLES.operations=['الجاهزية ومتطلبات التشغيل','Operational readiness'];
 PAGES.operations=pageOperations;
 if(location.hash==='#operations')page='operations';
