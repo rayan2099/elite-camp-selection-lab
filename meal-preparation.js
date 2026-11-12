@@ -33,9 +33,13 @@ const team=()=>{const d=db();if(!Array.isArray(d.team))d.team=[];
    if(!member){member={id:newId('staff-'),name:m.supervisor.trim(),role:'مشرف (سجل سابق)'};d.team.push(member)}
    m.supervisorId=member.id;
  }});
- return d.team};
+ const extra=S.prep.__phase2?.staff||[];
+ const roster=d.team.map(m=>({...m,...(extra.find(x=>x.id===m.id)||{})}));
+ extra.forEach(m=>{if(!roster.some(x=>x.id===m.id))roster.push(m)});
+ return roster};
+window.campCateringTeamMembers=team;
 const supervisorName=id=>team().find(x=>x.id===id)?.name||'';
-const supervisorOptions=id=>'<option value="">اختر المسؤول من فريق المعسكر</option>'+team().map(x=>'<option value="'+e(x.id)+'" '+(id===x.id?'selected':'')+'>'+e(x.name)+' · '+e(x.role)+(x.demo?' (تجريبي)':'')+'</option>').join('');
+const supervisorOptions=id=>'<option value="">اختر المسؤول من فريق المعسكر</option>'+team().filter(x=>x.active!==false||x.id===id).map(x=>'<option value="'+e(x.id)+'" '+(id===x.id?'selected':'')+'>'+e(x.name)+' · '+e(x.role)+(x.demo?' (تجريبي)':'')+'</option>').join('');
 const participants=()=>[...(S.students||[]).map(x=>({id:'s-'+x.id,name:L({ar:x.ar,en:x.en}),demo:true})),...db().people.map(x=>({id:x.id,name:x.name,demo:false}))];
 const pname=id=>participants().find(x=>x.id===id)?.name||'مشارك غير معروف';
 const total=()=>n(S.meta.students)+Object.values(db().staff).reduce((s,v)=>s+n(v),0);
@@ -115,12 +119,8 @@ function countsView(){
  const d=db(),people=participants();
  return head('الأعداد والمستفيدون','العدد المتوقع قد يختلف عن قائمة الطلاب المسجلة؛ لا تفترض اكتمال أسماء المشاركين.')+
  '<div class="cp-cols"><div class="card"><h3>حساب الحصص والمستفيدين</h3><label>عدد الطلاب المتوقع<input id="cp-students" type="number" min="0" value="'+n(S.meta.students)+'"></label><label>عدد المشرفين<input id="cp-supervisors" type="number" min="0" value="'+n(d.staff.supervisors)+'"></label><label>عدد المدربين<input id="cp-trainers" type="number" min="0" value="'+n(d.staff.trainers)+'"></label><label>المرافقون والسائقون<input id="cp-other" type="number" min="0" value="'+n(d.staff.other)+'"></label><button class="primary" data-cp="save-counts">حفظ أعداد المستفيدين</button><p class="help">تحديث الطلاب يغيّر بيانات المعسكر أيضًا، والعدد يصبح الأساس الافتراضي لحصص الوجبات الجديدة.</p></div>'+
- '<div class="card"><h3>الأسماء المتاحة للتغذية الخاصة</h3><div class="cp-names">'+people.map(p=>'<div>'+e(p.name)+(p.demo?' <small>تجريبي</small>':' <button class="small danger" data-cp="del-person" data-id="'+e(p.id)+'">حذف</button>')+'</div>').join('')+'</div><label>إضافة مشارك للتجهيز<input id="cp-person-name" maxlength="100" placeholder="اسم أو معرف المشارك"></label><button class="primary" data-cp="add-person">إضافة مشارك</button><p class="help">الأسماء المسجلة: '+people.length+' | الطلاب المتوقعون: '+n(S.meta.students)+'. قائمة الأسماء الحالية تجريبية أو مدخلة يدويًا.</p></div></div>'+
- '<div class="card cp-team"><h3>فريق الإشراف والتوزيع</h3><p class="help">أضف أسماء أعضاء فريق هذا المعسكر لتظهر ضمن قائمة المشرف المسؤول عند تجهيز كل وجبة.</p>'+
- '<div class="cp-team-list">'+team().map(t=>'<div class="cp-team-item"><span>'+e(t.name)+' · '+e(t.role)+(t.demo?' (تجريبي)':'')+'</span><button class="small danger" data-cp="del-team" data-id="'+e(t.id)+'">حذف</button></div>').join('')+'</div>'+
- '<label>اسم عضو الفريق<input id="ct-name" maxlength="100" placeholder="اسم المشرف أو المدرب"></label>'+
- '<label>دوره في المعسكر<select id="ct-role"><option>مشرف ميداني</option><option>مدرب</option><option>مسؤول التغذية</option><option>قائد برامج</option><option>مدير معسكر</option><option>مرافق</option></select></label>'+
- '<button class="primary" data-cp="add-team">إضافة للفريق</button></div>';
+ '<div class="card"><h3>الأسماء المتاحة للتغذية الخاصة</h3><div class="cp-names">'+people.map(p=>'<div>'+e(p.name)+(p.demo?' <small>تجريبي</small>':' <button class="small danger" data-cp="del-person" data-id="'+e(p.id)+'">حذف</button>')+'</div>').join('')+'</div><label>إضافة مشارك للتجهيز<input id="cp-person-name" maxlength="100" placeholder="اسم أو معرف المشارك"></label><button class="primary" data-cp="add-person">إضافة مشارك</button><p class="help">الأسماء المسجلة: '+people.length+' | الطلاب المتوقعون: '+n(S.meta.students)+'. قائمة الأسماء الحالية تجريبية أو مدخلة يدويًا.</p></div></div>';
+
 }
 function specialView(){
  const d=db();
@@ -349,16 +349,6 @@ function handle(b){
  if(a==='new-meal'||a==='edit-meal'){mealModal(id);return}
  if(a==='new-special'||a==='edit-special'){specialModal(id);return}
  if(a==='save-counts'){S.meta.students=n($('#cp-students').value);d.staff={supervisors:n($('#cp-supervisors').value),trainers:n($('#cp-trainers').value),other:n($('#cp-other').value)};commit();toast('حُفظت أعداد المستفيدين.');return}
- if(a==='add-team'){
-  const name=$('#ct-name')?.value.trim(),role=$('#ct-role')?.value;
-  if(!name||name.length<2)return toast('أدخل اسم المسؤول.');
-  if(team().some(x=>x.name===name))return toast('هذا العضو مسجل مسبقًا.');
-  team().push({id:newId('staff-'),name,role});commit();toast('تمت إضافة عضو الفريق.');return;
- }
- if(a==='del-team'){
-  if(d.meals.some(m=>m.supervisorId===id))return toast('هذا العضو مسؤول عن وجبة. أسند الوجبات إلى مسؤول آخر أولًا.');
-  if(confirm('حذف العضو من فريق المعسكر؟')){d.team=team().filter(x=>x.id!==id);commit()}return;
- }
  if(a==='add-person'){const name=$('#cp-person-name').value.trim();if(name.length<2)return toast('اكتب اسمًا واضحًا.');if(participants().some(p=>p.name===name))return toast('الاسم موجود مسبقًا.');d.people.push({id:newId('guest-'),name});commit();return}
  if(a==='del-person'){if(d.special.some(s=>s.id===id))return toast('احذف احتياج التغذية الخاص لهذا المشارك أولًا.');d.people=d.people.filter(p=>p.id!==id);commit();return}
  if(a==='del-meal'){if(confirm('حذف الوجبة من الخطة؟')){d.meals=d.meals.filter(m=>m.id!==id);commit()}return}
