@@ -12,7 +12,7 @@ let tab='programs';
 function db(){
  S.prep??={};
  const d=S.prep.__phase2??(S.prep.__phase2={staff:[],programs:{},custom:[],overrides:{},hidden:[],transport:[],audit:null});
- d.staff??=[];d.programs??={};d.custom??=[];d.overrides??={};d.hidden??=[];d.transport??=[];
+ d.staff??=[];d.programs??={};d.custom??=[];d.overrides??={};d.hidden??=[];d.transport??=[];d.assignmentDetails??={};
  if(!d.migrated){(S.prep.__manual||[]).forEach(r=>d.custom.push({id:r.id,name:r.name,category:'general',linked:[],owner:S.prep[r.id]?.owner||'',quantity:1,unit:'متطلب',details:'',reason:'',status:S.prep[r.id]?.done?'ready':'pending'}));d.migrated=true;}
  return d;
 }
@@ -80,6 +80,53 @@ const p2RoleOptions=["مدرب","مشرف ميداني","مسؤول أمن وس�
 const p2Permissions=[["schedule","عرض جداول البرامج"],["activities","تسجيل تنفيذ الأنشطة"],["attendance","متابعة الحضور"],["safety","تسجيل بلاغات السلامة"],["resources","متابعة التجهيزات"],["transport","متابعة النقل"],["meals","متابعة الوجبات"],["reports","رفع التقارير"]];
 const p2RoleDefaults={"مدرب":{"duties":["teach","reports"],"permissions":["schedule","activities","reports"]},"مشرف ميداني":{"duties":["supervise","reports"],"permissions":["schedule","attendance","activities","safety","reports"]},"مسؤول أمن وسلامة":{"duties":["safety","reports"],"permissions":["schedule","safety","reports"]},"مسؤول نقل":{"duties":["transport"],"permissions":["schedule","transport"]},"مسؤول تجهيزات":{"duties":["materials"],"permissions":["schedule","resources"]},"مسؤول التغذية":{"duties":["meals"],"permissions":["schedule","meals"]}};
 const p2Duties=[["teach","تقديم البرامج"],["supervise","الإشراف على الطلاب"],["safety","متابعة السلامة"],["materials","تجهيز الأدوات"],["transport","مرافقة النقل"],["meals","استلام الوجبات"],["reports","تسليم التقرير اليومي"]];
+const p2AssignmentRoles=[['lead','مدرب رئيسي'],['assistant','مدرب مساعد'],['supervisor','مشرف متابعة'],['support','مساندة تشغيلية']];
+const p2AssignmentStates=[['planned','مخطط'],['confirmed','مؤكد'],['completed','تم التنفيذ']];
+const p2ProgramDays=p=>{
+ const all=S.meta?.days||[];
+ const days=Array.isArray(p.days)&&p.days.length?p.days:(p.day?[p.day]:[]);
+ const unique=[...new Set(days.map(Number).filter(n=>n>=1&&n<=all.length))];
+ return unique.length?unique:all.map((_,i)=>i+1);
+};
+const p2Details=(staffId,programId)=>db().assignmentDetails?.[staffId]?.[programId]||{};
+const p2AssignedDays=(staffId,p)=>{const available=p2ProgramDays(p),detail=p2Details(staffId,p.id);
+ return Array.isArray(detail.days)&&detail.days.length?detail.days.map(Number).filter(d=>available.includes(d)):available;
+};
+const p2AssignmentRows=(staffId,chosen)=>{
+ const selectedIds=new Set(chosen||[]);
+ return items().map(p=>{
+   const selected=selectedIds.has(p.id),detail=p2Details(staffId,p.id),days=p2ProgramDays(p);
+   const chosenDays=p2AssignedDays(staffId,p);
+   return '<article class="p2-assignment" data-p2-assignment="'+H(p.id)+'" data-program-title="'+H(name(p.id).toLowerCase())+'">'+
+    '<label class="p2-assignment-select"><input type="checkbox" data-p2-program="'+H(p.id)+'" '+(selected?'checked':'')+'><span><b>'+H(name(p.id))+'</b><small>الأيام المخصصة للبرنامج: '+H(days.map(d=>'اليوم '+d).join('، '))+'</small></span></label>'+
+    '<div class="p2-assignment-details" '+(selected?'':'hidden')+'><div class="p2-assignment-columns">'+
+    '<label>طبيعة التكليف<select data-p2-role="'+H(p.id)+'">'+p2AssignmentRoles.map(([key,label])=>'<option value="'+key+'" '+((detail.role||'lead')===key?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+
+    '<label>حالة التكليف<select data-p2-state="'+H(p.id)+'">'+p2AssignmentStates.map(([key,label])=>'<option value="'+key+'" '+((detail.status||'planned')===key?'selected':'')+'>'+label+'</option>').join('')+'</select></label></div>'+
+    '<div class="p2-assignment-days"><b>أيام مشاركة العضو</b><div class="p2-assignment-day-options">'+days.map(d=>'<label><input type="checkbox" data-p2-day="'+H(p.id)+'" value="'+d+'" '+(chosenDays.includes(d)?'checked':'')+'> اليوم '+d+'</label>').join('')+'</div></div>'+
+    '<label class="p2-assignment-note">مهمة العضو في البرنامج<input data-p2-note="'+H(p.id)+'" maxlength="200" value="'+H(detail.note||'')+'" placeholder="مثال: قيادة النشاط، تقييم المشاركين أو تجهيز الأدوات"></label></div>'+
+    '</article>';
+ }).join('');
+};
+function p2AssignmentsWidget(staffId){
+ const assigned=staffId?p2StaffPrograms(staffId):[];
+ return '<div class="p2-assignment-widget"><div class="p2-assignment-summary"><div><h4>البرامج المرتبطة بهذا العضو</h4><p>حدد البرنامج، ثم دوره وأيام مشاركته ومهمته وحالة التكليف.</p></div><span id="p2-assignment-count">'+assigned.length+' برنامج</span></div>'+
+ '<div class="p2-program-toolbar"><input type="search" data-p2-assignment-search placeholder="بحث باسم البرنامج"><button type="button" data-p2-tool="clear-assignments">إلغاء الاختيار</button></div>'+
+ '<div class="p2-assignment-list">'+(items().length?p2AssignmentRows(staffId,assigned):'<div class="p2-assignment-empty">لا توجد برامج معتمدة في خطة المعسكر. أضفها من تخطيط البرامج أولًا.</div>')+'</div></div>';
+}
+function p2ReadAssignments(){
+ const ids=selected('data-p2-program'),result={},valid=[];
+ for(const id of ids){
+   const p=items().find(x=>x.id===id);if(!p)continue;
+   const validDays=p2ProgramDays(p),days=[...document.querySelectorAll('[data-p2-day]:checked')].filter(el=>el.getAttribute('data-p2-day')===id).map(el=>Number(el.value)).filter(n=>validDays.includes(n));
+   if(!days.length)return {error:'حدد يوم مشاركة واحدًا على الأقل في البرنامج: '+name(id)};
+   const role=document.querySelector('[data-p2-role="'+id+'"]')?.value||'lead';
+   const status=document.querySelector('[data-p2-state="'+id+'"]')?.value||'planned';
+   if(!p2AssignmentRoles.some(x=>x[0]===role)||!p2AssignmentStates.some(x=>x[0]===status))return {error:'تفاصيل تكليف غير صالحة: '+name(id)};
+   result[id]={role,status,days:[...new Set(days)],note:(document.querySelector('[data-p2-note="'+id+'"]')?.value||'').trim()};
+   valid.push(id);
+ }
+ return {ids:valid,details:result};
+}
 const p2StaffPrograms=id=>items().filter(p=>info(p.id).trainers.includes(id)).map(p=>p.id);
 const p2Checks=(attr,values,options)=>'<div class="p2-checks">'+options.map(([id,label])=>'<label><input type="checkbox" '+attr+'="'+H(id)+'" '+((values||[]).includes(id)?'checked':'')+'>'+H(label)+'</label>').join('')+'</div>';
 function teamPage(){
@@ -87,7 +134,7 @@ function teamPage(){
  return '<div class="p2-heading"><div><h2>الفريق والصلاحيات والمسؤوليات</h2><p>سجل تفصيلي يربط الأعضاء بالبرامج والمهام والصلاحيات التشغيلية.</p></div><button class="primary" data-p2="add-staff">+ إضافة عضو</button></div>'+
  '<div class="card p2-notice">الصلاحيات المعروضة تكليفات تشغيلية للتخطيط، ولا تمنح حساب دخول أو تفويضًا تقنيًا داخل النظام.</div>'+
  '<div class="p2-grid">'+all.map(x=>'<article class="p2-card"><div class="p2-card-header"><h3>'+H(x.name)+'</h3><span class="pill">'+H(x.role||'عضو فريق')+'</span></div>'+
- '<p><b>البرامج:</b> '+H(labelIds(p2StaffPrograms(x.id)))+'</p>'+
+ '<p><b>البرامج والتكليفات:</b> '+(p2StaffPrograms(x.id).length?p2StaffPrograms(x.id).map(pid=>{const d=p2Details(x.id,pid),p=items().find(p=>p.id===pid);return '<span class="p2-assignment-tag">'+H(name(pid))+' · '+H(p2AssignmentRoles.find(r=>r[0]===d.role)?.[1]||'مدرب')+' · '+H(p2AssignedDays(x.id,p).map(n=>'يوم '+n).join('، '))+'</span>'}).join(''):'لم تحدد')+'</p>'+
  '<p><b>المسؤوليات:</b> '+H(p2Duties.filter(a=>(x.duties||[]).includes(a[0])).map(a=>a[1]).join('، ')||'لم تحدد')+'</p>'+
  '<p><b>الصلاحيات التشغيلية:</b> '+H(p2Permissions.filter(a=>(x.permissions||[]).includes(a[0])).map(a=>a[1]).join('، ')||'لم تحدد')+'</p>'+
  '<p><b>حالة العضو:</b> '+(x.active===false?'غير نشط':'نشط')+'</p>'+
@@ -104,7 +151,7 @@ function staffModal(id){
  '<label class="full">تعليمات التكليف<textarea id="p2-staff-notes" rows="2">'+H(p.notes||'')+'</textarea></label>'+
  '<div class="full"><div class="p2-member-section-head"><h3>المسؤوليات</h3><button type="button" data-p2-tool="suggest-role">اقتراح حسب الدور</button></div>'+p2Checks('data-p2-duty',p.duties,p2Duties)+'</div>'+
  '<div class="full"><h3>الصلاحيات التشغيلية</h3><p class="help">توثيق فقط، وليس تفويضًا للدخول.</p>'+p2Checks('data-p2-permission',p.permissions,p2Permissions)+'</div>'+
- '<div class="full"><h3>البرامج المكلف بها</h3>'+checkPrograms(id?p2StaffPrograms(id):[])+'</div>'+
+ '<div class="full">'+p2AssignmentsWidget(id)+'</div>'+
  '<label class="full p2-inline"><input type="checkbox" id="p2-staff-active" '+(p.active===false?'':'checked')+'> نشط</label></div>'+
  '<div class="p2-actions"><button data-act="close">إلغاء</button><button class="primary" data-p2="save-staff" data-id="'+H(id||'')+'">حفظ بيانات العضو</button></div>');
 }
@@ -141,13 +188,14 @@ function act(b){
  if(a==='save-staff'){
   const person=db().staff.find(x=>x.id===id),name=input('p2-staff-name').trim(),role=input('p2-staff-role');
   if(name.length<2||staff().some(x=>x.name===name&&x.id!==id))return toast('تحقق من الاسم أو التكرار');
-  const linked=selected('data-p2-program'),active=document.getElementById('p2-staff-active').checked;
+  const assignment=p2ReadAssignments();if(assignment.error)return toast(assignment.error);const linked=assignment.ids,active=document.getElementById('p2-staff-active').checked;
   if(!active&&linked.length)return toast('لا يمكن إسناد برامج لعضو غير نشط');
   const staffId=person?.id||id||newId('trainer-');
   const value={id:staffId,name,role,contact:input('p2-staff-contact').trim(),shift:input('p2-staff-shift').trim(),notes:input('p2-staff-notes').trim(),active,
     permissions:selected('data-p2-permission').filter(v=>p2Permissions.some(x=>x[0]===v)),
     duties:selected('data-p2-duty').filter(v=>p2Duties.some(x=>x[0]===v))};
   if(person)Object.assign(person,value);else d.staff.push(value);
+  d.assignmentDetails[staffId]=assignment.details;
   items().forEach(p=>{const old=info(p.id),trainers=new Set(old.trainers);if(linked.includes(p.id))trainers.add(staffId);else trainers.delete(staffId);d.programs[p.id]={...old,trainers:[...trainers]};});
   closeModal();persist();return;
  }
@@ -195,9 +243,22 @@ function act(b){
   d.audit={at:Date.now(),role:S.role};save();render({preserveScroll:true});toast('تم توثيق التدقيق');
  }
 }
+document.addEventListener('change',e=>{
+ if(!e.target.matches('.p2-assignment-select input[data-p2-program]'))return;
+ const row=e.target.closest('.p2-assignment'),details=row?.querySelector('.p2-assignment-details');
+ if(details)details.hidden=!e.target.checked;
+ const count=document.getElementById('p2-assignment-count');
+ if(count)count.textContent=document.querySelectorAll('.p2-assignment-select input:checked').length+' برنامج';
+},true);
+document.addEventListener('input',e=>{
+ if(!e.target.matches('[data-p2-assignment-search]'))return;
+ const q=e.target.value.trim().toLowerCase();
+ document.querySelectorAll('.p2-assignment').forEach(row=>{row.hidden=!!q&&!row.dataset.programTitle.includes(q)});
+},true);
 document.addEventListener('input',e=>{if(!e.target.matches('[data-p2-program-search]'))return;const holder=e.target.closest('.p2-program-picker'),q=e.target.value.trim().toLowerCase();holder?.querySelectorAll('.p2-program-options label').forEach(el=>el.hidden=!!q&&!el.dataset.programTitle.includes(q));},true);
 document.addEventListener('change',e=>{if(!e.target.matches('[data-p2-program]'))return;const p=e.target.closest('.p2-program-picker'),count=p?.querySelector('.p2-program-count');if(count)count.textContent=p.querySelectorAll('[data-p2-program]:checked').length+' برنامج محدد';},true);
 document.addEventListener('click',e=>{const b=e.target.closest('[data-p2-tool]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();const holder=b.closest('.p2-program-picker');if(b.dataset.p2Tool==='suggest-role'){const role=document.getElementById('p2-staff-role')?.value,defaultSet=p2RoleDefaults[role];if(defaultSet){document.querySelectorAll('[data-p2-duty]').forEach(box=>box.checked=defaultSet.duties.includes(box.getAttribute('data-p2-duty')));document.querySelectorAll('[data-p2-permission]').forEach(box=>box.checked=defaultSet.permissions.includes(box.getAttribute('data-p2-permission')))}return;}
+ if(b.dataset.p2Tool==='clear-assignments'){document.querySelectorAll('.p2-assignment-select input[data-p2-program]').forEach(box=>box.checked=false);document.querySelectorAll('.p2-assignment-details').forEach(x=>x.hidden=true);const n=document.getElementById('p2-assignment-count');if(n)n.textContent='0 برنامج';return;}
  if(b.dataset.p2Tool==='clear-programs')holder?.querySelectorAll('[data-p2-program]').forEach(box=>box.checked=false);const count=holder?.querySelector('.p2-program-count');if(count)count.textContent='0 برنامج محدد';},true);
 document.addEventListener('click',e=>{const b=e.target.closest('[data-p2]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();act(b)},true);
 NAV[2][1].push(['operations','الجاهزية ومتطلبات التشغيل','Operational readiness']);
