@@ -305,12 +305,44 @@ function act(b){
   d.audit={at:Date.now(),role:S.role};save();render({preserveScroll:true});toast('تم توثيق التدقيق');
  }
 }
+document.addEventListener('click',e=>{
+ const tab=e.target.closest('[data-p2-daytab]');
+ if(tab){e.preventDefault();e.stopImmediatePropagation();const day=tab.getAttribute('data-p2-daytab');
+ document.querySelectorAll('[data-p2-daytab]').forEach(b=>b.classList.toggle('active',b===tab));
+ document.querySelectorAll('[data-p2-day-panel]').forEach(p=>p.hidden=p.getAttribute('data-p2-day-panel')!==day);return;}
+ const button=e.target.closest('[data-p2-assign-day]');if(!button)return;
+ e.preventDefault();e.stopImmediatePropagation();
+ const id=button.getAttribute('data-p2-assign-day'),day=Number(button.getAttribute('data-p2-assign-num'));
+ const row=[...document.querySelectorAll('.p2-assignment')].find(r=>r.getAttribute('data-p2-assignment')===id);
+ if(!row)return;
+ const main=row.querySelector('input[data-p2-program]'),days=[...row.querySelectorAll('[data-p2-day]')];
+ const current=days.find(x=>Number(x.value)===day);if(!main||!current)return;
+ if(!main.checked){main.checked=true;days.forEach(x=>x.checked=false);current.checked=true;}
+ else current.checked=!current.checked;
+ if(!days.some(x=>x.checked))main.checked=false;
+ const details=row.querySelector('.p2-assignment-details');if(details)details.hidden=!main.checked;
+ p2SyncScheduleButtons(id,day,main.checked&&current.checked);
+ p2UpdateAssignmentSummary();
+},true);
+document.addEventListener('change',e=>{
+ if(!e.target.matches('[data-p2-day]'))return;
+ const row=e.target.closest('.p2-assignment');if(!row)return;
+ const id=row.getAttribute('data-p2-assignment'),main=row.querySelector('input[data-p2-program]');
+ if(!main)return;
+ main.checked=[...row.querySelectorAll('[data-p2-day]')].some(x=>x.checked);
+ const detail=row.querySelector('.p2-assignment-details');if(detail)detail.hidden=!main.checked;
+ p2SyncScheduleButtons(id,Number(e.target.value),main.checked&&e.target.checked);
+ p2UpdateAssignmentSummary();
+},true);
 document.addEventListener('change',e=>{
  if(!e.target.matches('.p2-assignment-select input[data-p2-program]'))return;
  const row=e.target.closest('.p2-assignment'),details=row?.querySelector('.p2-assignment-details');
  if(details)details.hidden=!e.target.checked;
  const count=document.getElementById('p2-assignment-count');
  if(count)count.textContent=document.querySelectorAll('.p2-assignment-select input:checked').length+' برنامج';
+ const id=row?.getAttribute('data-p2-assignment'),days=[...(row?.querySelectorAll('[data-p2-day]')||[])];
+ if(id){if(e.target.checked&&!days.some(x=>x.checked))days.forEach(x=>x.checked=true);
+ days.forEach(x=>p2SyncScheduleButtons(id,Number(x.value),e.target.checked&&x.checked));}
 },true);
 document.addEventListener('input',e=>{
  if(!e.target.matches('[data-p2-assignment-search]'))return;
@@ -320,7 +352,7 @@ document.addEventListener('input',e=>{
 document.addEventListener('input',e=>{if(!e.target.matches('[data-p2-program-search]'))return;const holder=e.target.closest('.p2-program-picker'),q=e.target.value.trim().toLowerCase();holder?.querySelectorAll('.p2-program-options label').forEach(el=>el.hidden=!!q&&!el.dataset.programTitle.includes(q));},true);
 document.addEventListener('change',e=>{if(!e.target.matches('[data-p2-program]'))return;const p=e.target.closest('.p2-program-picker'),count=p?.querySelector('.p2-program-count');if(count)count.textContent=p.querySelectorAll('[data-p2-program]:checked').length+' برنامج محدد';},true);
 document.addEventListener('click',e=>{const b=e.target.closest('[data-p2-tool]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();const holder=b.closest('.p2-program-picker');if(b.dataset.p2Tool==='suggest-role'){const role=document.getElementById('p2-staff-role')?.value,defaultSet=p2RoleDefaults[role];if(defaultSet){document.querySelectorAll('[data-p2-duty]').forEach(box=>box.checked=defaultSet.duties.includes(box.getAttribute('data-p2-duty')));document.querySelectorAll('[data-p2-permission]').forEach(box=>box.checked=defaultSet.permissions.includes(box.getAttribute('data-p2-permission')))}return;}
- if(b.dataset.p2Tool==='clear-assignments'){document.querySelectorAll('.p2-assignment-select input[data-p2-program]').forEach(box=>box.checked=false);document.querySelectorAll('.p2-assignment-details').forEach(x=>x.hidden=true);const n=document.getElementById('p2-assignment-count');if(n)n.textContent='0 برنامج';return;}
+ if(b.dataset.p2Tool==='clear-assignments'){document.querySelectorAll('.p2-assignment-select input[data-p2-program]').forEach(box=>box.checked=false);document.querySelectorAll('.p2-assignment-details').forEach(x=>x.hidden=true);document.querySelectorAll('[data-p2-assign-day]').forEach(x=>{x.setAttribute('aria-pressed','false');x.classList.remove('assigned');x.textContent='+ إسناد'});p2UpdateAssignmentSummary();return;}
  if(b.dataset.p2Tool==='clear-programs')holder?.querySelectorAll('[data-p2-program]').forEach(box=>box.checked=false);const count=holder?.querySelector('.p2-program-count');if(count)count.textContent='0 برنامج محدد';},true);
 document.addEventListener('click',e=>{const b=e.target.closest('[data-p2]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();act(b)},true);
 NAV[2][1].push(['operations','الجاهزية ومتطلبات التشغيل','Operational readiness']);
