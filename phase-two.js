@@ -28,7 +28,23 @@ const labelIds=ids=>(ids||[]).map(name).join('، ')||'لم تُحدد برامج
 const checkPrograms=selected=>'<div class="p2-program-picker"><div class="p2-program-toolbar"><input type="search" data-p2-program-search placeholder="ابحث عن برنامج..." aria-label="البحث عن البرامج"><button type="button" data-p2-tool="clear-programs">إلغاء التحديد</button></div><div class="p2-checks p2-program-options">'+items().map(x=>'<label data-program-title="'+H(name(x.id).toLowerCase())+'"><input type="checkbox" data-p2-program="'+H(x.id)+'" '+((selected||[]).includes(x.id)?'checked':'')+'>'+H(name(x.id))+'</label>').join('')+'</div><small class="p2-program-count">'+(selected||[]).length+' برنامج محدد</small></div>';
 const selected=attr=>[...document.querySelectorAll('['+attr+']:checked')].map(e=>e.getAttribute(attr));
 const input=id=>document.getElementById(id)?.value||'';
-const selectedChecks=()=>{const d=db(),errors=[];d.hidden.forEach(k=>{if(related(k).length)errors.push('متطلب أساسي مستبعد رغم ارتباطه ببرنامج: '+(codes[k]||k))});if(related('transport').length&&!d.transport.length)errors.push('توجد برامج تحتاج نقلًا دون إعداد رحلة أو وسيلة نقل');items().forEach(p=>{const a=info(p.id);if(!a.trainers.length)errors.push('لم يحدد مدرب: '+name(p.id));if(a.trainers.some(id=>!staff().some(x=>x.id===id)))errors.push('مدرب غير موجود: '+name(p.id));if(a.safety&&!a.safetyWhy.trim())errors.push('سبب الأمن والسلامة ناقص: '+name(p.id));if(a.outdoor&&!a.outdoorWhy.trim())errors.push('سبب المساحة الخارجية ناقص: '+name(p.id))});requirements().forEach(r=>{if(!r.owner?.trim())errors.push('المسؤول غير محدد: '+r.name);if(!r.details?.trim())errors.push('تفاصيل ناقصة: '+r.name);if(r.status!=='ready')errors.push('المتطلب غير مكتمل: '+r.name);if(['materials','safety','transport'].includes(r.category)&&!r.linked.length)errors.push('غير مرتبط ببرنامج: '+r.name)});d.transport.forEach(t=>{if(!t.linked?.length||!t.owner||N(t.seats)<1)errors.push('بيانات نقل ناقصة: '+t.name);if(N(t.passengers)>N(t.seats))errors.push('سعة النقل أقل من عدد المشاركين: '+t.name);if((t.studentIds||[]).length>N(t.seats))errors.push('عدد الطلاب المحددين يتجاوز السعة: '+t.name)});return errors};
+const selectedChecks=()=>{const d=db(),errors=assignmentIssues();d.hidden.forEach(k=>{if(related(k).length)errors.push('متطلب أساسي مستبعد رغم ارتباطه ببرنامج: '+(codes[k]||k))});if(related('transport').length&&!d.transport.length)errors.push('توجد برامج تحتاج نقلًا دون إعداد رحلة أو وسيلة نقل');items().forEach(p=>{const a=info(p.id);if(!a.trainers.length)errors.push('لم يحدد مدرب: '+name(p.id));if(a.trainers.some(id=>!staff().some(x=>x.id===id)))errors.push('مدرب غير موجود: '+name(p.id));if(a.safety&&!a.safetyWhy.trim())errors.push('سبب الأمن والسلامة ناقص: '+name(p.id));if(a.outdoor&&!a.outdoorWhy.trim())errors.push('سبب المساحة الخارجية ناقص: '+name(p.id))});requirements().forEach(r=>{if(!r.owner?.trim())errors.push('المسؤول غير محدد: '+r.name);if(!r.details?.trim())errors.push('تفاصيل ناقصة: '+r.name);if(r.status!=='ready')errors.push('المتطلب غير مكتمل: '+r.name);if(['materials','safety','transport'].includes(r.category)&&!r.linked.length)errors.push('غير مرتبط ببرنامج: '+r.name)});d.transport.forEach(t=>{if(!t.linked?.length||!t.owner||N(t.seats)<1)errors.push('بيانات نقل ناقصة: '+t.name);if(N(t.passengers)>N(t.seats))errors.push('سعة النقل أقل من عدد المشاركين: '+t.name);if((t.studentIds||[]).length>N(t.seats))errors.push('عدد الطلاب المحددين يتجاوز السعة: '+t.name)});return errors};
+function assignmentIssues(){
+ const result=[],d=db();
+ for(const p of items()){
+  const infoP=info(p.id);
+  for(const id of infoP.trainers||[]){
+   const memberData=staff().find(m=>m.id===id);
+   if(memberData?.active===false)result.push('عضو غير نشط مكلف بالبرنامج: '+name(p.id));
+   const detail=d.assignmentDetails?.[id]?.[p.id];
+   if(detail){
+    const days=p2ProgramDays(p);
+    if(!detail.days?.length||detail.days.some(n=>!days.includes(Number(n))))result.push('أيام تكليف غير متطابقة: '+name(p.id)+' · '+(memberData?.name||id));
+   }
+  }
+ }
+ return result;
+}
 const persist=()=>{db().audit=null;save();render({preserveScroll:true})};
 function pageOperations(){
  const d=db(),pg=items(),req=requirements(),ext=pg.filter(p=>info(p.id).outdoor).length,safe=pg.filter(p=>info(p.id).safety).length,errors=selectedChecks();
