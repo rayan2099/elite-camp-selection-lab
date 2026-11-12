@@ -46,3 +46,23 @@
 .p2-form .full{grid-column:1/-1}
 @media(max-width:950px){.p2-metrics{grid-template-columns:repeat(3,1fr)}.p2-grid{grid-template-columns:1fr}}
 @media(max-width:620px){.p2-hero{flex-direction:column;align-items:stretch}.p2-metrics{grid-template-columns:repeat(2,1fr)}.p2-heading{align-items:flex-start;flex-direction:column}.p2-form,.p2-checks{grid-template-columns:1fr}}
+
+
+/* Phase-two operational team directory */
+.p2-notice{background:#f5f8fc;border:1px solid #dfe9f3;border-radius:10px;color:#4f6680;font-size:12px;padding:12px 15px;margin:11px 0 16px}
+.p2-workspace .p2-card-header small{display:block;font-size:11px;color:#728298;margin-top:4px}
+.p2-workspace .p2-card .p2-actions{display:flex;flex-wrap:wrap}
+.p2-modal{max-width:920px;text-align:right}
+.p2-modal .p2-form h3{margin:5px 0 9px;font-size:14px;color:#23415e}
+.p2-modal .p2-form .full>h3{margin-top:9px}
+.p2-modal .p2-form .p2-checks{grid-template-columns:repeat(2,minmax(0,1fr));max-height:210px;gap:9px;overflow:auto;padding:4px}
+.p2-modal .p2-form .p2-checks label{border:1px solid #e1e8f1;background:#f9fbfd;border-radius:9px;font-size:12px;margin:0;padding:10px 12px}
+.p2-modal .p2-form .p2-checks label:has(input:checked){background:#fff6ed;border-color:#f1bf95}
+.p2-modal .p2-form .p2-checks label[hidden]{display:none!important}
+.p2-modal .p2-form .p2-program-picker{border:1px solid #e5eaf0;border-radius:12px;padding:13px;margin-top:9px}
+.p2-modal .p2-program-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.p2-modal .p2-program-toolbar input{flex:1;min-width:180px}
+.p2-modal .p2-program-toolbar button{border:1px solid #dce5ed;border-radius:8px;padding:9px 12px;background:#fff;color:#465f77;font-size:12px}
+.p2-modal .p2-program-count{display:block;font-size:11px;color:#667d90;margin-top:7px}
+.p2-modal .p2-form .p2-inline{display:flex;flex-direction:row;gap:9px;align-items:center;background:#f5f8fb;border-radius:9px;padding:10px 12px}
+@media(max-width:700px){.p2-modal .p2-form .p2-checks{grid-template-columns:1fr}.p2-modal .p2-program-toolbar input{width:100%}}
