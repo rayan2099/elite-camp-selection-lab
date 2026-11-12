@@ -134,3 +134,21 @@
 .p2-modal .p2-assignment-advanced>summary{padding:14px 17px;cursor:pointer;font-size:12px;font-weight:750;color:#284560;background:#f8fafc}
 .p2-modal .p2-assignment-advanced>.p2-program-toolbar,.p2-modal .p2-assignment-advanced>.p2-assignment-list{margin:12px 15px}
 @media(max-width:620px){.p2-modal .p2-schedule-row{grid-template-columns:73px minmax(0,1fr);gap:8px;padding:9px}.p2-modal .p2-sched-program button{padding:7px 10px}.p2-modal .p2-schedule-daytitle{padding:11px}}
+
+
+/* Multi-activity assignment, schedule batching and fixed periods */
+.p2-modal .p2-schedule-bulk{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:13px 16px;border-bottom:1px solid #e3eaf0;background:#f8fafc}
+.p2-modal .p2-schedule-bulk>b,.p2-modal .p2-schedule-bulk div>b{font-size:12px;color:#223c55}
+.p2-modal .p2-schedule-bulk small{display:block;font-size:10px;color:#8294a5;margin-top:3px}
+.p2-modal .p2-schedule-bulk-actions{display:flex;flex-wrap:wrap;gap:6px}
+.p2-modal .p2-schedule-bulk-actions button{border:1px solid #dce5ee;border-radius:8px;background:#fff;color:#425b75;font-size:11px;font-weight:600;padding:8px 11px;cursor:pointer}
+.p2-modal .p2-schedule-bulk-actions button.primary{background:#ee7f3c;border-color:#ee7f3c;color:#1e3246}
+.p2-modal .p2-sched-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.p2-modal .p2-bulk-pick{display:inline-flex!important;flex-direction:row!important;align-items:center;gap:4px;margin:0!important;padding:6px!important;font-size:11px!important;color:#60758b;cursor:pointer}
+.p2-modal .p2-bulk-pick input{width:16px;height:16px;accent-color:#e9793a}
+.p2-modal .p2-bulk-pick:has(input:checked){color:#b45d20}
+.p2-modal .p2-fixed-entry{border-top:1px dashed #e5ebf1;margin-top:5px}
+.p2-modal .p2-fixed-entry>div>b{font-weight:600}
+.p2-modal .p2-schedule-live{font-size:11px;color:#637b90;padding:10px 16px;border-top:1px solid #e6ecf3;line-height:1.7}
+.p2-modal .p2-sched-program button.assigned{color:#207347;background:#e9f4ec}
+@media(max-width:650px){.p2-modal .p2-schedule-bulk{align-items:stretch}.p2-modal .p2-schedule-bulk-actions{width:100%}.p2-modal .p2-schedule-bulk-actions button{flex-grow:1}}
