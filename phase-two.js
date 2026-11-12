@@ -268,7 +268,11 @@ function act(b){
  if(a==='save-staff'){
   const person=db().staff.find(x=>x.id===id),name=input('p2-staff-name').trim(),role=input('p2-staff-role');
   if(name.length<2||staff().some(x=>x.name===name&&x.id!==id))return toast('تحقق من الاسم أو التكرار');
-  const assignment=p2ReadAssignments();if(assignment.error)return toast(assignment.error);const linked=assignment.ids,active=document.getElementById('p2-staff-active').checked;
+  const assignment=p2ReadAssignments();if(assignment.error)return toast(assignment.error);
+  const fixedKeys=[...document.querySelectorAll('[data-p2-fixed][aria-pressed="true"]')].map(b=>b.getAttribute('data-p2-fixed'));
+  const conflicts=p2DetectAssignmentConflicts(assignment,fixedKeys);
+  if(conflicts.length&&!confirm('تنبيه: توجد أنشطة متزامنة لهذا العضو:\n'+conflicts.slice(0,5).join('\n')+'\nهل تريد حفظ التكليف رغم التعارض؟'))return;
+  const linked=assignment.ids,active=document.getElementById('p2-staff-active').checked;
   if(!active&&linked.length)return toast('لا يمكن إسناد برامج لعضو غير نشط');
   const staffId=person?.id||id||newId('trainer-');
   const value={id:staffId,name,role,contact:input('p2-staff-contact').trim(),shift:input('p2-staff-shift').trim(),notes:input('p2-staff-notes').trim(),active,
@@ -276,7 +280,7 @@ function act(b){
     duties:selected('data-p2-duty').filter(v=>p2Duties.some(x=>x[0]===v))};
   if(person)Object.assign(person,value);else d.staff.push(value);
   d.assignmentDetails[staffId]=assignment.details;
-  d.activityAssignments[staffId]=[...document.querySelectorAll('[data-p2-fixed][aria-pressed="true"]')].map(b=>b.getAttribute('data-p2-fixed'));
+  d.activityAssignments[staffId]=fixedKeys;
 
   items().forEach(p=>{const old=info(p.id),trainers=new Set(old.trainers);if(linked.includes(p.id))trainers.add(staffId);else trainers.delete(staffId);d.programs[p.id]={...old,trainers:[...trainers]};});
   closeModal();persist();return;
@@ -326,6 +330,35 @@ function act(b){
  }
 }
 
+function p2DetectAssignmentConflicts(assignment,fixedKeys){
+ const matches=[];
+ const byDay=new Map();
+ const add=(day,time,label)=>{
+  const stamps=String(time||'').match(/\d{1,2}:\d{2}/g)||[];
+  if(!stamps.length)return;
+  const minutes=x=>{const parts=x.split(':').map(Number);return parts[0]*60+parts[1]};
+  const start=minutes(stamps[0]),end=stamps[1]?minutes(stamps[1]):start+1;
+  if(end<=start)return;
+  if(!byDay.has(day))byDay.set(day,[]);
+  byDay.get(day).push({start,end,label});
+ };
+ for(let day=1;day<=S.meta.days.length;day++){
+  const schedule=p2SchedulePrograms(day);
+  for(const row of schedule.rows){
+   for(const programId of row.ids){
+    if(assignment.details[programId]?.days.includes(day))add(day,row.time,name(programId));
+   }
+   if(fixedKeys.includes(p2FixedKey(day,row.index)))add(day,row.time,row.title);
+  }
+ }
+ for(const [day,entries] of byDay){
+  for(let i=0;i<entries.length;i++)for(let j=i+1;j<entries.length;j++){
+   const a=entries[i],b=entries[j];
+   if(a.start<b.end&&b.start<a.end)matches.push('اليوم '+day+': '+a.label+' و'+b.label);
+  }
+ }
+ return [...new Set(matches)];
+}
 function p2SetActivity(id,day,active){
  if(id.includes(':')){
   const btn=[...document.querySelectorAll('[data-p2-fixed]')].find(x=>x.getAttribute('data-p2-fixed')===id);
