@@ -1618,7 +1618,9 @@ function icon(name){
     check:'M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4Zm-1 13.4L7.6 12 6.2 13.4 11 18.2l7.2-7.2-1.4-1.4L11 15.4Z',
     export:'M12 3v10.6l3.3-3.3 1.4 1.4L12 17.4l-4.7-4.7 1.4-1.4L12 14.6V3h0ZM4 19h16v2H4z',
     brick:'M3 8h7v3H3V8Zm11 0h7v3h-7V8ZM3 13h7v7H3v-7Zm11 0h7v7h-7v-7Z',
-    collection:'M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z'
+    collection:'M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z',
+    utensils:'M6 2v8H4V2H2v8a4 4 0 0 0 3 3.9V22h2v-8.1a4 4 0 0 0 3-3.9V2H8v8H6V2Zm10 0c-2 2-3 5-3 9v3h4v8h2V2h-3Z',
+    'clipboard-check':'M7 3h3a2 2 0 0 1 4 0h3v2h3v16H4V5h3V3Zm2 2v1h6V5H9Zm-3 2v12h12V7H6Zm3 6 2 2 4-4 1.4 1.4-5.4 5.4-3.4-3.4L9 13Z'
   }[name]||'M4 4h16v16H4z';
   return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${p}"/></svg>`;
 }
@@ -1668,7 +1670,7 @@ function header(){
       <svg viewBox="0 0 92 46" aria-hidden="true"><path fill="currentColor" d="M2 40 24 6l10 16 6-9 20 27H46L34 23l-8 17H2Z"/><path fill="currentColor" opacity=".45" d="M62 40 80 12l10 28H62Z"/></svg>
       <div><b>${T('أكاديمية النخبة','Elite Academy')}</b><small>CAMP PLANNER</small></div>
     </div>
-    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({start:'١ · إعداد المعسكر',plan:'٢ · تصميم البرنامج والجدول',prepare:'٣ · تجهيز التشغيل',verify:'٤ · المراجعة والتحقق',out:'٥ · النتائج والمشاركة'}[g],{start:'1 · CAMP SETUP',plan:'2 · PROGRAMS & SCHEDULE',prepare:'3 · OPERATIONS',verify:'4 · REVIEW',out:'5 · RESULTS & SHARING'}[g])}</div>
+    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({start:'إعداد المعسكر',plan:'تصميم البرامج والجدول',prepare:'التجهيز والتشغيل',verify:'المراجعة والتحقق',out:'النتائج والمشاركة'}[g],{start:'CAMP SETUP',plan:'PROGRAMS & SCHEDULE',prepare:'OPERATIONS',verify:'REVIEW',out:'RESULTS & SHARING'}[g])}</div>
       ${items.map(([id,ar,en])=>id==='finance'?`<div><button class="navbtn ${page==='finance'?'active':''}" data-act="toggleFinanceNav" aria-expanded="${financeNavOpen}" aria-controls="financeCampLinks">${icon('export')}<span>${T(ar,en)}</span><span class="finance-toggle">${financeNavOpen?'⌄':'›'}</span></button>${financeNavOpen?`<div class="finance-sublist" id="financeCampLinks">${S.camps.map(c=>`<button class="finance-subitem ${page==='finance'&&c.id===S.activeId?'active':''}" data-fin-camp="${esc(c.id)}" title="${esc(campName(c))}"><span class="camp-marker">▣</span><span class="camp-label">${esc(campName(c))}</span></button>`).join('')}</div>`:''}</div>`:`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='camps'?'collection':id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='meals'?'utensils':id==='operations'?'clipboard-check':id==='opportunities'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}${id==='camps'?`<span class="cnt">${S.camps.length}</span>`:''}</button>`).join('')}
     </div>`).join('')}
     <div class="navgroup"><div class="navlabel">متابعة التنفيذ والجودة</div><a class="navbtn" href="./execution-phases.html" style="text-decoration:none;display:flex;align-items:center;gap:10px">${icon('check')}<span>مراحل تنفيذ التعديلات (30)</span></a></div>
@@ -4415,7 +4417,7 @@ document.head.append(style);
 })();
 </script>
 <script src="./phase-one.js?v=ad48ef5b" defer></script>
-<script src="./meal-preparation.js?v=restaurant7" defer></script>
-<script src="./phase-two.js?v=assign9" defer></script>
+<script src="./meal-preparation.js?v=nav10" defer></script>
+<script src="./phase-two.js?v=nav10" defer></script>
 </body>
 </html>
