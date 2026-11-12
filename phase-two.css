@@ -171,3 +171,33 @@
 .p2-modal .p2-add-duty-row button[hidden]{display:none!important}
 .p2-modal .p2-add-duty>small{display:block;font-size:11px;color:#8191a0;margin-top:7px;line-height:1.65}
 @media(max-width:700px){.p2-modal .p2-duty-list{grid-template-columns:1fr}.p2-modal .p2-duty-item{flex-wrap:wrap}}
+
+
+/* Optional assignment from schedule step 5 */
+.p2-inline-assignment{display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px;margin-inline:5px;vertical-align:middle}
+.p2-inline-assign-button{background:#fff!important;border:1px solid #d8e2ec!important;color:#354d66!important;border-radius:8px!important;padding:6px 11px!important;font-size:11px!important;font-weight:650!important;cursor:pointer!important}
+.p2-inline-assign-button:hover{background:#eef3f8!important;border-color:#b6c6d5!important}
+.p2-inline-assignees{color:#687d91;font-size:10px;line-height:1.6;max-width:220px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.p2-schedule-assign-modal{direction:rtl;text-align:right;max-width:690px;color:#223a52}
+.p2-schedule-assign-header{border-bottom:1px solid #e4ebf3;padding-bottom:15px}
+.p2-schedule-assign-header>small{display:block;font-size:11px;color:#e67b3e;font-weight:750}
+.p2-schedule-assign-header h2{font-size:23px;margin:5px 0;color:#1d3650}
+.p2-schedule-assign-header p{font-size:12px;color:#74869a;margin:0;line-height:1.7}
+.p2-schedule-assign-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:15px 0}
+.p2-schedule-assign-toolbar span{font-size:12px;font-weight:750;color:#2b4761;margin-inline-end:auto}
+.p2-schedule-assign-toolbar button{background:#fff;border:1px solid #dce5ed;border-radius:8px;color:#506981;padding:8px 12px;font-size:11px}
+.p2-schedule-assign-search input{border:1px solid #dbe5ee;border-radius:9px;width:100%;padding:12px;font-size:12px;background:#fff;color:#253d57}
+.p2-schedule-assign-members{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;max-height:300px;overflow:auto;scrollbar-width:thin;padding:6px 1px 12px;margin:6px 0}
+.p2-schedule-assign-member{display:flex;align-items:center;gap:10px;min-height:62px;background:#f9fbfd;border:1px solid #e1e8f0;border-radius:10px;padding:11px;cursor:pointer}
+.p2-schedule-assign-member[hidden]{display:none!important}
+.p2-schedule-assign-member:has(input:checked){background:#fff7ed;border-color:#eeb98e}
+.p2-schedule-assign-member input{width:17px;height:17px;accent-color:#ed7a39}
+.p2-schedule-assign-member span{display:grid;gap:3px;min-width:0}
+.p2-schedule-assign-member b{font-size:12px;color:#25425c}
+.p2-schedule-assign-member small{font-size:11px;color:#7c8d9f}
+.p2-schedule-assign-note{font-size:11px;color:#7d8fa2;line-height:1.8;margin:8px 0 17px}
+.p2-schedule-assign-actions{display:flex;gap:8px;justify-content:flex-end;padding-top:13px;border-top:1px solid #e8eef4}
+.p2-schedule-assign-actions button{border-radius:9px;border:1px solid #dae4ee;padding:11px 15px;background:#fff;color:#38536c;font-size:12px;font-weight:700}
+.p2-schedule-assign-actions button.primary{background:#f0803d;border-color:#f0803d;color:#142e44}
+@media(max-width:620px){.p2-schedule-assign-members{grid-template-columns:1fr}.p2-schedule-assign-actions{justify-content:stretch}.p2-schedule-assign-actions button{flex:1}}
+@media print{.p2-inline-assignment{display:none!important}}
