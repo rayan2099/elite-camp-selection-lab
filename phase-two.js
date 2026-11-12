@@ -12,7 +12,7 @@ let tab='programs';
 function db(){
  S.prep??={};
  const d=S.prep.__phase2??(S.prep.__phase2={staff:[],programs:{},custom:[],overrides:{},hidden:[],transport:[],audit:null});
- d.staff??=[];d.programs??={};d.custom??=[];d.overrides??={};d.hidden??=[];d.transport??=[];d.assignmentDetails??={};d.activityAssignments??={};
+ d.staff??=[];d.programs??={};d.custom??=[];d.overrides??={};d.hidden??=[];d.transport??=[];d.assignmentDetails??={};d.activityAssignments??={};d.customDuties??=[];
  if(!d.migrated){(S.prep.__manual||[]).forEach(r=>d.custom.push({id:r.id,name:r.name,category:'general',linked:[],owner:S.prep[r.id]?.owner||'',quantity:1,unit:'متطلب',details:'',reason:'',status:S.prep[r.id]?.done?'ready':'pending'}));d.migrated=true;}
  return d;
 }
@@ -106,6 +106,20 @@ const p2RoleOptions=["مدرب","مشرف ميداني","مسؤول أمن وس�
 const p2Permissions=[["schedule","عرض جداول البرامج"],["activities","تسجيل تنفيذ الأنشطة"],["attendance","متابعة الحضور"],["safety","تسجيل بلاغات السلامة"],["resources","متابعة التجهيزات"],["transport","متابعة النقل"],["meals","متابعة الوجبات"],["reports","رفع التقارير"]];
 const p2RoleDefaults={"مدرب":{"duties":["teach","reports"],"permissions":["schedule","activities","reports"]},"مشرف ميداني":{"duties":["supervise","reports"],"permissions":["schedule","attendance","activities","safety","reports"]},"مسؤول أمن وسلامة":{"duties":["safety","reports"],"permissions":["schedule","safety","reports"]},"مسؤول نقل":{"duties":["transport"],"permissions":["schedule","transport"]},"مسؤول تجهيزات":{"duties":["materials"],"permissions":["schedule","resources"]},"مسؤول التغذية":{"duties":["meals"],"permissions":["schedule","meals"]}};
 const p2Duties=[["teach","تقديم البرامج"],["supervise","الإشراف على الطلاب"],["safety","متابعة السلامة"],["materials","تجهيز الأدوات"],["transport","مرافقة النقل"],["meals","استلام الوجبات"],["reports","تسليم التقرير اليومي"]];
+const p2AllDuties=()=>[...p2Duties,...db().customDuties.map(x=>[x.id,x.name])];
+const p2DutyAdmin=()=>can('select');
+function p2DutyOptions(checked){
+ return '<div id="p2-duty-list" class="p2-checks p2-duty-list">'+p2AllDuties().map(([key,label])=>
+ '<div class="p2-duty-item"><label><input type="checkbox" data-p2-duty="'+H(key)+'" '+((checked||[]).includes(key)?'checked':'')+'>'+H(label)+'</label>'+
+ (db().customDuties.some(x=>x.id===key)&&p2DutyAdmin()?'<div class="p2-duty-controls"><button type="button" data-p2-duty-action="edit" data-id="'+H(key)+'" title="تعديل المسؤولية">تعديل</button><button type="button" data-p2-duty-action="delete" data-id="'+H(key)+'" title="حذف المسؤولية">حذف</button></div>':'')+'</div>').join('')+'</div>';
+}
+function p2RefreshDutyOptions(){
+ const box=document.getElementById('p2-duty-list');if(!box)return;
+ const selectedKeys=[...box.querySelectorAll('[data-p2-duty]:checked')].map(x=>x.getAttribute('data-p2-duty'));
+ const outer=document.createElement('div');outer.innerHTML=p2DutyOptions(selectedKeys);
+ box.replaceWith(outer.firstElementChild);
+}
+
 const p2AssignmentRoles=[['lead','مدرب رئيسي'],['assistant','مدرب مساعد'],['supervisor','مشرف متابعة'],['support','مساندة تشغيلية']];
 const p2AssignmentStates=[['planned','مخطط'],['confirmed','مؤكد'],['completed','تم التنفيذ']];
 const p2ProgramDays=p=>{
@@ -214,7 +228,7 @@ function teamPage(){
  '<div class="card p2-notice">الصلاحيات المعروضة تكليفات تشغيلية للتخطيط، ولا تمنح حساب دخول أو تفويضًا تقنيًا داخل النظام.</div>'+
  '<div class="p2-grid">'+all.map(x=>'<article class="p2-card"><div class="p2-card-header"><h3>'+H(x.name)+'</h3><span class="pill">'+H(x.role||'عضو فريق')+'</span></div>'+
  '<p><b>البرامج والتكليفات:</b> '+(p2StaffPrograms(x.id).length?p2StaffPrograms(x.id).map(pid=>{const d=p2Details(x.id,pid),p=items().find(p=>p.id===pid);return '<span class="p2-assignment-tag">'+H(name(pid))+' · '+H(p2AssignmentRoles.find(r=>r[0]===d.role)?.[1]||'مدرب')+' · '+H(p2AssignedDays(x.id,p).map(n=>'يوم '+n).join('، '))+'</span>'}).join(''):'لم تحدد')+'</p>'+
- '<p><b>المسؤوليات:</b> '+H(p2Duties.filter(a=>(x.duties||[]).includes(a[0])).map(a=>a[1]).join('، ')||'لم تحدد')+'</p>'+
+ '<p><b>المسؤوليات:</b> '+H(p2AllDuties().filter(a=>(x.duties||[]).includes(a[0])).map(a=>a[1]).join('، ')||'لم تحدد')+'</p>'+
  '<p><b>الصلاحيات التشغيلية:</b> '+H(p2Permissions.filter(a=>(x.permissions||[]).includes(a[0])).map(a=>a[1]).join('، ')||'لم تحدد')+'</p>'+
  '<p><b>الأنشطة التشغيلية:</b> '+H((db().activityAssignments?.[x.id]||[]).map(key=>{const [day,index]=key.split(':').map(Number);const r=typeof scheduleRow==='function'?scheduleRow(day,index):null;return r?'اليوم '+day+' · '+r.ar:'نشاط غير متاح'}).join('، ')||'لا يوجد')+'</p>'+
  '<p><b>حالة العضو:</b> '+(x.active===false?'غير نشط':'نشط')+'</p>'+
@@ -222,6 +236,7 @@ function teamPage(){
  '</article>').join('')+'</div>';
 }
 function staffModal(id){
+ p2EditingDuty=null;
  const p=staff().find(x=>x.id===id)||{name:'',role:'مدرب',permissions:[],duties:[],active:true,notes:'',shift:'',contact:''};
  modal('<h2>'+(id?'تعديل عضو الفريق':'إضافة مدرب / مشرف')+'</h2><p class="help">حدد تفاصيل التكليف وليس الاسم والدور فقط.</p><div class="p2-form">'+
  '<label>الاسم<input id="p2-staff-name" maxlength="100" value="'+H(p.name)+'"></label>'+
@@ -229,7 +244,9 @@ function staffModal(id){
  '<label>التواصل<input id="p2-staff-contact" maxlength="80" value="'+H(p.contact||'')+'"></label>'+
  '<label>فترة العمل<input id="p2-staff-shift" maxlength="100" value="'+H(p.shift||'')+'"></label>'+
  '<label class="full">تعليمات التكليف<textarea id="p2-staff-notes" rows="2">'+H(p.notes||'')+'</textarea></label>'+
- '<div class="full"><div class="p2-member-section-head"><h3>المسؤوليات</h3><button type="button" data-p2-tool="suggest-role">اقتراح حسب الدور</button></div>'+p2Checks('data-p2-duty',p.duties,p2Duties)+'</div>'+
+ '<div class="full p2-duties-section"><div class="p2-member-section-head"><h3>المسؤوليات</h3><button type="button" data-p2-tool="suggest-role">اقتراح حسب الدور</button></div>'+
+ p2DutyOptions(p.duties)+
+ (p2DutyAdmin()?'<div class="p2-add-duty"><label for="p2-duty-name">مسؤولية مخصصة جديدة</label><div class="p2-add-duty-row"><input id="p2-duty-name" type="text" maxlength="100" placeholder="مثال: الإشراف على تجهيز الرحلات"><button type="button" data-p2-duty-action="save" class="primary" id="p2-duty-save">+ إضافة مسؤولية</button><button type="button" data-p2-duty-action="cancel" id="p2-duty-cancel" hidden>إلغاء التعديل</button></div><small>تُضاف المسؤولية إلى مكتبة المعسكر لتكون متاحة لجميع أعضاء الفريق.</small></div>':'')+'</div>'+
  '<div class="full"><h3>الصلاحيات التشغيلية</h3><p class="help">توثيق فقط، وليس تفويضًا للدخول.</p>'+p2Checks('data-p2-permission',p.permissions,p2Permissions)+'</div>'+
  '<div class="full">'+p2AssignmentsWidget(id)+'</div>'+
  '<label class="full p2-inline"><input type="checkbox" id="p2-staff-active" '+(p.active===false?'':'checked')+'> نشط</label></div>'+
@@ -277,7 +294,7 @@ function act(b){
   const staffId=person?.id||id||newId('trainer-');
   const value={id:staffId,name,role,contact:input('p2-staff-contact').trim(),shift:input('p2-staff-shift').trim(),notes:input('p2-staff-notes').trim(),active,
     permissions:selected('data-p2-permission').filter(v=>p2Permissions.some(x=>x[0]===v)),
-    duties:selected('data-p2-duty').filter(v=>p2Duties.some(x=>x[0]===v))};
+    duties:selected('data-p2-duty').filter(v=>p2AllDuties().some(x=>x[0]===v))};
   if(person)Object.assign(person,value);else d.staff.push(value);
   d.assignmentDetails[staffId]=assignment.details;
   d.activityAssignments[staffId]=fixedKeys;
@@ -435,6 +452,34 @@ document.addEventListener('input',e=>{
 },true);
 document.addEventListener('input',e=>{if(!e.target.matches('[data-p2-program-search]'))return;const holder=e.target.closest('.p2-program-picker'),q=e.target.value.trim().toLowerCase();holder?.querySelectorAll('.p2-program-options label').forEach(el=>el.hidden=!!q&&!el.dataset.programTitle.includes(q));},true);
 document.addEventListener('change',e=>{if(!e.target.matches('[data-p2-program]'))return;const p=e.target.closest('.p2-program-picker'),count=p?.querySelector('.p2-program-count');if(count)count.textContent=p.querySelectorAll('[data-p2-program]:checked').length+' برنامج محدد';},true);
+
+let p2EditingDuty=null;
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-p2-duty-action]');if(!b)return;
+ e.preventDefault();e.stopImmediatePropagation();
+ if(!p2DutyAdmin())return toast('إدارة مكتبة المسؤوليات متاحة للإدارة فقط');
+ const action=b.getAttribute('data-p2-duty-action'),key=b.getAttribute('data-id'),nameField=document.getElementById('p2-duty-name'),saveBtn=document.getElementById('p2-duty-save'),cancelBtn=document.getElementById('p2-duty-cancel');
+ if(action==='cancel'){p2EditingDuty=null;if(nameField)nameField.value='';if(saveBtn)saveBtn.textContent='+ إضافة مسؤولية';if(cancelBtn)cancelBtn.hidden=true;return;}
+ if(action==='edit'){const item=db().customDuties.find(x=>x.id===key);if(!item)return;
+  p2EditingDuty=key;if(nameField){nameField.value=item.name;nameField.focus();}
+  if(saveBtn)saveBtn.textContent='حفظ تعديل المسؤولية';if(cancelBtn)cancelBtn.hidden=false;return;}
+ if(action==='delete'){
+  const item=db().customDuties.find(x=>x.id===key);if(!item)return;
+  if(!confirm('حذف المسؤولية «'+item.name+'» من المكتبة وإزالتها من جميع أعضاء الفريق؟'))return;
+  db().customDuties=db().customDuties.filter(x=>x.id!==key);
+  db().staff.forEach(m=>{m.duties=(m.duties||[]).filter(x=>x!==key)});
+  if(p2EditingDuty===key){p2EditingDuty=null;if(nameField)nameField.value='';if(saveBtn)saveBtn.textContent='+ إضافة مسؤولية';if(cancelBtn)cancelBtn.hidden=true;}
+  save();p2RefreshDutyOptions();return;
+ }
+ if(action==='save'){
+  const title=(nameField?.value||'').trim().replace(/\s+/g,' ');
+  if(title.length<3)return toast('اكتب اسم مسؤولية واضحًا من 3 أحرف على الأقل');
+  if(p2AllDuties().some(([id,label])=>label.toLocaleLowerCase()===title.toLocaleLowerCase()&&id!==p2EditingDuty))return toast('المسؤولية موجودة مسبقًا');
+  if(p2EditingDuty){const existing=db().customDuties.find(x=>x.id===p2EditingDuty);if(!existing)return toast('تعذر العثور على المسؤولية');existing.name=title;}
+  else db().customDuties.push({id:newId('duty-'),name:title});
+  save();p2RefreshDutyOptions();p2EditingDuty=null;if(nameField)nameField.value='';if(saveBtn)saveBtn.textContent='+ إضافة مسؤولية';if(cancelBtn)cancelBtn.hidden=true;
+ }
+},true);
 document.addEventListener('click',e=>{const b=e.target.closest('[data-p2-tool]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();const holder=b.closest('.p2-program-picker');if(b.dataset.p2Tool==='suggest-role'){const role=document.getElementById('p2-staff-role')?.value,defaultSet=p2RoleDefaults[role];if(defaultSet){document.querySelectorAll('[data-p2-duty]').forEach(box=>box.checked=defaultSet.duties.includes(box.getAttribute('data-p2-duty')));document.querySelectorAll('[data-p2-permission]').forEach(box=>box.checked=defaultSet.permissions.includes(box.getAttribute('data-p2-permission')))}return;}
  if(b.dataset.p2Tool==='clear-assignments'){document.querySelectorAll('.p2-assignment-select input[data-p2-program]').forEach(box=>box.checked=false);document.querySelectorAll('.p2-assignment-details').forEach(x=>x.hidden=true);document.querySelectorAll('[data-p2-assign-day]').forEach(x=>{x.setAttribute('aria-pressed','false');x.classList.remove('assigned');x.textContent='+ إسناد'});p2UpdateAssignmentSummary();return;}
  if(b.dataset.p2Tool==='clear-programs')holder?.querySelectorAll('[data-p2-program]').forEach(box=>box.checked=false);const count=holder?.querySelector('.p2-program-count');if(count)count.textContent='0 برنامج محدد';},true);
