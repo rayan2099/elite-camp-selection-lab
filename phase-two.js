@@ -143,7 +143,7 @@ function act(b){
   if(name.length<2||staff().some(x=>x.name===name&&x.id!==id))return toast('تحقق من الاسم أو التكرار');
   const linked=selected('data-p2-program'),active=document.getElementById('p2-staff-active').checked;
   if(!active&&linked.length)return toast('لا يمكن إسناد برامج لعضو غير نشط');
-  const staffId=person?.id||newId('trainer-');
+  const staffId=person?.id||id||newId('trainer-');
   const value={id:staffId,name,role,contact:input('p2-staff-contact').trim(),shift:input('p2-staff-shift').trim(),notes:input('p2-staff-notes').trim(),active,
     permissions:selected('data-p2-permission').filter(v=>p2Permissions.some(x=>x[0]===v)),
     duties:selected('data-p2-duty').filter(v=>p2Duties.some(x=>x[0]===v))};
