@@ -16,7 +16,7 @@ function db(){
  if(!d.migrated){(S.prep.__manual||[]).forEach(r=>d.custom.push({id:r.id,name:r.name,category:'general',linked:[],owner:S.prep[r.id]?.owner||'',quantity:1,unit:'متطلب',details:'',reason:'',status:S.prep[r.id]?.done?'ready':'pending'}));d.migrated=true;}
  return d;
 }
-const staff=()=>[...(S.prep.__catering?.team||[]),...db().staff];
+const staff=()=>{const all=[...(S.prep.__catering?.team||[])];db().staff.forEach(m=>{const i=all.findIndex(x=>x.id===m.id);if(i>=0)all[i]={...all[i],...m};else all.push(m)});return all};
 const member=id=>staff().find(x=>x.id===id)?.name||'غير محدد';
 const info=id=>{const x=ITEM(id),d=db();return {trainers:[],safety:x?.need.includes('safety')||false,outdoor:x?.need.includes('outdoor')||false,safetyWhy:'',outdoorWhy:'',...(d.programs[id]||{})}};
 const related=k=>items().filter(p=>ITEM(p.id).need.includes(k)).map(x=>x.id);
@@ -90,11 +90,11 @@ function teamPage(){
  '<p><b>المسؤوليات:</b> '+H(p2Duties.filter(a=>(x.duties||[]).includes(a[0])).map(a=>a[1]).join('، ')||'لم تحدد')+'</p>'+
  '<p><b>الصلاحيات التشغيلية:</b> '+H(p2Permissions.filter(a=>(x.permissions||[]).includes(a[0])).map(a=>a[1]).join('، ')||'لم تحدد')+'</p>'+
  '<p><b>حالة العضو:</b> '+(x.active===false?'غير نشط':'نشط')+'</p>'+
- (local.some(m=>m.id===x.id)?'<div class="p2-actions"><button data-p2="edit-staff" data-id="'+H(x.id)+'">تعديل التكليفات</button><button data-p2="delete-staff" data-id="'+H(x.id)+'">حذف</button></div>':'<p class="help">عضو مستورد من قائمة التغذية؛ تعديل بياناته الأساسية يتم من مصدره.</p>')+
+ (local.some(m=>m.id===x.id)?'<div class="p2-actions"><button data-p2="edit-staff" data-id="'+H(x.id)+'">تعديل التكليفات</button><button data-p2="delete-staff" data-id="'+H(x.id)+'">حذف</button></div>':'<div class="p2-actions"><button data-p2="edit-staff" data-id="'+H(x.id)+'">تحديد الصلاحيات والمسؤوليات</button></div>')+
  '</article>').join('')+'</div>';
 }
 function staffModal(id){
- const p=db().staff.find(x=>x.id===id)||{name:'',role:'مدرب',permissions:[],duties:[],active:true,notes:'',shift:'',contact:''};
+ const p=staff().find(x=>x.id===id)||{name:'',role:'مدرب',permissions:[],duties:[],active:true,notes:'',shift:'',contact:''};
  modal('<h2>'+(id?'تعديل عضو الفريق':'إضافة مدرب / مشرف')+'</h2><p class="help">حدد تفاصيل التكليف وليس الاسم والدور فقط.</p><div class="p2-form">'+
  '<label>الاسم<input id="p2-staff-name" maxlength="100" value="'+H(p.name)+'"></label>'+
  '<label>الدور<select id="p2-staff-role">'+p2RoleOptions.map(r=>'<option '+(r===p.role?'selected':'')+'>'+H(r)+'</option>').join('')+'</select></label>'+
