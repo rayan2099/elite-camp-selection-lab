@@ -3597,7 +3597,7 @@ function calendarProductCells(type,y,m){
   }else{
    const scheduled=[0,1,2,3].includes(dow);
    if(scheduled&&!(exception||isHoliday)){cls='pc-active';marker='<span class="pc-label">'+T('الأكاديمية · 3 ساعات','Academy · 3 hours')+'</span>';}
-   else if(scheduled&&(exception||isHoliday)){cls='pc-excluded';marker='<span class="pc-label">'+(exception?T('مستثنى · '+exception,'Excluded · '+exception):T('إجازة مقترحة','Tentative break'))+'</span>';}
+   else if(scheduled&&(exception||isHoliday)){cls='pc-excluded';marker='<span class="pc-label">'+(exception?esc(T('مستثنى · '+exception,'Excluded · '+exception)):T('إجازة مقترحة','Tentative break'))+'</span>';}
    if(scheduled){cls+=' pc-selectable';hint=T('اضغط لإضافة أو إزالة استثناء الاختبارات والإجازات','Toggle an exam or holiday exception');}
   }
   const clickable=(type==='calendar-camps'||(type==='calendar-days'&&dow===5)||(type==='calendar-academy'&&[0,1,2,3].includes(dow)));
@@ -3629,6 +3629,7 @@ function productCalendarClick(type,date){
  const settings=productCalendarSettings();
  if(type==='calendar-days'){settings.fridays[date.slice(0,7)]=date;}
  else if(type==='calendar-academy'){
+  if(apStore().examRanges.some(x=>date>=x.start&&date<=x.end))return toast('هذا اليوم ضمن فترة اختبارات مستثناة؛ عدّل فترة الاستثناء من إعدادات التشغيل.');
   if(settings.exclusions[date])delete settings.exclusions[date];
   else settings.exclusions[date]='اختبارات / استثناء';
  }
