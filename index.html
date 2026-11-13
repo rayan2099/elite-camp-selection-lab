@@ -927,6 +927,7 @@ body{font-size:var(--type-body);line-height:1.7}
 
 .ap-workspace{display:flex;flex-direction:column;gap:14px}.ap-hero{border:1px solid #e8edf3;background:linear-gradient(125deg,#fff7ee,#fff 65%);border-radius:16px;padding:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;align-items:center}.ap-hero small{color:#e77d36;font-size:11px;font-weight:700}.ap-hero h1{font-size:25px;margin:4px 0 6px;color:#243951}.ap-hero p{font-size:12px;color:#708298;margin:0}.ap-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.ap-stat{background:var(--surface,#fff);border:1px solid #e0e7ef;border-radius:12px;padding:15px}.ap-stat small{display:block;color:#60758a;font-size:11px;margin-bottom:9px}.ap-stat b{font-size:21px;color:#243951;font-variant-numeric:tabular-nums}.ap-panel{background:var(--surface,#fff);border:1px solid #e1e7ee;padding:17px;border-radius:14px}.ap-panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.ap-panel h3{margin:0 0 4px;font-size:17px}.ap-panel p{margin:0;font-size:12px;color:#688096;line-height:1.8}.ap-actions{display:flex;gap:7px;flex-wrap:wrap}.ap-actions>* ,.ap-panel-head>button{border:1px solid #dce5ef;background:#fff;border-radius:8px;padding:8px 11px;color:#3f5670;cursor:pointer;font-size:12px}.ap-table-wrap{overflow-x:auto}.ap-table{width:100%;border-collapse:collapse;text-align:right;font-size:12px;min-width:650px}.ap-table th{background:#f6f8fa;color:#577087}.ap-table th,.ap-table td{padding:12px;border-bottom:1px solid #e6edf3}.ap-table td small{display:block;color:#8392a4}.ap-table button{border:1px solid #ec8745;background:#fff6ee;border-radius:7px;padding:7px 9px;color:#a35d30;cursor:pointer}.ap-status{font-size:11px;padding:5px 9px;background:#f2f4f7;border-radius:15px;color:#536579}.ap-ready,.ap-done{background:#eaf6ed;color:#257149}.ap-cancelled{background:#fceeed;color:#994e4e}.ap-edit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}.ap-field{display:flex;flex-direction:column;gap:5px;color:#536982;font-size:12px}.ap-field input,.ap-field select,.ap-field textarea{width:100%;padding:9px;border:1px solid #d9e2eb;border-radius:9px;background:var(--surface,#fff);color:var(--fg,#283b51);box-sizing:border-box;font-size:13px}.ap-full{margin-top:12px}.ap-check-wrap{padding:12px;background:#f7f9fb;border:1px solid #e3eaf0;border-radius:10px}.ap-check-wrap>b{display:block;font-size:12px;margin-bottom:10px}.ap-check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.ap-check{display:flex;align-items:center;gap:7px;font-size:12px;color:#4c6075}.ap-check input{accent-color:#e97f3d}@media(max-width:700px){.ap-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.ap-edit-grid,.ap-check-grid{grid-template-columns:1fr}}
 
+.ap-range-settings{margin-top:16px;border-top:1px solid #e3eaf0;padding-top:14px}.ap-range-settings h4{font-size:13px;margin:0 0 10px}.ap-range-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}.ap-range{display:flex;justify-content:space-between;gap:12px;align-items:center;background:#f7f9fb;border:1px solid #e4ebf2;border-radius:8px;padding:9px 11px;font-size:12px}.ap-range button{background:transparent;border:0;color:#ba4f36;cursor:pointer}.ap-panel .ap-actions label{display:flex;align-items:center;gap:6px;font-size:12px;color:#536982}.ap-panel .ap-actions input{border:1px solid #dbe5ed;border-radius:8px;padding:7px;background:#fff;color:#304861}.ap-panel .ap-hint{margin-top:10px;font-size:11px}
 </style>
 <link rel="stylesheet" href="./catering-ui.css?v=restaurant7">
 <link rel="stylesheet" href="./phase-two.css?v=teams14-orange-outline">
@@ -3580,7 +3581,7 @@ function calendarProductCells(type,y,m){
  const weeksStart=new Date(Date.UTC(y,m,1)).getUTCDay();
  for(let blank=0;blank<weeksStart;blank++)out.push('<div class="pc-day pc-empty" aria-hidden="true"></div>');
  for(let d=1;d<=count;d++){
-  const date=productDate(y,m,d),dow=new Date(date+'T12:00:00Z').getUTCDay(),exception=settings.exclusions[date];
+  const date=productDate(y,m,d),dow=new Date(date+'T12:00:00Z').getUTCDay(),exception=apException(date);
   const holiday=calendarHoliday(date),isHoliday=!!holiday;
   let marker='',cls='',hint='';
   if(type==='calendar-camps'){
@@ -3647,7 +3648,13 @@ let apFilter='all';
 function apStore(){
  const state=productCalendarSettings();
  if(!state.sessions||typeof state.sessions!=='object')state.sessions={};
+ if(!Array.isArray(state.examRanges))state.examRanges=[];
+ if(!state.hours)state.hours={days:{start:'09:00',end:'17:00'},academy:{start:'16:00',end:'19:00'}};
  return state;
+}
+function apException(date){
+ const state=apStore();
+ return state.exclusions[date]||state.examRanges.find(x=>date>=x.start&&date<=x.end)?.reason||'';
 }
 function apDay(date){return new Date(date+'T12:00:00Z').getUTCDay();}
 function apDates(type,y,m){
@@ -3655,13 +3662,13 @@ function apDates(type,y,m){
  for(let d=1;d<=count;d++){
   const date=productDate(y,m,d),dow=apDay(date);
   if(type==='calendar-days'){if(date===productFriday(y,m))dates.push(date);}
-  if(type==='calendar-academy'&&[0,1,2,3].includes(dow)&&!calendarHoliday(date)&&!apStore().exclusions[date])dates.push(date);
+  if(type==='calendar-academy'&&[0,1,2,3].includes(dow)&&!calendarHoliday(date)&&!apException(date))dates.push(date);
  }
  return dates;
 }
 function apSession(type,date){
- const id=type+'|'+date,saved=apStore().sessions[id]||{},isDays=type==='calendar-days';
- return Object.assign({id,type,date,title:isDays?'يوم النخبة':'جلسة الأكاديمية',start:isDays?'09:00':'16:00',end:isDays?'17:00':'19:00',place:'',lead:'',assistants:'',capacity:0,registered:0,attended:0,fee:0,cost:0,status:'planned',notes:'',checks:{venue:false,staff:false,program:false,safety:false,parents:false}},saved);
+ const id=type+'|'+date,saved=apStore().sessions[id]||{},isDays=type==='calendar-days',hours=isDays?apStore().hours.days:apStore().hours.academy;
+ return Object.assign({id,type,date,title:isDays?'يوم النخبة':'جلسة الأكاديمية',start:hours.start,end:hours.end,place:'',lead:'',assistants:'',capacity:0,registered:0,attended:0,fee:0,cost:0,status:'planned',notes:'',checks:{venue:false,staff:false,program:false,safety:false,parents:false}},saved);
 }
 function apSaveSession(data){
  const state=apStore(),id=data.type+'|'+data.date;
@@ -3735,6 +3742,30 @@ function apCards(type){
  }
  return '<div class="ap-stats">'+[['الجلسات المجدولة',stats.total],['جاهزة',stats.ready],['تم تنفيذها',stats.completed],['إجمالي الحضور',stats.participants],['الجاهزية',stats.checks+'%'],['الإيراد المسجل تقديريًا',stats.income.toLocaleString('en-US')+' ر.س']].map(a=>'<div class="ap-stat"><small>'+a[0]+'</small><b>'+a[1]+'</b></div>').join('')+'</div>';
 }
+
+function apConfiguration(type){
+ if(type==='calendar-camps')return '';
+ const st=apStore(),key=type==='calendar-days'?'days':'academy',hours=st.hours[key];
+ const ranges=type==='calendar-academy'?'<div class="ap-range-list">'+(st.examRanges.length?st.examRanges.map((r,i)=>'<div class="ap-range"><span>'+apEsc(r.start)+' — '+apEsc(r.end)+' · '+apEsc(r.reason)+'</span><button type="button" data-ap-remove-range="'+i+'">إزالة</button></div>').join(''):'<small>لم تتم إضافة فترات اختبارات خاصة بعد.</small>')+'</div>':'';
+ const exams=type==='calendar-academy'?'<div class="ap-range-settings"><h4>استثناء فترة اختبارات أو إجازة</h4><div class="ap-actions"><label>من <input type="date" id="ap-range-start"></label><label>إلى <input type="date" id="ap-range-end"></label><input id="ap-range-reason" placeholder="السبب: اختبارات / إجازة" maxlength="70"><button type="button" data-ap-add-range="1">إضافة فترة استثناء</button></div>'+ranges+'</div>':'';
+ return '<div class="ap-panel"><div class="ap-panel-head"><div><h3>إعدادات التشغيل المتكرر</h3><p>'+ (key==='days'?'موعد الجمعة شهريًا قابل للتغيير من التقويم.':'الأحد إلى الأربعاء مع إيقاف تلقائي في الفترات المستثناة.') +'</p></div></div><div class="ap-actions"><label>بداية اليوم <input type="time" id="ap-default-start" value="'+apEsc(hours.start)+'"></label><label>نهاية اليوم <input type="time" id="ap-default-end" value="'+apEsc(hours.end)+'"></label><button type="button" data-ap-save-hours="'+type+'">حفظ أوقات التشغيل</button></div><p class="ap-hint">تطبق الأوقات الجديدة على الجلسات غير المعدلة، وتبقى بيانات الجلسات المحفوظة كما هي.</p>'+exams+'</div>';
+}
+function apSaveHours(type){
+ const start=apRead('ap-default-start'),end=apRead('ap-default-end'),hours=apStore().hours;
+ if(!apTimeValid(start)||!apTimeValid(end)||end<=start)return toast('وقت البداية والنهاية غير صحيح.');
+ const duration=(Number(end.slice(0,2))*60+Number(end.slice(3)))-(Number(start.slice(0,2))*60+Number(start.slice(3)));
+ const expected=type==='calendar-days'?480:180;
+ if(duration!==expected)return toast('يجب أن تستمر الجلسة '+(expected/60)+' ساعات وفق النموذج التشغيلي المحدد.');
+ hours[type==='calendar-days'?'days':'academy']={start,end};save();render({preserveScroll:true});toast('تم تحديث أوقات التشغيل الافتراضية.');
+}
+function apAddRange(){
+ const start=apRead('ap-range-start'),end=apRead('ap-range-end'),reason=apRead('ap-range-reason').trim();
+ if(!apValidDate(start)||!apValidDate(end)||end<start||!reason)return toast('أدخل تاريخ بداية ونهاية صحيحين وسبب الاستثناء.');
+ const days=Math.round((Date.parse(end+'T12:00:00Z')-Date.parse(start+'T12:00:00Z'))/86400000)+1;
+ if(days>120)return toast('أقصى مدة استثناء لكل فترة 120 يومًا.');
+ apStore().examRanges.push({start,end,reason});save();render({preserveScroll:true});toast('تم إضافة الفترة المستثناة إلى تقويم الأكاديمية.');
+}
+
 function apOperations(type){
  if(type==='calendar-camps')return '<div class="ap-panel"><div class="ap-panel-head"><h3>التشغيل المالي والتخطيط</h3><button type="button" data-page="camps">إدارة المعسكرات</button></div><p>أضف معسكرًا أو افتح معسكرًا قائمًا لمتابعة التخطيط والجدول والتكليفات والتكاليف. بيانات كل معسكر مستقلة.</p></div>';
  const sessions=apMonthData(type,productCalendarYear,productCalendarMonth).sessions.filter(x=>apFilter==='all'||x.status===apFilter);
@@ -3755,13 +3786,19 @@ function apExport(type){
 function pageAnnualProductOperations(type){
  const tabs=Object.keys(PRODUCT_CALENDARS).map(id=>'<button type="button" class="pc-tab '+(type===id?'active':'')+'" data-page="'+id+'">'+T(PRODUCT_CALENDARS[id].ar,PRODUCT_CALENDARS[id].en)+'</button>').join('');
  return '<div class="ap-workspace"><div class="ap-hero"><div><small>أكاديمية النخبة · إدارة المنتجات</small><h1>'+T(PRODUCT_CALENDARS[type].ar,PRODUCT_CALENDARS[type].en)+'</h1><p>التخطيط السنوي، التشغيل، المتابعة، وإثبات أثر التنفيذ في مساحة واحدة.</p></div><div class="pc-switch">'+tabs+'</div></div>'+
- apCards(type)+pageProductCalendarBase(type)+apOperations(type)+'</div>';
+ apCards(type)+pageProductCalendarBase(type)+apConfiguration(type)+apOperations(type)+'</div>';
 }
 document.addEventListener('click',e=>{
  const open=e.target.closest('[data-ap-open]');
  if(open){e.preventDefault();e.stopPropagation();apOpen(open.dataset.apOpen,open.dataset.apDate);return;}
  const saveBtn=e.target.closest('[data-ap-save]');
  if(saveBtn){e.preventDefault();e.stopPropagation();apCommit(saveBtn.dataset.apSave,saveBtn.dataset.apDate);return;}
+ const hoursBtn=e.target.closest('[data-ap-save-hours]');
+ if(hoursBtn){e.preventDefault();apSaveHours(hoursBtn.dataset.apSaveHours);return;}
+ const rangeBtn=e.target.closest('[data-ap-add-range]');
+ if(rangeBtn){e.preventDefault();apAddRange();return;}
+ const removeRange=e.target.closest('[data-ap-remove-range]');
+ if(removeRange){e.preventDefault();const i=Number(removeRange.dataset.apRemoveRange);if(Number.isInteger(i)&&i>=0&&i<apStore().examRanges.length){apStore().examRanges.splice(i,1);save();render({preserveScroll:true});toast('تم إزالة فترة الاستثناء.');}return;}
  const exportBtn=e.target.closest('[data-ap-export]');
  if(exportBtn){e.preventDefault();apExport(exportBtn.dataset.apExport);return;}
 });
