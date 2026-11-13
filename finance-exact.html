@@ -967,6 +967,7 @@ function finOpenAttachments(itemId){
  $('finAttachmentHeading').textContent='فواتير وإيصالات: '+item.name;
  $('finAttachmentFiles').value='';$('finAttachmentCamera').value='';
  $('financeAttachmentShell').classList.add('open');
+ if(typeof financeShowEntry==='function')financeShowEntry('financeAttachmentShell');
  finAttachmentMessage('');
  finRenderAttachments();
 }
@@ -1762,7 +1763,7 @@ render();
   if(id==='modalShell')syncExpenseForm(true);
   financeBringIntoView(shell);
  };
- const closeBtn={modalShell:'closeModal',paymentShell:'paymentCancel',collectionShell:'collectionCancel',catModal:'cancelCat'};
+ const closeBtn={modalShell:'closeModal',paymentShell:'paymentCancel',collectionShell:'collectionCancel',catModal:'cancelCat',financeAttachmentShell:'finAttachmentClose'};
  const saveBtn={modalShell:'saveItem',paymentShell:'paymentSave',collectionShell:'collectionSave',catModal:'saveCat'};
  document.addEventListener('keydown',e=>{
   const open=[...document.querySelectorAll('.modal-shell.open')].pop();if(!open)return;
@@ -1786,7 +1787,7 @@ render();
   s2.insertBefore(methodSeg,g2);
   const linkedInfo=el('p',{class:'elite-linked',id:'uxLinkedInfo'});s2.insertBefore(linkedInfo,g2);
   labelOf('calcMethod')?.classList.add('ux-hide-native');g2.appendChild(labelOf('calcMethod'));
-  ['itemQty','itemDays','unitPrice','extraCost'].forEach(id=>{const l=labelOf(id);if(l)g2.appendChild(l)});
+  ['itemQty','itemDays','unitPrice','extraCost','itemVatMode'].forEach(id=>{const l=labelOf(id);if(l)g2.appendChild(l)});
   const calcTotal=el('div',{class:'ux-calc-total'});calcTotal.appendChild(summary);s2.appendChild(calcTotal);
   const [s3,g3]=sec('٣','ما حالة البند الآن؟');
   const statusSeg=el('div',{class:'ux-seg',role:'group','aria-label':'حالة المصروف'},[
