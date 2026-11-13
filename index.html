@@ -3562,11 +3562,13 @@ function productCalendarSettings(){
  return S.productCalendars;
 }
 function productDate(y,m,d){return [y,String(m+1).padStart(2,'0'),String(d).padStart(2,'0')].join('-')}
-function calendarHoliday(date){return typeof OC_EVENTS!=='undefined'?OC_EVENTS.find(e=>e.kind==='break'&&date>=e.start&&date<=e.end):null}
+function calendarHoliday(date){return typeof OC_EVENTS!=='undefined'?OC_EVENTS.find(e=>['break','national'].includes(e.kind)&&date>=e.start&&date<=e.end):null}
+function countFridayDays(y,m){return new Date(Date.UTC(y,m+1,0)).getUTCDate();}
 function productFriday(y,m){
  const cfg=productCalendarSettings(),key=productDate(y,m,1).slice(0,7);
  const stored=cfg.fridays[key];
  if(stored&&new Date(stored+'T12:00:00Z').getUTCDay()===5&&stored.slice(0,7)===key)return stored;
+ for(let d=1;d<=countFridayDays(y,m);d++){const date=productDate(y,m,d);if(new Date(date+'T12:00:00Z').getUTCDay()===5&&!calendarHoliday(date))return date;}
  for(let d=1;d<=7;d++)if(new Date(productDate(y,m,d)+'T12:00:00Z').getUTCDay()===5)return productDate(y,m,d);
  return '';
 }
