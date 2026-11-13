@@ -221,3 +221,11 @@
 .p2-modal .p2-assignment-team-options label{display:flex;flex-direction:row;align-items:center;gap:7px;margin:0;font-size:11px;font-weight:500;color:#455d74;border:1px solid #dfe7ef;border-radius:8px;background:#f7f9fc;padding:8px 11px;cursor:pointer}
 .p2-modal .p2-assignment-team-options label:has(input:checked){background:#fff4e9;border-color:#e9b78d;color:#784522}
 .p2-modal .p2-assignment-team-options input{width:16px;height:16px;accent-color:#e77b39}
+
+/* Staff-card actions: orange outline, retaining existing button behavior */
+.p2-workspace .p2-card .p2-actions button[data-p2="edit-staff"],
+.p2-workspace .p2-card .p2-actions button[data-p2="delete-staff"]{border:1.5px solid #ed7c35;background:#fff;color:#435b73;border-radius:9px;transition:border-color .15s,background .15s}
+.p2-workspace .p2-card .p2-actions button[data-p2="edit-staff"]:hover,
+.p2-workspace .p2-card .p2-actions button[data-p2="delete-staff"]:hover{border-color:#da651e;background:#fff6ee}
+.p2-workspace .p2-card .p2-actions button[data-p2="edit-staff"]:focus-visible,
+.p2-workspace .p2-card .p2-actions button[data-p2="delete-staff"]:focus-visible{outline:2px solid #ed7c35;outline-offset:2px}
