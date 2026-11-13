@@ -544,7 +544,7 @@ html.finance-embedded .cat.selected{outline:2px solid var(--ux-orange);outline-o
 <section class="panel finance-ledger" id="financeApproval"><div class="panel-header"><div><h2>مراجعة واعتماد الميزانية</h2><p class="fx-note">اعتماد تشغيلي محلي لا يمثل توقيعاً محاسبياً موثقاً.</p></div><span class="tag" id="financeApprovalStatus">مسودة</span></div><div class="finance-workflow"><div class="flow-step"><b>نسخة الميزانية الحالية</b><strong id="financeApprovalTotal">—</strong><p id="financeApprovalVersion">لم تعتمد بعد</p></div><div class="flow-step"><b>مراجعة التكاليف والإيرادات</b><p id="financeApprovalGuidance">راجع جميع البنود قبل الاعتماد.</p><button class="btn sm" id="financeReviewButton">إرسال للمراجعة</button></div><div class="flow-step"><b>اعتماد / إعادة فتح</b><p>تثبيت التقديرات بعد الاعتماد، مع السماح بتسجيل المدفوعات والتحصيل.</p><button class="btn primary sm" id="financeApproveButton">اعتماد الميزانية</button><button class="btn sm" id="financeReopenButton" hidden>إعادة فتح الميزانية</button></div></div><div class="callout" id="financeApprovalNotice">هذا إجراء محلي، ولا يثبت هوية المعتمد.</div></section><section class="panel finance-ledger" id="financeOperations"><div class="panel-header"><div><h2>المتابعات والالتزامات المالية</h2><p class="fx-note">مهام مشتقة من بيانات المعسكر الفعلية.</p></div><span class="tag" id="financeTasksCount">—</span></div><div id="financeTasks"></div></section><section class="panel finance-ledger" id="financeReadiness"><div class="panel-header"><div><h2>جاهزية الملف المالي</h2><p class="fx-note">مؤشرات اكتمال الإدخال للتحضير والمراجعة، وليست اعتماداً محاسبياً.</p></div><span class="tag" id="financeCompletion">—</span></div><div id="financeChecklist"></div></section>
 <section class="panel finance-ledger" id="financeAudit"><div class="panel-header"><div><h2>سجل الحركة والمراجعة المالية</h2><p class="fx-note">آخر التعديلات والتسجيلات والتصحيحات لهذا المعسكر فقط (بحد أقصى 500 عملية). السجل محلي وغير محمي من التلاعب، فلا يُعد سجل تدقيق محاسبياً معتمداً.</p></div><button class="btn sm" id="exportAudit">تصدير سجل الحركة</button></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>العملية</th><th>التفاصيل</th></tr></thead><tbody id="auditBody"></tbody></table></div></section>
 <p class="footer">أكاديمية النخبة • نموذج أولي مستقل للإدارة المالية • تخزين محلي في المتصفح • جميع القيم الأولية لأغراض العرض وليست بيانات تشغيلية معتمدة</p></main>
-<div class="modal-shell" id="modalShell" role="dialog" aria-modal="true"><div class="modal fin-entry-modal"><div class="between"><div><h2 id="modalTitle">إضافة مصروف</h2><p class="sub">حدد التصنيف وطريقة الحساب وحالة الصرف.</p></div><button class="btn sm" id="closeModal">✕ إغلاق</button></div><div class="expense-templates" id="expenseTemplates"><div class="expense-templates-title"><strong>اختر بنداً مالياً جاهزاً</strong><span>اختياري — أو اكتب اسماً مخصصاً أدناه</span></div><div class="expense-preset-grid" id="presetButtons"></div><p class="fin-helper" style="margin-top:8px">اختيار البند يعبّئ الاسم والتصنيف وطريقة الحساب فقط. أدخل الكميات والأسعار الفعلية قبل الحفظ.</p></div><div class="form-grid"><label class="field">اسم البند المالي<input id="itemName" placeholder="مثال: استئجار حافلات"></label><label class="field">تصنيف البند<select id="itemCat"></select></label><label class="field">طريقة الاحتساب<select id="calcMethod"><option value="unit">الكمية × سعر الوحدة</option><option value="personday">الأشخاص × الأيام × السعر</option><option value="day">عدد الأيام × التكلفة اليومية</option><option value="fixed">مبلغ ثابت</option></select></label><label class="field">حالة المصروف<select id="itemStatus"><option value="estimated">تقديري</option><option value="committed">ملتزم به (غير مدفوع)</option><option value="paid">مدفوع</option></select></label><label class="field" id="qtyField">الكمية<input id="itemQty" type="number" min="0" value="1"></label><label class="field" id="daysField" style="display:none">عدد الأيام<input id="itemDays" type="number" min="0" value="1"></label><label class="field">سعر الوحدة (ر.س)<input id="unitPrice" type="number" min="0" value="0"></label><label class="field">مصاريف إضافية ثابتة (ر.س)<input id="extraCost" type="number" min="0" value="0"></label><label class="field">المورّد / المستفيد<input id="itemVendor" maxlength="120" placeholder="اسم الفندق أو شركة النقل"></label>
+<div class="modal-shell" id="modalShell" role="dialog" aria-modal="true"><div class="modal fin-entry-modal"><div class="between"><div><h2 id="modalTitle">إضافة مصروف</h2><p class="sub">حدد التصنيف وطريقة الحساب وحالة الصرف.</p></div><button class="btn sm" id="closeModal">✕ إغلاق</button></div><div class="expense-templates" id="expenseTemplates"><div class="expense-templates-title"><strong>اختر بنداً مالياً جاهزاً</strong><span>اختياري — أو اكتب اسماً مخصصاً أدناه</span></div><div class="expense-preset-grid" id="presetButtons"></div><p class="fin-helper" style="margin-top:8px">اختيار البند يعبّئ الاسم والتصنيف وطريقة الحساب فقط. أدخل الكميات والأسعار الفعلية قبل الحفظ.</p></div><div class="form-grid"><label class="field">اسم البند المالي<input id="itemName" placeholder="مثال: استئجار حافلات"></label><label class="field">تصنيف البند<select id="itemCat"></select></label><label class="field">طريقة الاحتساب<select id="calcMethod"><option value="unit">الكمية × سعر الوحدة</option><option value="personday">الأشخاص × الأيام × السعر</option><option value="day">عدد الأيام × التكلفة اليومية</option><option value="fixed">مبلغ ثابت</option></select></label><label class="field">حالة المصروف<select id="itemStatus"><option value="estimated">تقديري</option><option value="committed">ملتزم به (غير مدفوع)</option><option value="paid">مدفوع</option></select></label><label class="field" id="qtyField">الكمية<input id="itemQty" type="number" min="0" value="1"></label><label class="field" id="daysField" style="display:none">عدد الأيام<input id="itemDays" type="number" min="0" value="1"></label><label class="field">سعر الوحدة (ر.س)<input id="unitPrice" type="number" min="0" value="0"></label><label class="field">ضريبة القيمة المضافة للبند<select id="itemVatMode"><option value="none">لا تُحتسب على هذا البند</option><option value="included">السعر يشمل الضريبة بالفعل</option><option value="add">أضف الضريبة إلى التكلفة</option></select></label><label class="field">مصاريف إضافية ثابتة (ر.س)<input id="extraCost" type="number" min="0" value="0"></label><label class="field">المورّد / المستفيد<input id="itemVendor" maxlength="120" placeholder="اسم الفندق أو شركة النقل"></label>
 <label class="field">تاريخ الاستحقاق / الدفع<input id="itemDue" type="date"></label>
 <label class="field">رقم العرض أو الفاتورة<input id="itemRef" maxlength="80" placeholder="مرجع اختياري"></label>
 <label class="field">تفاصيل البند<textarea id="itemNotes" maxlength="500" placeholder="وصف الخدمة أو شروط الاتفاق"></textarea></label>
@@ -697,6 +697,7 @@ const audit=(action,detail)=>{state.audit.unshift({id:'a'+Date.now()+Math.random
 const receiptTotal=kind=>state.collections.filter(x=>x.kind===kind).reduce((sum,x)=>sum+n(x.amount),0);
 const actualTuition=()=>n(state.collected)+receiptTotal('tuition');
 const actualOtherRevenue=()=>receiptTotal('other');
+function finVatAmount(base,mode,rate){return mode==='add'?base*(1+Math.max(0,Math.min(100,Number(rate)||0))/100):base}
 const amountFor=(id)=>state.items.filter(x=>x.cat===id).reduce((a,x)=>a+x.amount,0);const actualFor=(id)=>state.items.filter(x=>x.cat===id).reduce((a,x)=>a+n(x.paid),0);
 function figures(){
  const base=state.items.filter(x=>x.cat!=='reserve').reduce((a,x)=>a+n(x.amount),0),reserve=base*n(state.reservePct)/100;
@@ -721,12 +722,16 @@ $('financeApprovalNotice').textContent=locked?'سجّل المدفوعات وا�
 ['addBtn2','startExpense','customCatBtn'].forEach(id=>$(id).disabled=locked);
 const today=new Date().toISOString().slice(0,10);
 const due=state.items.filter(x=>x.due&&x.due<today&&x.status!=='estimated'&&n(x.amount)>n(x.paid));
-const refs=state.items.filter(x=>x.status!=='estimated'&&!x.ref);
+const refs=state.items.filter(x=>x.status!=='estimated'&&!x.ref&&!(x.attachments||[]).length);
 const overs=state.items.filter(x=>n(x.paid)>n(x.amount));
 const tasks=[];
 if(!state.items.length||!n(state.students)||!n(state.fee))tasks.push(['استكمال الميزانية','أدخل تكاليف المعسكر، وعدد الطلاب، ورسوم الطالب.']);
 if(due.length)tasks.push(['التزامات متأخرة ('+due.length+')',due.slice(0,3).map(x=>x.name).join('، ')]);
-if(refs.length)tasks.push(['مراجع ناقصة ('+refs.length+')','أضف رقم عرض السعر أو الفاتورة للبنود الملتزم بها.']);
+if(refs.length)tasks.push(['مراجع ناقصة ('+refs.length+')','ارفق فاتورة أو مستنداً، أو أضف رقم العرض أو مرجع السداد.']);
+const missingVendor=state.items.filter(x=>x.status!=='estimated'&&!x.vendor);
+if(missingVendor.length)tasks.push(['المورد غير محدد ('+missingVendor.length+')','راجع اسم المورد في البنود الملتزم بها أو المدفوعة.']);
+const missingEvidence=state.items.filter(x=>n(x.paid)>0&&!(x.attachments||[]).length);
+if(missingEvidence.length)tasks.push(['مدفوعات بلا فواتير مرفقة ('+missingEvidence.length+')','ارفع إيصالات PDF أو صور من زر المرفقات في سجل المصروفات.']);
 if(overs.length)tasks.push(['تجاوز التقدير ('+overs.length+')','راجع البنود التي يتجاوز مدفوعها التكلفة المقدرة.']);
 if(!locked)tasks.push(['اعتماد الميزانية','راجع مسودة التكاليف وقدمها للاعتماد المحلي.']);
 $('financeTasksCount').textContent=tasks.length+' متابعات';
@@ -780,10 +785,11 @@ document.querySelectorAll('[data-collection-del]').forEach(el=>el.onclick=()=>{
 
 const steps=[
  ['إضافة تقديرات التكلفة',state.items.length>0],
- ['تسجيل الموردين أو مراجع البنود',state.items.length>0&&state.items.every(x=>Boolean(x.vendor||x.ref||x.notes))],
+ ['تسجيل الموردين أو مراجع البنود',state.items.length>0&&state.items.every(x=>Boolean(x.vendor||x.ref||(x.attachments||[]).length))],
  ['تحديد العدد المتوقع للطلاب',n(state.students)>0],
  ['تحديد رسوم الطالب',n(state.fee)>0],
  ['توثيق الدفعات عند وجود مدفوعات',state.items.every(x=>n(x.paid)===0||Array.isArray(x.payments)&&x.payments.length>0)],
+ ['إرفاق فواتير أو إيصالات المدفوعات',state.items.every(x=>n(x.paid)===0||(x.attachments||[]).length>0)],
  ['تسجيل عمليات تحصيل عند وجود دخل فعلي',n(state.collected)===0||state.collections.length>0]
 ];
 const done=steps.filter(x=>x[1]).length;
@@ -869,7 +875,7 @@ function editItem(id){
  $('itemQty').value=x.qty??1;$('itemDays').value=x.days??1;
  $('unitPrice').value=x.unitPrice??x.amount??0;$('extraCost').value=x.extra??0;
  $('paidValue').value=n(x.paid);$('itemVendor').value=x.vendor||'';
- $('itemDue').value=x.due||'';$('itemRef').value=x.ref||'';$('itemNotes').value=x.notes||'';
+ $('itemDue').value=x.due||'';$('itemRef').value=x.ref||'';$('itemNotes').value=x.notes||'';$('itemVatMode').value=x.vatMode||'none';
  updateCalc();modal(true);
 }
 function updateCalc(){
@@ -878,12 +884,12 @@ function updateCalc(){
  $('daysField').style.display=m==='day'||m==='personday'?'flex':'none';
  $('paidField').style.display=status==='paid'&&!editing?'flex':'none';
  let mult=m==='fixed'?1:m==='day'?n($('itemDays').value):m==='personday'?n($('itemQty').value)*n($('itemDays').value):n($('itemQty').value);
- const val=mult*n($('unitPrice').value)+n($('extraCost').value);
+ const val=finVatAmount(mult*n($('unitPrice').value)+n($('extraCost').value),$('itemVatMode').value,state.vatRate);
  $('itemTotal').textContent=sar(val);
  $('formulaText').textContent=({unit:'الكمية × السعر + المصاريف الإضافية',personday:'الأشخاص × الأيام × السعر + المصاريف الإضافية',day:'الأيام × السعر + المصاريف الإضافية',fixed:'التكلفة الثابتة + المصاريف الإضافية'})[m];
  return val;
 }
-['calcMethod','itemStatus','itemQty','itemDays','unitPrice','extraCost'].forEach(id=>$(id).addEventListener('input',updateCalc));
+['calcMethod','itemStatus','itemQty','itemDays','unitPrice','extraCost','itemVatMode'].forEach(id=>$(id).addEventListener('input',updateCalc));
 $('saveItem').onclick=()=>{
  if(!guardBudget())return;
  const name=$('itemName').value.trim(),amount=updateCalc(),status=$('itemStatus').value;
@@ -901,7 +907,7 @@ $('saveItem').onclick=()=>{
    qty:n($('itemQty').value),days:n($('itemDays').value),
    unitPrice:n($('unitPrice').value),extra:n($('extraCost').value),
    vendor:$('itemVendor').value.trim(),due:$('itemDue').value,
-   ref:$('itemRef').value.trim(),notes:$('itemNotes').value.trim()});
+   ref:$('itemRef').value.trim(),notes:$('itemNotes').value.trim(),vatMode:$('itemVatMode').value});
   audit('تعديل بند',name+' · '+sar(amount));
  }else{
   state.items.unshift({id:'i'+Date.now()+Math.random().toString(36).slice(2),
@@ -910,7 +916,7 @@ $('saveItem').onclick=()=>{
    days:n($('itemDays').value),unitPrice:n($('unitPrice').value),
    extra:n($('extraCost').value),vendor:$('itemVendor').value.trim(),
    due:$('itemDue').value,ref:$('itemRef').value.trim(),
-   notes:$('itemNotes').value.trim(),
+   notes:$('itemNotes').value.trim(),vatMode:$('itemVatMode').value,
    payments:initialPaid?[{id:'p'+Date.now(),amount:initialPaid,date:localDay(),method:'غير محدد',ref:'دفعة أولية عند الإنشاء'}]:[]});
   audit('إضافة بند',name+' · '+sar(amount));
  }
@@ -1122,7 +1128,7 @@ function financeReportHtml(){
  const cash=collected-f.actual;
  const today=new Date().toISOString().slice(0,10);
  const overdue=committed.filter(i=>i.due&&i.due<today&&n(i.amount)>n(i.paid));
- const noDocs=committed.filter(i=>!i.ref);
+ const noDocs=committed.filter(i=>!i.ref&&!(i.attachments||[]).length);
  const excess=state.items.filter(i=>n(i.paid)>n(i.amount));
  const untracked=state.items.filter(i=>n(i.paid)>0&&(!Array.isArray(i.payments)||!i.payments.length));
  const unapproved=state.approval?.status!=='approved';
@@ -1161,6 +1167,7 @@ function financeReportHtml(){
   ['مدفوعات دون سجل دفعات تفصيلي',untracked.length,untracked.length?'راجع البنود المستوردة أو القديمة.':'المدفوعات لها تفاصيل مسجلة.'],
   ['اعتماد الميزانية',unapproved?'غير معتمدة':'معتمدة محلياً',unapproved?'اعرض الميزانية للمراجعة.':'الاعتماد محلي غير موثق الهوية.']
  ].map(r=>row(r.map(x=>esc(String(x))))).join('');
+ const evidenceRows=state.items.filter(x=>(x.attachments||[]).length).map(x=>row([esc(x.name),String(x.attachments.length),esc(x.attachments.map(a=>a.name).join('، '))])).join('');
  const status=state.approval?.status==='approved'?'معتمدة محلياً':state.approval?.status==='review'?'قيد المراجعة':'مسودة';
  const section=(title,heads,body,cols)=>'<h2>'+title+'</h2><div class="report-table-wrap"><table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(body||'<tr><td colspan="'+cols+'">لا توجد بيانات مسجلة.</td></tr>')+'</tbody></table></div>';
  return '<div class="report-brand"><div><strong>التقرير المالي التنفيذي للمعسكر</strong><small>أكاديمية النخبة · إدارة المعسكرات · ملخص إداري ومرفقات مالية</small></div><div class="report-mark"><span class="report-wordmark">النخبة</span><span class="report-logo" aria-label="شعار أكاديمية النخبة"><svg viewBox="15 38 113 67" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="شعار الجبال"><polygon points="118,89 75,50 72,49 23,90 26,94 72,56 115,94" fill="#dd7f4c"/><polygon points="36,90 40,93 56,79 63,83 56,90 59,93 67,87 71,89 73,86 72,83 76,79 81,81 95,93 98,90 78,73 68,80 57,73" fill="#dd7f4c"/></svg></span></div></div>'
@@ -1499,7 +1506,7 @@ function eliteItemAmount(x,st){
 }
 function eliteSyncLinked(){
  if(budgetLocked())return false;let changed=false;
- state.items.forEach(x=>{if(!LINKED_METHODS[x.method])return;const q=eliteLinkedQty(x.method,state),a=q*n(x.unitPrice)+n(x.extra);if(Math.abs(a-n(x.amount))>0.004||x.qty!==q){x.amount=a;x.qty=q;changed=true}});
+ state.items.forEach(x=>{if(!LINKED_METHODS[x.method])return;const q=eliteLinkedQty(x.method,state),a=finVatAmount(q*n(x.unitPrice)+n(x.extra),x.vatMode||'none',state.vatRate);if(Math.abs(a-n(x.amount))>0.004||x.qty!==q){x.amount=a;x.qty=q;changed=true}});
  return changed;
 }
 updateCalc=function(){
@@ -1509,7 +1516,7 @@ updateCalc=function(){
  $('paidField').style.display=status==='paid'&&!editing?'flex':'none';
  const q=n($('itemQty').value),d=n($('itemDays').value),p=n($('unitPrice').value),x=n($('extraCost').value);
  const mult=linked?eliteLinkedQty(m,state):m==='fixed'?1:m==='day'?d:m==='personday'?q*d:q;
- const val=mult*p+x;$('itemTotal').textContent=sar(val);
+ const val=finVatAmount(mult*p+x,$('itemVatMode').value,state.vatRate);$('itemTotal').textContent=sar(val);
  if(linked){$('itemQty').value=eliteLinkedQty(m,state);if(m==='studentDay')$('itemDays').value=n(state.days)}
  return val;
 };
@@ -1784,7 +1791,7 @@ render();
   methodSeg.addEventListener('click',e=>{const b=e.target.closest('[data-method]');if(!b)return;byId('calcMethod').value=b.dataset.method;byId('calcMethod').dispatchEvent(new Event('input',{bubbles:true}));syncExpenseForm();focusFirstAmount()});
   statusSeg.addEventListener('click',e=>{const b=e.target.closest('[data-status]');if(!b||b.disabled)return;byId('itemStatus').value=b.dataset.status;byId('itemStatus').dispatchEvent(new Event('input',{bubbles:true}));syncExpenseForm();if(b.dataset.status!=='estimated')more.open=true;if(b.dataset.status==='paid'&&byId('paidField').style.display!=='none')byId('paidValue').focus()});
   byId('presetButtons')?.addEventListener('click',e=>{if(e.target.closest('button'))setTimeout(()=>{syncExpenseForm();focusFirstAmount()},0)});
-  ['itemQty','itemDays','unitPrice','extraCost','calcMethod','itemStatus'].forEach(id=>byId(id)?.addEventListener('input',()=>syncExpenseForm()));
+  ['itemQty','itemDays','unitPrice','extraCost','calcMethod','itemStatus','itemVatMode'].forEach(id=>byId(id)?.addEventListener('input',()=>syncExpenseForm()));
  })();
  function focusFirstAmount(){const f=['itemQty','itemDays','unitPrice'].map(byId).find(x=>x&&x.closest('label').style.display!=='none');f?.focus()}
  const setLabel=(id,text)=>{const l=labelOf(id);if(l&&l.firstChild&&l.firstChild.nodeType===3)l.firstChild.nodeValue=text};
@@ -1806,7 +1813,7 @@ render();
   else info.hidden=true;
   const q=n(byId('itemQty').value),d=n(byId('itemDays').value),p=n(byId('unitPrice').value),x=n(byId('extraCost').value);
   const parts=m==='personday'?[q,d,p]:m==='unit'?[q,p]:m==='day'?[d,p]:m==='studentDay'?[att,cd,p]:m==='night'?[cn,p]:m==='campDay'?[cd,p]:m==='student'?[att,p]:[p];
-  byId('formulaText').textContent=parts.map(fmt).join(' × ')+(x?' + '+fmt(x):'')+' = '+sar(updateCalc());
+  byId('formulaText').textContent=parts.map(fmt).join(' × ')+(x?' + '+fmt(x):'')+($('itemVatMode').value==='add'?' + ضريبة '+fmt(state.vatRate)+'%':$('itemVatMode').value==='included'?' (شامل الضريبة)':' (دون إضافة ضريبة)')+' = '+sar(updateCalc());
   byId('saveItem').textContent=editing?'حفظ التعديلات':'حفظ البند';
   byId('uxSaveNext').hidden=editing;
   if(opening){const more=byId('uxMoreDetails');more.open=s!=='estimated'||!!(byId('itemVendor').value||byId('itemDue').value||byId('itemRef').value||byId('itemNotes').value)}
