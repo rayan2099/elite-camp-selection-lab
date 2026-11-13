@@ -123,6 +123,12 @@ function p2RefreshDutyOptions(){
 
 const p2AssignmentRoles=[['lead','مدرب رئيسي'],['assistant','مدرب مساعد'],['supervisor','مشرف متابعة'],['support','مساندة تشغيلية']];
 const p2AssignmentStates=[['planned','مخطط'],['confirmed','مؤكد'],['completed','تم التنفيذ']];
+const p2CampTeams=()=>{const available=typeof TEAMS!=='undefined'?TEAMS:[];
+ const configured=Array.isArray(S.meta?.teamList)?S.meta.teamList:[];
+ return (configured.length?configured:available).slice(0,Math.max(0,Number(S.meta?.teams)||configured.length||available.length)).map(x=>({id:String(x.id),name:x.ar||x.name||x.en||'فريق'}));
+};
+const p2TeamLabels=ids=>(ids||[]).map(id=>p2CampTeams().find(x=>x.id===String(id))?.name).filter(Boolean).join('، ')||'جميع الفرق';
+
 const p2ProgramDays=p=>{
  const all=S.meta?.days||[];
  const days=Array.isArray(p.days)&&p.days.length?p.days:(p.day?[p.day]:[]);
@@ -146,6 +152,7 @@ const p2AssignmentRows=(staffId,chosen)=>{
     '<label>طبيعة التكليف<select data-p2-role="'+H(p.id)+'">'+p2AssignmentRoles.map(([key,label])=>'<option value="'+key+'" '+((detail.role||'lead')===key?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+
     '<label>حالة التكليف<select data-p2-state="'+H(p.id)+'">'+p2AssignmentStates.map(([key,label])=>'<option value="'+key+'" '+((detail.status||'planned')===key?'selected':'')+'>'+label+'</option>').join('')+'</select></label></div>'+
     '<div class="p2-assignment-days"><b>أيام مشاركة العضو</b><div class="p2-assignment-day-options">'+days.map(d=>'<label><input type="checkbox" data-p2-day="'+H(p.id)+'" value="'+d+'" '+(chosenDays.includes(d)?'checked':'')+'> اليوم '+d+'</label>').join('')+'</div></div>'+
+ '<div class="p2-assignment-teams"><div class="p2-assignment-teamhead"><b>الفرق المكلف بها في هذا البرنامج</b><small>اختياري · عدم التحديد يعني جميع الفرق</small></div><div class="p2-assignment-team-options">'+p2CampTeams().map(team=>'<label><input type="checkbox" data-p2-assignment-team="'+H(p.id)+'" value="'+H(team.id)+'" '+((detail.teamIds||[]).map(String).includes(team.id)?'checked':'')+'>'+H(team.name)+'</label>').join('')+'</div></div>'+
     '<label class="p2-assignment-note">مهمة العضو في البرنامج<input data-p2-note="'+H(p.id)+'" maxlength="200" value="'+H(detail.note||'')+'" placeholder="مثال: قيادة النشاط، تقييم المشاركين أو تجهيز الأدوات"></label></div>'+
     '</article>';
  }).join('');
@@ -216,7 +223,9 @@ function p2ReadAssignments(){
    const role=document.querySelector('[data-p2-role="'+id+'"]')?.value||'lead';
    const status=document.querySelector('[data-p2-state="'+id+'"]')?.value||'planned';
    if(!p2AssignmentRoles.some(x=>x[0]===role)||!p2AssignmentStates.some(x=>x[0]===status))return {error:'تفاصيل تكليف غير صالحة: '+name(id)};
-   result[id]={role,status,days:[...new Set(days)],note:(document.querySelector('[data-p2-note="'+id+'"]')?.value||'').trim()};
+   const validTeams=new Set(p2CampTeams().map(t=>t.id));
+   const teamIds=[...document.querySelectorAll('[data-p2-assignment-team]:checked')].filter(el=>el.getAttribute('data-p2-assignment-team')===id).map(el=>String(el.value)).filter(t=>validTeams.has(t));
+   result[id]={role,status,days:[...new Set(days)],teamIds:[...new Set(teamIds)],note:(document.querySelector('[data-p2-note="'+id+'"]')?.value||'').trim()};
    valid.push(id);
  }
  return {ids:valid,details:result};
@@ -228,7 +237,7 @@ function teamPage(){
  return '<div class="p2-heading"><div><h2>الفريق والصلاحيات والمسؤوليات</h2><p>سجل تفصيلي يربط الأعضاء بالبرامج والمهام والصلاحيات التشغيلية.</p></div><button class="primary" data-p2="add-staff">+ إضافة عضو</button></div>'+
  '<div class="card p2-notice">الصلاحيات المعروضة تكليفات تشغيلية للتخطيط، ولا تمنح حساب دخول أو تفويضًا تقنيًا داخل النظام.</div>'+
  '<div class="p2-grid">'+all.map(x=>'<article class="p2-card"><div class="p2-card-header"><h3>'+H(x.name)+'</h3><span class="pill">'+H(x.role||'عضو فريق')+'</span></div>'+
- '<p><b>البرامج والتكليفات:</b> '+(p2StaffPrograms(x.id).length?p2StaffPrograms(x.id).map(pid=>{const d=p2Details(x.id,pid),p=items().find(p=>p.id===pid);return '<span class="p2-assignment-tag">'+H(name(pid))+' · '+H(p2AssignmentRoles.find(r=>r[0]===d.role)?.[1]||'مدرب')+' · '+H(p2AssignedDays(x.id,p).map(n=>'يوم '+n).join('، '))+'</span>'}).join(''):'لم تحدد')+'</p>'+
+ '<p><b>البرامج والتكليفات:</b> '+(p2StaffPrograms(x.id).length?p2StaffPrograms(x.id).map(pid=>{const d=p2Details(x.id,pid),p=items().find(p=>p.id===pid);return '<span class="p2-assignment-tag">'+H(name(pid))+' · '+H(p2AssignmentRoles.find(r=>r[0]===d.role)?.[1]||'مدرب')+' · '+H(p2AssignedDays(x.id,p).map(n=>'يوم '+n).join('، '))+' · '+H(p2TeamLabels(d.teamIds))+'</span>'}).join(''):'لم تحدد')+'</p>'+
  '<p><b>المسؤوليات:</b> '+H(p2AllDuties().filter(a=>(x.duties||[]).includes(a[0])).map(a=>a[1]).join('، ')||'لم تحدد')+'</p>'+
  '<p><b>الصلاحيات التشغيلية:</b> '+H(p2Permissions.filter(a=>(x.permissions||[]).includes(a[0])).map(a=>a[1]).join('، ')||'لم تحدد')+'</p>'+
  '<p><b>الأنشطة التشغيلية:</b> '+H((db().activityAssignments?.[x.id]||[]).map(key=>{const [day,index]=key.split(':').map(Number);const r=typeof scheduleRow==='function'?scheduleRow(day,index):null;return r?'اليوم '+day+' · '+r.ar:'نشاط غير متاح'}).join('، ')||'لا يوجد')+'</p>'+
