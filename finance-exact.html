@@ -1521,7 +1521,7 @@ const ELITE_METHOD_LABEL={night:'ليلة',studentDay:'طالب/يوم',campDay:
 })();
 function eliteItemAmount(x,st){
  if(!LINKED_METHODS[x.method])return n(x.amount);
- return eliteLinkedQty(x.method,st)*n(x.unitPrice)+n(x.extra);
+ return finVatAmount(eliteLinkedQty(x.method,st)*n(x.unitPrice)+n(x.extra),x.vatMode||'none',st.vatRate);
 }
 function eliteSyncLinked(){
  if(budgetLocked())return false;let changed=false;
@@ -1883,7 +1883,7 @@ render();
    const x=rows[i];if(!x)return;
    const hay=[x.name,x.vendor,x.ref,x.notes,state.categories.find(c=>c.id===x.cat)?.name].join(' ').toLowerCase();
    const show=!query||hay.includes(query);tr.hidden=!show;
-   if(LINKED_METHODS[x.method]||x.method==='fixed'){const meta=tr.querySelector('td:first-child');if(meta&&!meta.querySelector('.elite-basis')){const q=LINKED_METHODS[x.method]?eliteLinkedQty(x.method,state):1;meta.insertAdjacentHTML('beforeend','<div class="fin-meta elite-basis">'+ELITE_METHOD_LABEL[x.method]+(LINKED_METHODS[x.method]?': '+fmt(q)+' × '+(Math.abs(n(x.unitPrice)-Math.round(n(x.unitPrice)))>0.004?n(x.unitPrice).toFixed(2):fmt(x.unitPrice))+(n(x.extra)?' + '+fmt(x.extra):''):'')+'</div>')}}
+   if(financeActiveView!=='execution'&&(LINKED_METHODS[x.method]||x.method==='fixed')){const meta=tr.querySelector('td:first-child');if(meta&&!meta.querySelector('.elite-basis')){const q=LINKED_METHODS[x.method]?eliteLinkedQty(x.method,state):1;meta.insertAdjacentHTML('beforeend','<div class="fin-meta elite-basis">'+ELITE_METHOD_LABEL[x.method]+(LINKED_METHODS[x.method]?': '+fmt(q)+' × '+(Math.abs(n(x.unitPrice)-Math.round(n(x.unitPrice)))>0.004?n(x.unitPrice).toFixed(2):fmt(x.unitPrice))+(n(x.extra)?' + '+fmt(x.extra):''):'')+'</div>')}}
    if(isOverdue(x)){tr.classList.add('ux-overdue');const b=tr.querySelector('td b');if(b&&!tr.querySelector('.ux-overdue-tag'))b.insertAdjacentHTML('afterend','<span class="ux-overdue-tag">متأخر السداد</span>')}
    if(show){tot.a+=n(x.amount);tot.p+=n(x.paid);tot.r+=Math.max(0,n(x.amount)-n(x.paid));tot.c++}
   });
@@ -1905,7 +1905,7 @@ render();
   if(!n(state.students)||!n(state.fee)||!n(state.days))tasks.push({t:'أكمل أساسيات المعسكر',d:'الطلاب المدفوعون والسعر والأيام والليالي — تُبنى عليها التكاليف المرتبطة والإيرادات.',b:'إدخال الأساسيات',go:()=>{financeActivateView('budget');setTimeout(()=>{const id=!n(state.students)?'bStudents':!n(state.fee)?'bFee':'bDays';financeBringIntoView(byId('eliteBasics'));byId(id).focus()},60)}});
   if(!state.items.length)tasks.push({t:'ابدأ ببنود موازنة النخبة',d:'يضيف القالب البنود العشرة المعتمدة بأسعار افتراضية تعدّلها حسب عروض الموردين.',b:'تطبيق القالب',go:()=>{financeActivateView('budget');eliteApplyTemplate()}});
   if(overdue.length)tasks.push({t:overdue.length+' التزام متأخر السداد',d:overdue.slice(0,3).map(x=>x.name+' ('+sar(n(x.amount)-n(x.paid))+')').join('، '),b:'تسجيل دفعة',go:()=>{if(overdue.length===1){financeActivateView('budget');openPayment(overdue[0].id)}else{financeActivateView('budget');filter='committed';document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.filter==='committed'));render();financeBringIntoView(byId('expenses'))}}});
-  const missingRef=state.items.filter(x=>x.status!=='estimated'&&!x.ref&&!x.vendor);
+  const missingRef=state.items.filter(x=>x.status!=='estimated'&&!x.ref&&!(x.attachments||[]).length&&!x.vendor);
   if(state.items.length&&n(state.students)&&n(state.fee)&&state.approval.status==='draft')tasks.push({t:'أرسل الميزانية للاعتماد',d:'التقديرات جاهزة: راجعها ثم أرسلها للمراجعة لتثبيتها.',b:'مراجعة واعتماد',go:()=>{financeActivateView('control');financeBringIntoView(byId('financeApproval'))}});
   if(state.approval.status==='review')tasks.push({t:'الميزانية بانتظار الاعتماد',d:'اعتمد النسخة المرسلة أو عدّلها ثم أعد إرسالها.',b:'فتح الاعتماد',go:()=>{financeActivateView('control');financeBringIntoView(byId('financeApproval'))}});
   const expected=n(state.students)*n(state.fee);
