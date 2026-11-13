@@ -2659,29 +2659,49 @@ function editScheduleRow(day,index){
  const n=Number(day),j=Number(index);
  if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length)return;
  const row=scheduleRow(n,j);
+ const timeParts=String(row.t||'').split(/\s*[–-]\s*/);
+ const timeValue=v=>/^\d{1,2}:\d{2}$/.test(v)?v.padStart(5,'0'):'';
  openModal(`<div class="eyebrow">${T('الجدول اليومي','DAILY SCHEDULE')}</div><h2>${T('تعديل فعالية اليوم','Edit daily activity')} ${n}</h2>
    <div class="fields spacer">
-   <label class="fld">${T('الوقت','Time')}<input id="seTime" maxlength="32" value="${esc(row.t)}" dir="ltr" placeholder="08:40 – 09:40"></label>
+   <label class="fld">${T('وقت البداية','Start time')}<input id="seTimeStart" type="time" step="60" required value="${esc(timeValue(timeParts[0]))}" dir="ltr"></label>
+   <label class="fld">${T('وقت النهاية (اختياري)','End time (optional)')}<input id="seTimeEnd" type="time" step="60" value="${esc(timeValue(timeParts[1]||''))}" dir="ltr"></label>
    <label class="fld">${T('اسم الفعالية بالعربية','Arabic activity name')}<input id="seAr" maxlength="90" value="${esc(row.ar)}"></label>
    <label class="fld">${T('اسم الفعالية بالإنجليزية','English activity name')}<input id="seEn" maxlength="90" value="${esc(row.en||'')}"></label></div>
-   <p class="help">${T('الجدول قابل للتعديل لهذا المعسكر دون تغيير الجدول الأساسي لبقية المعسكرات. راجع أوقات الصلاة حسب الموقع والتاريخ.','Changes affect this camp only. Verify prayer times for the venue and date.')}</p>
+   <p class="help">${T('حدد وقت البداية، ويمكنك إضافة وقت نهاية. التعديل خاص بهذا المعسكر ويُحفظ في المتصفح. راجع أوقات الصلاة حسب الموقع والتاريخ.','Select a start time and optionally an end time. Changes are stored in this browser for this camp only. Verify prayer times for the venue and date.')}</p>
    <div class="actions spacer" style="display:flex;gap:8px;justify-content:flex-end">
-   <button data-act="close">${T('إلغاء','Cancel')}</button>
-   <button class="primary" data-act="saveScheduleRow:${n},${j}">${T('حفظ التعديل','Save changes')}</button></div>`);
+   <button type="button" data-act="close">${T('إلغاء','Cancel')}</button>
+   <button type="button" class="primary" data-act="saveScheduleRow:${n},${j}">${T('حفظ التعديل','Save changes')}</button></div>`);
 }
 function saveScheduleRow(day,index){
  if(!(can('select')||can('scheduleEdit')))return toast(T('تعديل الجدول غير متاح لهذا الدور.','Schedule editing is not available for this role.'));
  const n=Number(day),j=Number(index);
  if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length)return;
- const t=$('#seTime')?.value.trim(),ar=$('#seAr')?.value.trim(),en=$('#seEn')?.value.trim();
- if(!t||!ar)return toast(T('الوقت واسم الفعالية مطلوبان.','Time and activity name are required.'));
- if(!/^\\d{1,2}:\\d{2}(\\s*[–-]\\s*\\d{1,2}:\\d{2})?$/.test(t))return toast(T('استخدم وقتاً مثل 08:40 أو 08:40 – 09:40.','Enter a time such as 08:40 or 08:40 – 09:40.'));
- const validTime=v=>{const parts=v.split(':').map(Number);return parts[0]>=0&&parts[0]<24&&parts[1]>=0&&parts[1]<60};
- if(!t.split(/\\s*[–-]\\s*/).every(validTime))return toast(T('الوقت غير صحيح.','Invalid time.'));
+ const start=$('#seTimeStart')?.value||'',end=$('#seTimeEnd')?.value||'';
+ const ar=$('#seAr')?.value.trim(),en=$('#seEn')?.value.trim();
+ if(!start||!ar)return toast(T('وقت البداية واسم الفعالية مطلوبان.','Start time and activity name are required.'));
+ const validTime=v=>/^\d{2}:\d{2}$/.test(v)&&Number(v.slice(0,2))<24&&Number(v.slice(3))<60;
+ if(!validTime(start)||(end&&!validTime(end)))return toast(T('اختر وقتًا صحيحًا من حقول الوقت.','Choose a valid time.'));
+ if(end&&end<=start)return toast(T('يجب أن يكون وقت النهاية بعد وقت البداية.','End time must be after start time.'));
+ const t=end?start+' – '+end:start;
+ if(!S.prep||typeof S.prep!=='object')S.prep={};
  if(!S.prep.__scheduleEdits)S.prep.__scheduleEdits={};
  if(!S.prep.__scheduleEdits[n])S.prep.__scheduleEdits[n]={};
+ const previous=S.prep.__scheduleEdits[n][j];
  S.prep.__scheduleEdits[n][j]={t,ar,en:en||ar};
- save();closeModal();render();toast(T('تم تحديث جدول اليوم.','Day schedule updated.'));
+ save();
+ let persisted=false;
+ try{
+  const data=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
+  const camp=data?.camps?.find(c=>c.id===S.activeId);
+  persisted=camp?.prep?.__scheduleEdits?.[n]?.[j]?.t===t;
+ }catch(e){}
+ if(!persisted){
+  if(previous)S.prep.__scheduleEdits[n][j]=previous;
+  else delete S.prep.__scheduleEdits[n][j];
+  return toast(T('تعذر حفظ التعديل في المتصفح. تحقق من مساحة التخزين وحاول مجددًا.','Could not save in this browser. Check storage and retry.'));
+ }
+ closeModal();render();
+ toast(T('تم حفظ وقت الفعالية وتحديث الجدول.','Activity time saved and schedule updated.'));
 }
 
 function planDays(){
