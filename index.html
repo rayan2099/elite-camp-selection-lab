@@ -909,25 +909,6 @@ body{font-size:var(--type-body);line-height:1.7}
  #app .big{font-size:20px}
 }
 
-
-/* Three independent annual product calendars */
-.product-finance-note{padding:12px 16px;margin:0 0 10px;background:#fff8f1;border:1px solid #ffd4b5;border-radius:12px;color:#694628;font-size:13px}
-.pc-wrap{background:var(--surface,#fff);border:1px solid var(--line,#e1e7ed);border-radius:16px;padding:18px;margin-bottom:16px}
-.pc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.pc-top h2{font-size:21px;margin:0 0 6px}.pc-top p{color:var(--muted,#62758b);font-size:12px;line-height:1.7;margin:0 0 15px}
-.pc-switch{display:flex;flex-wrap:wrap;gap:7px}.pc-tab{border:1px solid #d9e4ed;background:#fff;color:#48617b;border-radius:9px;padding:8px 12px;font-weight:600;cursor:pointer}.pc-tab.active{border-color:#ee7f3c;background:#fff2e8;color:#a34f19}
-.pc-month{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0 16px}.pc-month h3{font-size:18px;margin:0}.pc-month button{border:1px solid #dce5ed;background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;color:#35506b}.pc-month .pc-current{margin-inline-start:auto;font-size:12px}
-.pc-weekdays,.pc-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.pc-weekdays{text-align:center;font-size:11px;color:#657a8e;margin-bottom:7px}.pc-weekdays span{padding:5px 0}
-.pc-day{display:flex;align-items:flex-start;flex-direction:column;text-align:start;gap:6px;min-height:90px;padding:9px;background:#fafbfd;border:1px solid #e1e9f0;border-radius:10px;color:var(--fg,#243c54);font:inherit}
-.pc-day>b{font-size:13px}.pc-day:disabled{opacity:1}.pc-day.pc-selectable,.pc-day.pc-active{cursor:pointer}.pc-day.pc-selectable:hover{border-color:#ee7f3c}.pc-day.pc-active{border-color:#efad79;background:#fff4ea}.pc-day.pc-excluded{border-color:#e0c1bf;background:#fff5f4}.pc-empty{border:none;background:transparent}
-.pc-label{display:block;font-size:10px;line-height:1.5;font-weight:600;overflow-wrap:anywhere;color:#a4521e}.pc-excluded .pc-label{color:#9a6563}
-.pc-legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:13px;color:#677d90;font-size:12px}.pc-legend span{display:flex;align-items:center;gap:6px}.pc-dot{display:inline-block;width:12px;height:12px;background:#fff4ea;border:1px solid #efad79;border-radius:3px}.pc-dot.pc-off{background:#fff5f4;border-color:#e0c1bf}.pc-foot{font-size:12px;color:#62788d;margin:12px 0 0;line-height:1.7}
-@media(max-width:650px){.pc-wrap{padding:10px}.pc-day{min-height:69px;padding:5px;gap:3px}.pc-day>b{font-size:11px}.pc-label{font-size:8px}.pc-weekdays{font-size:9px}.pc-grid,.pc-weekdays{gap:3px}}
-
-
-.ap-workspace{display:flex;flex-direction:column;gap:14px}.ap-hero{border:1px solid #e8edf3;background:linear-gradient(125deg,#fff7ee,#fff 65%);border-radius:16px;padding:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;align-items:center}.ap-hero small{color:#e77d36;font-size:11px;font-weight:700}.ap-hero h1{font-size:25px;margin:4px 0 6px;color:#243951}.ap-hero p{font-size:12px;color:#708298;margin:0}.ap-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.ap-stat{background:var(--surface,#fff);border:1px solid #e0e7ef;border-radius:12px;padding:15px}.ap-stat small{display:block;color:#60758a;font-size:11px;margin-bottom:9px}.ap-stat span{display:block;color:#8795a5;font-size:10px;margin-top:6px}.ap-stat b{font-size:21px;color:#243951;font-variant-numeric:tabular-nums}.ap-panel{background:var(--surface,#fff);border:1px solid #e1e7ee;padding:17px;border-radius:14px}.ap-panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.ap-panel h3{margin:0 0 4px;font-size:17px}.ap-panel p{margin:0;font-size:12px;color:#688096;line-height:1.8}.ap-actions{display:flex;gap:7px;flex-wrap:wrap}.ap-actions>* ,.ap-panel-head>button{border:1px solid #dce5ef;background:#fff;border-radius:8px;padding:8px 11px;color:#3f5670;cursor:pointer;font-size:12px}.ap-table-wrap{overflow-x:auto}.ap-table{width:100%;border-collapse:collapse;text-align:right;font-size:12px;min-width:650px}.ap-table th{background:#f6f8fa;color:#577087}.ap-table th,.ap-table td{padding:12px;border-bottom:1px solid #e6edf3}.ap-table td small{display:block;color:#8392a4}.ap-table button{border:1px solid #ec8745;background:#fff6ee;border-radius:7px;padding:7px 9px;color:#a35d30;cursor:pointer}.ap-status{font-size:11px;padding:5px 9px;background:#f2f4f7;border-radius:15px;color:#536579}.ap-ready,.ap-done{background:#eaf6ed;color:#257149}.ap-cancelled{background:#fceeed;color:#994e4e}.ap-edit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}.ap-field{display:flex;flex-direction:column;gap:5px;color:#536982;font-size:12px}.ap-field input,.ap-field select,.ap-field textarea{width:100%;padding:9px;border:1px solid #d9e2eb;border-radius:9px;background:var(--surface,#fff);color:var(--fg,#283b51);box-sizing:border-box;font-size:13px}.ap-full{margin-top:12px}.ap-check-wrap{padding:12px;background:#f7f9fb;border:1px solid #e3eaf0;border-radius:10px}.ap-check-wrap>b{display:block;font-size:12px;margin-bottom:10px}.ap-check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.ap-check{display:flex;align-items:center;gap:7px;font-size:12px;color:#4c6075}.ap-check input{accent-color:#e97f3d}@media(max-width:700px){.ap-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.ap-edit-grid,.ap-check-grid{grid-template-columns:1fr}}
-
-.ap-range-settings{margin-top:16px;border-top:1px solid #e3eaf0;padding-top:14px}.ap-range-settings h4{font-size:13px;margin:0 0 10px}.ap-range-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}.ap-range{display:flex;justify-content:space-between;gap:12px;align-items:center;background:#f7f9fb;border:1px solid #e4ebf2;border-radius:8px;padding:9px 11px;font-size:12px}.ap-range button{background:transparent;border:0;color:#ba4f36;cursor:pointer}.ap-panel .ap-actions label{display:flex;align-items:center;gap:6px;font-size:12px;color:#536982}.ap-panel .ap-actions input{border:1px solid #dbe5ed;border-radius:8px;padding:7px;background:#fff;color:#304861}.ap-panel .ap-hint{margin-top:10px;font-size:11px}
 </style>
 <link rel="stylesheet" href="./catering-ui.css?v=restaurant7">
 <link rel="stylesheet" href="./phase-two.css?v=teams14-orange-outline">
@@ -1657,13 +1638,7 @@ const NAV=[
   ['prepare',[
     ['meals','إدارة الوجبات والتغذية','Meals and catering'],
     ['operations','الجاهزية ومتطلبات التشغيل','Operational readiness'],
-    ['finance','الإدارة المالية','Financial management']
-  ]],
-  ['calendar',[
-    ['annual-overview','الهيكل التشغيلي والتقويم السنوي','Annual operations overview'],
-    ['calendar-camps','تقويم معسكرات النخبة','Elite Camps calendar'],
-    ['calendar-days','تقويم أيام النخبة','Elite Days calendar'],
-    ['calendar-academy','تقويم الأكاديمية','Academy calendar']
+    ['finance','الإدارة المالية للمعسكرات','Camp financial management']
   ]],
   ['verify',[
     ['fit','٤. افحص مواءمة الطلاب','4. Review student alignment'],
@@ -1681,13 +1656,7 @@ const PAGE_TITLES={
   selection:['البرامج المختارة','Selected programs'],days:['توزيع البرامج على الأيام','Daily program allocation'],
   fit:['مواءمة احتياجات الطلاب','Student needs alignment'],readiness:['مراجعة اكتمال الخطة','Plan completeness review'],
   opportunities:['تقويم فرص المعسكرات','Camp opportunities calendar'],
-  finance:['الإدارة المالية · معسكرات النخبة','Elite Camps finances'],
-  'finance-days':['الإدارة المالية · أيام النخبة','Elite Days finances'],
-  'finance-academy':['الإدارة المالية · الأكاديمية','Academy finances'],
-  'annual-overview':['الهيكل التشغيلي والتقويم السنوي','Annual operating overview'],
-  'calendar-camps':['تقويم معسكرات النخبة','Elite Camps calendar'],
-  'calendar-days':['تقويم أيام النخبة','Elite Days calendar'],
-  'calendar-academy':['تقويم الأكاديمية','Academy calendar'],
+  finance:['الميزانية والتشغيل المالي','Camp finances'],
   outputs:['ملفات الخطة والتجهيز','Plan & preparation files']
 };
 
@@ -1701,13 +1670,8 @@ function header(){
       <svg viewBox="0 0 92 46" aria-hidden="true"><path fill="currentColor" d="M2 40 24 6l10 16 6-9 20 27H46L34 23l-8 17H2Z"/><path fill="currentColor" opacity=".45" d="M62 40 80 12l10 28H62Z"/></svg>
       <div><b>${T('أكاديمية النخبة','Elite Academy')}</b><small>CAMP PLANNER</small></div>
     </div>
-    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({start:'إعداد المعسكر',plan:'تصميم البرامج والجدول',prepare:'التجهيز والتشغيل',calendar:'التقويم السنوي للمنتجات',verify:'المراجعة والتحقق',out:'النتائج والمشاركة'}[g],{start:'CAMP SETUP',plan:'PROGRAMS & SCHEDULE',prepare:'OPERATIONS',calendar:'ANNUAL PRODUCT CALENDARS',verify:'REVIEW',out:'RESULTS & SHARING'}[g])}</div>
-      ${items.map(([id,ar,en])=>id==='finance'?`<div><button class="navbtn ${['finance','finance-days','finance-academy'].includes(page)?'active':''}" data-act="toggleFinanceNav" aria-expanded="${financeNavOpen}" aria-controls="financeCampLinks">${icon('export')}<span>${T(ar,en)}</span><span class="finance-toggle">${financeNavOpen?'⌄':'›'}</span></button>${financeNavOpen?`<div class="finance-sublist" id="financeCampLinks">
-      <button class="finance-subitem ${page==='finance'?'active':''}" data-page="finance"><span class="camp-marker">▣</span><span class="camp-label">${T('معسكرات النخبة','Elite Camps')}</span></button>
-      ${S.camps.map(c=>`<button class="finance-subitem ${page==='finance'&&c.id===S.activeId?'active':''}" data-fin-camp="${esc(c.id)}" title="${esc(campName(c))}" style="padding-inline-start:24px"><span class="camp-marker">•</span><span class="camp-label">${esc(campName(c))}</span></button>`).join('')}
-      <button class="finance-subitem ${page==='finance-days'?'active':''}" data-page="finance-days"><span class="camp-marker">▣</span><span class="camp-label">${T('أيام النخبة','Elite Days')}</span></button>
-      <button class="finance-subitem ${page==='finance-academy'?'active':''}" data-page="finance-academy"><span class="camp-marker">▣</span><span class="camp-label">${T('الأكاديمية','Academy')}</span></button>
-     </div>`:''}</div>`:`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='camps'?'collection':id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='meals'?'utensils':id==='operations'?'clipboard-check':id==='opportunities'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}${id==='camps'?`<span class="cnt">${S.camps.length}</span>`:''}</button>`).join('')}
+    ${NAV.map(([g,items])=>`<div class="navgroup"><div class="navlabel">${T({start:'إعداد المعسكر',plan:'تصميم البرامج والجدول',prepare:'التجهيز والتشغيل',verify:'المراجعة والتحقق',out:'النتائج والمشاركة'}[g],{start:'CAMP SETUP',plan:'PROGRAMS & SCHEDULE',prepare:'OPERATIONS',verify:'REVIEW',out:'RESULTS & SHARING'}[g])}</div>
+      ${items.map(([id,ar,en])=>id==='finance'?`<div><button class="navbtn ${page==='finance'?'active':''}" data-act="toggleFinanceNav" aria-expanded="${financeNavOpen}" aria-controls="financeCampLinks">${icon('export')}<span>${T(ar,en)}</span><span class="finance-toggle">${financeNavOpen?'⌄':'›'}</span></button>${financeNavOpen?`<div class="finance-sublist" id="financeCampLinks">${S.camps.map(c=>`<button class="finance-subitem ${page==='finance'&&c.id===S.activeId?'active':''}" data-fin-camp="${esc(c.id)}" title="${esc(campName(c))}"><span class="camp-marker">▣</span><span class="camp-label">${esc(campName(c))}</span></button>`).join('')}</div>`:''}</div>`:`<button class="navbtn ${page===id?'active':''}" data-page="${id}">${icon(id==='camps'?'collection':id==='builder'?'brick':id==='dashboard'?'dashboard':id==='library'?'library':id==='selection'?'select':id==='days'?'calendar':id==='meals'?'utensils':id==='operations'?'clipboard-check':id==='opportunities'?'calendar':id==='fit'?'target':id==='readiness'?'check':'export')}<span>${T(ar,en)}</span>${id==='selection'?`<span class="cnt">${selCount()}</span>`:''}${id==='camps'?`<span class="cnt">${S.camps.length}</span>`:''}</button>`).join('')}
     </div>`).join('')}
     <div class="navgroup"><div class="navlabel">متابعة التنفيذ والجودة</div><a class="navbtn" href="./execution-phases.html" style="text-decoration:none;display:flex;align-items:center;gap:10px">${icon('check')}<span>مراحل تنفيذ التعديلات (30)</span></a></div>
     <div class="sidefoot">
@@ -3543,305 +3507,12 @@ document.addEventListener('change',e=>{
  const b=e.target.closest('[data-fin-setting]');if(b)finSetting(b.dataset.finSetting,b.value);
 });
 
-function financeIframe(id,name){
- const src='finance-exact.html?embed=1&camp='+encodeURIComponent(id)+'&campName='+encodeURIComponent(name)+'&ui=finance-products-v1';
- return '<iframe id="financeExactFrame" src="'+esc(src)+'" title="'+esc(name)+'" loading="eager"></iframe>';
-}
 function pageFinanceExact(){
  const camp=activeCamp();
- return financeIframe(camp.id,campName(camp));
+ const src='finance-exact.html?embed=1&camp='+encodeURIComponent(camp.id)+'&campName='+encodeURIComponent(campName(camp))+'&ui=finance-report-logo-v7';
+ return '<iframe id="financeExactFrame" src="'+esc(src)+'" title="'+esc(T('الإدارة المالية: ','Finances: ')+campName(camp))+'" loading="eager"></iframe>';
 }
-function pageFinanceDays(){return '<div class="product-finance-note">'+T('الإدارة المالية المستقلة لأيام النخبة؛ لا تختلط بنودها أو إيراداتها مع المعسكرات أو الأكاديمية.','Separate finances for Elite Days.')+'</div>'+financeIframe('product-elite-days',T('أيام النخبة','Elite Days'));}
-function pageFinanceAcademy(){return '<div class="product-finance-note">'+T('الإدارة المالية المستقلة للأكاديمية؛ لا تختلط بنودها أو إيراداتها مع المنتجات الأخرى.','Separate finances for the Academy.')+'</div>'+financeIframe('product-academy',T('الأكاديمية','Academy'));}
-
-/* ===== Annual product calendars: independent products and persisted exceptions ===== */
-let productCalendarYear=2026,productCalendarMonth=10;
-const PRODUCT_CALENDARS={
- 'calendar-camps':{ar:'معسكرات النخبة',en:'Elite Camps',description:'المعسكرات الموسمية بحسب مواعيد المعسكرات المسجلة',descEn:'Seasonal camps from registered camp dates'},
- 'calendar-days':{ar:'أيام النخبة',en:'Elite Days',description:'لقاء شهري يوم الجمعة لمدة 8 ساعات؛ الجمعة الأولى مقترح افتراضي قابل للتغيير',descEn:'One Friday each month, 8 hours; first Friday is an editable default'},
- 'calendar-academy':{ar:'الأكاديمية',en:'Academy',description:'الأحد إلى الأربعاء، 3 ساعات يوميًا، مع استثناء أيام الإجازات والاختبارات',descEn:'Sunday through Wednesday, 3 hours daily, with holidays and exam exceptions'}
-};
-function productCalendarSettings(){
- if(!S.productCalendars||typeof S.productCalendars!=='object')S.productCalendars={};
- if(!S.productCalendars.exclusions)S.productCalendars.exclusions={};
- if(!S.productCalendars.fridays)S.productCalendars.fridays={};
- return S.productCalendars;
-}
-function productDate(y,m,d){return [y,String(m+1).padStart(2,'0'),String(d).padStart(2,'0')].join('-')}
-function calendarHoliday(date){return typeof OC_EVENTS!=='undefined'?OC_EVENTS.find(e=>['break','national'].includes(e.kind)&&date>=e.start&&date<=e.end):null}
-function countFridayDays(y,m){return new Date(Date.UTC(y,m+1,0)).getUTCDate();}
-function productFriday(y,m){
- const cfg=productCalendarSettings(),key=productDate(y,m,1).slice(0,7);
- const stored=cfg.fridays[key];
- if(stored&&new Date(stored+'T12:00:00Z').getUTCDay()===5&&stored.slice(0,7)===key)return stored;
- for(let d=1;d<=countFridayDays(y,m);d++){const date=productDate(y,m,d);if(new Date(date+'T12:00:00Z').getUTCDay()===5&&!calendarHoliday(date))return date;}
- for(let d=1;d<=7;d++)if(new Date(productDate(y,m,d)+'T12:00:00Z').getUTCDay()===5)return productDate(y,m,d);
- return '';
-}
-function calendarProductCells(type,y,m){
- const settings=productCalendarSettings(),count=new Date(Date.UTC(y,m+1,0)).getUTCDate(),out=[];
- const weeksStart=new Date(Date.UTC(y,m,1)).getUTCDay();
- for(let blank=0;blank<weeksStart;blank++)out.push('<div class="pc-day pc-empty" aria-hidden="true"></div>');
- for(let d=1;d<=count;d++){
-  const date=productDate(y,m,d),dow=new Date(date+'T12:00:00Z').getUTCDay(),exception=apException(date);
-  const holiday=calendarHoliday(date),isHoliday=!!holiday;
-  let marker='',cls='',hint='';
-  if(type==='calendar-camps'){
-   const matches=S.camps.filter(c=>c.meta?.start&&c.meta?.end&&date>=c.meta.start&&date<=c.meta.end&&c.status!=='archived');
-   if(matches.length){cls='pc-active';marker=matches.map(c=>'<span class="pc-label">'+esc(campName(c))+'</span>').join('');}
-   hint=T('اضغط لعرض إدارة المعسكرات','Open camp management');
-  }else if(type==='calendar-days'){
-   const scheduled=date===productFriday(y,m);
-   if(scheduled){cls='pc-active';marker='<span class="pc-label">'+T('أيام النخبة · 8 ساعات','Elite Days · 8 hours')+'</span>';}
-   if(dow===5){cls+=' pc-selectable';hint=T('اضغط لتحديد جمعة هذا الشهر','Choose this month’s Friday');}
-  }else{
-   const scheduled=[0,1,2,3].includes(dow);
-   if(scheduled&&!(exception||isHoliday)){cls='pc-active';marker='<span class="pc-label">'+T('الأكاديمية · 3 ساعات','Academy · 3 hours')+'</span>';}
-   else if(scheduled&&(exception||isHoliday)){cls='pc-excluded';marker='<span class="pc-label">'+(exception?esc(T('مستثنى · '+exception,'Excluded · '+exception)):T('إجازة مقترحة','Tentative break'))+'</span>';}
-   if(scheduled){cls+=' pc-selectable';hint=T('اضغط لإضافة أو إزالة استثناء الاختبارات والإجازات','Toggle an exam or holiday exception');}
-  }
-  const clickable=(type==='calendar-camps'||(type==='calendar-days'&&dow===5)||(type==='calendar-academy'&&[0,1,2,3].includes(dow)));
-  out.push('<button type="button" class="pc-day '+cls+'" '+(clickable?'data-pc-date="'+date+'" data-pc-type="'+type+'"':'disabled')+' title="'+esc(hint)+'"><b>'+d+'</b>'+marker+'</button>');
- }
- return out.join('');
-}
-function pageProductCalendarBase(type){
- const info=PRODUCT_CALENDARS[type];if(!info)return '';
- const y=productCalendarYear,m=productCalendarMonth,monthLabel=(lang==='ar'?OC_MONTHS_AR:OC_MONTHS_EN)[m]+' '+y;
- const months=Object.keys(PRODUCT_CALENDARS);
- const tabs=months.map(id=>'<button type="button" class="pc-tab '+(type===id?'active':'')+'" data-page="'+id+'">'+T(PRODUCT_CALENDARS[id].ar,PRODUCT_CALENDARS[id].en)+'</button>').join('');
- return '<section class="pc-wrap"><div class="pc-top"><div><h2>'+T(info.ar,info.en)+'</h2><p>'+T(info.description,info.descEn)+'</p></div><div class="pc-switch">'+tabs+'</div></div>'+
-  '<div class="pc-month"><button type="button" data-pc-month="-1" aria-label="'+T('الشهر السابق','Previous month')+'">‹</button><h3>'+monthLabel+'</h3><button type="button" data-pc-month="1" aria-label="'+T('الشهر التالي','Next month')+'">›</button><button type="button" class="pc-current" data-pc-today="1">'+T('الشهر الحالي','Current month')+'</button></div>'+
-  '<div class="pc-weekdays">'+[T('الأحد','Sun'),T('الإثنين','Mon'),T('الثلاثاء','Tue'),T('الأربعاء','Wed'),T('الخميس','Thu'),T('الجمعة','Fri'),T('السبت','Sat')].map(x=>'<span>'+x+'</span>').join('')+'</div>'+
-  '<div class="pc-grid">'+calendarProductCells(type,y,m)+'</div>'+
-  '<div class="pc-legend"><span><i class="pc-dot"></i>'+T('يوم مجدول','Scheduled day')+'</span><span><i class="pc-dot pc-off"></i>'+T('إجازة أو استثناء','Holiday / exception')+'</span></div>'+
-  '<p class="pc-foot">'+(type==='calendar-academy'?T('الإجازات المعروضة من تقويم الفرص إرشادية وتحتاج مراجعة التقويم الدراسي الرسمي. لتسجيل فترة اختبارات أو استثناء يوم، اضغط اليوم.','Displayed holidays are provisional. Click academy dates to mark exam/holiday exceptions.'):type==='calendar-days'?T('اضغط على أي جمعة لتحديد موعد اللقاء الشهري بدلاً من الجمعة الأولى الافتراضية.','Click a Friday to choose a different monthly session date.'):T('تُعرض المعسكرات المسجلة في المنصة حسب تاريخ البداية والنهاية، دون إنشاء معسكرات افتراضية.','Shows registered camps by start and end dates; no fictitious camps.'))+'</p></section>';
-}
-function productCalendarShift(delta){
- productCalendarMonth+=delta;
- if(productCalendarMonth<0){productCalendarMonth=11;productCalendarYear--;}
- if(productCalendarMonth>11){productCalendarMonth=0;productCalendarYear++;}
- render({preserveScroll:true});
-}
-function productCalendarClick(type,date){
- if(type==='calendar-camps'){page='camps';render();return;}
- if(apDates(type,Number(date.slice(0,4)),Number(date.slice(5,7))-1).includes(date)||apStore().sessions[type+'|'+date]){apOpen(type,date);return;}
- const settings=productCalendarSettings();
- if(type==='calendar-days'){settings.fridays[date.slice(0,7)]=date;}
- else if(type==='calendar-academy'){
-  if(apStore().examRanges.some(x=>date>=x.start&&date<=x.end))return toast('هذا اليوم ضمن فترة اختبارات مستثناة؛ عدّل فترة الاستثناء من إعدادات التشغيل.');
-  if(settings.exclusions[date])delete settings.exclusions[date];
-  else settings.exclusions[date]='اختبارات / استثناء';
- }
- save();render({preserveScroll:true});
- toast(T('تم حفظ تعديل التقويم.','Calendar update saved.'));
-}
-document.addEventListener('click',e=>{
- const month=e.target.closest('[data-pc-month]');
- if(month){e.preventDefault();productCalendarShift(Number(month.dataset.pcMonth));return;}
- const today=e.target.closest('[data-pc-today]');
- if(today){e.preventDefault();const now=new Date();productCalendarYear=now.getFullYear();productCalendarMonth=now.getMonth();render({preserveScroll:true});return;}
- const date=e.target.closest('[data-pc-date]');
- if(date){e.preventDefault();productCalendarClick(date.dataset.pcType,date.dataset.pcDate);}
-});
-
-
-/* Annual product operations: per-session management, attendance, readiness and costs. */
-let apFilter='all';
-function apStore(){
- const state=productCalendarSettings();
- if(!state.sessions||typeof state.sessions!=='object')state.sessions={};
- if(!Array.isArray(state.examRanges))state.examRanges=[];
- if(!state.hours)state.hours={days:{start:'09:00',end:'17:00'},academy:{start:'16:00',end:'19:00'}};
- return state;
-}
-function apException(date){
- const state=apStore();
- return state.exclusions[date]||state.examRanges.find(x=>date>=x.start&&date<=x.end)?.reason||'';
-}
-function apDay(date){return new Date(date+'T12:00:00Z').getUTCDay();}
-function apDates(type,y,m){
- const count=new Date(Date.UTC(y,m+1,0)).getUTCDate(),dates=[];
- for(let d=1;d<=count;d++){
-  const date=productDate(y,m,d),dow=apDay(date);
-  if(type==='calendar-days'){if(date===productFriday(y,m))dates.push(date);}
-  if(type==='calendar-academy'&&[0,1,2,3].includes(dow)&&!calendarHoliday(date)&&!apException(date))dates.push(date);
- }
- return dates;
-}
-function apSession(type,date){
- const id=type+'|'+date,saved=apStore().sessions[id]||{},isDays=type==='calendar-days',hours=isDays?apStore().hours.days:apStore().hours.academy;
- return Object.assign({id,type,date,title:isDays?'يوم النخبة':'جلسة الأكاديمية',start:hours.start,end:hours.end,place:'',lead:'',assistants:'',capacity:0,registered:0,attended:0,fee:0,cost:0,status:'planned',notes:'',checks:{venue:false,staff:false,program:false,safety:false,parents:false}},saved);
-}
-function apSaveSession(data){
- const state=apStore(),id=data.type+'|'+data.date;
- state.sessions[id]=data;save();
- let stored=false;
- try{
-  const storedRoot=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
-  stored=storedRoot?.productCalendars?.sessions?.[id]?.start===data.start;
- }catch(e){}
- if(!stored)return false;
- return true;
-}
-function apValidDate(v){return /^\d{4}-\d{2}-\d{2}$/.test(v)&&!Number.isNaN(Date.parse(v+'T12:00:00Z'));}
-function apEsc(v){return esc(v==null?'':v);}
-function apNum(v){return Number.isFinite(+v)?Math.max(0,Number(v)):0;}
-function apStatusLabel(x){return ({planned:T('مخطط','Planned'),ready:T('جاهز','Ready'),done:T('منفذ','Completed'),cancelled:T('ملغى','Cancelled')})[x]||x;}
-function apTimeValid(t){return /^([01]\d|2[0-3]):[0-5]\d$/.test(t);}
-function apOpen(type,date){
- if(type==='calendar-camps'){page='camps';render();return;}
- const data=apSession(type,date);
- const checkLabels={venue:'المقر والتجهيز',staff:'الطاقم والتكليفات',program:'البرنامج والأنشطة',safety:'الأمن والسلامة',parents:'إبلاغ أولياء الأمور'};
- const field=(label,id,value,kind='text')=>'<label class="ap-field"><span>'+label+'</span><input id="'+id+'" type="'+kind+'" value="'+apEsc(value)+'"></label>';
- const checks=Object.entries(checkLabels).map(([key,label])=>'<label class="ap-check"><input type="checkbox" data-ap-check="'+key+'" '+(data.checks?.[key]?'checked':'')+'><span>'+label+'</span></label>').join('');
- openModal('<div class="eyebrow">'+T('إدارة الجلسة','SESSION OPERATIONS')+'</div><h2>'+apEsc(data.title)+' · '+date+'</h2>'+
-  '<div class="ap-edit-grid">'+
-  field('اسم الجلسة','ap-title',data.title)+
-  '<label class="ap-field"><span>الحالة التشغيلية</span><select id="ap-status">'+['planned','ready','done','cancelled'].map(v=>'<option value="'+v+'" '+(data.status===v?'selected':'')+'>'+apStatusLabel(v)+'</option>').join('')+'</select></label>'+
-  field('وقت البداية','ap-start',data.start,'time')+field('وقت النهاية','ap-end',data.end,'time')+
-  field('المقر أو الموقع','ap-place',data.place)+field('المشرف المسؤول','ap-lead',data.lead)+
-  field('المدربون والمساعدون (أسماء مفصولة بفاصلة)','ap-assistants',data.assistants)+
-  field('السعة المستهدفة','ap-capacity',data.capacity,'number')+
-  field('المسجلون','ap-registered',data.registered,'number')+field('الحاضرون','ap-attended',data.attended,'number')+
-  field('الإيراد للطالب (ريال)','ap-fee',data.fee,'number')+field('التكلفة الفعلية/المقدرة للجلسة (ريال)','ap-cost',data.cost,'number')+
-  '</div><div class="ap-check-wrap"><b>قائمة الجاهزية التشغيلية</b><div class="ap-check-grid">'+checks+'</div></div>'+
-  '<label class="ap-field ap-full"><span>الملاحظات والتقارير</span><textarea id="ap-notes" rows="3">'+apEsc(data.notes)+'</textarea></label>'+
-  '<div class="actions spacer"><button type="button" data-act="close">إلغاء</button><button type="button" class="primary" data-ap-save="'+type+'" data-ap-date="'+date+'">حفظ الجلسة</button></div>');
-}
-function apRead(id){return document.getElementById(id)?.value||'';}
-function apCommit(type,date){
- const original=apSession(type,date);
- const start=apRead('ap-start'),end=apRead('ap-end');
- if(!apTimeValid(start)||!apTimeValid(end)||end<=start)return toast('تحقق من أوقات البداية والنهاية؛ يجب أن تكون النهاية بعد البداية.');
- const capacity=apNum(apRead('ap-capacity')),registered=apNum(apRead('ap-registered')),attended=apNum(apRead('ap-attended'));
- if(attended>registered||registered>capacity&&capacity>0)return toast('تحقق من أعداد السعة والمسجلين والحاضرين.');
- if(!apRead('ap-title').trim())return toast('أدخل اسم الجلسة.');
- const checks={};document.querySelectorAll('[data-ap-check]').forEach(el=>checks[el.dataset.apCheck]=el.checked);
- const data=Object.assign({},original,{
-  title:apRead('ap-title').trim(),start,end,place:apRead('ap-place').trim(),
-  lead:apRead('ap-lead').trim(),assistants:apRead('ap-assistants').trim(),
-  capacity,registered,attended,fee:apNum(apRead('ap-fee')),cost:apNum(apRead('ap-cost')),
-  status:apRead('ap-status'),notes:apRead('ap-notes').trim(),checks,updatedAt:new Date().toISOString()
- });
- if(data.status==='ready'&&Object.values(checks).some(v=>!v))return toast('أكمل قائمة الجاهزية قبل تحويل الحالة إلى جاهز.');
- if(!apSaveSession(data))return toast('تعذر التحقق من الحفظ المحلي. لا تغلق الصفحة قبل مراجعة مساحة التخزين.');
- closeModal();render({preserveScroll:true});toast('تم حفظ الجلسة بنجاح.');
-}
-function apMonthData(type,y,m){
- const dates=apDates(type,y,m),sessions=dates.map(date=>apSession(type,date));
- const current=sessions.filter(x=>x.status!=='cancelled');
- const checkRate=x=>Object.values(x.checks||{}).filter(Boolean).length;
- return {dates,sessions,total:current.length,completed:current.filter(x=>x.status==='done').length,ready:current.filter(x=>x.status==='ready').length,
-  participants:current.reduce((n,x)=>n+apNum(x.attended),0),
-  income:current.reduce((n,x)=>n+apNum(x.attended)*apNum(x.fee),0),cost:current.reduce((n,x)=>n+apNum(x.cost),0),
-  checks:current.length?Math.round(current.reduce((n,x)=>n+checkRate(x),0)/(current.length*5)*100):0};
-}
-function apCards(type){
- const stats=apMonthData(type,productCalendarYear,productCalendarMonth);
- if(type==='calendar-camps'){
-  const items=S.camps.filter(c=>c.status!=='archived'&&c.meta?.start?.slice(0,7)===productDate(productCalendarYear,productCalendarMonth,1).slice(0,7));
-  return '<div class="ap-stats">'+[['المعسكرات المسجلة',items.length],['معسكرات جاهزة',items.filter(x=>x.status==='ready').length],['تحتاج متابعة',items.filter(x=>x.status==='draft').length]].map(a=>'<div class="ap-stat"><small>'+a[0]+'</small><b>'+a[1]+'</b></div>').join('')+'</div>';
- }
- return '<div class="ap-stats">'+[['الجلسات المجدولة',stats.total],['جاهزة',stats.ready],['تم تنفيذها',stats.completed],['إجمالي الحضور',stats.participants],['الجاهزية',stats.checks+'%'],['الإيراد المسجل تقديريًا',stats.income.toLocaleString('en-US')+' ر.س']].map(a=>'<div class="ap-stat"><small>'+a[0]+'</small><b>'+a[1]+'</b></div>').join('')+'</div>';
-}
-
-function apConfiguration(type){
- if(type==='calendar-camps')return '';
- const st=apStore(),key=type==='calendar-days'?'days':'academy',hours=st.hours[key];
- const ranges=type==='calendar-academy'?'<div class="ap-range-list">'+(st.examRanges.length?st.examRanges.map((r,i)=>'<div class="ap-range"><span>'+apEsc(r.start)+' — '+apEsc(r.end)+' · '+apEsc(r.reason)+'</span><button type="button" data-ap-remove-range="'+i+'">إزالة</button></div>').join(''):'<small>لم تتم إضافة فترات اختبارات خاصة بعد.</small>')+'</div>':'';
- const exams=type==='calendar-academy'?'<div class="ap-range-settings"><h4>استثناء فترة اختبارات أو إجازة</h4><div class="ap-actions"><label>من <input type="date" id="ap-range-start"></label><label>إلى <input type="date" id="ap-range-end"></label><input id="ap-range-reason" placeholder="السبب: اختبارات / إجازة" maxlength="70"><button type="button" data-ap-add-range="1">إضافة فترة استثناء</button></div>'+ranges+'</div>':'';
- return '<div class="ap-panel"><div class="ap-panel-head"><div><h3>إعدادات التشغيل المتكرر</h3><p>'+ (key==='days'?'موعد الجمعة شهريًا قابل للتغيير من التقويم.':'الأحد إلى الأربعاء مع إيقاف تلقائي في الفترات المستثناة.') +'</p></div></div><div class="ap-actions"><label>بداية اليوم <input type="time" id="ap-default-start" value="'+apEsc(hours.start)+'"></label><label>نهاية اليوم <input type="time" id="ap-default-end" value="'+apEsc(hours.end)+'"></label><button type="button" data-ap-save-hours="'+type+'">حفظ أوقات التشغيل</button></div><p class="ap-hint">تطبق الأوقات الجديدة على الجلسات غير المعدلة، وتبقى بيانات الجلسات المحفوظة كما هي.</p>'+exams+'</div>';
-}
-function apSaveHours(type){
- const start=apRead('ap-default-start'),end=apRead('ap-default-end'),hours=apStore().hours;
- if(!apTimeValid(start)||!apTimeValid(end)||end<=start)return toast('وقت البداية والنهاية غير صحيح.');
- const duration=(Number(end.slice(0,2))*60+Number(end.slice(3)))-(Number(start.slice(0,2))*60+Number(start.slice(3)));
- const expected=type==='calendar-days'?480:180;
- if(duration!==expected)return toast('يجب أن تستمر الجلسة '+(expected/60)+' ساعات وفق النموذج التشغيلي المحدد.');
- hours[type==='calendar-days'?'days':'academy']={start,end};save();render({preserveScroll:true});toast('تم تحديث أوقات التشغيل الافتراضية.');
-}
-function apAddRange(){
- const start=apRead('ap-range-start'),end=apRead('ap-range-end'),reason=apRead('ap-range-reason').trim();
- if(!apValidDate(start)||!apValidDate(end)||end<start||!reason)return toast('أدخل تاريخ بداية ونهاية صحيحين وسبب الاستثناء.');
- const days=Math.round((Date.parse(end+'T12:00:00Z')-Date.parse(start+'T12:00:00Z'))/86400000)+1;
- if(days>120)return toast('أقصى مدة استثناء لكل فترة 120 يومًا.');
- apStore().examRanges.push({start,end,reason});save();render({preserveScroll:true});toast('تم إضافة الفترة المستثناة إلى تقويم الأكاديمية.');
-}
-
-function apOperations(type){
- if(type==='calendar-camps')return '<div class="ap-panel"><div class="ap-panel-head"><h3>التشغيل المالي والتخطيط</h3><button type="button" data-page="camps">إدارة المعسكرات</button></div><p>أضف معسكرًا أو افتح معسكرًا قائمًا لمتابعة التخطيط والجدول والتكليفات والتكاليف. بيانات كل معسكر مستقلة.</p></div>';
- const sessions=apMonthData(type,productCalendarYear,productCalendarMonth).sessions.filter(x=>apFilter==='all'||x.status===apFilter);
- const financePage=type==='calendar-days'?'finance-days':'finance-academy';
- const table=sessions.map(x=>'<tr><td><b>'+apEsc(x.date)+'</b><small>'+apEsc(x.title)+'</small></td><td>'+apEsc(x.start)+' – '+apEsc(x.end)+'</td><td>'+apEsc(x.lead||'غير محدد')+'</td><td><span class="ap-status ap-'+apEsc(x.status)+'">'+apStatusLabel(x.status)+'</span></td><td>'+x.attended+' / '+x.registered+'</td><td><button type="button" data-ap-open="'+type+'" data-ap-date="'+x.date+'">إدارة الجلسة</button></td></tr>').join('');
- return '<div class="ap-panel"><div class="ap-panel-head"><div><h3>الجلسات والتكليفات</h3><p>انقر أي جلسة لإدارة المقر والطاقم والجاهزية والحضور والتكاليف.</p></div><div class="ap-actions"><select id="ap-filter" aria-label="تصفية حسب الحالة">'+[['all','كل الحالات'],['planned','مخطط'],['ready','جاهز'],['done','منفذ'],['cancelled','ملغى']].map(pair=>'<option value="'+pair[0]+'" '+(apFilter===pair[0]?'selected':'')+'>'+pair[1]+'</option>').join('')+'</select><button type="button" data-page="'+financePage+'">الإدارة المالية</button><button type="button" data-ap-export="'+type+'">تصدير CSV</button></div></div>'+
- '<div class="ap-table-wrap"><table class="ap-table"><thead><tr><th>التاريخ / الجلسة</th><th>الوقت</th><th>المسؤول</th><th>الحالة</th><th>الحضور</th><th>الإجراء</th></tr></thead><tbody>'+ (table||'<tr><td colspan="6">لا توجد جلسات مطابقة لهذا الشهر.</td></tr>')+'</tbody></table></div></div>';
-}
-function apExport(type){
- const rows=apMonthData(type,productCalendarYear,productCalendarMonth).sessions;
- const keys=['date','title','start','end','place','lead','assistants','status','capacity','registered','attended','fee','cost','notes'];
- const cell=v=>'"'+String(v??'').replace(/^[=+\-@\t\r]/,' ').replace(/"/g,'""')+'"';
- const content='\ufeff'+[keys.join(','),...rows.map(x=>keys.map(k=>cell(x[k])).join(','))].join('\r\n');
- const blob=new Blob([content],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
- a.href=url;a.download=(type==='calendar-days'?'elite-days':'elite-academy')+'-'+productCalendarYear+'-'+String(productCalendarMonth+1).padStart(2,'0')+'.csv';
- document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
-}
-
-function pageAnnualOverview(){
- const year=productCalendarYear;
- let campDays=0,daySessions=0,academySessions=0,activeMonths=new Set(),months=[];
- const uniqueCampDates=new Set();
- S.camps.filter(c=>c.status!=='archived'&&c.meta?.start&&c.meta?.end).forEach(c=>{
-  const start=new Date(c.meta.start+'T12:00:00Z'),end=new Date(c.meta.end+'T12:00:00Z');
-  const span=Math.min(370,Math.max(0,Math.floor((end-start)/86400000)+1));
-  for(let i=0;i<span;i++){const d=new Date(start.getTime()+i*86400000).toISOString().slice(0,10);if(d.startsWith(String(year)))uniqueCampDates.add(d);}
- });
- campDays=uniqueCampDates.size;
- for(let m=0;m<12;m++){
-  const elite=apDates('calendar-days',year,m).length,academy=apDates('calendar-academy',year,m).length,
-   camp=[...uniqueCampDates].filter(d=>Number(d.slice(5,7))===m+1).length;
-  daySessions+=elite;academySessions+=academy;
-  if(elite||academy||camp)activeMonths.add(m);
-  months.push({m,camp,elite,academy});
- }
- const tile=(label,value,sub)=>'<div class="ap-stat"><small>'+label+'</small><b>'+value+'</b><span>'+sub+'</span></div>';
- const cards='<div class="ap-stats">'+tile('أيام المعسكرات المسجلة',campDays,'يوم موسمي؛ لا تُفترض ساعات تشغيل')+
- tile('لقاءات أيام النخبة',daySessions,daySessions*8+' ساعة مخططة')+
- tile('جلسات الأكاديمية',academySessions,academySessions*3+' ساعة مخططة')+
- tile('إجمالي ساعات المنتجات المتكررة',daySessions*8+academySessions*3,'لا تشمل ساعات المعسكرات')+
- tile('أشهر فيها تشغيل مخطط',activeMonths.size+' / 12','بحسب النماذج الحالية')+
- tile('معسكرات مسجلة',S.camps.filter(c=>c.status!=='archived').length,'بما فيها المسودات')+'</div>';
- const rows=months.map(o=>'<tr><td>'+OC_MONTHS_AR[o.m]+'</td><td>'+o.camp+'</td><td>'+o.elite+'</td><td>'+o.academy+'</td><td><span class="ap-status '+(o.camp?'ap-ready':'')+'">'+(o.camp?'تشغيل موسمي':o.elite+o.academy?'تشغيل متكرر':'بدون نشاط')+'</span></td></tr>').join('');
- const links=Object.keys(PRODUCT_CALENDARS).map(id=>'<button class="pc-tab" type="button" data-page="'+id+'">'+PRODUCT_CALENDARS[id].ar+'</button>').join('')+
- '<button class="pc-tab" type="button" data-page="finance">الإدارة المالية</button>';
- return '<div class="ap-workspace"><div class="ap-hero"><div><small>أكاديمية النخبة · لوحة التخطيط السنوي</small><h1>الهيكل التشغيلي والتقويم السنوي</h1><p>تخطيط المنتجات الثلاثة، وإشغال العام، وربط التشغيل بالإدارة المالية.</p></div><div class="ap-actions"><button type="button" data-ap-year="-1">السنة السابقة</button><b>'+year+'</b><button type="button" data-ap-year="1">السنة التالية</button></div></div>'+
- cards+'<div class="ap-panel"><div class="ap-panel-head"><h3>توزيع التشغيل على أشهر السنة</h3><div class="pc-switch">'+links+'</div></div><div class="ap-table-wrap"><table class="ap-table"><thead><tr><th>الشهر</th><th>أيام المعسكرات</th><th>لقاءات أيام النخبة</th><th>جلسات الأكاديمية</th><th>نوع التشغيل</th></tr></thead><tbody>'+rows+'</tbody></table></div><p class="ap-hint">الأرقام توقعات تخطيطية مبنية على المعسكرات المسجلة والقواعد الافتراضية للمنتجات، وليست سجلاً للحضور أو التشغيل الفعلي. الإجازات من بيانات النموذج وتحتاج تحققًا رسميًا.</p></div></div>';
-}
-
-function pageAnnualProductOperations(type){
- const tabs=Object.keys(PRODUCT_CALENDARS).map(id=>'<button type="button" class="pc-tab '+(type===id?'active':'')+'" data-page="'+id+'">'+T(PRODUCT_CALENDARS[id].ar,PRODUCT_CALENDARS[id].en)+'</button>').join('');
- return '<div class="ap-workspace"><div class="ap-hero"><div><small>أكاديمية النخبة · إدارة المنتجات</small><h1>'+T(PRODUCT_CALENDARS[type].ar,PRODUCT_CALENDARS[type].en)+'</h1><p>التخطيط السنوي، التشغيل، المتابعة، وإثبات أثر التنفيذ في مساحة واحدة.</p></div><div class="pc-switch">'+tabs+'</div></div>'+
- apCards(type)+pageProductCalendarBase(type)+apConfiguration(type)+apOperations(type)+'</div>';
-}
-document.addEventListener('click',e=>{
- const year=e.target.closest('[data-ap-year]');
- if(year){e.preventDefault();productCalendarYear+=Number(year.dataset.apYear);render({preserveScroll:true});return;}
- const open=e.target.closest('[data-ap-open]');
- if(open){e.preventDefault();e.stopPropagation();apOpen(open.dataset.apOpen,open.dataset.apDate);return;}
- const saveBtn=e.target.closest('[data-ap-save]');
- if(saveBtn){e.preventDefault();e.stopPropagation();apCommit(saveBtn.dataset.apSave,saveBtn.dataset.apDate);return;}
- const hoursBtn=e.target.closest('[data-ap-save-hours]');
- if(hoursBtn){e.preventDefault();apSaveHours(hoursBtn.dataset.apSaveHours);return;}
- const rangeBtn=e.target.closest('[data-ap-add-range]');
- if(rangeBtn){e.preventDefault();apAddRange();return;}
- const removeRange=e.target.closest('[data-ap-remove-range]');
- if(removeRange){e.preventDefault();const i=Number(removeRange.dataset.apRemoveRange);if(Number.isInteger(i)&&i>=0&&i<apStore().examRanges.length){apStore().examRanges.splice(i,1);save();render({preserveScroll:true});toast('تم إزالة فترة الاستثناء.');}return;}
- const exportBtn=e.target.closest('[data-ap-export]');
- if(exportBtn){e.preventDefault();apExport(exportBtn.dataset.apExport);return;}
-});
-document.addEventListener('change',e=>{if(e.target.id==='ap-filter'){apFilter=e.target.value;render({preserveScroll:true});}});
-
-const PAGES={'annual-overview':pageAnnualOverview,finance:pageFinanceExact,'finance-days':pageFinanceDays,'finance-academy':pageFinanceAcademy,'calendar-camps':()=>pageAnnualProductOperations('calendar-camps'),'calendar-days':()=>pageAnnualProductOperations('calendar-days'),'calendar-academy':()=>pageAnnualProductOperations('calendar-academy'),opportunities:pageOpportunityCalendar,camps:pageCamps,builder:pageBuilder,dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
+const PAGES={finance:pageFinanceExact,opportunities:pageOpportunityCalendar,camps:pageCamps,builder:pageBuilder,dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
 let lastRenderedPage=null;
 function render({preserveScroll}={}){
   if(!PAGES[page]) page='camps';
@@ -3849,11 +3520,11 @@ function render({preserveScroll}={}){
   // Actual navigation to a different section continues to start at the top.
   const keepPosition=preserveScroll===undefined?(lastRenderedPage===page):preserveScroll;
   const previousScrollY=keepPosition?window.scrollY:0;
-  document.body.classList.toggle('finance-exact-mode',['finance','finance-days','finance-academy'].includes(page));
+  document.body.classList.toggle('finance-exact-mode',page==='finance');
   header();
   const container=$('#app');
-  container.innerHTML=(['finance','finance-days','finance-academy'].includes(page)?'':`<div class="demo noprint"><span>◈ ${T('نموذج تخطيط تجريبي · بيانات الطلاب افتراضية · الحفظ على هذا المتصفح فقط','Planning prototype · sample student data · saved in this browser only')}</span><span>${T('مواءمة تخطيطية وليست تقييمًا للطالب','Planning alignment, not student assessment')}</span></div>`)+PAGES[page]();
-  if(['finance','finance-days','finance-academy'].includes(page)){
+  container.innerHTML=(page==='finance'?'':`<div class="demo noprint"><span>◈ ${T('نموذج تخطيط تجريبي · بيانات الطلاب افتراضية · الحفظ على هذا المتصفح فقط','Planning prototype · sample student data · saved in this browser only')}</span><span>${T('مواءمة تخطيطية وليست تقييمًا للطالب','Planning alignment, not student assessment')}</span></div>`)+PAGES[page]();
+  if(page==='finance'){
     const financeFrame=document.getElementById('financeExactFrame');
     financeFrame?.addEventListener('load',()=>{
       try{
@@ -4585,7 +4256,7 @@ document.addEventListener('click',e=>{
   const [a,arg]=el.dataset.act.split(':');
   const map={
     go:()=>{page=arg;render()},
-    toggleFinanceNav:()=>{if(!['finance','finance-days','finance-academy'].includes(page)){page='finance';financeNavOpen=true;render();}else{financeNavOpen=!financeNavOpen;header();}},
+    toggleFinanceNav:()=>{if(page!=='finance'){page='finance';financeNavOpen=true;render();}else{financeNavOpen=!financeNavOpen;header();}},
     lang:()=>{lang=lang==='ar'?'en':'ar';render()},
     theme:()=>{S.theme=S.theme==='light'?'dark':'light';render()},
     menu:()=>{$('#sidebar').classList.toggle('open')},
