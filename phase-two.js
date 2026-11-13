@@ -192,7 +192,7 @@ function p2ScheduleAssignmentWidget(staffId){
  }).join('');
  return '<div class="p2-schedule-box"><div class="p2-schedule-top"><h4>جدول المعسكر · إسناد مباشر</h4><p>مستمد من خطة المعسكر الحالية. اختر اليوم ثم اضغط إسناد بجانب البرنامج.</p></div>'+
  '<div class="p2-schedule-day-tabs">'+all.map((d,i)=>'<button type="button" data-p2-daytab="'+(i+1)+'" class="'+(i===0?'active':'')+'">اليوم '+(i+1)+'</button>').join('')+'</div>'+
- '<div class="p2-schedule-bulk"><div><b id="p2-bulk-count">لم تحدد أنشطة للإسناد الجماعي</b><small>حدد عدة أنشطة من يوم واحد أو أكثر، ثم اسندها دفعة واحدة.</small></div><div class="p2-schedule-bulk-actions"><button type="button" data-p2-bulk="select-day">تحديد أنشطة اليوم</button><button type="button" class="primary" data-p2-bulk="assign">إسناد المحدد</button><button type="button" data-p2-bulk="unassign">إلغاء إسناد المحدد</button><button type="button" data-p2-bulk="clear">مسح الاختيار</button></div></div><div class="p2-schedule-panels">'+blocks+'</div><div class="p2-schedule-live" id="p2-schedule-live" aria-live="polite"></div></div>';
+ '<div class="p2-schedule-bulk" role="group" aria-label="إجراءات جماعية للأنشطة"><div class="p2-bulk-heading"><div class="p2-bulk-heading-text"><b>إجراءات الجدول</b><small id="p2-bulk-count" aria-live="polite">لم يتم تحديد أنشطة</small></div><button type="button" class="p2-bulk-action p2-bulk-select" data-p2-bulk="select-day" title="تحديد جميع أنشطة اليوم المعروض"><span aria-hidden="true">☑</span> تحديد أنشطة اليوم</button></div><div class="p2-schedule-bulk-actions"><button type="button" class="p2-bulk-action primary" data-p2-bulk="assign" disabled title="حدد أنشطة أولاً"><span aria-hidden="true">✓</span> إسناد المحدد</button><button type="button" class="p2-bulk-action" data-p2-bulk="unassign" disabled title="حدد أنشطة مسندة أولاً"><span aria-hidden="true">↶</span> إلغاء الإسناد</button><button type="button" class="p2-bulk-action p2-bulk-clear" data-p2-bulk="clear" disabled title="مسح تحديد الأنشطة"><span aria-hidden="true">×</span> مسح التحديد</button></div></div><div class="p2-schedule-panels">'+blocks+'</div><div class="p2-schedule-live" id="p2-schedule-live" aria-live="polite"></div></div>';
 }
 function p2SyncScheduleButtons(id,day,active){
  document.querySelectorAll('[data-p2-assign-day]').forEach(b=>{
@@ -414,8 +414,12 @@ function p2SelectedBulkChoices(){
  return [...document.querySelectorAll('[data-p2-bulk-choice]:checked')].map(x=>({id:x.getAttribute('data-p2-id'),day:Number(x.getAttribute('data-p2-num'))}));
 }
 function p2UpdateBulkCount(){
- const count=p2SelectedBulkChoices().length,node=document.getElementById('p2-bulk-count');
- if(node)node.textContent=count?count+' نشاط محدد للإسناد الجماعي':'لم تحدد أنشطة للإسناد الجماعي';
+ const choices=p2SelectedBulkChoices(),count=choices.length,node=document.getElementById('p2-bulk-count');
+ if(node)node.textContent=count?count+' نشاط محدد':'لم يتم تحديد أنشطة';
+ const assign=document.querySelector('[data-p2-bulk="assign"]'),unassign=document.querySelector('[data-p2-bulk="unassign"]'),clear=document.querySelector('[data-p2-bulk="clear"]');
+ if(assign){assign.disabled=!count;assign.title=count?'إسناد الأنشطة المحددة':'حدد أنشطة أولاً';}
+ if(clear)clear.disabled=!count;
+ if(unassign){const hasAssigned=choices.some(({id,day})=>{const row=[...document.querySelectorAll('.p2-assignment')].find(r=>r.getAttribute('data-p2-assignment')===id);return !!row?.querySelector('input[data-p2-day][value="'+day+'"]:checked');});unassign.disabled=!hasAssigned;unassign.title=hasAssigned?'إلغاء إسناد الأنشطة المحددة':'حدد أنشطة مسندة أولاً';}
 }
 document.addEventListener('click',e=>{
  const tab=e.target.closest('[data-p2-daytab]');
