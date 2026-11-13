@@ -752,7 +752,7 @@ $('expensesBody').innerHTML=rows.length?rows.map(x=>{
  <td>${esc(state.categories.find(c=>c.id===x.cat)?.name||'مخصص')}</td>
  <td>${fmt(x.amount)}</td><td><b>${fmt(paid)}</b><div class="fin-meta">المتبقي: ${fmt(remaining)}</div>${paymentHistory}</td>
  <td><span class="pill ${x.status}">${label}</span></td>
- <td><div class="fin-row-actions"><button data-edit="${esc(x.id)}">تعديل</button><button data-pay="${esc(x.id)}">تسجيل دفعة</button><button type="button" data-fin-attachments="${esc(x.id)}">المرفقات (${(x.attachments||[]).length})</button><button class="del" data-del="${esc(x.id)}">حذف</button></div></td></tr>`;
+ <td><div class="fin-row-actions">${financeActiveView!=='execution'?`<button data-edit="${esc(x.id)}">تعديل التخطيط</button>`:''}<button data-pay="${esc(x.id)}">تسجيل دفعة</button><button type="button" data-fin-attachments="${esc(x.id)}">المرفقات (${(x.attachments||[]).length})</button>${financeActiveView!=='execution'?`<button class="del" data-del="${esc(x.id)}">حذف</button>`:''}</div></td></tr>`;
 }).join(''):'<tr><td colspan="6"><div class="empty">لا توجد بنود مطابقة. أضف مصروفًا أو غيّر الفلتر.</div></td></tr>';
 document.querySelectorAll('[data-edit]').forEach(el=>el.onclick=()=>editItem(el.dataset.edit));
 document.querySelectorAll('[data-fin-attachments]').forEach(el=>el.onclick=()=>finOpenAttachments(el.dataset.finAttachments));
@@ -772,6 +772,7 @@ document.querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{
  const item=state.items.find(x=>x.id===el.dataset.del);
  if(!guardBudget())return;
  if(item&&n(item.paid)>0){alert('لا يمكن حذف بند عليه مدفوعات. ألغِ الدفعات أولاً أو احتفظ بالبند كسجل مالي.');return;}
+ if(item&&(item.attachments||[]).length){alert('يحتوي هذا البند على مستندات مرفقة. احفظها أو احذفها من المرفقات أولاً لتجنب ضياع المستندات.');return;}
  if(item&&confirm('حذف بند «'+item.name+'»؟ لا يمكن التراجع.')){
   state.items=state.items.filter(x=>x.id!==el.dataset.del);audit('حذف بند',item.name);save();render();
  }
@@ -1359,9 +1360,9 @@ function financeSetupWorkspaces(){
  assign(byId('financeReadiness'),'control');
  assign(byId('financeAudit'),'control');
  // Preserve the report sheet as a separate global panel, opened through its existing button.
- document.querySelectorAll('[data-fin-stage]').forEach(b=>b.addEventListener('click',()=>financeActivateView(b.dataset.finStage==='planning'?'budget':'execution',{scroll:false})));
+ document.querySelectorAll('[data-fin-stage]').forEach(b=>b.addEventListener('click',()=>{financeActivateView(b.dataset.finStage==='planning'?'budget':'execution',{scroll:false});render()}));
  document.getElementById('finWorkspaceNav').addEventListener('click',e=>{
-  const tab=e.target.closest('[data-fin-tab]');if(tab)financeActivateView(tab.dataset.finTab);
+  const tab=e.target.closest('[data-fin-tab]');if(tab){financeActivateView(tab.dataset.finTab);if(['execution','budget'].includes(tab.dataset.finTab))render();}
  });
  document.querySelectorAll('[data-fin-jump]').forEach(button=>button.addEventListener('click',()=>{
   financeActivateView(button.dataset.finJump);
