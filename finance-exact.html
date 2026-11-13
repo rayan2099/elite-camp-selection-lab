@@ -466,6 +466,68 @@ html.finance-embedded .cat.selected{outline:2px solid var(--ux-orange);outline-o
 .fin-finance-summary{margin:12px 0;padding:12px;border:1px solid #e5eaf0;border-radius:11px;background:#fbfcfd;color:#415c76}
 .fin-finance-summary b{display:block;margin:3px 0}
 
+
+/* Finance UX alignment · Elite Camp navy/orange design system */
+:root{--finance-brand:#ef7d38;--finance-brand-hover:#dd6826;--finance-ink:#223c55;--finance-line:#dfe7ef;--finance-ring:#1265a8;--finance-soft:#fff5ed}
+html.finance-embedded body{font-family:Tahoma,"Segoe UI",Arial,sans-serif;font-size:13px;color:var(--finance-ink);line-height:1.65}
+html.finance-embedded main{padding:22px 26px 48px!important}
+html.finance-embedded .heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:0 0 14px;flex-wrap:wrap}
+html.finance-embedded .heading h1{font-size:23px;line-height:1.35;letter-spacing:-.015em}
+html.finance-embedded .heading .sub{font-size:12px;line-height:1.7;max-width:680px}
+html.finance-embedded .heading>.actions{display:flex;gap:8px;flex-wrap:wrap}
+html.finance-embedded .fin-workspace-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;border:1px solid var(--finance-line);border-radius:13px;padding:7px;margin:12px 0 16px;background:#f7f9fc;box-shadow:none}
+html.finance-embedded .fin-tab{flex:none;display:flex;justify-content:flex-start;text-align:start;min-height:46px;gap:9px;padding:9px 11px;background:#fff;color:#425a72;border:1px solid #e1e8ef;border-radius:9px;font-size:12px;font-weight:700;box-shadow:none;transform:none;transition:background .15s,border-color .15s,color .15s}
+html.finance-embedded .fin-tab:hover{background:var(--finance-soft);color:#914b22;border-color:#f5bb95;transform:none}
+html.finance-embedded .fin-tab.active{background:var(--finance-soft);color:#8b451d;border-color:var(--finance-brand);box-shadow:inset -3px 0 var(--finance-brand)}
+html.finance-embedded .fin-tab-icon{display:grid;place-items:center;flex-shrink:0;width:26px;height:26px;border-radius:7px;background:#eef3f8;color:#455f7a;font-size:15px}
+html.finance-embedded .fin-tab.active .fin-tab-icon{background:#ffdfca;color:#965027}
+html.finance-embedded .fin-view-heading{margin:16px 0 12px;padding:0 2px}
+html.finance-embedded .fin-view-heading h2{font-size:19px;color:var(--finance-ink)}
+html.finance-embedded .fin-view-counter{padding:6px 11px;border-radius:8px;color:#60758a;background:#f7f9fc}
+html.finance-embedded .panel,html.finance-embedded .ux-form-sec,html.finance-embedded .stat{border-radius:12px;border-color:var(--finance-line);box-shadow:none}
+html.finance-embedded .panel-header{gap:12px;flex-wrap:wrap}
+html.finance-embedded .panel-header h2{font-size:16px;line-height:1.45}
+html.finance-embedded .panel-header .sub{font-size:11.5px;line-height:1.6}
+html.finance-embedded .btn,html.finance-embedded button.fin-tab,html.finance-embedded .fin-row-actions button,html.finance-embedded .filter,html.finance-embedded .ux-seg button{font-family:inherit}
+html.finance-embedded .btn{min-height:36px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;line-height:1.35;transition:background .15s,border-color .15s,box-shadow .15s}
+html.finance-embedded .btn.primary{background:var(--finance-brand);border-color:var(--finance-brand);color:#182d43}
+html.finance-embedded .btn.primary:hover:not(:disabled){background:var(--finance-brand-hover);border-color:var(--finance-brand-hover);color:#17283b}
+html.finance-embedded :is(button,.btn,input,textarea,select,summary,a):focus-visible{outline:2px solid var(--finance-ring);outline-offset:2px}
+html.finance-embedded :is(button,.btn):disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+html.finance-embedded .field{min-width:0;font-weight:700;color:#4c6179}
+html.finance-embedded .field input,html.finance-embedded .field select,html.finance-embedded .field textarea{min-height:39px;border-radius:8px;border-color:#d8e2ed;color:#223c55;background:#fff;font-size:13px}
+html.finance-embedded .field textarea{min-height:80px}
+html.finance-embedded .filters{display:flex;gap:6px;flex-wrap:wrap}
+html.finance-embedded .filter{min-height:34px;border:1px solid #dfe6ef;border-radius:8px;padding:6px 11px}
+html.finance-embedded .filter.active{background:#fff2e8;border-color:#ed965d;color:#a45324}
+html.finance-embedded .table-wrap{border-radius:10px;max-width:100%}
+html.finance-embedded .table-wrap table{width:100%;border-collapse:collapse}
+html.finance-embedded .table-wrap th{font-size:11px;background:#f6f8fb;color:#526980;white-space:nowrap}
+html.finance-embedded .table-wrap td{font-size:12px;vertical-align:top}
+html.finance-embedded .table-wrap th,html.finance-embedded .table-wrap td{padding:10px 11px;border-bottom:1px solid #e8edf3}
+html.finance-embedded .fin-row-actions{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-start}
+html.finance-embedded .fin-row-actions button{min-height:30px;padding:6px 9px;border-radius:7px;font-size:11px;line-height:1.3;border:1px solid #d9e3ee;background:#fff;color:#435b75}
+html.finance-embedded .fin-row-actions button:hover{border-color:#ef8b4c;background:#fff7f1}
+html.finance-embedded .fin-row-actions .del{color:#b6534c;border-color:#ecd0ce;background:#fffafa}
+html.finance-embedded .fin-row-actions .del:hover{background:#fff0ef;border-color:#dbaaa5}
+html.finance-embedded .fin-entry-modal,html.finance-embedded .fin-file-dialog{width:min(100%,720px);margin-inline:auto;border-radius:14px}
+html.finance-embedded .ux-form-sec{padding:14px;margin:10px 0}
+html.finance-embedded .ux-form-sec>h4{font-size:13px}
+html.finance-embedded .ux-seg button{min-height:42px;border-radius:8px}
+html.finance-embedded .ux-seg button[aria-pressed=true]{border-color:var(--finance-brand);background:var(--finance-soft);color:#965027}
+html.finance-embedded .ux-form-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+html.finance-embedded .fin-upload-actions{display:flex;gap:8px;flex-wrap:wrap}
+html.finance-embedded .fin-upload-choose{min-height:42px;border-radius:8px;background:var(--finance-soft)!important}
+html.finance-embedded .fin-file-entry{background:#fbfcfd;border-color:var(--finance-line);padding:12px;border-radius:9px}
+html.finance-embedded .fin-file-actions button{font:inherit;font-size:11px;font-weight:700}
+html.finance-embedded .fin-file-actions button:hover{background:var(--finance-soft)}
+html.finance-embedded .fin-attachment-note{font-size:11.5px;line-height:1.7}
+html.finance-embedded #financeAttachmentMessage:not(:empty){background:#f4f8fc;border:1px solid #dfe8f1;border-radius:8px;padding:9px 11px;margin-top:9px}
+html.finance-embedded [hidden]{display:none!important}
+@media(max-width:1000px){html.finance-embedded .fin-workspace-nav{grid-template-columns:repeat(2,minmax(0,1fr))}html.finance-embedded main{padding:18px 16px 38px!important}}
+@media(max-width:600px){html.finance-embedded main{padding:12px 10px 30px!important}html.finance-embedded .fin-workspace-nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:5px}html.finance-embedded .fin-tab{min-height:48px;padding:7px 8px;font-size:10.5px;gap:6px}html.finance-embedded .fin-tab-icon{width:22px;height:22px;font-size:13px}html.finance-embedded .heading h1{font-size:20px}html.finance-embedded .heading>.actions{width:100%}html.finance-embedded .heading>.actions>.btn{flex:1}html.finance-embedded .panel{padding:12px}html.finance-embedded .fin-row-actions button{padding:6px 7px;font-size:10.5px}html.finance-embedded .fin-file-entry{align-items:flex-start}html.finance-embedded .fin-file-actions{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){html.finance-embedded .btn,html.finance-embedded .fin-tab{transition:none!important;animation:none!important}}
+
 </style><script>if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('finance-embedded');</script></head><body><aside><div class="brand">✦ أكاديمية النخبة</div><p class="desc">منصة إدارة المعسكرات</p><nav><a href="#overview">◫ &nbsp; نظرة عامة</a><a href="#categories">▦ &nbsp; التصنيفات المالية</a><a href="#expenses" class="active">▣ &nbsp; إدارة المصروفات</a><a href="#revenues">◈ &nbsp; الإيرادات والتسعير</a><a href="#analysis">▤ &nbsp; التحليل والتقارير</a></nav><div class="side-note">💡 كل مصروف له حالة مستقلة: تقديري، ملتزم به، أو مدفوع فعلياً؛ لضمان تقارير مالية دقيقة.</div></aside><main>
 <div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="fullReportBtn">التقرير المالي PDF</button></div></header>
 <section class="report-sheet" id="financeReportView" hidden role="region" aria-label="التقرير المالي التنفيذي">
@@ -539,7 +601,7 @@ html.finance-embedded .cat.selected{outline:2px solid var(--ux-orange);outline-o
  <p><b>محددات:</b> لا تخلط البرنامج الأسبوعي مع المعسكرات ذات الإقامة. يُذكر في ملف 2027 أن تجاوز 50 مقعدًا مسعّرًا يستدعي إعادة تقدير السكن والمشرفين والنقل. مخصص الزكاة 2.5% تقديري وليس طريقة احتساب الزكاة المستحقة نظامًا. بعض البنود غير محتسبة في الموازنة المرجعية.</p>
  </details>
 </section><section id="categories"><div class="section-title"><div><h2>البنود المالية</h2><p>اضغط على تصنيف لعرض بنوده فقط في السجل أدناه.</p></div><button class="btn sm" id="customCatBtn">＋ إنشاء تصنيف مخصص</button></div><div class="categories" id="categoryGrid"></div></section>
-<div class="fin-stage-switch" role="group" aria-label="مرحلة الإدارة المالية"><button type="button" class="active" data-fin-stage="planning">التخطيط والميزانية</button><button type="button" data-fin-stage="execution">التنفيذ والمصروفات الفعلية</button></div>
+
 <section class="grid2" id="expenses"><div class="panel"><div class="panel-header"><div><h2>سجل المصروفات التفصيلي</h2><p class="sub" style="font-size:12px">تتبع كل بند من التقدير حتى الدفع</p></div><button class="btn primary sm" id="addBtn2">＋ مصروف جديد</button></div><div class="filters" id="filters"><button class="filter active" data-filter="all">جميع البنود</button><button class="filter" data-filter="estimated">تقديري</button><button class="filter" data-filter="committed">ملتزم به</button><button class="filter" data-filter="paid">مدفوع</button></div><div class="finance-empty-warning" id="expenseGettingStarted" hidden>لم تُسجّل أي بنود بعد. ابدأ ببند واحد مثل «إقامة الطلاب» أو «استئجار الحافلة»، ويمكنك تعديله لاحقاً.</div><div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>البند</th><th>التصنيف</th><th>التقديري</th><th>المدفوع</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody id="expensesBody"></tbody></table></div></div><div class="panel" id="revenues"><div class="panel-header"><h2>الإيرادات والتسعير</h2><span class="tag">حساب فوري</span></div><div class="form-grid"><label class="field">عدد الطلاب المتوقع<input id="studentCount" type="number" min="0"></label><label class="field">رسوم الاشتراك للطالب (ر.س)<input id="studentFee" type="number" min="0"></label><label class="field">الرسوم المحصلة فعلياً (ر.س)<input id="collectedFees" type="number" min="0" readonly title="تُحسب من سجل التحصيل"></label><label class="field">إيرادات / رعايات إضافية متوقعة (ر.س)<input id="otherRevenue" type="number" min="0"></label><label class="field">نسبة ضريبة القيمة المضافة (%)<input id="campVatRate" type="number" min="0" max="100" step=".1"></label><label class="field">معالجة الإيرادات الأخرى<select id="campOtherTaxMode"><option value="unclassified">غير مصنفة — دون استقطاع افتراضي</option><option value="inclusive">مدخلة شاملة الضريبة المفترضة</option></select></label><p class="small" style="grid-column:1/-1">رسوم الطلاب مفترضة شاملة ضريبة المبيعات وفق نماذج الموازنة المرفقة. هذه نسبة قابلة للتعديل وليست إقرارًا أو رأيًا محاسبيًا؛ صنّف الإيرادات الأخرى مع المختص.</p></div><div class="finance-ledger"><div class="between"><b>سجل التحصيل الفعلي</b><button class="btn sm" id="addCollection2">＋ تحصيل جديد</button></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>النوع</th><th>الدافع</th><th>المبلغ</th><th>الإجراء</th></tr></thead><tbody id="collectionsBody"></tbody></table></div></div><div class="summary-box"><span class="small">المبيعات المتوقعة شاملة الضريبة المفترضة</span><strong id="expectedRevenue">—</strong><span class="small" id="revenueSummary">—</span><div class="fx-fin-bridge"><span>ضريبة المبيعات المفترضة <b id="campForecastVat">—</b></span><span>الإيراد دون الضريبة المفترضة <b id="campForecastNet">—</b></span></div></div><div class="divider"></div><div class="panel-header"><h2>نقطة التعادل</h2><span class="tag">مؤشر قرار</span></div><div class="form-grid"><label class="field">نقطة التعادل المبسطة وفق صافي الرسوم<input id="breakEven" readonly></label><label class="field">صافي التحصيل المسجل<input id="cashNet" readonly></label></div><p class="small" style="margin-top:12px">تحسب نقطة التعادل وفق التكاليف الثابتة والتكاليف المتغيرة لكل طالب؛ عند تعذر تحديدها بدقة يُستخدم تقدير مبسط ويُشار إليه.</p></div></section>
 <section id="analysis" class="grid2"><div class="panel"><div class="panel-header"><h2>مؤشرات الأداء واتخاذ القرار</h2><span class="tag">تتحدث تلقائياً</span></div><div class="form-grid"><div class="summary-box" style="margin:0"><span class="small">التكلفة التقديرية للطالب</span><strong id="costPerStudent">—</strong></div><div class="summary-box" style="margin:0"><span class="small">هامش الربح بعد المخصص من المبيعات</span><strong id="margin">—</strong></div><div class="summary-box" style="margin:0"><span class="small">إجمالي الالتزامات + المدفوع</span><strong id="obligated">—</strong></div><div class="summary-box" style="margin:0"><span class="small">الفائض النقدي المسجل</span><strong id="cashflow">—</strong></div></div></div><div class="panel"><div class="panel-header"><h2>الاحتياطي والافتراضات</h2><small>الإعدادات المالية</small></div><div class="form-grid"><label class="field">نسبة الاحتياطي (%)<input id="reservePct" type="number" min="0" max="100"></label><label class="field">مخصص احتياطي معتمد (ر.س)<input id="reserveAmount" readonly></label></div><p class="small">يُحتسب الاحتياطي من تكلفة البنود غير الاحتياطية. أي مبلغ احتياطي لا يُعد مصروفاً مدفوعاً إلا عند تسجيل عملية دفع فعلية من بند مرتبط.</p><div class="callout warn" id="alerts" style="margin-top:16px">—</div></div></section>
 <section class="panel finance-ledger" id="financeApproval"><div class="panel-header"><div><h2>مراجعة واعتماد الميزانية</h2><p class="fx-note">اعتماد تشغيلي محلي لا يمثل توقيعاً محاسبياً موثقاً.</p></div><span class="tag" id="financeApprovalStatus">مسودة</span></div><div class="finance-workflow"><div class="flow-step"><b>نسخة الميزانية الحالية</b><strong id="financeApprovalTotal">—</strong><p id="financeApprovalVersion">لم تعتمد بعد</p></div><div class="flow-step"><b>مراجعة التكاليف والإيرادات</b><p id="financeApprovalGuidance">راجع جميع البنود قبل الاعتماد.</p><button class="btn sm" id="financeReviewButton">إرسال للمراجعة</button></div><div class="flow-step"><b>اعتماد / إعادة فتح</b><p>تثبيت التقديرات بعد الاعتماد، مع السماح بتسجيل المدفوعات والتحصيل.</p><button class="btn primary sm" id="financeApproveButton">اعتماد الميزانية</button><button class="btn sm" id="financeReopenButton" hidden>إعادة فتح الميزانية</button></div></div><div class="callout" id="financeApprovalNotice">هذا إجراء محلي، ولا يثبت هوية المعتمد.</div><div id="financeApprovalMissing" class="fin-finance-summary" aria-live="polite"></div></section><section class="panel finance-ledger" id="financeOperations"><div class="panel-header"><div><h2>المتابعات والالتزامات المالية</h2><p class="fx-note">مهام مشتقة من بيانات المعسكر الفعلية.</p></div><span class="tag" id="financeTasksCount">—</span></div><div id="financeTasks"></div></section><section class="panel finance-ledger" id="financeReadiness"><div class="panel-header"><div><h2>جاهزية الملف المالي</h2><p class="fx-note">مؤشرات اكتمال الإدخال للتحضير والمراجعة، وليست اعتماداً محاسبياً.</p></div><span class="tag" id="financeCompletion">—</span></div><div id="financeChecklist"></div></section>
@@ -1340,8 +1402,11 @@ function financeActivateView(view,{scroll=false}={}){
  document.getElementById('finViewTitle').textContent=info[1];
  document.getElementById('finViewSubtitle').textContent=info[2];
  document.getElementById('finViewCount').textContent=info[3];
- document.querySelectorAll('[data-fin-stage]').forEach(b=>b.classList.toggle('active',b.dataset.finStage===(view==='execution'?'execution':'planning')));
+ const heading=document.getElementById('finViewHeading');if(heading)heading.setAttribute('aria-label',info[1]);
  const add=document.getElementById('addBtn2');if(add)add.hidden=view==='execution';
+ const filters=document.getElementById('filters');if(filters)filters.hidden=view==='execution';
+ const ledgerTitle=document.querySelector('#financeExpenseLedger .panel-header h2');if(ledgerTitle)ledgerTitle.textContent=view==='execution'?'متابعة المدفوعات والمرفقات':'سجل بنود الميزانية';
+ const ledgerDesc=document.querySelector('#financeExpenseLedger .panel-header .sub');if(ledgerDesc)ledgerDesc.textContent=view==='execution'?'البنود الملتزم بها والمدفوعة · سجّل الدفعات وارفق مستنداتها':'أدخل التكاليف التقديرية وصنّفها ثم تابع تحولها إلى التزامات';
  document.getElementById('finQuickActions').hidden=view!=='home';
  if(scroll){
   try{financeBringIntoView(document.getElementById('finWorkspaceNav'));}catch(e){window.scrollTo({top:0,behavior:'smooth'});}
@@ -1371,7 +1436,6 @@ function financeSetupWorkspaces(){
  assign(byId('financeReadiness'),'control');
  assign(byId('financeAudit'),'control');
  // Preserve the report sheet as a separate global panel, opened through its existing button.
- document.querySelectorAll('[data-fin-stage]').forEach(b=>b.addEventListener('click',()=>{financeActivateView(b.dataset.finStage==='planning'?'budget':'execution',{scroll:false});render()}));
  document.getElementById('finWorkspaceNav').addEventListener('click',e=>{
   const tab=e.target.closest('[data-fin-tab]');if(tab){financeActivateView(tab.dataset.finTab);if(['execution','budget'].includes(tab.dataset.finTab))render();}
  });
