@@ -473,6 +473,7 @@ html.finance-embedded .cat.selected{outline:2px solid var(--ux-orange);outline-o
 <div id="financeReportContent"></div></section><div class="fin-workspace-nav" id="finWorkspaceNav" role="tablist" aria-label="أقسام الإدارة المالية">
   <button type="button" role="tab" data-fin-tab="home" aria-selected="true" class="fin-tab active"><span class="fin-tab-icon">◫</span><span>الملخص التنفيذي</span></button>
   <button type="button" role="tab" data-fin-tab="budget" aria-selected="false" class="fin-tab"><span class="fin-tab-icon">▦</span><span>الميزانية والبنود</span></button>
+  <button type="button" role="tab" data-fin-tab="execution" aria-selected="false" class="fin-tab"><span class="fin-tab-icon">▤</span><span>التنفيذ والمدفوعات</span></button>
   <button type="button" role="tab" data-fin-tab="revenue" aria-selected="false" class="fin-tab"><span class="fin-tab-icon">◈</span><span>الإيرادات والتحصيل</span></button>
   <button type="button" role="tab" data-fin-tab="decision" aria-selected="false" class="fin-tab"><span class="fin-tab-icon">⌁</span><span>السيناريوهات والتحليل</span></button>
   <button type="button" role="tab" data-fin-tab="control" aria-selected="false" class="fin-tab"><span class="fin-tab-icon">☷</span><span>الاعتماد والمتابعة</span></button>
@@ -737,7 +738,7 @@ if(!locked)tasks.push(['اعتماد الميزانية','راجع مسودة ا
 $('financeTasksCount').textContent=tasks.length+' متابعات';
 $('financeTasks').innerHTML=tasks.length?tasks.map(([title,desc])=>'<div style="padding:10px 0;border-bottom:1px solid var(--line)"><b>'+esc(title)+'</b><div class="fx-note">'+esc(desc)+'</div></div>').join(''):'<div class="callout">لا توجد تنبيهات تشغيلية ظاهرة حالياً.</div>';$('estimated').textContent=sar(f.estimated);$('actual').textContent=sar(f.actual);$('revenuesStat').textContent=sar(f.revenue);$('profit').textContent=sar(f.profit);$('profit').style.color=f.profit<0?'var(--red)':'var(--navy)';$('progressLabel').textContent=(f.estimated?((f.actual/f.estimated)*100).toFixed(1):0)+'%';$('globalProgress').style.width=Math.min(100,f.estimated?f.actual/f.estimated*100:0)+'%';$('committed').textContent=sar(f.committed);$('remaining').textContent=sar(f.remaining);$('reserve').textContent=sar(f.reserve+f.explicitReserve);$('budgetAdvice').textContent=state.items.length===0?'ابدأ بإضافة البنود المالية الفعلية للمعسكر؛ الأرقام الحالية لا تمثل ميزانية تشغيلية.':f.remaining<0?'تنبيه: المدفوعات والالتزامات تتجاوز الميزانية المقدرة. راجع بنود الإنفاق.':f.profit<0?'تنبيه: التكاليف المقدرة تتجاوز الإيرادات المتوقعة. راجع التسعير أو خفض التكاليف.':'الوضع الحالي: التكاليف المتوقعة مغطاة بالإيرادات المتوقعة. راجع الالتزامات والتحصيل بانتظام.';
 const data=state.categories.map(c=>({...c,value:amountFor(c.id)+(c.id==='reserve'?f.reserve:0),paid:actualFor(c.id)}));let sorted=[...data].sort((a,b)=>b.value-a.value);let max=sorted[0]?.value||1;$('chart').innerHTML=sorted.slice(0,5).map(c=>`<div class="chartrow"><span>${esc(c.name)}</span><div class="bar"><i style="background:${c.color};width:${Math.min(100,c.value/max*100)}%"></i></div><span class="v">${fmt(c.value)}</span></div>`).join('');$('categoryGrid').innerHTML=data.map(c=>`<article class="cat ${selectedCat===c.id?'selected':''}" data-cat="${esc(c.id)}" style="--tone:${c.color};--tint:${c.color}17"><div class="symbol">${financeCategoryIcon(c.id)}</div><h3>${esc(c.name)}</h3><div class="micro">${esc(c.desc)}</div><div class="money">${sar(c.value)}</div><div class="between"><span class="count">${state.items.filter(i=>i.cat===c.id).length} بنود</span><span class="count">${c.value?Math.round(c.paid/c.value*100):0}% مدفوع</span></div><div class="progress"><span style="width:${c.value?Math.min(100,c.paid/c.value*100):0}%"></span></div></article>`).join('');document.querySelectorAll('.cat').forEach(e=>e.onclick=()=>{selectedCat=selectedCat===e.dataset.cat?null:e.dataset.cat;render();$('expenses').scrollIntoView({behavior:'smooth',block:'start'})});
-const rows=state.items.filter(x=>(filter==='all'||x.status===filter)&&(!selectedCat||x.cat===selectedCat));
+const rows=state.items.filter(x=>(financeActiveView==='execution'?(x.status==='committed'||x.status==='paid'):(filter==='all'||x.status===filter))&&(!selectedCat||x.cat===selectedCat));
 $('expenseGettingStarted').hidden=state.items.length>0;
 $('expensesBody').innerHTML=rows.length?rows.map(x=>{
  const paid=n(x.paid),remaining=Math.max(0,n(x.amount)-paid);
@@ -1182,11 +1183,12 @@ function financeReportHtml(){
  +section('٣ · المصروفات والالتزامات التفصيلية',['البند','التصنيف','التقديري','المدفوع','المتبقي','الحالة'],itemRows,6)
  +section('تفاصيل الموردين وتواريخ الاستحقاق',['البند','المورد','تاريخ الاستحقاق','مرجع المستند'],supplierRows,4)
  +section('٤ · سجل مدفوعات الموردين',['التاريخ','البند','المورد','المبلغ','الطريقة','المرجع'],paymentRows,6)
+ +section('فهرس الفواتير والإيصالات المرفقة',['البند','عدد المستندات','الملفات'],evidenceRows,3)
  +section('٥ · التحصيلات والإيرادات',['التاريخ','نوع التحصيل','الدافع','المبلغ','المرجع'],collectionRows,5)
  +'<div class="report-note">الإيراد المتوقع للطلاب: '+money(n(state.students)*n(state.fee))+' · الرعايات والإيرادات الأخرى المتوقعة: '+money(state.otherRevenue)+' · التحصيل الطلابي المسجل: '+money(actualTuition())+' · الإيرادات الأخرى المحصلة: '+money(actualOtherRevenue())+'. قد تتضمن السجلات القديمة تحصيلات افتتاحية بلا تفاصيل فردية.</div>'
  +section('٦ · المخاطر والاستثناءات ونقاط المتابعة',['المؤشر','النتيجة','الإجراء المطلوب'],riskRows,3)
  +section('٧ · سجل التعديلات والحركات الأخيرة',['التاريخ','نوع العملية','البيان'],auditRows,3)
- +'<div class="report-alert">ملاحظة حوكمة: جميع سجلات النظام حالياً محلية في المتصفح. الاعتماد محلي لا يتحقق من هوية المعتمد، وسجل التعديلات غير محمي مؤسسياً. يجب مطابقة المستندات والتحصيلات والمدفوعات مع الحسابات والفواتير الأصلية قبل الاعتماد النهائي.</div>'
+ +'<div class="report-alert">المرفقات الأصلية محفوظة في تخزين IndexedDB لهذا المتصفح ولا تُضمّن في التقرير المطبوع؛ اطلب تنزيلها أو مشاركتها من سجل مرفقات كل بند. ملاحظة حوكمة: جميع سجلات النظام حالياً محلية في المتصفح. الاعتماد محلي لا يتحقق من هوية المعتمد، وسجل التعديلات غير محمي مؤسسياً. يجب مطابقة المستندات والتحصيلات والمدفوعات مع الحسابات والفواتير الأصلية قبل الاعتماد النهائي.</div>'
  +'<div class="report-signatures"><div class="sign">أعدّه: _____________________ &nbsp; التاريخ: ____________</div><div class="sign">راجعه: _____________________ &nbsp; التاريخ: ____________</div></div>'
  +'<div class="report-footer">أكاديمية النخبة — تقرير تشغيلي آلي · إعداد إلكتروني وفق البيانات المتاحة بتاريخ '+esc(dateText)+' · يُفضّل الاحتفاظ بنسخة احتياطية من السجلات مع هذا التقرير. لا يعتمد هذا التقرير توقيعاً إلكترونياً.</div>';
 }
@@ -1307,6 +1309,7 @@ $('exportBtn').onclick=()=>{let f=figures(),lines=[['الاسم','التصنيف
 const FIN_VIEWS=[
  ['home','الملخص التنفيذي','راجع الميزانية والتحصيل والفائض والمخاطر في شاشة واحدة.','نظرة عامة'],
  ['budget','الميزانية والبنود','صنّف تكاليف السكن والوجبات والنقل والمشرفين وأدخل أسعار الموردين.','تخطيط المصروفات'],
+ ['execution','التنفيذ والمدفوعات','تابع التكاليف الفعلية والمدفوعات والفواتير المرفقة دون تغيير معادلات التخطيط.','مراقبة التنفيذ'],
  ['revenue','الإيرادات والتحصيل','حدد رسوم الطلاب، وميّز المبيعات المتوقعة عن التحصيل الفعلي.','تدفقات الدخول'],
  ['decision','السيناريوهات والتحليل','اختبر عدد الطلاب ونقطة التعادل والسعة، وقارن مع الموازنات المرجعية.','قرارات النمو'],
  ['control','الاعتماد والمتابعة','راجع النسخة المعتمدة، والالتزامات، ونواقص الملف المالي، وسجل التغييرات.','رقابة ومراجعة']
@@ -1315,7 +1318,7 @@ let financeActiveView='home';
 function financeActivateView(view,{scroll=false}={}){
  if(!FIN_VIEWS.some(v=>v[0]===view))view='home';
  financeActiveView=view;
- document.querySelectorAll('[data-fin-view]').forEach(el=>el.hidden=el.dataset.finView!==view);
+ document.querySelectorAll('[data-fin-view]').forEach(el=>el.hidden=el.dataset.finView!==view&&!(view==='execution'&&el.id==='financeExpenseLedger'));
  document.querySelectorAll('[data-fin-tab]').forEach(btn=>{
   const on=btn.dataset.finTab===view;btn.classList.toggle('active',on);
   btn.setAttribute('aria-selected',on?'true':'false');btn.tabIndex=on?0:-1;
@@ -1325,6 +1328,8 @@ function financeActivateView(view,{scroll=false}={}){
  document.getElementById('finViewTitle').textContent=info[1];
  document.getElementById('finViewSubtitle').textContent=info[2];
  document.getElementById('finViewCount').textContent=info[3];
+ document.querySelectorAll('[data-fin-stage]').forEach(b=>b.classList.toggle('active',b.dataset.finStage===(view==='execution'?'execution':'planning')));
+ const add=document.getElementById('addBtn2');if(add)add.hidden=view==='execution';
  document.getElementById('finQuickActions').hidden=view!=='home';
  if(scroll){
   try{financeBringIntoView(document.getElementById('finWorkspaceNav'));}catch(e){window.scrollTo({top:0,behavior:'smooth'});}
@@ -1343,6 +1348,7 @@ function financeSetupWorkspaces(){
  assign(document.querySelector('div.mid'),'home');
  assign(byId('categories'),'budget');
  assign(byId('expenses')?.firstElementChild,'budget');
+ if(byId('expenses')?.firstElementChild)byId('expenses').firstElementChild.id='financeExpenseLedger';
  assign(byId('revenues'),'revenue');
  assign(byId('financialDecision'),'decision');
  assign(byId('analysis')?.firstElementChild,'decision');
@@ -1353,6 +1359,7 @@ function financeSetupWorkspaces(){
  assign(byId('financeReadiness'),'control');
  assign(byId('financeAudit'),'control');
  // Preserve the report sheet as a separate global panel, opened through its existing button.
+ document.querySelectorAll('[data-fin-stage]').forEach(b=>b.addEventListener('click',()=>financeActivateView(b.dataset.finStage==='planning'?'budget':'execution',{scroll:false})));
  document.getElementById('finWorkspaceNav').addEventListener('click',e=>{
   const tab=e.target.closest('[data-fin-tab]');if(tab)financeActivateView(tab.dataset.finTab);
  });
@@ -1855,7 +1862,7 @@ render();
  }
  function decorateLedger(){
   const body=byId('expensesBody');if(!body)return;
-  const rows=state.items.filter(x=>(filter==='all'||x.status===filter)&&(!selectedCat||x.cat===selectedCat));
+  const rows=state.items.filter(x=>(financeActiveView==='execution'?(x.status==='committed'||x.status==='paid'):(filter==='all'||x.status===filter))&&(!selectedCat||x.cat===selectedCat));
   const heads=[...document.querySelectorAll('#expenses thead th')].map(th=>th.textContent.trim());
   const trs=[...body.querySelectorAll(':scope>tr')];let tot={a:0,p:0,r:0,c:0};
   body.querySelector('.ux-noresult')?.remove();
