@@ -201,3 +201,13 @@
 .p2-schedule-assign-actions button.primary{background:#f0803d;border-color:#f0803d;color:#142e44}
 @media(max-width:620px){.p2-schedule-assign-members{grid-template-columns:1fr}.p2-schedule-assign-actions{justify-content:stretch}.p2-schedule-assign-actions button{flex:1}}
 @media print{.p2-inline-assignment{display:none!important}}
+
+/* Optional team allocation within linked-program assignments */
+.p2-modal .p2-assignment-teams{padding:12px 0 5px;border-top:1px solid #e8eef4;margin:10px 0}
+.p2-modal .p2-assignment-teamhead{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.p2-modal .p2-assignment-teamhead b{font-size:12px;color:#334e69}
+.p2-modal .p2-assignment-teamhead small{font-size:10px;color:#8797a7;font-weight:400}
+.p2-modal .p2-assignment-team-options{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.p2-modal .p2-assignment-team-options label{display:flex;flex-direction:row;align-items:center;gap:7px;margin:0;font-size:11px;font-weight:500;color:#455d74;border:1px solid #dfe7ef;border-radius:8px;background:#f7f9fc;padding:8px 11px;cursor:pointer}
+.p2-modal .p2-assignment-team-options label:has(input:checked){background:#fff4e9;border-color:#e9b78d;color:#784522}
+.p2-modal .p2-assignment-team-options input{width:16px;height:16px;accent-color:#e77b39}
