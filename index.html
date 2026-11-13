@@ -3509,7 +3509,7 @@ document.addEventListener('change',e=>{
 
 function pageFinanceExact(){
  const camp=activeCamp();
- const src='finance-exact.html?embed=1&camp='+encodeURIComponent(camp.id)+'&campName='+encodeURIComponent(campName(camp))+'&ui=finance-ux-consistency-v3';
+ const src='finance-exact.html?embed=1&camp='+encodeURIComponent(camp.id)+'&campName='+encodeURIComponent(campName(camp))+'&ui=finance-clear-arabic-v4';
  return '<iframe id="financeExactFrame" src="'+esc(src)+'" title="'+esc(T('الإدارة المالية: ','Finances: ')+campName(camp))+'" loading="eager"></iframe>';
 }
 const PAGES={finance:pageFinanceExact,opportunities:pageOpportunityCalendar,camps:pageCamps,builder:pageBuilder,dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
