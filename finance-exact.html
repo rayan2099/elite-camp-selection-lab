@@ -557,7 +557,7 @@ html.finance-embedded .cat.selected{outline:2px solid var(--ux-orange);outline-o
 <label class="field">مبلغ الدفعة (ر.س)<input type="number" id="paymentAmount" min=".01" step=".01"></label>
 <label class="field">تاريخ الدفع<input type="date" id="paymentDate"></label>
 <label class="field">طريقة الدفع<select id="paymentMethod"><option>تحويل بنكي</option><option>نقداً</option><option>بطاقة</option><option>أخرى</option></select></label>
-<label class="field">مرجع السداد<input id="paymentReference" maxlength="80" placeholder="رقم العملية أو الإيصال"></label>
+<label class="field">مرجع السداد<input id="paymentReference" maxlength="80" placeholder="رقم العملية أو الإيصال"></label><label class="field">رفع إيصال / فاتورة مع الدفعة<input id="paymentEvidence" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.heic,.heif,application/pdf,image/*" multiple><small>اختياري: PDF أو صور من الجهاز</small></label><label class="field">تصوير إيصال بالكاميرا<input id="paymentCamera" type="file" accept="image/*" capture="environment"><small>اختياري: الكاميرا في الجوال</small></label>
 </div><div class="fin-attachment-note">يمكنك إرفاق الفاتورة أو إيصال السداد بعد تسجيل الدفعة من سجل المرفقات المرتبط بالبند.</div><div class="actions"><button class="btn primary" id="paymentSave">تسجيل الدفعة</button></div>
 </div></div>
 <div class="modal-shell" id="collectionShell" role="dialog" aria-modal="true"><div class="modal" style="max-width:530px">
@@ -866,7 +866,7 @@ function newItem(category){
  editingExpenseId=null;refreshCats();
  $('expenseTemplates').hidden=false;clearPresetSelection();
  $('modalTitle').textContent='إضافة بند مالي';
- $('itemName').value='';$('calcMethod').value='unit';$('itemStatus').value='estimated';
+ $('itemName').value='';$('calcMethod').value='unit';$('itemStatus').value='estimated';$('itemVatMode').value='none';
  $('itemQty').value=1;$('itemDays').value=1;$('unitPrice').value=0;$('extraCost').value=0;$('paidValue').value=0;
  $('itemVendor').value='';$('itemDue').value='';$('itemRef').value='';$('itemNotes').value='';
  if(category&&state.categories.some(x=>x.id===category))$('itemCat').value=category;
@@ -1044,7 +1044,7 @@ function openPayment(id){
  paymentExpenseId=id;
  $('paymentTitle').textContent='تسجيل دفعة: '+x.name;
  $('paymentHint').textContent='المدفوع سابقاً: '+sar(x.paid)+' · المتبقي من التقديري: '+sar(Math.max(0,x.amount-n(x.paid)))+' — أضف دفعة جديدة فقط.';
- $('paymentAmount').value='';$('paymentDate').value=localDay();$('paymentReference').value='';
+ $('paymentAmount').value='';$('paymentDate').value=localDay();$('paymentReference').value='';$('paymentEvidence').value='';$('paymentCamera').value='';
  $('paymentShell').classList.add('open');financeShowEntry('paymentShell');$('paymentAmount').focus();
 }
 $('paymentSave').onclick=()=>{
@@ -1058,7 +1058,9 @@ $('paymentSave').onclick=()=>{
   method:$('paymentMethod').value,ref:$('paymentReference').value.trim()});
  x.paid=n(x.paid)+amount;x.status='paid';
  audit('تسجيل دفعة',x.name+' · '+sar(amount)+' · '+($('paymentReference').value.trim()||'دون مرجع'));
+ const evidence=[...$('paymentEvidence').files,...$('paymentCamera').files];
  save();$('paymentShell').classList.remove('open');render();
+ if(evidence.length){finOpenAttachments(x.id);finAddAttachments(evidence);}
 };
 $('paymentCancel').onclick=()=>$('paymentShell').classList.remove('open');
 $('paymentShell').addEventListener('click',e=>{if(e.target===$('paymentShell'))$('paymentShell').classList.remove('open')});
