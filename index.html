@@ -3513,9 +3513,13 @@ function pageFinanceExact(){
  return '<iframe id="financeExactFrame" src="'+esc(src)+'" title="'+esc(T('الإدارة المالية: ','Finances: ')+campName(camp))+'" loading="eager"></iframe>';
 }
 const PAGES={finance:pageFinanceExact,opportunities:pageOpportunityCalendar,camps:pageCamps,builder:pageBuilder,dashboard:pageDashboard,library:pageLibrary,selection:pageSelection,days:pageDays,fit:pageFit,readiness:pageReadiness,outputs:pageOutputs};
-function render({preserveScroll=false}={}){
-  const previousScrollY=preserveScroll?window.scrollY:0;
+let lastRenderedPage=null;
+function render({preserveScroll}={}){
   if(!PAGES[page]) page='camps';
+  // Same-page saves, edits, assignments and filters keep the user's position.
+  // Actual navigation to a different section continues to start at the top.
+  const keepPosition=preserveScroll===undefined?(lastRenderedPage===page):preserveScroll;
+  const previousScrollY=keepPosition?window.scrollY:0;
   document.body.classList.toggle('finance-exact-mode',page==='finance');
   header();
   const container=$('#app');
@@ -3562,7 +3566,9 @@ function render({preserveScroll=false}={}){
   if(page==='library'){renderLib();}
   S.page=page;S.lang=lang;save();
   try{history.replaceState(null,'','#'+page)}catch(e){}
-  window.scrollTo(0,preserveScroll?previousScrollY:0);
+  lastRenderedPage=page;
+  // Restore after replacing the view; never jump to the top for same-page actions.
+  window.scrollTo({top:keepPosition?previousScrollY:0,left:0,behavior:'instant'});
 }
 function renderLib(){
   const grid=$('#libGrid');if(!grid)return;
