@@ -916,6 +916,114 @@ $('saveItem').onclick=()=>{
  }
  save();modal(false);render();editingExpenseId=null;
 };
+
+/* Supporting-document vault: blobs in IndexedDB, metadata in per-camp finance state.
+   Browser-local only: no server upload or cross-device synchronization. */
+let finAttachmentItemId=null;
+const FIN_DOC_DB='elite-camp-evidence-v1',FIN_DOC_MAX=10*1024*1024;
+function finDocStore(){
+ return new Promise((resolve,reject)=>{
+  if(!('indexedDB' in window))return reject(new Error('IndexedDB unsupported'));
+  const req=indexedDB.open(FIN_DOC_DB,1);
+  req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('files'))req.result.createObjectStore('files')};
+  req.onsuccess=()=>resolve(req.result);
+  req.onerror=()=>reject(req.error||new Error('Could not open evidence database'));
+ });
+}
+async function finDocAction(mode,key,value){
+ const db=await finDocStore();
+ try{return await new Promise((resolve,reject)=>{
+  const tx=db.transaction('files',mode==='get'?'readonly':'readwrite');
+  const st=tx.objectStore('files');
+  const request=mode==='put'?st.put(value,key):mode==='delete'?st.delete(key):st.get(key);
+  let result;
+  request.onsuccess=()=>{result=request.result};
+  request.onerror=()=>reject(request.error||new Error('File operation failed'));
+  tx.oncomplete=()=>resolve(result);
+  tx.onerror=()=>reject(tx.error||new Error('Evidence transaction failed'));
+  tx.onabort=()=>reject(tx.error||new Error('Evidence transaction aborted'));
+ })}finally{db.close();}
+}
+function finAttachmentRecord(item){return (item?.attachments||[]).filter(a=>a&&a.key&&a.name)}
+function finEvidenceItem(){return state.items.find(x=>x.id===finAttachmentItemId)}
+function finAttachmentMessage(message){const el=$('finAttachmentMessage');if(el)el.textContent=message}
+function finOpenAttachments(itemId){
+ const item=state.items.find(x=>x.id===itemId);if(!item)return;
+ finAttachmentItemId=itemId;
+ $('finAttachmentHeading').textContent='فواتير وإيصالات: '+item.name;
+ $('finAttachmentFiles').value='';$('finAttachmentCamera').value='';
+ $('financeAttachmentShell').classList.add('open');
+ finAttachmentMessage('');
+ finRenderAttachments();
+}
+function finRenderAttachments(){
+ const item=finEvidenceItem(),list=$('finAttachmentList');if(!item||!list)return;
+ const meta=finAttachmentRecord(item);
+ list.innerHTML=meta.length?meta.map(a=>'<div class="fin-file-entry"><div><strong>'+esc(a.name)+'</strong><small>'+esc(new Date(a.addedAt||Date.now()).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn'))+' · '+(a.size/1024/1024).toFixed(2)+' MB</small></div><div class="fin-file-actions"><button type="button" data-fin-file-open="'+esc(a.key)+'">عرض / تنزيل</button><button type="button" data-fin-file-share="'+esc(a.key)+'">مشاركة</button><button type="button" class="fin-file-delete" data-fin-file-remove="'+esc(a.key)+'">حذف</button></div></div>').join(''):'<div class="fin-attachment-note">لا توجد فواتير مرفقة بهذا البند.</div>';
+}
+function finDocumentAllowed(file){
+ const n=file.name.toLowerCase(),type=file.type.toLowerCase();
+ return /\.(pdf|png|jpe?g|webp|heic|heif)$/.test(n)||(type==='application/pdf'||type.startsWith('image/'));
+}
+async function finAddAttachments(files){
+ const item=finEvidenceItem();
+ if(!item)return;
+ const chosen=[...files];
+ if(!chosen.length)return;
+ if(!Array.isArray(item.attachments))item.attachments=[];
+ let added=0;
+ for(const file of chosen){
+  if(!finDocumentAllowed(file)){finAttachmentMessage('ملف غير مدعوم: '+file.name+'. اختر PDF أو صورة.');continue;}
+  if(!file.size||file.size>FIN_DOC_MAX){finAttachmentMessage('حجم الملف غير صالح أو يتجاوز 10 ميجابايت: '+file.name);continue;}
+  const key=financeCampId+'|'+item.id+'|'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+  try{
+   await finDocAction('put',key,file);
+   item.attachments.push({key,name:file.name.slice(0,180),size:file.size,type:file.type||'application/octet-stream',addedAt:new Date().toISOString()});
+   save();
+   added++;
+  }catch(error){
+   finAttachmentMessage('تعذّر تخزين الملف '+file.name+'. قد تكون مساحة تخزين المتصفح ممتلئة.');
+  }
+ }
+ if(added){audit('إرفاق مستند',item.name+' · '+added+' ملف');save();finAttachmentMessage('تم حفظ '+added+' ملف على هذا الجهاز.');}
+ finRenderAttachments();render();
+}
+async function finGetAttachment(key){
+ const item=finEvidenceItem(),meta=finAttachmentRecord(item).find(a=>a.key===key);
+ if(!meta)return null;
+ try{const blob=await finDocAction('get',key);if(!blob){finAttachmentMessage('الملف غير موجود في تخزين هذا المتصفح.');return null;}return {meta,blob};}
+ catch(e){finAttachmentMessage('تعذّر قراءة المستند من التخزين المحلي.');return null;}
+}
+async function finOpenAttachment(key){
+ const record=await finGetAttachment(key);if(!record)return;
+ const url=URL.createObjectURL(record.blob);
+ const a=document.createElement('a');a.href=url;a.download=record.meta.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),15000);
+}
+async function finShareAttachment(key){
+ const record=await finGetAttachment(key);if(!record)return;
+ const file=new File([record.blob],record.meta.name,{type:record.meta.type});
+ if(navigator.share&&navigator.canShare?.({files:[file]})){
+  try{await navigator.share({title:'فاتورة / إيصال',files:[file]});return;}catch(err){if(err.name==='AbortError')return;}
+ }
+ finAttachmentMessage('المشاركة المباشرة غير متاحة في هذا المتصفح. تم تجهيز الملف للتنزيل؛ يمكنك إرساله من جهازك.');
+ await finOpenAttachment(key);
+}
+async function finDeleteAttachment(key){
+ const item=finEvidenceItem(),meta=finAttachmentRecord(item).find(a=>a.key===key);if(!item||!meta)return;
+ if(!confirm('حذف المرفق «'+meta.name+'» نهائياً من تخزين هذا الجهاز؟'))return;
+ try{await finDocAction('delete',key);item.attachments=item.attachments.filter(a=>a.key!==key);audit('حذف مستند',item.name+' · '+meta.name);save();finRenderAttachments();render();finAttachmentMessage('تم حذف المرفق.');}
+ catch(e){finAttachmentMessage('تعذّر حذف المستند.');}
+}
+$('finAttachmentFiles').addEventListener('change',e=>{finAddAttachments(e.target.files);e.target.value='';});
+$('finAttachmentCamera').addEventListener('change',e=>{finAddAttachments(e.target.files);e.target.value='';});
+$('finAttachmentClose').onclick=()=>{$('financeAttachmentShell').classList.remove('open');finAttachmentItemId=null};
+$('financeAttachmentShell').addEventListener('click',e=>{if(e.target===$('financeAttachmentShell'))$('finAttachmentClose').click();});
+$('finAttachmentList').addEventListener('click',e=>{
+ const open=e.target.closest('[data-fin-file-open]');if(open){finOpenAttachment(open.dataset.finFileOpen);return;}
+ const share=e.target.closest('[data-fin-file-share]');if(share){finShareAttachment(share.dataset.finFileShare);return;}
+ const remove=e.target.closest('[data-fin-file-remove]');if(remove)finDeleteAttachment(remove.dataset.finFileRemove);
+});
+
 function openPayment(id){
  const x=state.items.find(row=>row.id===id);if(!x)return;
  paymentExpenseId=id;
