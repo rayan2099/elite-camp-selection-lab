@@ -2654,20 +2654,42 @@ function dayTimeline(day,opts){
     </div>`}).join('')}</div>`;
 }
 
+function eliteParseClock(value){
+ const digits=String(value??'').replace(/[٠-٩]/g,d=>String(d.charCodeAt(0)-1632)).replace(/[۰-۹]/g,d=>String(d.charCodeAt(0)-1776));
+ const text=digits.trim().replace(/\\s+/g,' ');
+ const match=text.match(/^(\\d{1,2}):(\\d{2})(?:\\s*(ص|م|صباح(?:اً|ا)?|مساء(?:ً|ا)?|AM|PM))?$/i);
+ if(!match)return null;
+ let hour=Number(match[1]),minute=Number(match[2]);
+ if(minute>59)return null;
+ const part=(match[3]||'').toLowerCase();
+ const pm=part==='م'||part.startsWith('مساء')||part==='pm';
+ const am=part==='ص'||part.startsWith('صباح')||part==='am';
+ if(am||pm){
+   if(hour<1||hour>12)return null;
+   hour=(hour%12)+(pm?12:0);
+ }else if(hour>23)return null;
+ return String(hour).padStart(2,'0')+':'+String(minute).padStart(2,'0');
+}
+function eliteClockInput(value){
+ const time=eliteParseClock(value);
+ if(!time)return String(value||'').trim();
+ const hour=Number(time.slice(0,2)),min=time.slice(3);
+ return String(hour%12||12)+':'+min+(hour>=12?' م':' ص');
+}
 function editScheduleRow(day,index){
  if(!(can('select')||can('scheduleEdit')))return toast(T('تعديل الجدول غير متاح لهذا الدور.','Schedule editing is not available for this role.'));
  const n=Number(day),j=Number(index);
  if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length)return;
  const row=scheduleRow(n,j);
- const timeParts=String(row.t||'').split(/\s*[–-]\s*/);
- const timeValue=v=>/^\d{1,2}:\d{2}$/.test(v)?v.padStart(5,'0'):'';
+ const parts=String(row.t||'').split(/\\s*[–-]\\s*/);
+ const start=eliteClockInput(parts[0]),end=parts.length>1?eliteClockInput(parts[1]):'';
  openModal(`<div class="eyebrow">${T('الجدول اليومي','DAILY SCHEDULE')}</div><h2>${T('تعديل فعالية اليوم','Edit daily activity')} ${n}</h2>
    <div class="fields spacer">
-   <label class="fld">${T('وقت البداية','Start time')}<input id="seTimeStart" type="time" step="60" required value="${esc(timeValue(timeParts[0]))}" dir="ltr"></label>
-   <label class="fld">${T('وقت النهاية (اختياري)','End time (optional)')}<input id="seTimeEnd" type="time" step="60" value="${esc(timeValue(timeParts[1]||''))}" dir="ltr"></label>
+   <label class="fld">${T('وقت البداية','Start time')}<input id="seTimeStart" type="text" inputmode="text" maxlength="14" required value="${esc(start)}" placeholder="1:40 م" dir="ltr"></label>
+   <label class="fld">${T('وقت النهاية (اختياري)','End time (optional)')}<input id="seTimeEnd" type="text" inputmode="text" maxlength="14" value="${esc(end)}" placeholder="2:30 م" dir="ltr"></label>
    <label class="fld">${T('اسم الفعالية بالعربية','Arabic activity name')}<input id="seAr" maxlength="90" value="${esc(row.ar)}"></label>
    <label class="fld">${T('اسم الفعالية بالإنجليزية','English activity name')}<input id="seEn" maxlength="90" value="${esc(row.en||'')}"></label></div>
-   <p class="help">${T('حدد وقت البداية، ويمكنك إضافة وقت نهاية. التعديل خاص بهذا المعسكر ويُحفظ في المتصفح. راجع أوقات الصلاة حسب الموقع والتاريخ.','Select a start time and optionally an end time. Changes are stored in this browser for this camp only. Verify prayer times for the venue and date.')}</p>
+   <p class="help">${T('أدخل الوقت بصيغة 1:40 م أو 13:40. وقت النهاية اختياري، ويمكن تركه فارغًا.','Use 1:40 PM or 13:40. End time is optional and may be left blank.')}</p>
    <div class="actions spacer" style="display:flex;gap:8px;justify-content:flex-end">
    <button type="button" data-act="close">${T('إلغاء','Cancel')}</button>
    <button type="button" class="primary" data-act="saveScheduleRow:${n},${j}">${T('حفظ التعديل','Save changes')}</button></div>`);
@@ -2676,11 +2698,11 @@ function saveScheduleRow(day,index){
  if(!(can('select')||can('scheduleEdit')))return toast(T('تعديل الجدول غير متاح لهذا الدور.','Schedule editing is not available for this role.'));
  const n=Number(day),j=Number(index);
  if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length)return;
- const start=$('#seTimeStart')?.value||'',end=$('#seTimeEnd')?.value||'';
+ const start=eliteParseClock($('#seTimeStart')?.value),rawEnd=($('#seTimeEnd')?.value||'').trim();
+ const end=rawEnd?eliteParseClock(rawEnd):'';
  const ar=$('#seAr')?.value.trim(),en=$('#seEn')?.value.trim();
- if(!start||!ar)return toast(T('وقت البداية واسم الفعالية مطلوبان.','Start time and activity name are required.'));
- const validTime=v=>/^\d{2}:\d{2}$/.test(v)&&Number(v.slice(0,2))<24&&Number(v.slice(3))<60;
- if(!validTime(start)||(end&&!validTime(end)))return toast(T('اختر وقتًا صحيحًا من حقول الوقت.','Choose a valid time.'));
+ if(!start||!ar)return toast(T('أدخل اسم الفعالية ووقت بداية صحيحًا (مثل 1:40 م).','Enter an activity name and a valid start time.'));
+ if(rawEnd&&!end)return toast(T('وقت النهاية غير صحيح. صححه أو اتركه فارغًا.','End time is invalid; correct it or leave it blank.'));
  if(end&&end<=start)return toast(T('يجب أن يكون وقت النهاية بعد وقت البداية.','End time must be after start time.'));
  const t=end?start+' – '+end:start;
  if(!S.prep||typeof S.prep!=='object')S.prep={};
@@ -2694,13 +2716,13 @@ function saveScheduleRow(day,index){
   const data=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
   const camp=data?.camps?.find(c=>c.id===S.activeId);
   persisted=camp?.prep?.__scheduleEdits?.[n]?.[j]?.t===t;
- }catch(e){}
+ }catch(error){console.warn('Could not verify schedule persistence',error);}
  if(!persisted){
   if(previous)S.prep.__scheduleEdits[n][j]=previous;
   else delete S.prep.__scheduleEdits[n][j];
   return toast(T('تعذر حفظ التعديل في المتصفح. تحقق من مساحة التخزين وحاول مجددًا.','Could not save in this browser. Check storage and retry.'));
  }
- closeModal();render();
+ closeModal();render({preserveScroll:true});
  toast(T('تم حفظ وقت الفعالية وتحديث الجدول.','Activity time saved and schedule updated.'));
 }
 
@@ -4011,7 +4033,10 @@ function saveEdit(id){
     ...($('#eBreakdown')?.value||'').split(/\r?\n/).map(v=>v.trim()).filter(Boolean)
   ])];
   if(!choices.length)return toast(T('اختر تفريعة واحدة على الأقل قبل الحفظ.','Select at least one subactivity before saving.'));
-  // Apply changes only after every validation succeeds.
+  // Retain the last valid state until the browser confirms the updated selection was persisted.
+  const previousSelected=JSON.stringify(S.selected);
+  const previousDraft=S.draft;
+  const previousLogLength=S.log.length;
   x.pri=$('#ePri').value;
   x.day=$('#eDay').value?+$('#eDay').value:null;
   x.why=$('#eWhy').value.trim();
@@ -4027,7 +4052,21 @@ function saveEdit(id){
   }else{
     logIt(`حُدّث قرار «${item.ar}»`,`Decision updated: ${item.en}`);
   }
-  save();closeModal();render({preserveScroll:true});
+  save();
+  let persisted=false;
+  try{
+    const data=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
+    const stored=data?.camps?.find(c=>c.id===S.activeId)?.selected?.find(entry=>entry.id===id);
+    persisted=!!stored&&stored.sportChoice===x.sportChoice&&stored.activityBreakdown===x.activityBreakdown&&stored.day===x.day;
+  }catch(error){console.warn('Could not verify program selection persistence',error);}
+  if(!persisted){
+    S.selected=JSON.parse(previousSelected);
+    S.draft=previousDraft;
+    S.log.length=previousLogLength;
+    if(isNew)pendingProgramChoice=x;
+    return toast(T('لم يكتمل حفظ البرنامج. بقيت النافذة مفتوحة لإعادة المحاولة.','Program not saved. The form remains open to retry.'));
+  }
+  closeModal();render({preserveScroll:true});
   toast(isNew?T('أُضيف البرنامج إلى الخطة بعد حفظ التفريعات.','Program added after saving subactivities.'):T('حُفظ قرار الاختيار.','Selection decision saved.'));
 }
 function pickerModal(day){
