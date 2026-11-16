@@ -2635,9 +2635,23 @@ function scheduleDiagnostics(day){
  for(const [slot,items] of Object.entries(map))if(items.length>1)notes.push(T('تم جمع '+items.length+' برامج في جلسة واحدة؛ راجع توقيتها.','Multiple programs assigned to one session; verify timing.'));
  return [...new Set(notes)];
 }
+function eliteTimelineTimeShade(day){
+ const segments=DAY_TEMPLATE.map((_,index)=>{
+  const row=scheduleRow(day,index),parts=String(row.t||'').split(/\s*[–-]\s*/);
+  const start=eliteTimeMinutes(parts[0]),end=eliteTimeMinutes(parts[1]);
+  if(start===null||end===null||end<=start)return '';
+  const left=(start/1440*100).toFixed(3),width=((end-start)/1440*100).toFixed(3);
+  const color=row.ic==='prayer'?'#aa7b27':row.slot?'#ed8a48':'#4c85d7';
+  return '<span title="'+esc(row.ar+' · '+parts[0]+'–'+parts[1])+'" style="position:absolute;left:'+left+'%;width:'+width+'%;min-width:2px;top:0;bottom:0;background:'+color+';border-radius:2px"></span>';
+ }).filter(Boolean);
+ return '<div class="noprint" style="margin:2px 0 12px"><div class="help" style="margin-bottom:5px">'
+  +T('التوزيع الزمني الفعلي لليوم (يتحدث عند تعديل الأوقات)','Actual day time coverage (updates after edits)')
+  +'</div><div aria-label="'+T('التوزيع الزمني للفترات المسجلة','Recorded time segments')+'" style="position:relative;height:12px;border-radius:6px;background:var(--soft2);overflow:hidden" dir="ltr">'
+  +segments.join('')+'</div><div style="display:flex;justify-content:space-between;direction:ltr;font-size:10px;color:var(--muted)"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div></div>';
+}
 function dayTimeline(day,opts){
   const map=slotMap(day), o=opts||{};
-  return `<div class="tl">${DAY_TEMPLATE.map((original,idx)=>{const row=scheduleRow(day,idx);
+  return `${eliteTimelineTimeShade(day)}<div class="tl">${DAY_TEMPLATE.map((original,idx)=>{const row=scheduleRow(day,idx);
     const items=scheduleSlotPrograms(day,idx,map);
     const customActivity=slotHasCustomActivity(day,idx);
     const body = row.slot
