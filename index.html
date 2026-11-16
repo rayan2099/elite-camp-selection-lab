@@ -2700,7 +2700,7 @@ function dayTimeline(day,opts){
       <div class="tltime">${row.t}</div>
       <div class="tldot">${tico(row.ic)}</div>
       <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${row.slot&&!items.length&&!customActivity?`<small class="tlwhy" style="display:block">${T('هذا عنوان فترة في قالب الجدول، وليس نشاطًا مُعيّنًا.','This is a timetable category, not an assigned activity.')}</small>`:''}${body}${(!row.slot||(customActivity&&!items.length))&&typeof window.campScheduleAssignInline==='function'?window.campScheduleAssignInline('activity',day,idx):''}<button type="button" class="small schedule-edit-control noprint" data-act="editScheduleRow:${day},${idx}" title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button>${can('select')?`<button type="button" class="small danger noprint" data-act="confirmScheduleRowRemove:${day},${idx}" title="${T('حذف هذه الفعالية من جدول اليوم فقط','Remove this activity from this day only')}">${T('حذف','Delete')}</button>`:''}</div>
-    </div>`}).join('')}${can('select')&&DAY_TEMPLATE.some((_,idx)=>scheduleRowRemoved(day,idx))?`<div class="noprint" style="margin-top:12px;padding:10px;border:1px dashed var(--line);border-radius:9px"><span class="help">${T('فعاليات محذوفة من هذا اليوم','Activities removed from this day')}</span><div class="actions" style="margin-top:6px">${DAY_TEMPLATE.map((_,idx)=>scheduleRowRemoved(day,idx)?`<button type="button" class="small" data-act="restoreScheduleRow:${day},${idx}">${T('استعادة','Restore')}: ${esc(scheduleRow(day,idx).ar)}</button>`:'').join('')}</div></div>`:''}</div>`;
+    </div>`}).join('')}</div>`;
 }
 
 function confirmScheduleRowRemove(day,index){
@@ -2791,12 +2791,61 @@ function confirmScheduleProgramRemove(id){
   +'<p class="help" style="margin:12px 0 14px">'+T('سيُزال «'+esc(name)+'» من خطة المعسكر وجدوله فقط، وسيبقى متاحًا في مكتبة البرامج.','The program will be removed from this camp plan and schedule only; it remains in the library.')+'</p>'
   +'<div class="actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:15px"><button type="button" data-act="close">'+T('إلغاء','Cancel')+'</button><button type="button" class="danger" data-act="removeScheduleProgram:'+esc(id)+'">'+T('تأكيد الإزالة','Confirm removal')+'</button></div>');
 }
+/* Per-camp recycle bin for deleted schedule programs and fixed activities. */
+function eliteDeletedItemsForDay(day){
+ const n=Number(day),rows=[];
+ DAY_TEMPLATE.forEach((_,index)=>{
+  if(scheduleRowRemoved(n,index)){
+   const row=scheduleRow(n,index);
+   rows.push({kind:'activity',day:n,index,name:row.ar||row.en||'',time:row.t||''});
+  }
+ });
+ const archive=S.prep?.__deletedPrograms;
+ if(Array.isArray(archive))archive.forEach(entry=>{
+  const data=entry?.program;
+  if(!data||typeof data.id!=='string')return;
+  const days=Array.isArray(data.days)&&data.days.length?data.days:[data.day];
+  if(days.map(Number).includes(n)){
+   const lib=ITEM(data.id);
+   rows.push({kind:'program',day:n,id:data.id,name:lib?.ar||data.name||data.id,time:''});
+  }
+ });
+ return rows;
+}
+function restoreDeletedProgram(id){
+ if(!can('select'))return toast(T('الاستعادة غير متاحة لهذا الدور.','Restore not permitted.'),'error');
+ const archive=S.prep?.__deletedPrograms;
+ const index=Array.isArray(archive)?archive.findIndex(x=>x?.program?.id===id):-1;
+ if(index<0)return toast(T('لم يتم العثور على البرنامج في المحذوفات.','Deleted program not found.'),'error');
+ if(S.selected.some(x=>x.id===id))return toast(T('البرنامج موجود بالفعل ضمن الخطة.','Program already exists in plan.'),'error');
+ const record=archive[index];
+ const beforeSelected=S.selected.slice(),beforeArchive=archive.slice();
+ S.selected.push({...record.program});
+ archive.splice(index,1);
+ save();
+ let persisted=false;
+ try{
+  const raw=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
+  const camp=raw?.camps?.find(c=>c.id===S.activeId);
+  persisted=!!camp?.selected?.some(x=>x.id===id)&&!camp?.prep?.__deletedPrograms?.some(x=>x.program?.id===id);
+ }catch(error){console.error('Restore program verification failed',error)}
+ if(!persisted){
+  S.selected=beforeSelected;S.prep.__deletedPrograms=beforeArchive;
+  return toast(T('تعذرت استعادة البرنامج. لم تتغير البيانات.','Program restore failed.'),'error');
+ }
+ render({preserveScroll:true});
+ toast(T('تمت استعادة البرنامج إلى الخطة والجدول بنجاح.','Program restored to plan and schedule.'),'success','top');
+}
 function removeSelectedProgram(id){
  if(!can('select'))return toast(T('حذف البرامج غير متاح لهذا الدور.','No permission to remove programs.'),'error');
  const entry=S.selected.find(x=>x.id===id);
  if(!entry)return toast(T('البرنامج غير موجود في الخطة.','Program not found in the plan.'),'error');
  const item=ITEM(id),name=item?.ar||id;
  const previous=S.selected.slice(),draft=S.draft,logLength=S.log.length;
+ S.prep??={};
+ const oldDeleted=Array.isArray(S.prep.__deletedPrograms)?S.prep.__deletedPrograms.slice():[];
+ S.prep.__deletedPrograms=oldDeleted.filter(x=>x?.program?.id!==id);
+ S.prep.__deletedPrograms.push({program:{...entry},name,deletedAt:Date.now()});
  S.selected=S.selected.filter(x=>x.id!==id);
  S.draft=false;
  logIt('أُزيل من خطة المعسكر: '+name,'Removed from camp plan: '+(item?.en||id));
@@ -2805,10 +2854,10 @@ function removeSelectedProgram(id){
  try{
   const data=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
   const camp=data?.camps?.find(c=>c.id===S.activeId);
-  persisted=!!camp?.selected&&!camp.selected.some(x=>x.id===id);
+  persisted=!!camp?.selected&&!camp.selected.some(x=>x.id===id)&&camp?.prep?.__deletedPrograms?.some(x=>x.program?.id===id);
  }catch(error){console.error('Unable to verify program removal',error);}
  if(!persisted){
-  S.selected=previous;S.draft=draft;S.log.length=logLength;
+  S.selected=previous;S.prep.__deletedPrograms=oldDeleted;S.draft=draft;S.log.length=logLength;
   return toast(T('تعذر حفظ حذف البرنامج. لم تتغير الخطة.','Could not save removal; plan unchanged.'),'error');
  }
  pendingProgramChoice=null;
@@ -4397,6 +4446,14 @@ document.addEventListener('drop',e=>{
   if(id)placeBrick(id,+p.dataset.plate);
 });
 
+/* Restore archived library programs from the day-level deleted-items menu. */
+document.addEventListener('click',function(event){
+ const control=event.target.closest('button[data-restore-deleted-program]');
+ if(!control)return;
+ event.preventDefault();event.stopImmediatePropagation();
+ try{restoreDeletedProgram(control.dataset.restoreDeletedProgram);}
+ catch(error){console.error('Deleted program restore failed',error);toast(T('حدث خطأ أثناء استعادة البرنامج.','Program restore error.'),'error');}
+},true);
 /* Fixed and edited timeline activities: capture deletion clicks before embedded handlers. */
 document.addEventListener('click',function(event){
  const button=event.target.closest('button[data-act^="confirmScheduleRowRemove:"],button[data-act^="removeScheduleRow:"],button[data-act^="restoreScheduleRow:"]');
