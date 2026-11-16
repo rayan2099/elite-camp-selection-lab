@@ -4353,6 +4353,23 @@ document.addEventListener('drop',e=>{
   if(id)placeBrick(id,+p.dataset.plate);
 });
 
+/* Dedicated capture handler for the free-session suggestion button.
+   Prevent other generic handlers from consuming or silently ignoring this click. */
+document.addEventListener('click',function(event){
+ const button=event.target.closest('button.elite-suggestion[data-act^="eliteAddSuggestion:"]');
+ if(!button)return;
+ event.preventDefault();
+ event.stopImmediatePropagation();
+ const payload=(button.dataset.act||'').slice('eliteAddSuggestion:'.length);
+ const parts=payload.split(',');
+ if(parts.length!==3)return toast(T('تعذر قراءة بيانات الاقتراح.','Invalid suggestion information.'),'error');
+ try{
+   eliteAddSuggestion(Number(parts[0]),parts[1],parts[2]);
+ }catch(error){
+   console.error('Suggestion addition failed',error);
+   toast(T('حدث خطأ أثناء إضافة البرنامج. لم يكتمل الإجراء.','An error occurred while adding the program.'),'error');
+ }
+},true);
 /* Stable schedule assignment routing. Handle before generic page click handlers. */
 document.addEventListener('click',function(event){
  const button=event.target.closest('button[data-p2-schedule-assign]');
