@@ -2536,6 +2536,9 @@ function scheduleRow(day,index){
  const override=S.prep?.__scheduleEdits?.[day]?.[index]||{};
  return {...DAY_TEMPLATE[index],...override};
 }
+function scheduleRowRemoved(day,index){
+ return S.prep?.__scheduleEdits?.[day]?.[index]?.deleted===true;
+}
 function slotHasCustomActivity(day,index){
  const changed=S.prep?.__scheduleEdits?.[day]?.[index];
  const base=DAY_TEMPLATE[index];
@@ -2550,7 +2553,7 @@ function scheduleSlotPrograms(day,index,map){
 }
 function slotIsUnassigned(day,index){
  const row=scheduleRow(day,index);
- return !!row.slot&&!scheduleSlotPrograms(day,index,slotMap(day)).length&&!slotHasCustomActivity(day,index);
+ return !scheduleRowRemoved(day,index)&&!!row.slot&&!scheduleSlotPrograms(day,index,slotMap(day)).length&&!slotHasCustomActivity(day,index);
 }
 function unassignedSlots(day){
  return DAY_TEMPLATE.map((_,index)=>({index,row:scheduleRow(day,index)})).filter(o=>slotIsUnassigned(day,o.index));
@@ -2579,6 +2582,7 @@ function eliteDuration(n){
 function eliteScheduleStats(day){
  const rows=DAY_TEMPLATE.map((r,i)=>({row:scheduleRow(day,i),index:i})),sessions=[],totals={program:0,other:0,prayer:0};
  for(const {row,index} of rows){
+  if(scheduleRowRemoved(day,index))continue;
   const parts=String(row.t||'').split(/\s*[–-]\s*/);
   if(parts.length!==2)continue;
   const start=eliteTimeMinutes(parts[0]),end=eliteTimeMinutes(parts[1]);
@@ -2660,7 +2664,7 @@ function eliteDayAnalysis(day){
 }
 function scheduleDiagnostics(day){
  const map=slotMap(day),balance=programBalance().days[day-1],notes=[...balance.notes];
- const events=DAY_TEMPLATE.map((r,i)=>scheduleRow(day,i)).filter(r=>r.ic!=='prayer');
+ const events=DAY_TEMPLATE.map((r,i)=>!scheduleRowRemoved(day,i)?scheduleRow(day,i):null).filter(r=>r&&r.ic!=='prayer');
  const minute=x=>{const m=String(x).match(/^(\d{1,2}):(\d{2})/);return m?Number(m[1])*60+Number(m[2]):null};
  const ranges=events.map(x=>({name:T(x.ar,x.en),start:minute(x.t),end:minute(String(x.t).split(/[–-]/)[1]||'')})).filter(x=>x.start!==null&&x.end!==null&&x.end>x.start);
  for(let k=1;k<ranges.length;k++)if(ranges[k].start<ranges[k-1].end){
@@ -2674,7 +2678,7 @@ function scheduleDiagnostics(day){
 
 function dayTimeline(day,opts){
   const map=slotMap(day), o=opts||{};
-  return `<div class="tl">${DAY_TEMPLATE.map((original,idx)=>{const row=scheduleRow(day,idx);
+  return `<div class="tl">${DAY_TEMPLATE.map((original,idx)=>{if(scheduleRowRemoved(day,idx))return '';const row=scheduleRow(day,idx);
     const items=scheduleSlotPrograms(day,idx,map);
     const customActivity=slotHasCustomActivity(day,idx);
     const body = row.slot
@@ -2695,10 +2699,60 @@ function dayTimeline(day,opts){
     return `<div class="tlrow ${row.slot?'prog':'fixed'} ${row.slot&&!items.length?'tl-empty':''}">
       <div class="tltime">${row.t}</div>
       <div class="tldot">${tico(row.ic)}</div>
-      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${row.slot&&!items.length&&!customActivity?`<small class="tlwhy" style="display:block">${T('هذا عنوان فترة في قالب الجدول، وليس نشاطًا مُعيّنًا.','This is a timetable category, not an assigned activity.')}</small>`:''}${body}${(!row.slot||(customActivity&&!items.length))&&typeof window.campScheduleAssignInline==='function'?window.campScheduleAssignInline('activity',day,idx):''}<button type="button" class="small schedule-edit-control noprint" data-act="editScheduleRow:${day},${idx}" title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button>${customActivity&&can('select')?`<button type="button" class="small danger noprint" data-act="confirmScheduleManualRemove:${day},${idx}" title="${T('حذف النشاط اليدوي وإعادة الفترة إلى حالتها الأصلية','Remove manual activity and restore original slot')}">${T('حذف النشاط','Remove activity')}</button>`:''}</div>
-    </div>`}).join('')}</div>`;
+      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${row.slot&&!items.length&&!customActivity?`<small class="tlwhy" style="display:block">${T('هذا عنوان فترة في قالب الجدول، وليس نشاطًا مُعيّنًا.','This is a timetable category, not an assigned activity.')}</small>`:''}${body}${(!row.slot||(customActivity&&!items.length))&&typeof window.campScheduleAssignInline==='function'?window.campScheduleAssignInline('activity',day,idx):''}<button type="button" class="small schedule-edit-control noprint" data-act="editScheduleRow:${day},${idx}" title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button>${can('select')?`<button type="button" class="small danger noprint" data-act="confirmScheduleRowRemove:${day},${idx}" title="${T('حذف هذه الفعالية من جدول اليوم فقط','Remove this activity from this day only')}">${T('حذف','Delete')}</button>`:''}</div>
+    </div>`}).join('')}${can('select')&&DAY_TEMPLATE.some((_,idx)=>scheduleRowRemoved(day,idx))?`<div class="noprint" style="margin-top:12px;padding:10px;border:1px dashed var(--line);border-radius:9px"><span class="help">${T('فعاليات محذوفة من هذا اليوم','Activities removed from this day')}</span><div class="actions" style="margin-top:6px">${DAY_TEMPLATE.map((_,idx)=>scheduleRowRemoved(day,idx)?`<button type="button" class="small" data-act="restoreScheduleRow:${day},${idx}">${T('استعادة','Restore')}: ${esc(scheduleRow(day,idx).ar)}</button>`:'').join('')}</div></div>`:''}</div>`;
 }
 
+function confirmScheduleRowRemove(day,index){
+ if(!can('select'))return toast(T('الحذف غير متاح لهذا الدور.','Removal not permitted.'),'error');
+ const n=Number(day),j=Number(index);
+ if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length)return toast(T('تعذر تحديد الفعالية.','Invalid activity.'),'error');
+ if(scheduleRowRemoved(n,j))return toast(T('الفعالية محذوفة بالفعل.','Activity already removed.'),'error');
+ const row=scheduleRow(n,j),assigned=row.slot?(slotMap(n)[row.slot]||[]):[];
+ if(assigned.length)return toast(T('هذه الفترة مرتبطة ببرنامج. احذف البرنامج من الجدول أولاً.','Remove the assigned program before deleting its time slot.'),'error');
+ openModal('<h2>'+T('حذف الفعالية من جدول اليوم','Remove activity from this day')+'</h2>'
+  +'<p class="help" style="margin:12px 0"> '+T('هل تريد حذف «'+esc(row.ar)+'» من اليوم '+n+'؟ لن تتأثر بقية أيام المعسكر، ويمكن استعادتها لاحقاً.','Remove '+esc(row.en)+' from day '+n+'? Other days are unaffected and you can restore it later.')+'</p>'
+  +'<div class="actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:15px"><button type="button" data-act="close">'+T('إلغاء','Cancel')+'</button><button type="button" class="danger" data-act="removeScheduleRow:'+n+','+j+'">'+T('تأكيد الحذف','Confirm deletion')+'</button></div>');
+}
+function removeScheduleRow(day,index){
+ if(!can('select'))return toast(T('الحذف غير متاح لهذا الدور.','Removal not permitted.'),'error');
+ const n=Number(day),j=Number(index);
+ if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length)return;
+ const row=scheduleRow(n,j);
+ if(row.slot&&(slotMap(n)[row.slot]||[]).length)return toast(T('احذف البرامج المرتبطة بالفترة أولاً.','Remove assigned programs first.'),'error');
+ S.prep??={};S.prep.__scheduleEdits??={};S.prep.__scheduleEdits[n]??={};
+ const previous=S.prep.__scheduleEdits[n][j];
+ S.prep.__scheduleEdits[n][j]={...(previous||{}),deleted:true};
+ save();
+ let confirmed=false;
+ try{
+  const data=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
+  confirmed=data?.camps?.find(c=>c.id===S.activeId)?.prep?.__scheduleEdits?.[n]?.[j]?.deleted===true;
+ }catch(error){console.error('Schedule deletion verification failed',error)}
+ if(!confirmed){
+  if(previous===undefined)delete S.prep.__scheduleEdits[n][j];else S.prep.__scheduleEdits[n][j]=previous;
+  return toast(T('تعذر حفظ الحذف. لم تتغير البيانات.','Delete could not be saved.'),'error');
+ }
+ closeModal();render({preserveScroll:true});
+ toast(T('تم حذف «'+row.ar+'» من جدول اليوم '+n+' بنجاح.','Activity removed from day '+n+' successfully.'),'success','top');
+}
+function restoreScheduleRow(day,index){
+ if(!can('select'))return toast(T('الاستعادة غير متاحة لهذا الدور.','Restore not permitted.'),'error');
+ const n=Number(day),j=Number(index);
+ if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length||!scheduleRowRemoved(n,j))return;
+ const previous=S.prep.__scheduleEdits[n][j];
+ const updated={...previous};delete updated.deleted;
+ if(Object.keys(updated).length)S.prep.__scheduleEdits[n][j]=updated;else delete S.prep.__scheduleEdits[n][j];
+ save();
+ let persisted=false;
+ try{
+  const data=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
+  persisted=!data?.camps?.find(c=>c.id===S.activeId)?.prep?.__scheduleEdits?.[n]?.[j]?.deleted;
+ }catch(error){console.error('Restore verification failed',error)}
+ if(!persisted){S.prep.__scheduleEdits[n][j]=previous;return toast(T('تعذرت الاستعادة.','Restore failed.'),'error')}
+ render({preserveScroll:true});
+ toast(T('تمت استعادة الفعالية إلى جدول اليوم.','Activity restored to daily schedule.'),'success','top');
+}
 function confirmScheduleManualRemove(day,index){
  if(!can('select'))return toast(T('حذف الأنشطة غير متاح لهذا الدور.','No permission to remove activities.'));
  const n=Number(day),j=Number(index);
@@ -4343,6 +4397,20 @@ document.addEventListener('drop',e=>{
   if(id)placeBrick(id,+p.dataset.plate);
 });
 
+/* Fixed and edited timeline activities: capture deletion clicks before embedded handlers. */
+document.addEventListener('click',function(event){
+ const button=event.target.closest('button[data-act^="confirmScheduleRowRemove:"],button[data-act^="removeScheduleRow:"],button[data-act^="restoreScheduleRow:"]');
+ if(!button)return;
+ event.preventDefault();event.stopImmediatePropagation();
+ const [action,params]=(button.dataset.act||'').split(':');
+ const pair=(params||'').split(',');
+ if(pair.length!==2)return toast(T('تعذر تحديد الفعالية.','Invalid activity reference.'),'error');
+ try{
+  if(action==='confirmScheduleRowRemove')confirmScheduleRowRemove(pair[0],pair[1]);
+  else if(action==='removeScheduleRow')removeScheduleRow(pair[0],pair[1]);
+  else if(action==='restoreScheduleRow')restoreScheduleRow(pair[0],pair[1]);
+ }catch(error){console.error('Schedule activity action failed',error);toast(T('تعذر إكمال الإجراء، حاول مجدداً.','Could not complete this action.'),'error')}
+},true);
 /* Confirm removal from both timetable and subactivity editor before any deletion. */
 document.addEventListener('click',function(event){
  const button=event.target.closest('button[data-act^="confirmScheduleProgramRemove:"]');
