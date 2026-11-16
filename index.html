@@ -472,31 +472,6 @@ html[data-theme=dark] .plan-day .dn{background:var(--accent);color:#22140d}
 .wizdots i.on{background:var(--accent)}
 
 
-/* Day timeline: category swimlanes and real 24-hour alignment */
-.elite-day-timeline{border:1px solid var(--line);background:var(--surface);border-radius:15px;padding:15px 17px;margin:10px 0 18px;box-shadow:0 4px 14px #12223a07;direction:rtl}
-.elite-day-timeline-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.elite-day-timeline-head strong{font-size:14px;color:var(--fg)}
-.elite-day-timeline-head p{font-size:11px;color:var(--muted);margin:2px 0 0}
-.elite-day-timeline-total{font-size:11px;font-weight:700;color:var(--fg);background:var(--soft);border:1px solid var(--line);padding:5px 11px;border-radius:30px;white-space:nowrap}
-.elite-day-timeline-scroll{overflow-x:auto;overscroll-behavior-inline:contain;padding:2px 0 6px;scrollbar-width:thin}
-.elite-day-timeline-chart{min-width:660px;display:grid;gap:9px}
-.elite-day-timeline-axis,.elite-day-timeline-lane{display:grid;grid-template-columns:138px minmax(0,1fr);gap:12px;align-items:center}
-.elite-day-timeline-axis{height:27px;margin-top:10px}
-.elite-day-timeline-axis-marks{position:relative;height:25px;margin-inline:12px}
-.elite-day-timeline-tick{position:absolute;top:0;height:100%;width:1px;background:var(--line)}
-.elite-day-timeline-tick time{position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:10.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;font-family:Tahoma,Arial,sans-serif}
-.elite-day-timeline-lane-name{display:flex;gap:7px;align-items:center;font-size:11.5px;font-weight:700;color:var(--fg);white-space:nowrap}
-.elite-day-timeline-lane-name small{font-size:10px;border-radius:6px;background:var(--soft);color:var(--muted);padding:0 5px}
-.elite-day-timeline-dot{width:9px;height:9px;border-radius:3px;flex:none}
-.elite-day-timeline-track{position:relative;height:40px;margin-inline:12px;border:1px solid var(--line);border-radius:9px;background-color:var(--soft);background-image:linear-gradient(to right,transparent calc(25% - .5px),var(--line) 25%,transparent calc(25% + .5px)),linear-gradient(to right,transparent calc(50% - .5px),var(--line) 50%,transparent calc(50% + .5px)),linear-gradient(to right,transparent calc(75% - .5px),var(--line) 75%,transparent calc(75% + .5px));overflow:visible}
-.elite-day-timeline-segment{position:absolute;top:4px;height:30px;min-width:4px;border-radius:5px;background:var(--segment-color);box-shadow:0 1px 3px #0d1f3a23;cursor:help;transition:filter .15s ease,transform .15s ease;outline-offset:3px;z-index:1}
-.elite-day-timeline-segment:hover,.elite-day-timeline-segment:focus-visible{filter:brightness(1.09);transform:translateY(-2px);z-index:3;outline:2px solid var(--fg)}
-.elite-day-timeline-segment span{display:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;text-shadow:0 1px 1px #0003;font-size:10px;font-weight:700;padding:7px}
-.elite-day-timeline-segment.can-label span{display:block}
-.elite-day-timeline-foot{font-size:10.5px;color:var(--muted);margin:9px 0 0}
-@media(max-width:700px){.elite-day-timeline{padding:12px}.elite-day-timeline-chart{min-width:680px}.elite-day-timeline-head strong{font-size:13px}.elite-day-timeline-axis,.elite-day-timeline-lane{grid-template-columns:124px minmax(0,1fr)}}
-@media print{.elite-day-timeline{display:none!important}}
-
 /* ---------- daily timeline ---------- */
 .tl{--tl-time:92px;position:relative;margin-top:6px}
 .tl:before{content:"";position:absolute;top:8px;bottom:8px;inset-inline-start:calc(var(--tl-time) + 17px);width:2px;background:var(--soft2)}
@@ -2696,55 +2671,10 @@ function scheduleDiagnostics(day){
  for(const [slot,items] of Object.entries(map))if(items.length>1)notes.push(T('تم جمع '+items.length+' برامج في جلسة واحدة؛ راجع توقيتها.','Multiple programs assigned to one session; verify timing.'));
  return [...new Set(notes)];
 }
-function eliteTimelineTimeShade(day){
- const groupInfo={
-  program:{ar:'جلسات البرامج',en:'Programs',color:'#e77e37'},
-  other:{ar:'الأنشطة والراحة',en:'Activities & breaks',color:'#467fca'},
-  prayer:{ar:'الصلوات',en:'Prayers',color:'#b68a35'}
- };
- const events=DAY_TEMPLATE.map((_,index)=>{
-  const row=scheduleRow(day,index),parts=String(row.t||'').split(/\s*[–-]\s*/);
-  if(parts.length!==2)return null;
-  const start=eliteTimeMinutes(parts[0]),end=eliteTimeMinutes(parts[1]);
-  if(start===null||end===null||end<=start)return null;
-  const type=row.ic==='prayer'?'prayer':row.slot?'program':'other';
-  return {name:T(row.ar,row.en),start,end,type,minutes:end-start,index};
- }).filter(Boolean);
- const minutesByType={program:0,other:0,prayer:0};
- events.forEach(event=>{minutesByType[event.type]+=event.minutes});
- const totalMinutes=events.reduce((sum,event)=>sum+event.minutes,0);
- const formatMinute=(minute)=>{
-  const hour=Math.floor(minute/60),m=minute%60;
-  return String(hour%12||12)+':'+String(m).padStart(2,'0')+(hour>=12?T(' م',' PM'):T(' ص',' AM'));
- };
- const marks=[0,360,720,1080,1440].map(min=>{
-  const position=(min/1440*100).toFixed(3);
-  return '<span class="elite-day-timeline-tick" style="left:'+position+'%"><time>'+((min===1440)?'24:00':formatMinute(min))+'</time></span>';
- }).join('');
- const grouped=Object.keys(groupInfo).map(type=>{
-  const info=groupInfo[type],items=events.filter(e=>e.type===type);
-  return '<div class="elite-day-timeline-lane">'
-   +'<div class="elite-day-timeline-lane-name"><span class="elite-day-timeline-dot" style="background:'+info.color+'"></span><span>'+T(info.ar,info.en)+'</span><small>'+items.length+'</small></div>'
-   +'<div class="elite-day-timeline-track" dir="ltr">'
-   +items.map(event=>{
-      const left=(event.start/1440*100).toFixed(3),width=((event.end-event.start)/1440*100).toFixed(3);
-      const label=event.name+' · '+formatMinute(event.start)+' – '+formatMinute(event.end)+' · '+event.minutes+' '+T('دقيقة','min');
-      return '<div class="elite-day-timeline-segment'+(event.minutes>=90?' can-label':'')+'" style="left:'+left+'%;width:'+width+'%;--segment-color:'+info.color+'" title="'+esc(label)+'" tabindex="0" aria-label="'+esc(label)+'"><span>'+esc(event.name)+'</span></div>';
-   }).join('')+'</div></div>';
- }).join('');
- return '<section class="elite-day-timeline noprint" aria-label="'+T('المخطط الزمني اليومي','Daily timeline')+'">'
-  +'<div class="elite-day-timeline-head"><div><strong>'+T('خريطة اليوم الزمنية','Daily time map')+'</strong>'
-  +'<p>'+T('توزيع الأنشطة حسب وقتها الفعلي — يُحدّث تلقائيًا بعد حفظ التعديل','Activities aligned to their actual times — updates after saving edits')+'</p></div>'
-  +'<span class="elite-day-timeline-total">'+T('إجمالي الفترات: ','Timed sessions: ')+events.length+' · '+totalMinutes+' '+T('دقيقة','min')+'</span></div>'
-  +'<div class="elite-day-timeline-scroll"><div class="elite-day-timeline-chart">'
-  +'<div class="elite-day-timeline-axis"><div></div><div class="elite-day-timeline-axis-marks" dir="ltr">'+marks+'</div></div>'
-  +grouped+'</div></div>'
-  +'<p class="elite-day-timeline-foot">'+T('مرّر المؤشر فوق أي فترة لعرض اسم النشاط ووقته، أو حدّدها بلوحة المفاتيح.','Hover over a segment or focus it to see its activity and time.')+'</p>'
-  +'</section>';
-}
+
 function dayTimeline(day,opts){
   const map=slotMap(day), o=opts||{};
-  return `${eliteTimelineTimeShade(day)}<div class="tl">${DAY_TEMPLATE.map((original,idx)=>{const row=scheduleRow(day,idx);
+  return `<div class="tl">${DAY_TEMPLATE.map((original,idx)=>{const row=scheduleRow(day,idx);
     const items=scheduleSlotPrograms(day,idx,map);
     const customActivity=slotHasCustomActivity(day,idx);
     const body = row.slot
