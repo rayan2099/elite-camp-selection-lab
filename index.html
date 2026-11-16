@@ -2670,11 +2670,32 @@ function eliteParseClock(value){
  }else if(hour>23)return null;
  return String(hour).padStart(2,'0')+':'+String(minute).padStart(2,'0');
 }
-function eliteClockInput(value){
- const time=eliteParseClock(value);
- if(!time)return String(value||'').trim();
- const hour=Number(time.slice(0,2)),min=time.slice(3);
- return String(hour%12||12)+':'+min+(hour>=12?' م':' ص');
+function eliteTimePicker(prefix,value,optional=false){
+ const parsed=eliteParseClock(value);
+ const h24=parsed?Number(parsed.slice(0,2)):0;
+ const hour=parsed?String(h24%12||12):'';
+ const minute=parsed?parsed.slice(3):'00';
+ const period=parsed&&h24>=12?'pm':'am';
+ const hours=Array.from({length:12},(_,i)=>String(i+1));
+ const minutes=Array.from({length:60},(_,i)=>String(i).padStart(2,'0'));
+ const options=(values,selected)=>values.map(v=>'<option value="'+v+'" '+(v===selected?'selected':'')+'>'+v+'</option>').join('');
+ return '<div class="elite-time-picker" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" dir="rtl">'
+   +'<select id="'+prefix+'Hour" aria-label="'+T('الساعة','Hour')+'" style="min-width:90px;flex:1" required="'+(!optional)+'">'
+   +(optional?'<option value="" '+(!hour?'selected':'')+'>'+T('بلا نهاية','No end')+'</option>':'')
+   +options(hours,hour||'8')+'</select>'
+   +'<select id="'+prefix+'Minute" aria-label="'+T('الدقيقة','Minute')+'" style="min-width:80px;flex:1">'+options(minutes,minute)+'</select>'
+   +'<select id="'+prefix+'Period" aria-label="'+T('الفترة','Period')+'" style="min-width:90px;flex:1">'
+   +'<option value="am" '+(period==='am'?'selected':'')+'>'+T('صباحًا','AM')+'</option>'
+   +'<option value="pm" '+(period==='pm'?'selected':'')+'>'+T('مساءً','PM')+'</option></select></div>';
+}
+function eliteReadTimePicker(prefix,optional=false){
+ const hour=document.getElementById(prefix+'Hour')?.value||'';
+ if(optional&&!hour)return '';
+ const minute=document.getElementById(prefix+'Minute')?.value||'';
+ const period=document.getElementById(prefix+'Period')?.value;
+ if(!/^(?:[1-9]|1[0-2])$/.test(hour)||!/^\d{2}$/.test(minute)||Number(minute)>59||!['am','pm'].includes(period))return null;
+ const n=(Number(hour)%12)+(period==='pm'?12:0);
+ return String(n).padStart(2,'0')+':'+minute;
 }
 function editScheduleRow(day,index){
  if(!(can('select')||can('scheduleEdit')))return toast(T('تعديل الجدول غير متاح لهذا الدور.','Schedule editing is not available for this role.'));
@@ -2682,27 +2703,26 @@ function editScheduleRow(day,index){
  if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length)return;
  const row=scheduleRow(n,j);
  const parts=String(row.t||'').split(/\s*[–-]\s*/);
- const start=eliteClockInput(parts[0]),end=parts.length>1?eliteClockInput(parts[1]):'';
- openModal(`<div class="eyebrow">${T('الجدول اليومي','DAILY SCHEDULE')}</div><h2>${T('تعديل فعالية اليوم','Edit daily activity')} ${n}</h2>
-   <div class="fields spacer">
-   <label class="fld">${T('وقت البداية','Start time')}<input id="seTimeStart" type="text" inputmode="text" maxlength="14" required value="${esc(start)}" placeholder="1:40 م" dir="ltr"></label>
-   <label class="fld">${T('وقت النهاية (اختياري)','End time (optional)')}<input id="seTimeEnd" type="text" inputmode="text" maxlength="14" value="${esc(end)}" placeholder="2:30 م" dir="ltr"></label>
-   <label class="fld">${T('اسم الفعالية بالعربية','Arabic activity name')}<input id="seAr" maxlength="90" value="${esc(row.ar)}"></label>
-   <label class="fld">${T('اسم الفعالية بالإنجليزية','English activity name')}<input id="seEn" maxlength="90" value="${esc(row.en||'')}"></label></div>
-   <p class="help">${T('أدخل الوقت بصيغة 1:40 م أو 13:40. وقت النهاية اختياري، ويمكن تركه فارغًا.','Use 1:40 PM or 13:40. End time is optional and may be left blank.')}</p>
-   <div class="actions spacer" style="display:flex;gap:8px;justify-content:flex-end">
-   <button type="button" data-act="close">${T('إلغاء','Cancel')}</button>
-   <button type="button" class="primary" data-act="saveScheduleRow:${n},${j}">${T('حفظ التعديل','Save changes')}</button></div>`);
+ openModal('<div class="eyebrow">'+T('الجدول اليومي','DAILY SCHEDULE')+'</div><h2>'+T('تعديل فعالية اليوم','Edit daily activity')+' '+n+'</h2>'
+   +'<div class="fields spacer">'
+   +'<label class="fld">'+T('وقت البداية','Start time')+eliteTimePicker('seTimeStart',parts[0])+'</label>'
+   +'<label class="fld">'+T('وقت النهاية (اختياري)','End time (optional)')+eliteTimePicker('seTimeEnd',parts[1]||'',true)+'</label>'
+   +'<label class="fld">'+T('اسم الفعالية بالعربية','Arabic activity name')+'<input id="seAr" maxlength="90" value="'+esc(row.ar)+'"></label>'
+   +'<label class="fld">'+T('اسم الفعالية بالإنجليزية','English activity name')+'<input id="seEn" maxlength="90" value="'+esc(row.en||'')+'"></label></div>'
+   +'<p class="help">'+T('اختر الساعة والدقيقة وصباحًا أو مساءً. وقت النهاية اختياري.','Select hour, minute, and AM or PM. End time is optional.')+'</p>'
+   +'<div class="actions spacer" style="display:flex;gap:8px;justify-content:flex-end">'
+   +'<button type="button" data-act="close">'+T('إلغاء','Cancel')+'</button>'
+   +'<button type="button" class="primary" data-act="saveScheduleRow:'+n+','+j+'">'+T('حفظ التعديل','Save changes')+'</button></div>');
 }
 function saveScheduleRow(day,index){
  if(!(can('select')||can('scheduleEdit')))return toast(T('تعديل الجدول غير متاح لهذا الدور.','Schedule editing is not available for this role.'));
  const n=Number(day),j=Number(index);
  if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length)return;
- const start=eliteParseClock($('#seTimeStart')?.value),rawEnd=($('#seTimeEnd')?.value||'').trim();
- const end=rawEnd?eliteParseClock(rawEnd):'';
+ const start=eliteReadTimePicker('seTimeStart');
+ const end=eliteReadTimePicker('seTimeEnd',true);
  const ar=$('#seAr')?.value.trim(),en=$('#seEn')?.value.trim();
- if(!start||!ar)return toast(T('أدخل اسم الفعالية ووقت بداية صحيحًا (مثل 1:40 م).','Enter an activity name and a valid start time.'));
- if(rawEnd&&!end)return toast(T('وقت النهاية غير صحيح. صححه أو اتركه فارغًا.','End time is invalid; correct it or leave it blank.'));
+ if(!start||!ar)return toast(T('اختر وقت بداية صحيحًا وأدخل اسم الفعالية.','Choose a valid start time and enter the activity name.'));
+ if(end===null)return toast(T('اختر وقت نهاية صحيحًا أو بلا نهاية.','Choose a valid end time or no end time.'));
  if(end&&end<=start)return toast(T('يجب أن يكون وقت النهاية بعد وقت البداية.','End time must be after start time.'));
  const t=end?start+' – '+end:start;
  if(!S.prep||typeof S.prep!=='object')S.prep={};
