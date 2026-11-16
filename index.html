@@ -2746,25 +2746,31 @@ function confirmScheduleProgramRemove(id){
   +'<p class="help">'+T('سيُزال «'+esc(name)+'» من خطة المعسكر وجدوله فقط، وسيبقى متاحًا في مكتبة البرامج.','The program will be removed from this camp plan and schedule only; it remains in the library.')+'</p>'
   +'<div class="actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:15px"><button data-act="close">'+T('إلغاء','Cancel')+'</button><button class="danger" data-act="removeScheduleProgram:'+esc(id)+'">'+T('تأكيد الإزالة','Confirm removal')+'</button></div>');
 }
-function removeScheduleProgram(id){
- if(!can('select'))return;
+function removeSelectedProgram(id){
+ if(!can('select'))return toast(T('حذف البرامج غير متاح لهذا الدور.','No permission to remove programs.'),'error');
  const entry=S.selected.find(x=>x.id===id);
- if(!entry)return;
- const previous=S.selected.slice();
+ if(!entry)return toast(T('البرنامج غير موجود في الخطة.','Program not found in the plan.'),'error');
+ const item=ITEM(id),name=item?.ar||id;
+ const previous=S.selected.slice(),draft=S.draft,logLength=S.log.length;
  S.selected=S.selected.filter(x=>x.id!==id);
+ S.draft=false;
+ logIt('أُزيل من خطة المعسكر: '+name,'Removed from camp plan: '+(item?.en||id));
  save();
  let persisted=false;
  try{
   const data=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
-  persisted=!!data?.camps?.find(c=>c.id===S.activeId)&&!data.camps.find(c=>c.id===S.activeId).selected.some(x=>x.id===id);
- }catch(error){console.warn('Unable to verify program removal',error);}
+  const camp=data?.camps?.find(c=>c.id===S.activeId);
+  persisted=!!camp?.selected&&!camp.selected.some(x=>x.id===id);
+ }catch(error){console.error('Unable to verify program removal',error);}
  if(!persisted){
-  S.selected=previous;
-  return toast(T('تعذر حفظ إزالة البرنامج. لم تتغير الخطة.','Could not save program removal; plan unchanged.'));
+  S.selected=previous;S.draft=draft;S.log.length=logLength;
+  return toast(T('تعذر حفظ حذف البرنامج. لم تتغير الخطة.','Could not save removal; plan unchanged.'),'error');
  }
+ pendingProgramChoice=null;
  closeModal();render({preserveScroll:true});
- toast(T('أُزيل البرنامج من جدول المعسكر، وبقي في مكتبة البرامج.','Program removed from schedule; retained in library.'));
+ toast(T('تم حذف «'+name+'» من الخطة والجدول بنجاح. بقي البرنامج في المكتبة.','Removed '+(item?.en||id)+' from plan and schedule; retained in library.'),'success');
 }
+function removeScheduleProgram(id){return removeSelectedProgram(id);}
 
 function eliteParseClock(value){
  const digits=String(value??'').replace(/[٠-٩]/g,d=>String(d.charCodeAt(0)-1632)).replace(/[۰-۹]/g,d=>String(d.charCodeAt(0)-1776));
@@ -3747,14 +3753,7 @@ function beginProgramChoice(id,options={}){
 }
 function pick(id,silent){beginProgramChoice(id)}
 
-function unpick(id){
-  if(!can('select')){toast(T('هذا الإجراء غير متاح لدورك.','This action is not available for your role.'));return}
-  const it=ITEM(id);const was=S.selected.find(x=>x.id===id);
-  S.selected=S.selected.filter(x=>x.id!==id);S.draft=false;
-  if(was&&was.approved)logIt(`سُحب من الخطة: ${it.ar}`,`Removed from plan: ${it.en}`);
-  else logIt(`أُزيل من الخطة: ${it.ar}`,`Removed from plan: ${it.en}`);
-  save();render();
-}
+function unpick(id){return removeSelectedProgram(id);}
 function confirmTrayRemove(id){
   if(!can('select'))return;
   const x=S.selected.find(p=>p.id===id);
@@ -4148,7 +4147,7 @@ function editModal(id){
       <p class="help" style="margin-top:4px">${i.ph.map(p=>esc(L({ar:p[0],en:p[1]}))).join(' · ')}</p></div>
     <div class="actions" style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end">
       ${can('approve')&&S.selected.some(p=>p.id===id)?`<button data-act="approve:${id}">${x.approved?T('سحب الاعتماد','Unapprove'):T('اعتماد','Approve')}</button>`:''}
-      ${pendingProgramChoice?.id===id?`<button type="button" data-act="close">${T('إلغاء الإضافة','Cancel addition')}</button>`:can('select')?`<button class="danger" data-act="unpick:${id}">${T('إزالة من الخطة','Remove')}</button>`:''}
+      ${pendingProgramChoice?.id===id?`<button type="button" data-act="close">${T('إلغاء الإضافة','Cancel addition')}</button>`:can('select')?`<button type="button" class="danger" data-act="confirmScheduleProgramRemove:${esc(id)}">${T('حذف من الخطة','Remove from plan')}</button>`:''}
       <button class="primary" data-act="saveEdit:${id}">${T('حفظ القرار','Save decision')}</button>
     </div>`);
 }
