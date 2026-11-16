@@ -2656,8 +2656,8 @@ function dayTimeline(day,opts){
 
 function eliteParseClock(value){
  const digits=String(value??'').replace(/[٠-٩]/g,d=>String(d.charCodeAt(0)-1632)).replace(/[۰-۹]/g,d=>String(d.charCodeAt(0)-1776));
- const text=digits.trim().replace(/\\s+/g,' ');
- const match=text.match(/^(\\d{1,2}):(\\d{2})(?:\\s*(ص|م|صباح(?:اً|ا)?|مساء(?:ً|ا)?|AM|PM))?$/i);
+ const text=digits.trim().replace(/\s+/g,' ');
+ const match=text.match(/^(\d{1,2}):(\d{2})(?:\s*(ص|م|صباح(?:اً|ا)?|مساء(?:ً|ا)?|AM|PM))?$/i);
  if(!match)return null;
  let hour=Number(match[1]),minute=Number(match[2]);
  if(minute>59)return null;
@@ -2681,7 +2681,7 @@ function editScheduleRow(day,index){
  const n=Number(day),j=Number(index);
  if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length)return;
  const row=scheduleRow(n,j);
- const parts=String(row.t||'').split(/\\s*[–-]\\s*/);
+ const parts=String(row.t||'').split(/\s*[–-]\s*/);
  const start=eliteClockInput(parts[0]),end=parts.length>1?eliteClockInput(parts[1]):'';
  openModal(`<div class="eyebrow">${T('الجدول اليومي','DAILY SCHEDULE')}</div><h2>${T('تعديل فعالية اليوم','Edit daily activity')} ${n}</h2>
    <div class="fields spacer">
