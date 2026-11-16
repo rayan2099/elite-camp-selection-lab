@@ -498,7 +498,8 @@ html[data-theme=dark] .daynum{background:var(--accent);color:#22140d}
 #modal::backdrop{background:#07101f66;backdrop-filter:blur(3px)}
 #modal .inner{padding:22px;max-height:88vh;overflow:auto}
 #modal .x{position:absolute;inset-inline-end:14px;top:12px;width:32px;height:32px;display:grid;place-items:center;border:none;border-radius:50%;background:var(--soft);font-size:14px;color:var(--muted);padding:0;line-height:1}
-#toasts{position:fixed;inset-inline-end:20px;bottom:20px;z-index:80;display:flex;flex-direction:column;gap:8px}
+#toasts{position:fixed;inset-inline-end:20px;bottom:20px;z-index:1000;display:flex;flex-direction:column;gap:8px;max-width:min(520px,calc(100vw - 32px))}
+#toasts.toast-top{top:20px;bottom:auto;inset-inline-end:20px}
 .toast{background:var(--navy);color:#fff;padding:10px 15px;border-radius:10px;font-size:12.5px;box-shadow:0 12px 30px #07101f55;animation:pop .25s ease}
 .toast.toast-success{background:#147d50;color:white;border:1px solid #0b6940;font-weight:700}
 .toast.toast-error{background:#ab3028;color:white;border:1px solid #8d2520}
@@ -1539,12 +1540,13 @@ const can=cap=>(CAPS[S.role]||[]).includes(cap);
 const save=()=>{try{localStorage.setItem('elite-select-v1',JSON.stringify(S))}catch(e){toast(T('تعذّر الحفظ المحلي في هذا المتصفح.','Local storage is unavailable in this browser.'))}};
 /* Persist the 2027 camps right away so the finance «all camps» view can list them. */
 try{const raw=JSON.parse(localStorage.getItem('elite-select-v1')||'null');if(!raw||!raw.seed2027)localStorage.setItem('elite-select-v1',JSON.stringify(S))}catch(e){}
-function toast(msg,variant){
+function toast(msg,variant,placement){
  const t=document.getElementById('toasts');if(!t)return;
  const type=variant==='success'?' toast-success':variant==='error'?' toast-error':'';
+ t.classList.toggle('toast-top',placement==='top');
  t.setAttribute('role','status');t.setAttribute('aria-live','polite');
  t.innerHTML=`<div class="toast${type}">${variant==='success'?'✓ ':''}${esc(msg)}</div>`;
- clearTimeout(window.__tt);window.__tt=setTimeout(()=>t.innerHTML='',variant==='success'?5000:3500);
+ clearTimeout(window.__tt);window.__tt=setTimeout(()=>{t.innerHTML='';t.classList.remove('toast-top')},variant==='success'?5000:3500);
 }
 function logIt(ar,en){S.log.unshift({id:Date.now()+Math.random(),at:Date.now(),ar,en,role:S.role});if(S.log.length>300)S.log.length=300}
 
@@ -2742,9 +2744,10 @@ function confirmScheduleProgramRemove(id){
  const entry=S.selected.find(x=>x.id===id);
  if(!entry)return;
  const item=ITEM(id),name=item?.ar||id;
- openModal('<h2>'+T('إزالة البرنامج من المعسكر','Remove program from camp')+'</h2>'
-  +'<p class="help">'+T('سيُزال «'+esc(name)+'» من خطة المعسكر وجدوله فقط، وسيبقى متاحًا في مكتبة البرامج.','The program will be removed from this camp plan and schedule only; it remains in the library.')+'</p>'
-  +'<div class="actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:15px"><button data-act="close">'+T('إلغاء','Cancel')+'</button><button class="danger" data-act="removeScheduleProgram:'+esc(id)+'">'+T('تأكيد الإزالة','Confirm removal')+'</button></div>');
+ openModal('<div class="eyebrow">'+T('تأكيد حذف البرنامج','Confirm program removal')+'</div>'
+  +'<h2 style="margin-top:8px">'+T('إزالة البرنامج من المعسكر','Remove program from camp')+'</h2>'
+  +'<p class="help" style="margin:12px 0 14px">'+T('سيُزال «'+esc(name)+'» من خطة المعسكر وجدوله فقط، وسيبقى متاحًا في مكتبة البرامج.','The program will be removed from this camp plan and schedule only; it remains in the library.')+'</p>'
+  +'<div class="actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:15px"><button type="button" data-act="close">'+T('إلغاء','Cancel')+'</button><button type="button" class="danger" data-act="removeScheduleProgram:'+esc(id)+'">'+T('تأكيد الإزالة','Confirm removal')+'</button></div>');
 }
 function removeSelectedProgram(id){
  if(!can('select'))return toast(T('حذف البرامج غير متاح لهذا الدور.','No permission to remove programs.'),'error');
@@ -4201,7 +4204,7 @@ function saveEdit(id){
     return toast(T('لم يكتمل حفظ البرنامج. بقيت النافذة مفتوحة لإعادة المحاولة.','Program not saved. The form remains open to retry.'));
   }
   closeModal();render({preserveScroll:true});
-  toast(isNew?T('أُضيف البرنامج إلى الخطة بعد حفظ التفريعات.','Program added after saving subactivities.'):T('حُفظ قرار الاختيار.','Selection decision saved.'));
+  toast(isNew?T('تم حفظ القرار وإضافة البرنامج إلى الخطة بنجاح.','Decision saved and program added successfully.'):T('تم حفظ القرار بنجاح.','Decision saved successfully.'),'success','top');
 }
 function pickerModal(day){
   const pool=LIB.filter(i=>!isSel(i.id));
@@ -4352,6 +4355,16 @@ document.addEventListener('drop',e=>{
   if(id)placeBrick(id,+p.dataset.plate);
 });
 
+/* Confirm removal from both timetable and subactivity editor before any deletion. */
+document.addEventListener('click',function(event){
+ const button=event.target.closest('button[data-act^="confirmScheduleProgramRemove:"]');
+ if(!button)return;
+ event.preventDefault();event.stopImmediatePropagation();
+ const id=(button.dataset.act||'').slice('confirmScheduleProgramRemove:'.length);
+ if(!id)return toast(T('تعذر تحديد البرنامج المطلوب حذفه.','Unable to identify the program.'),'error');
+ try{confirmScheduleProgramRemove(id);}
+ catch(error){console.error('Program removal confirmation failed',error);toast(T('تعذر فتح نافذة تأكيد الحذف.','Could not open removal confirmation.'),'error');}
+},true);
 /* Dedicated capture handler for the free-session suggestion button.
    Prevent other generic handlers from consuming or silently ignoring this click. */
 document.addEventListener('click',function(event){
