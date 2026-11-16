@@ -2679,14 +2679,17 @@ function eliteTimePicker(prefix,value,optional=false){
  const hours=Array.from({length:12},(_,i)=>String(i+1));
  const minutes=Array.from({length:60},(_,i)=>String(i).padStart(2,'0'));
  const options=(values,selected)=>values.map(v=>'<option value="'+v+'" '+(v===selected?'selected':'')+'>'+v+'</option>').join('');
- return '<div class="elite-time-picker" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" dir="rtl">'
-   +'<select id="'+prefix+'Hour" aria-label="'+T('الساعة','Hour')+'" style="min-width:90px;flex:1" required="'+(!optional)+'">'
+ return '<div class="elite-time-picker" style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap" dir="rtl">'
+   +'<label style="display:flex;flex-direction:column;gap:4px;min-width:90px;flex:1"><span class="help">'+T('الساعة','Hour')+'</span>'
+   +'<select id="'+prefix+'Hour" aria-label="'+T('الساعة','Hour')+'" style="width:100%">'
    +(optional?'<option value="" '+(!hour?'selected':'')+'>'+T('بلا نهاية','No end')+'</option>':'')
-   +options(hours,hour||'8')+'</select>'
-   +'<select id="'+prefix+'Minute" aria-label="'+T('الدقيقة','Minute')+'" style="min-width:80px;flex:1">'+options(minutes,minute)+'</select>'
-   +'<select id="'+prefix+'Period" aria-label="'+T('الفترة','Period')+'" style="min-width:90px;flex:1">'
+   +options(hours,hour||'8')+'</select></label>'
+   +'<label style="display:flex;flex-direction:column;gap:4px;min-width:80px;flex:1"><span class="help">'+T('الدقيقة','Minute')+'</span>'
+   +'<select id="'+prefix+'Minute" aria-label="'+T('الدقيقة','Minute')+'" style="width:100%">'+options(minutes,minute)+'</select></label>'
+   +'<label style="display:flex;flex-direction:column;gap:4px;min-width:90px;flex:1"><span class="help">'+T('الفترة','Period')+'</span>'
+   +'<select id="'+prefix+'Period" aria-label="'+T('الفترة','Period')+'" style="width:100%">'
    +'<option value="am" '+(period==='am'?'selected':'')+'>'+T('صباحًا','AM')+'</option>'
-   +'<option value="pm" '+(period==='pm'?'selected':'')+'>'+T('مساءً','PM')+'</option></select></div>';
+   +'<option value="pm" '+(period==='pm'?'selected':'')+'>'+T('مساءً','PM')+'</option></select></label></div>';
 }
 function eliteReadTimePicker(prefix,optional=false){
  const hour=document.getElementById(prefix+'Hour')?.value||'';
