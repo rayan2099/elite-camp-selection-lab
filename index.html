@@ -1343,7 +1343,8 @@ const LIB=[
      ['تعزيز الاعتماد على النفس والشجاعة والقيادة والتعاون في بيئة طبيعية.','Strengthen independence, courage, leadership and teamwork in nature.']]}
 ];
 const TRACK=id=>TRACKS.find(t=>t.id===id);
-const ITEM=id=>LIB.find(x=>x.id===id);
+const eliteBaseProgramId=id=>String(id||'').split('__SLOT__')[0];
+const ITEM=id=>LIB.find(x=>x.id===id)||LIB.find(x=>x.id===eliteBaseProgramId(id));
 const FIELDOF=(t,f)=>{const v=FIELDS[t+'.'+f];return v?v[0]:''};
 const FIELDEN=(t,f)=>{const v=FIELDS[t+'.'+f];return v?v[1]:''};
 /* ============================ الحالة والإعدادات ============================ */
@@ -2586,7 +2587,7 @@ function eliteScheduleStats(day){
 }
 function eliteSuggestions(day,slot){
  const preferred={badge:['lead','values','skills'],elite:['lead','skills','values'],workshop:['skills','stem','values'],sport:['sport'],culture:['values','lead','trips']}[slot]||[];
- return LIB.filter(i=>!isSel(i.id)&&preferred.includes(i.t))
+ return LIB.filter(i=>preferred.includes(i.t))
   .sort((a,b)=>preferred.indexOf(a.t)-preferred.indexOf(b.t)||String(a.id).localeCompare(String(b.id))).slice(0,3);
 }
 function eliteAddSuggestion(day,slot,id){
@@ -2597,11 +2598,14 @@ function eliteAddSuggestion(day,slot,id){
  if(!it)return toast(T('البرنامج غير موجود في المكتبة.','Program not found in library.'),'error');
  const position=DAY_TEMPLATE.findIndex(row=>row.slot===slot);
  if(position<0||!slotIsUnassigned(day,position))return toast(T('هذه الفترة لم تعد شاغرة. حدّث الجدول واختر فترة أخرى.','This session is no longer empty.'),'error');
- if(isSel(id))return toast(T('البرنامج موجود بالفعل في خطة المعسكر.','This program is already in the camp plan.'),'error');
+ // The same catalog program may be scheduled in multiple different days/slots.
+ // Each placement has a stable unique key, retaining the original library identity.
+ const instanceId=id+'__SLOT__'+day+'_'+slot;
+ if(S.selected.some(x=>x.id===instanceId))return toast(T('البرنامج مضاف مسبقًا إلى هذه الفترة.','Program is already in this session.'),'error');
 
  // One-click placement; do not invent curriculum or sport choices.
  const previousSelected=S.selected.slice(),previousDraft=S.draft,previousLogLength=S.log.length;
- const entry={id,pri:'support',day,slot,why:'',owner:S.role,approved:false,at:Date.now(),activityBreakdown:'',activityType:activityType(it)};
+ const entry={id:instanceId,sourceId:id,pri:'support',day,slot,why:'',owner:S.role,approved:false,at:Date.now(),activityBreakdown:'',activityType:activityType(it)};
  S.selected.push(entry);
  S.draft=false;
  logIt('أُضيف برنامج «'+it.ar+'» إلى الفترة '+slot+' في اليوم '+day,'Added '+it.en+' to '+slot+' on day '+day);
@@ -2610,7 +2614,7 @@ function eliteAddSuggestion(day,slot,id){
  try{
    const saved=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
    const camp=saved?.camps?.find(c=>c.id===S.activeId);
-   persisted=!!camp?.selected?.some(x=>x.id===id&&x.day===day&&x.slot===slot);
+   persisted=!!camp?.selected?.some(x=>x.id===instanceId&&x.sourceId===id&&x.day===day&&x.slot===slot);
  }catch(error){console.error('Suggestion storage verification failed',error)}
  if(!persisted){
    S.selected=previousSelected;S.draft=previousDraft;S.log.length=previousLogLength;
@@ -2688,7 +2692,7 @@ function dayTimeline(day,opts){
           ? items.map(it=>{
               const t=TRACK(it.i.t);
               return `<div class="tlprog" style="--bc:${t.color}">
-                <span class="tlname">${esc(L({ar:it.i.ar,en:it.i.en}))}</span><button type="button" class="small noprint" data-p1="detail" data-id="${esc(it.x.id)}">${T('تفاصيل','Details')}</button>
+                <span class="tlname">${esc(L({ar:it.i.ar,en:it.i.en}))}</span><button type="button" class="small noprint" data-p1="detail" data-id="${esc(it.i.id)}">${T('تفاصيل','Details')}</button>
                 <span class="tlmeta">${esc(L(t.short))} · ${it.x.pri==='core'?T('أساسي','core'):T('مساند','support')}</span>
                 ${o.why&&it.x.why?`<small class="tlwhy">${esc(it.x.why)}</small>`:''}
                 ${(it.x.sportChoice||it.i.sportChoice)?`<small class="tlwhy" style="display:block;font-weight:700">${esc(sportName(it.x.sportChoice||it.i.sportChoice))}</small>`:''}${(it.x.activityBreakdown||it.i.activityBreakdown)?`<small class="tlwhy" style="display:block">${esc(it.x.activityBreakdown||it.i.activityBreakdown)}</small>`:''}${!(it.x.activityBreakdown||'').trim()?`<small class="tlwhy noprint" style="display:block;color:var(--warn)">${T('حدد التفريعات من زر تعديل البرنامج','Choose subactivities using Edit program')}</small>`:''}
