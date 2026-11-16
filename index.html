@@ -500,6 +500,8 @@ html[data-theme=dark] .daynum{background:var(--accent);color:#22140d}
 #modal .x{position:absolute;inset-inline-end:14px;top:12px;width:32px;height:32px;display:grid;place-items:center;border:none;border-radius:50%;background:var(--soft);font-size:14px;color:var(--muted);padding:0;line-height:1}
 #toasts{position:fixed;inset-inline-end:20px;bottom:20px;z-index:80;display:flex;flex-direction:column;gap:8px}
 .toast{background:var(--navy);color:#fff;padding:10px 15px;border-radius:10px;font-size:12.5px;box-shadow:0 12px 30px #07101f55;animation:pop .25s ease}
+.toast.toast-success{background:#147d50;color:white;border:1px solid #0b6940;font-weight:700}
+.toast.toast-error{background:#ab3028;color:white;border:1px solid #8d2520}
 @keyframes pop{from{opacity:0;transform:translateY(8px)}}
 .phase{display:grid;gap:8px}
 .phase .p{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:12.5px;line-height:1.75}
@@ -1536,7 +1538,13 @@ const can=cap=>(CAPS[S.role]||[]).includes(cap);
 const save=()=>{try{localStorage.setItem('elite-select-v1',JSON.stringify(S))}catch(e){toast(T('تعذّر الحفظ المحلي في هذا المتصفح.','Local storage is unavailable in this browser.'))}};
 /* Persist the 2027 camps right away so the finance «all camps» view can list them. */
 try{const raw=JSON.parse(localStorage.getItem('elite-select-v1')||'null');if(!raw||!raw.seed2027)localStorage.setItem('elite-select-v1',JSON.stringify(S))}catch(e){}
-function toast(msg){const t=document.getElementById('toasts');t.innerHTML=`<div class="toast">${esc(msg)}</div>`;clearTimeout(window.__tt);window.__tt=setTimeout(()=>t.innerHTML='',3200)}
+function toast(msg,variant){
+ const t=document.getElementById('toasts');if(!t)return;
+ const type=variant==='success'?' toast-success':variant==='error'?' toast-error':'';
+ t.setAttribute('role','status');t.setAttribute('aria-live','polite');
+ t.innerHTML=`<div class="toast${type}">${variant==='success'?'✓ ':''}${esc(msg)}</div>`;
+ clearTimeout(window.__tt);window.__tt=setTimeout(()=>t.innerHTML='',variant==='success'?5000:3500);
+}
 function logIt(ar,en){S.log.unshift({id:Date.now()+Math.random(),at:Date.now(),ar,en,role:S.role});if(S.log.length>300)S.log.length=300}
 
 /* ============================ المشتقات ============================ */
@@ -2583,12 +2591,33 @@ function eliteSuggestions(day,slot){
 }
 function eliteAddSuggestion(day,slot,id){
  day=Number(day);
- if(!can('select'))return toast(T('لا تملك صلاحية التعديل.','Not permitted to edit.'));
- if(!Number.isInteger(day)||day<1||day>S.meta.days.length||!SLOTS.includes(slot))return;
- const it=ITEM(id);if(!it)return;
- if((slotMap(day)[slot]||[]).length||DAY_TEMPLATE.some((r,index)=>r.slot===slot&&slotHasCustomActivity(day,index)))return toast(T('هذه الفترة تحتوي برنامجًا أو نشاطًا مُحددًا بالفعل.','This session already has an assigned program or custom activity.'));
- if(isSel(id))return toast(T('البرنامج مختار مسبقًا.','Program already selected.'));
- beginProgramChoice(id,{day,slot});
+ if(!can('select'))return toast(T('لا تملك صلاحية إضافة البرامج.','You cannot add programs.'),'error');
+ if(!Number.isInteger(day)||day<1||day>S.meta.days.length||!SLOTS.includes(slot))return toast(T('تعذر تحديد اليوم أو الفترة.','Invalid day or session.'),'error');
+ const it=ITEM(id);
+ if(!it)return toast(T('البرنامج غير موجود في المكتبة.','Program not found in library.'),'error');
+ const position=DAY_TEMPLATE.findIndex(row=>row.slot===slot);
+ if(position<0||!slotIsUnassigned(day,position))return toast(T('هذه الفترة لم تعد شاغرة. حدّث الجدول واختر فترة أخرى.','This session is no longer empty.'),'error');
+ if(isSel(id))return toast(T('البرنامج موجود بالفعل في خطة المعسكر.','This program is already in the camp plan.'),'error');
+
+ // One-click placement; do not invent curriculum or sport choices.
+ const previousSelected=S.selected.slice(),previousDraft=S.draft,previousLogLength=S.log.length;
+ const entry={id,pri:'support',day,slot,why:'',owner:S.role,approved:false,at:Date.now(),activityBreakdown:'',activityType:activityType(it)};
+ S.selected.push(entry);
+ S.draft=false;
+ logIt('أُضيف برنامج «'+it.ar+'» إلى الفترة '+slot+' في اليوم '+day,'Added '+it.en+' to '+slot+' on day '+day);
+ save();
+ let persisted=false;
+ try{
+   const saved=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
+   const camp=saved?.camps?.find(c=>c.id===S.activeId);
+   persisted=!!camp?.selected?.some(x=>x.id===id&&x.day===day&&x.slot===slot);
+ }catch(error){console.error('Suggestion storage verification failed',error)}
+ if(!persisted){
+   S.selected=previousSelected;S.draft=previousDraft;S.log.length=previousLogLength;
+   return toast(T('تعذر حفظ البرنامج. لم يُضف إلى الجدول؛ يرجى إعادة المحاولة.','Could not save the program. Nothing was added.'),'error');
+ }
+ render({preserveScroll:true});
+ toast(T('تمت إضافة «'+it.ar+'» إلى جدول اليوم '+day+' بنجاح. يمكنك تحديد تفريعاته من تعديل البرنامج.','Added '+it.en+' to day '+day+'. Use Edit program to select subactivities.'),'success');
 }
 function eliteDayAnalysis(day){
  const stat=eliteScheduleStats(day),colors={program:'#168660',other:'#2563eb',prayer:'#a16207'};
@@ -2662,7 +2691,7 @@ function dayTimeline(day,opts){
                 <span class="tlname">${esc(L({ar:it.i.ar,en:it.i.en}))}</span><button type="button" class="small noprint" data-p1="detail" data-id="${esc(it.x.id)}">${T('تفاصيل','Details')}</button>
                 <span class="tlmeta">${esc(L(t.short))} · ${it.x.pri==='core'?T('أساسي','core'):T('مساند','support')}</span>
                 ${o.why&&it.x.why?`<small class="tlwhy">${esc(it.x.why)}</small>`:''}
-                ${(it.x.sportChoice||it.i.sportChoice)?`<small class="tlwhy" style="display:block;font-weight:700">${esc(sportName(it.x.sportChoice||it.i.sportChoice))}</small>`:''}${(it.x.activityBreakdown||it.i.activityBreakdown)?`<small class="tlwhy" style="display:block">${esc(it.x.activityBreakdown||it.i.activityBreakdown)}</small>`:''}
+                ${(it.x.sportChoice||it.i.sportChoice)?`<small class="tlwhy" style="display:block;font-weight:700">${esc(sportName(it.x.sportChoice||it.i.sportChoice))}</small>`:''}${(it.x.activityBreakdown||it.i.activityBreakdown)?`<small class="tlwhy" style="display:block">${esc(it.x.activityBreakdown||it.i.activityBreakdown)}</small>`:''}${!(it.x.activityBreakdown||'').trim()?`<small class="tlwhy noprint" style="display:block;color:var(--warn)">${T('حدد التفريعات من زر تعديل البرنامج','Choose subactivities using Edit program')}</small>`:''}
                 ${typeof window.campScheduleAssignInline==='function'?window.campScheduleAssignInline('program',day,it.x.id):''}
                 <button type="button" class="small schedule-edit-control noprint" data-act="editScheduleProgram:${it.x.id}" title="${T('تعديل البرنامج وتفريعاته وأيام تنفيذه','Edit program, subactivities and delivery days')}">${T('تعديل البرنامج','Edit program')}</button>
                 ${can('select')?`<button type="button" class="small danger noprint" data-act="confirmScheduleProgramRemove:${it.x.id}" title="${T('إزالة البرنامج من خطة المعسكر دون حذفه من المكتبة','Remove program from camp plan only')}">${T('حذف من الجدول','Remove from schedule')}</button>`:''}
