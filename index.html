@@ -2527,11 +2527,18 @@ function scheduleRow(day,index){
 function slotHasCustomActivity(day,index){
  const changed=S.prep?.__scheduleEdits?.[day]?.[index];
  const base=DAY_TEMPLATE[index];
- return !!(base?.slot&&changed&&(String(changed.ar||'').trim()!==String(base.ar||'').trim()||String(changed.en||'').trim()!==String(base.en||'').trim()));
+ return !!(base?.slot&&changed&&!changed.deleted&&(String(changed.ar||'').trim()!==String(base.ar||'').trim()||String(changed.en||'').trim()!==String(base.en||'').trim()));
+}
+function scheduleSlotPrograms(day,index,map){
+ const row=scheduleRow(day,index);
+ // A manually named slot is an actual activity, not an unfilled placeholder.
+ // Do not conceal the manual activity behind an unrelated library assignment.
+ if(slotHasCustomActivity(day,index))return [];
+ return row.slot?(map[row.slot]||[]):[];
 }
 function slotIsUnassigned(day,index){
  const row=scheduleRow(day,index);
- return !!row.slot&&!(slotMap(day)[row.slot]||[]).length&&!slotHasCustomActivity(day,index);
+ return !!row.slot&&!scheduleSlotPrograms(day,index,slotMap(day)).length&&!slotHasCustomActivity(day,index);
 }
 function unassignedSlots(day){
  return DAY_TEMPLATE.map((_,index)=>({index,row:scheduleRow(day,index)})).filter(o=>slotIsUnassigned(day,o.index));
@@ -2631,7 +2638,7 @@ function scheduleDiagnostics(day){
 function dayTimeline(day,opts){
   const map=slotMap(day), o=opts||{};
   return `<div class="tl">${DAY_TEMPLATE.map((original,idx)=>{const row=scheduleRow(day,idx);
-    const items=row.slot?(map[row.slot]||[]):[];
+    const items=scheduleSlotPrograms(day,idx,map);
     const customActivity=slotHasCustomActivity(day,idx);
     const body = row.slot
       ? (items.length
@@ -2644,14 +2651,72 @@ function dayTimeline(day,opts){
                 ${(it.x.sportChoice||it.i.sportChoice)?`<small class="tlwhy" style="display:block;font-weight:700">${esc(sportName(it.x.sportChoice||it.i.sportChoice))}</small>`:''}${(it.x.activityBreakdown||it.i.activityBreakdown)?`<small class="tlwhy" style="display:block">${esc(it.x.activityBreakdown||it.i.activityBreakdown)}</small>`:''}
                 ${typeof window.campScheduleAssignInline==='function'?window.campScheduleAssignInline('program',day,it.x.id):''}
                 <button type="button" class="small schedule-edit-control noprint" data-act="editScheduleProgram:${it.x.id}" title="${T('تعديل البرنامج وتفريعاته وأيام تنفيذه','Edit program, subactivities and delivery days')}">${T('تعديل البرنامج','Edit program')}</button>
+                ${can('select')?`<button type="button" class="small danger noprint" data-act="confirmScheduleProgramRemove:${it.x.id}" title="${T('إزالة البرنامج من خطة المعسكر دون حذفه من المكتبة','Remove program from camp plan only')}">${T('حذف من الجدول','Remove from schedule')}</button>`:''}
               </div>`}).join('')
-          : customActivity?`<span class="pill good">${T('نشاط مُحدد يدويًا','Custom activity assigned')}</span>`:`<span class="tlhint">${T('لم يُحدد برنامج أو نشاط بعد','No program or activity assigned')}</span>`)
+          : customActivity?`<span class="pill good">${T('نشاط مضاف يدويًا · مُدرج في الجدول','Custom activity · included in timetable')}</span>`:`<span class="tlhint">${T('لم يُحدد برنامج أو نشاط بعد','No program or activity assigned')}</span>`)
       : '';
     return `<div class="tlrow ${row.slot?'prog':'fixed'} ${row.slot&&!items.length?'tl-empty':''}">
       <div class="tltime">${row.t}</div>
       <div class="tldot">${tico(row.ic)}</div>
-      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${row.slot&&!items.length&&!customActivity?`<small class="tlwhy" style="display:block">${T('هذا عنوان فترة في قالب الجدول، وليس نشاطًا مُعيّنًا.','This is a timetable category, not an assigned activity.')}</small>`:''}${body}${(!row.slot||(customActivity&&!items.length))&&typeof window.campScheduleAssignInline==='function'?window.campScheduleAssignInline('activity',day,idx):''}<button type="button" class="small schedule-edit-control noprint" data-act="editScheduleRow:${day},${idx}" title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button></div>
+      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${row.slot&&!items.length&&!customActivity?`<small class="tlwhy" style="display:block">${T('هذا عنوان فترة في قالب الجدول، وليس نشاطًا مُعيّنًا.','This is a timetable category, not an assigned activity.')}</small>`:''}${body}${(!row.slot||(customActivity&&!items.length))&&typeof window.campScheduleAssignInline==='function'?window.campScheduleAssignInline('activity',day,idx):''}<button type="button" class="small schedule-edit-control noprint" data-act="editScheduleRow:${day},${idx}" title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button>${customActivity&&can('select')?`<button type="button" class="small danger noprint" data-act="confirmScheduleManualRemove:${day},${idx}" title="${T('حذف النشاط اليدوي وإعادة الفترة إلى حالتها الأصلية','Remove manual activity and restore original slot')}">${T('حذف النشاط','Remove activity')}</button>`:''}</div>
     </div>`}).join('')}</div>`;
+}
+
+function confirmScheduleManualRemove(day,index){
+ if(!can('select'))return toast(T('حذف الأنشطة غير متاح لهذا الدور.','No permission to remove activities.'));
+ const n=Number(day),j=Number(index);
+ if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length||!slotHasCustomActivity(n,j))return;
+ const name=scheduleRow(n,j).ar;
+ openModal('<h2>'+T('تأكيد حذف النشاط اليدوي','Confirm manual activity removal')+'</h2>'
+  +'<p class="help">'+T('سيُحذف النشاط «'+esc(name)+'» من هذا اليوم، وتعود الفترة إلى عنوانها الأصلي.','This manual activity will be removed from this day and the original slot restored.')+'</p>'
+  +'<div class="actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:15px"><button data-act="close">'+T('إلغاء','Cancel')+'</button><button class="danger" data-act="removeScheduleManual:'+n+','+j+'">'+T('تأكيد الحذف','Confirm removal')+'</button></div>');
+}
+function removeScheduleManual(day,index){
+ if(!can('select'))return;
+ const n=Number(day),j=Number(index);
+ if(!Number.isInteger(n)||n<1||n>S.meta.days.length||!Number.isInteger(j)||j<0||j>=DAY_TEMPLATE.length||!slotHasCustomActivity(n,j))return;
+ const previous=S.prep?.__scheduleEdits?.[n]?.[j];
+ delete S.prep.__scheduleEdits[n][j];
+ save();
+ let persisted=false;
+ try{
+  const data=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
+  persisted=!data?.camps?.find(c=>c.id===S.activeId)?.prep?.__scheduleEdits?.[n]?.[j];
+ }catch(error){console.warn('Unable to verify manual activity removal',error);}
+ if(!persisted){
+  S.prep.__scheduleEdits[n][j]=previous;
+  return toast(T('تعذر حفظ الحذف. لم تتغير البيانات.','Could not save removal; nothing was changed.'));
+ }
+ closeModal();render({preserveScroll:true});
+ toast(T('حُذف النشاط اليدوي وأُعيدت الفترة الأصلية.','Manual activity removed and original slot restored.'));
+}
+function confirmScheduleProgramRemove(id){
+ if(!can('select'))return toast(T('حذف البرامج غير متاح لهذا الدور.','No permission to remove programs.'));
+ const entry=S.selected.find(x=>x.id===id);
+ if(!entry)return;
+ const item=ITEM(id),name=item?.ar||id;
+ openModal('<h2>'+T('إزالة البرنامج من المعسكر','Remove program from camp')+'</h2>'
+  +'<p class="help">'+T('سيُزال «'+esc(name)+'» من خطة المعسكر وجدوله فقط، وسيبقى متاحًا في مكتبة البرامج.','The program will be removed from this camp plan and schedule only; it remains in the library.')+'</p>'
+  +'<div class="actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:15px"><button data-act="close">'+T('إلغاء','Cancel')+'</button><button class="danger" data-act="removeScheduleProgram:'+esc(id)+'">'+T('تأكيد الإزالة','Confirm removal')+'</button></div>');
+}
+function removeScheduleProgram(id){
+ if(!can('select'))return;
+ const entry=S.selected.find(x=>x.id===id);
+ if(!entry)return;
+ const previous=S.selected.slice();
+ S.selected=S.selected.filter(x=>x.id!==id);
+ save();
+ let persisted=false;
+ try{
+  const data=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
+  persisted=!!data?.camps?.find(c=>c.id===S.activeId)&&!data.camps.find(c=>c.id===S.activeId).selected.some(x=>x.id===id);
+ }catch(error){console.warn('Unable to verify program removal',error);}
+ if(!persisted){
+  S.selected=previous;
+  return toast(T('تعذر حفظ إزالة البرنامج. لم تتغير الخطة.','Could not save program removal; plan unchanged.'));
+ }
+ closeModal();render({preserveScroll:true});
+ toast(T('أُزيل البرنامج من جدول المعسكر، وبقي في مكتبة البرامج.','Program removed from schedule; retained in library.'));
 }
 
 function eliteParseClock(value){
@@ -4332,6 +4397,10 @@ document.addEventListener('click',e=>{
     editScheduleRow:()=>{const [day,index]=arg.split(',');editScheduleRow(day,index)},
     saveScheduleRow:()=>{const [day,index]=arg.split(',');saveScheduleRow(day,index)},
     editScheduleProgram:()=>{if(!(can('select')||can('scheduleEdit')))return toast(T('لا تملك صلاحية تعديل البرامج.','No program edit permission.'));editModal(arg)},
+    confirmScheduleManualRemove:()=>{const [day,index]=(arg||'').split(',');confirmScheduleManualRemove(day,index)},
+    removeScheduleManual:()=>{const [day,index]=(arg||'').split(',');removeScheduleManual(day,index)},
+    confirmScheduleProgramRemove:()=>confirmScheduleProgramRemove(arg),
+    removeScheduleProgram:()=>removeScheduleProgram(arg),
     eliteAddSuggestion:()=>{const [day,slot,id]=arg.split(',');eliteAddSuggestion(day,slot,id)},
     newPrepRequirement:()=>newPrepRequirementModal(),
     savePrepRequirement:()=>savePrepRequirement(),
