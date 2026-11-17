@@ -4499,10 +4499,19 @@ function saveEdit(id){
   const previousSelected=JSON.stringify(S.selected);
   const previousDraft=S.draft;
   const previousLogLength=S.log.length;
+  // Read the multi-day checkboxes BEFORE modifying state. The days belong to
+  // this same transaction, not a second save after the modal is closed.
+  const dayPicker=$('#p1days');
+  const chosenDays=dayPicker
+    ? [...new Set($('[data-p1day]:checked').map(el=>Number(el.dataset.p1day)))]
+    : ($('#eDay').value?[Number($('#eDay').value)]:[]);
+  if(dayPicker&&!chosenDays.length)return toast(T('اختر يومًا واحدًا على الأقل قبل الحفظ.','Select at least one day before saving.'),'error','top');
+  if(chosenDays.some(d=>!Number.isInteger(d)||d<1||d>S.meta.days.length))return toast(T('اختيار الأيام غير صالح.','Invalid day selection.'),'error','top');
+  const chosenDay=chosenDays[0]||null;
   x.pri=$('#ePri').value;
-  const chosenDay=$('#eDay').value?+$('#eDay').value:null;
-  if(x.day!==chosenDay)x.slot=null; // Changing the day requires explicitly selecting a new time slot.
+  if(x.day!==chosenDay||(Array.isArray(x.days)&&x.days.length&&JSON.stringify(x.days)!==JSON.stringify(chosenDays)))x.slot=null; // Explicit re-scheduling required after changed days.
   x.day=chosenDay;
+  x.days=chosenDays;
   x.why=$('#eWhy').value.trim();
   x.activityType=$('#eActivityType').value;
   if(item?.t==='sport')x.sportChoice=sport;
@@ -4516,12 +4525,21 @@ function saveEdit(id){
   }else{
     logIt(`حُدّث قرار «${item.ar}»`,`Decision updated: ${item.en}`);
   }
-  save();
+  const saved=save();
   let persisted=false;
   try{
+    if(!saved)throw new Error('Local persistence failed');
     const data=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
-    const stored=data?.camps?.find(c=>c.id===S.activeId)?.selected?.find(entry=>entry.id===id);
-    persisted=!!stored&&stored.sportChoice===x.sportChoice&&stored.activityBreakdown===x.activityBreakdown&&stored.day===x.day;
+    const matches=data?.camps?.find(c=>c.id===S.activeId)?.selected?.filter(entry=>entry.id===id)||[];
+    const stored=matches.length===1?matches[0]:null;
+    persisted=!!stored
+      && stored.pri===x.pri
+      && stored.sportChoice===x.sportChoice
+      && stored.activityType===x.activityType
+      && stored.activityBreakdown===x.activityBreakdown
+      && stored.why===x.why
+      && stored.day===x.day
+      && JSON.stringify(stored.days||[])===JSON.stringify(chosenDays);
   }catch(error){console.warn('Could not verify program selection persistence',error);}
   if(!persisted){
     S.selected=JSON.parse(previousSelected);
@@ -4531,7 +4549,7 @@ function saveEdit(id){
     return toast(T('لم يكتمل حفظ البرنامج. بقيت النافذة مفتوحة لإعادة المحاولة.','Program not saved. The form remains open to retry.'));
   }
   closeModal();render({preserveScroll:true});
-  toast(isNew?T('تم حفظ القرار وإضافة البرنامج إلى الخطة بنجاح.','Decision saved and program added successfully.'):T('تم حفظ القرار بنجاح.','Decision saved successfully.'),'success','top');
+  toast(isNew?T('تمت إضافة البرنامج وحفظ تفريعاته وأيامه بنجاح. انتقل إلى الجدول لتحديد الوقت يدويًا.','Program and days saved. Choose its timetable slot manually.'):T('تم حفظ البرنامج والتفريعات والأيام المحددة بنجاح.','Program, subactivities and days saved successfully.'),'success','top');
 }
 function pickerModal(day){
   const pool=LIB.filter(i=>!isSel(i.id));
