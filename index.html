@@ -1562,7 +1562,18 @@ const T=(ar,en)=>lang==='ar'?ar:en;
 const DAYTEXT=(i)=>{const d=S.meta.days[i-1];return d?L(d):''};
 const ROLE=id=>ROLES.find(r=>r.id===id)||ROLES[0];
 const can=cap=>(CAPS[S.role]||[]).includes(cap);
-const save=()=>{try{localStorage.setItem('elite-select-v1',JSON.stringify(S))}catch(e){toast(T('تعذّر الحفظ المحلي في هذا المتصفح.','Local storage is unavailable in this browser.'))}};
+const save=()=>{
+ try{
+  const payload=JSON.stringify(S);
+  localStorage.setItem('elite-select-v1',payload);
+  if(localStorage.getItem('elite-select-v1')!==payload)throw new Error('Local state verification failed');
+  return true;
+ }catch(e){
+  console.error('Camp plan persistence failed',e);
+  toast(T('فشل حفظ التغييرات. لم تُؤكّد العملية؛ تحقق من مساحة تخزين المتصفح.','Saving failed; changes are not confirmed. Check browser storage.'),'error','top');
+  return false;
+ }
+};
 /* Persist the 2027 camps right away so the finance «all camps» view can list them. */
 try{const raw=JSON.parse(localStorage.getItem('elite-select-v1')||'null');if(!raw||!raw.seed2027)localStorage.setItem('elite-select-v1',JSON.stringify(S))}catch(e){}
 function toast(msg,variant,placement){
@@ -2876,7 +2887,7 @@ function elitePendingScheduleList(day){
 function dayTimeline(day,opts){
   const map=slotMap(day), o=opts||{};
   const timelineEntries=[
-    ...DAY_TEMPLATE.map((original,idx)=>({original,idx,added:false,start:eliteTimeMinutes(scheduleRow(day,idx).t.split(/\\s*[–-]\\s*/)[0])??9999})),
+    ...DAY_TEMPLATE.map((original,idx)=>({original,idx,added:false,start:eliteTimeMinutes(scheduleRow(day,idx).t.split(/\s*[–-]\s*/)[0])??9999})),
     ...eliteAddedActivities(day).map(original=>({original,idx:-1,added:true,start:eliteActivityRange(original)?.start??9999}))
   ].sort((a,b)=>a.start-b.start||(a.added?1:-1));
   return `<div class="tl">${timelineEntries.map(({original,idx,added})=>{
@@ -3155,8 +3166,25 @@ function saveScheduleRow(day,index){
  if(!S.prep.__scheduleEdits)S.prep.__scheduleEdits={};
  if(!S.prep.__scheduleEdits[n])S.prep.__scheduleEdits[n]={};
  const previous=S.prep.__scheduleEdits[n][j];
+ if(end){
+  const a=eliteTimeMinutes(start),b=eliteTimeMinutes(end),conflicts=[];
+  DAY_TEMPLATE.forEach((_,k)=>{
+   if(k===j||scheduleRowRemoved(n,k)||slotIsUnassigned(n,k))return;
+   const row=scheduleRow(n,k),range=eliteActivityRange(row);
+   if(range&&a<range.end&&b>range.start)conflicts.push(row.ar);
+  });
+  eliteAddedActivities(n).forEach(row=>{
+   const range=eliteActivityRange(row);
+   if(range&&a<range.end&&b>range.start)conflicts.push(row.ar);
+  });
+  if(conflicts.length)return toast(T('وقت الفعالية يتعارض مع: ','Time conflicts with: ')+[...new Set(conflicts)].join('، '),'error','top');
+ }
  S.prep.__scheduleEdits[n][j]={t,ar,en:en||ar};
- save();
+ if(!save()){
+  if(previous)S.prep.__scheduleEdits[n][j]=previous;
+  else delete S.prep.__scheduleEdits[n][j];
+  return;
+ }
  let persisted=false;
  try{
   const data=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
