@@ -477,20 +477,23 @@ function handle(b){
    const time=auto?slot.start:newValue.time;
    if(mealClockMinutes(time)===null)return toast('وقت تقديم غير صحيح لليوم '+day+'.');
    let updatedTime=null;
-   if(!auto&&slot&&time!==slot.start){
+   if(slot){
     const begin=mealClockMinutes(time),finish=begin+slot.minutes;
     if(finish>1440)return toast('وقت الوجبة في اليوم '+day+' يتجاوز نهاية اليوم. اختر وقتاً أبكر.');
-    updatedTime=time+' – '+mealClockFromMinutes(finish);
     const clashes=mealScheduleConflicts(day,slot.index,begin,finish);
-    alerts.push('اليوم '+day+': الوقت المحدد '+time+' بدلاً من '+slot.start+
-      (clashes.length?'، ويتداخل مع: '+clashes.join('، '):'، وسيتم تحديث موعد '+type(newValue.type)+' في الجدول'));
-   }else if(!auto&&!slot){
+    if(!auto&&time!==slot.start)updatedTime=time+' – '+mealClockFromMinutes(finish);
+    if(updatedTime||clashes.length){
+     alerts.push('اليوم '+day+': '+type(newValue.type)+' الساعة '+time+
+      (updatedTime?' (موعد الجدول الحالي '+slot.start+' وسيُحدّث إلى الوقت المحدد)':'')+
+      (clashes.length?'؛ يوجد تداخل مع: '+clashes.join('، '):''));
+    }
+   }else if(!auto){
     alerts.push('اليوم '+day+': لا توجد فترة '+type(newValue.type)+' في الجدول، لذلك ستُحفظ الوجبة في خطة التغذية دون تغيير جدول هذا اليوم.');
    }
    plan.push({day,time,slot,updatedTime});
   }
   if(alerts.length&&!confirm('تنبيه: تعارض أو اختلاف في مواعيد الوجبات.\n\n'+alerts.join('\n')+
-    '\n\nهل تؤكد اعتماد الوقت المدخل وتحديث جدول المعسكر في الأيام التي تحتوي فترة للوجبة؟'))return;
+    '\n\nهل تؤكد الوقت المحدد؟ ستُحدّث مواعيد الفطور أو الغداء أو العشاء في الجدول عند اختلافها.'))return;
   const oldMeals=JSON.stringify(d.meals),oldEdits=JSON.stringify(S.prep.__scheduleEdits||{});
   const group=m?.repeatGroup||newId('repeat-');
   for(const entry of plan){
