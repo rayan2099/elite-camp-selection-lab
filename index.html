@@ -4503,7 +4503,7 @@ function saveEdit(id){
   // this same transaction, not a second save after the modal is closed.
   const dayPicker=$('#p1days');
   const chosenDays=dayPicker
-    ? [...new Set($('[data-p1day]:checked').map(el=>Number(el.dataset.p1day)))]
+    ? [...new Set($$('[data-p1day]:checked').map(el=>Number(el.dataset.p1day)))]
     : ($('#eDay').value?[Number($('#eDay').value)]:[]);
   if(dayPicker&&!chosenDays.length)return toast(T('اختر يومًا واحدًا على الأقل قبل الحفظ.','Select at least one day before saving.'),'error','top');
   if(chosenDays.some(d=>!Number.isInteger(d)||d<1||d>S.meta.days.length))return toast(T('اختيار الأيام غير صالح.','Invalid day selection.'),'error','top');
