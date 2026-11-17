@@ -59,7 +59,7 @@ function mealBudgetSummary(){
  const students=Math.max(1,n(S.meta.students)),days=Math.max(1,S.meta.days.length);
  const limit=money(b.perStudent)*students*(b.period==='camp'?1:days);
  const totalCost=d.meals.reduce((sum,m)=>sum+cost(m),0)+money(b.equipment);
- const rate=limit>0?totalCost/limit:0;
+ const rate=limit>0?totalCost/limit:(totalCost>0?2:0);
  return {limit,totalCost,rate,remaining:limit-totalCost,level:rate>1?'danger':rate>=0.75?'warning':'success'};
 }
 const type=k=>types.find(x=>x[0]===k)?.[1]||'وجبة';
