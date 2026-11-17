@@ -285,12 +285,73 @@ document.addEventListener('change',event=>{
  }
 },true);
 
+const MEAL_SCHEDULE_ROWS={breakfast:2,lunch:8,dinner:16};
+function mealScheduleSlot(day,type){
+ const index=MEAL_SCHEDULE_ROWS[type];
+ if(index===undefined||typeof scheduleRow!=='function'||(typeof scheduleRowRemoved==='function'&&scheduleRowRemoved(day,index)))return null;
+ const row=scheduleRow(day,index);
+ const parts=String(row?.t||'').split(/\s*[–-]\s*/);
+ const start=typeof eliteParseClock==='function'?eliteParseClock(parts[0]):null;
+ const end=typeof eliteParseClock==='function'?eliteParseClock(parts[1]):null;
+ if(!start)return null;
+ const startMin=mealClockMinutes(start),endMin=mealClockMinutes(end);
+ return {day,index,start,end,endValid:endMin!==null&&endMin>startMin,minutes:endMin!==null&&endMin>startMin?endMin-startMin:40,row};
+}
+function mealClockMinutes(v){
+ if(!/^\d{2}:\d{2}$/.test(String(v||'')))return null;
+ const [hour,minute]=v.split(':').map(Number);
+ return hour<24&&minute<60?hour*60+minute:null;
+}
+function mealClockFromMinutes(value){
+ return String(Math.floor(value/60)).padStart(2,'0')+':'+String(value%60).padStart(2,'0');
+}
+function mealChosenDays(){
+ return [...document.querySelectorAll('[data-cm-day]:checked')].map(x=>n(x.dataset.cmDay)).filter(day=>day>=1&&day<=S.meta.days.length);
+}
+function mealSchedulePreview(){
+ const type=$('#cm-type')?.value,days=mealChosenDays(),auto=$('#cm-time-source')?.value!=='custom';
+ const input=$('#cm-time'),note=$('#cm-schedule-note');
+ if(!input||!note)return;
+ const slots=days.map(day=>({day,slot:mealScheduleSlot(day,type)}));
+ const found=slots.filter(x=>x.slot),missing=slots.filter(x=>!x.slot);
+ if(auto){
+  input.readOnly=true;
+  input.style.opacity='.75';
+  input.value=found[0]?.slot.start||'';
+ }else{
+  input.readOnly=false;
+  input.style.opacity='1';
+  if(!input.value)input.value=found[0]?.slot.start||'13:00';
+ }
+ const different=new Set(found.map(x=>x.slot.start)).size>1;
+ const list=found.map(x=>'اليوم '+x.day+': '+x.slot.start).join(' · ');
+ note.textContent=(!days.length?'حدد يوماً واحداً على الأقل. ':
+   !found.length?'لا يوجد وقت محدد لهذه الوجبة في جدول الأيام المختارة. اختر وقتاً مخصصاً. ':
+   different?'تختلف مواعيد الوجبة بين الأيام: '+list+'. سيُستخدم توقيت كل يوم تلقائياً. ':
+   'وقت الوجبة من الجدول: '+list+'. ')
+   +(missing.length?'لا يوجد موعد للوجبة في اليوم '+missing.map(x=>x.day).join('، ')+'. ':'')
+   +(auto?'اختر «وقت مخصص» إذا أردت تغييره.':'قد يطلب النظام تأكيد تعديل الجدول عند الحفظ.');
+ note.style.color=missing.length?'#a25718':'var(--muted)';
+}
+function mealScheduleConflicts(day,index,start,end){
+ if(typeof scheduleRow!=='function'||typeof DAY_TEMPLATE==='undefined')return [];
+ const result=[];
+ DAY_TEMPLATE.forEach((_,i)=>{
+  if(i===index||(typeof scheduleRowRemoved==='function'&&scheduleRowRemoved(day,i)))return;
+  const row=scheduleRow(day,i),range=String(row.t||'').split(/\s*[–-]\s*/);
+  if(range.length<2)return;
+  const a=mealClockMinutes(eliteParseClock(range[0])),b=mealClockMinutes(eliteParseClock(range[1]));
+  if(a!==null&&b!==null&&a<end&&b>start)result.push(row.ar||row.en||'فعالية');
+ });
+ return result;
+}
 function mealModal(id){
  const d=db(),m=d.meals.find(x=>x.id===id),v=m||{audienceMode:'all',audienceIds:[],day:dayChoice==='all'?1:Number(dayChoice),type:'lunch',time:'13:00',menu:'',supplier:'',supervisorId:'',serviceMode:'individual',peoplePerTray:5,servingNotes:'',deliveryTime:'',serviceLocation:'',equipment:'',servings:total(),unitPrice:0,specialPrice:0,specialMenu:'',specialIds:d.special.map(s=>s.id),confirmed:false};
  openModal('<div class="catering-modal"><div class="catering-modal-head"><div class="catering-kicker">التجهيز التشغيلي</div><h2>'+(m?'تعديل الوجبة':'إضافة وجبة جديدة')+'</h2><p>حدد يوم الوجبة وطريقة تقديمها، ثم كمياتها والمورد والمشرف.</p></div><div class="catering-modal-step">01 · توقيت الوجبة وطريقة التقديم</div><div class="cp-form">'+
  '<div class="full cm-days"><b>أيام تقديم الوجبة</b><p class="help">اختر يوماً أو عدة أيام؛ سيتم إنشاء وجبة مستقلة لكل يوم دون إعادة إدخال التفاصيل.</p><div class="cp-checkboxes">'+S.meta.days.map((day,i)=>'<label><input type="checkbox" data-cm-day="'+(i+1)+'" '+(v.day===i+1?'checked':'')+'>'+ 'اليوم '+(i+1)+' · '+e(L(day))+'</label>').join('')+'</div></div>'+
  '<label>نوع الوجبة<select id="cm-type">'+types.map(([id,label])=>'<option value="'+id+'" '+(v.type===id?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+
- '<label>وقت التقديم<input type="time" id="cm-time" value="'+e(v.time)+'"></label>'+
+ '<label>مصدر وقت التقديم<select id="cm-time-source"><option value="schedule" '+(!m||mealScheduleSlot(v.day,v.type)?.start===v.time?'selected':'')+'>من جدول المعسكر (تلقائي)</option><option value="custom" '+(m&&mealScheduleSlot(v.day,v.type)?.start!==v.time?'selected':'')+'>تحديد وقت مختلف</option></select></label>'+
+ '<label>وقت تقديم الوجبة<input type="time" id="cm-time" value="'+e(v.time)+'"><small class="help" id="cm-schedule-note" style="line-height:1.7"></small></label>'+
  '<label id="cm-servings-field">إجمالي المستفيدين من الوجبة<input type="number" min="0" id="cm-servings" value="'+(v.audienceMode==='selected'?(v.audienceIds||[]).length:servings(v))+'"><small class="help" id="cm-servings-explain">يشمل الطلاب والطاقم ما لم تحدد مجموعة طلاب معينة.</small></label>'+
  '<div class="full cm-audience-box"><div class="cm-audience-header"><div><b>لمن ستُقدم هذه الوجبة؟</b><small>اختر جميع المستفيدين أو مجموعة محددة من الطلاب. يفصل النظام الحالات الغذائية الخاصة تلقائيًا.</small></div><span class="cm-count-badge" id="cm-audience-label">جميع المستفيدين</span></div><div class="cm-audience-switch" role="group" aria-label="نطاق المستفيدين">'+
  '<label class="cm-audience-choice"><input name="cm-audience-mode" type="radio" value="all" '+((v.audienceMode||'all')==='all'?'checked':'')+'><span><strong>جميع المستفيدين</strong><small>الطلاب والطاقم بحسب العدد المسجل</small></span></label>'+
@@ -319,7 +380,7 @@ function mealModal(id){
  '<div class="full cp-calc" id="cm-preview" aria-live="polite"></div>'+
  '<label class="full cp-check"><input type="checkbox" id="cm-confirmed" '+(v.confirmed?'checked':'')+'> تم تأكيد الكميات والمكونات والتوقيت مع المورد</label></div>'+
  '<div class="cp-actions"><button data-act="close">إلغاء</button><button class="primary" data-cp="save-meal" data-id="'+e(id||'')+'">حفظ الوجبة</button></div></div>');
- updateMealPreview();
+ updateMealPreview();mealSchedulePreview();
 }
 function updateMealPreview(){
  const mode=$('#cm-mode')?.value;if(!mode)return;
@@ -393,7 +454,7 @@ function handle(b){
  if(a==='del-meal'){if(confirm('حذف الوجبة من الخطة؟')){d.meals=d.meals.filter(m=>m.id!==id);commit()}return}
  if(a==='del-special'){if(confirm('حذف الحالة الغذائية؟')){d.special=d.special.filter(s=>s.id!==id);d.meals.forEach(m=>m.specialIds=(m.specialIds||[]).filter(x=>x!==id));commit()}return}
  if(a==='save-meal'){
-  const m=d.meals.find(x=>x.id===id),chosenDays=[...document.querySelectorAll('[data-cm-day]:checked')].map(x=>n(x.dataset.cmDay)).filter(day=>day>=1&&day<=S.meta.days.length);
+  const m=d.meals.find(x=>x.id===id),chosenDays=mealChosenDays();
   if(!chosenDays.length)return toast('اختر يوماً واحداً على الأقل لتقديم الوجبة.');
   const newValue={id:m?.id||newId('meal-'),day:chosenDays[0],type:$('#cm-type').value,time:$('#cm-time').value,menu:$('#cm-menu').value.trim(),supplier:$('#cm-supplier').value.trim(),supervisorId:$('#cm-supervisor').value,audienceMode:document.querySelector('input[name="cm-audience-mode"]:checked')?.value||'all',audienceIds:[...document.querySelectorAll('[data-cm-student]:checked')].map(el=>el.dataset.cmStudent),serviceMode:$('#cm-mode').value,peoplePerTray:n($('#cm-group-size').value),servingNotes:$('#cm-serving-notes').value.trim(),deliveryTime:$('#cm-delivery').value,serviceLocation:$('#cm-location').value.trim(),equipment:$('#cm-equipment').value.trim(),servings:n($('#cm-servings').value),unitPrice:money($('#cm-price').value),specialPrice:money($('#cm-special-price').value),specialMenu:$('#cm-special-menu').value.trim(),specialIds:$$('[data-cm-special]:checked').map(x=>x.dataset.cmSpecial),confirmed:$('#cm-confirmed').checked};
   if(!newValue.day||!newValue.menu||!newValue.time)return toast('اليوم وقائمة الطعام والتوقيت مطلوبة.');
@@ -406,26 +467,57 @@ function handle(b){
   if(newValue.specialIds.length>newValue.servings)return toast('عدد المستفيدين أقل من الحالات الخاصة.');
   if(!newValue.supervisorId||!supervisorName(newValue.supervisorId))return toast('اختر المشرف المسؤول من فريق المعسكر قبل حفظ الوجبة.');
   if(newValue.serviceMode==='shared'&&(newValue.peoplePerTray<2||!newValue.servingNotes))return toast('حدد عدد الأشخاص لكل طبق وطريقة التقديم الجماعي.');
-  const previous=JSON.stringify(d.meals);
-  if(m)Object.assign(m,newValue);else d.meals.push(newValue);
-  // New records get a shared group for provenance; existing records are edited only for their original occurrence.
-  if(!m||chosenDays.length>1){
-   const group=m?.repeatGroup||newId('repeat-');
-   const original=d.meals.find(x=>x.id===newValue.id);if(original)original.repeatGroup=group;
-   chosenDays.filter(day=>day!==newValue.day).forEach(day=>{
-    const same=d.meals.find(x=>x.repeatGroup===group&&x.day===day);
-    if(same)Object.assign(same,{...newValue,id:same.id,day,repeatGroup:group});
-    else d.meals.push({...newValue,id:newId('meal-'),day,repeatGroup:group});
-   });
+  const auto=$('#cm-time-source')?.value!=='custom';
+  const selectedTime=mealClockMinutes(newValue.time);
+  if(!auto&&selectedTime===null)return toast('اختر وقت تقديم صحيحاً.');
+  const plan=[],alerts=[];
+  for(const day of chosenDays){
+   const slot=mealScheduleSlot(day,newValue.type);
+   if(auto&&!slot)return toast('لا يوجد موعد «'+type(newValue.type)+'» في جدول اليوم '+day+'. اختر وقتاً مخصصاً أو أضف الموعد إلى الجدول.');
+   const time=auto?slot.start:newValue.time;
+   if(mealClockMinutes(time)===null)return toast('وقت تقديم غير صحيح لليوم '+day+'.');
+   let updatedTime=null;
+   if(!auto&&slot&&time!==slot.start){
+    const begin=mealClockMinutes(time),finish=begin+slot.minutes;
+    if(finish>1440)return toast('وقت الوجبة في اليوم '+day+' يتجاوز نهاية اليوم. اختر وقتاً أبكر.');
+    updatedTime=time+' – '+mealClockFromMinutes(finish);
+    const clashes=mealScheduleConflicts(day,slot.index,begin,finish);
+    alerts.push('اليوم '+day+': الوقت المحدد '+time+' بدلاً من '+slot.start+
+      (clashes.length?'، ويتداخل مع: '+clashes.join('، '):'، وسيتم تحديث موعد '+type(newValue.type)+' في الجدول'));
+   }else if(!auto&&!slot){
+    alerts.push('اليوم '+day+': لا توجد فترة '+type(newValue.type)+' في الجدول، لذلك ستُحفظ الوجبة في خطة التغذية دون تغيير جدول هذا اليوم.');
+   }
+   plan.push({day,time,slot,updatedTime});
+  }
+  if(alerts.length&&!confirm('تنبيه: تعارض أو اختلاف في مواعيد الوجبات.\n\n'+alerts.join('\n')+
+    '\n\nهل تؤكد اعتماد الوقت المدخل وتحديث جدول المعسكر في الأيام التي تحتوي فترة للوجبة؟'))return;
+  const oldMeals=JSON.stringify(d.meals),oldEdits=JSON.stringify(S.prep.__scheduleEdits||{});
+  const group=m?.repeatGroup||newId('repeat-');
+  for(const entry of plan){
+   const existing=entry.day===m?.day?m:d.meals.find(x=>x.repeatGroup===group&&x.day===entry.day);
+   const value={...newValue,id:existing?.id||newId('meal-'),day:entry.day,time:entry.time,repeatGroup:group};
+   if(existing)Object.assign(existing,value);
+   else d.meals.push(value);
+   if(entry.updatedTime){
+    S.prep.__scheduleEdits??={};
+    S.prep.__scheduleEdits[entry.day]??={};
+    const prev=S.prep.__scheduleEdits[entry.day][entry.slot.index]||{};
+    S.prep.__scheduleEdits[entry.day][entry.slot.index]={...prev,t:entry.updatedTime};
+   }
   }
   save();
   let verified=false;
   try{
    const persisted=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
    const camp=persisted?.camps?.find(c=>c.id===S.activeId);
-   verified=chosenDays.every(day=>camp?.prep?.__catering?.meals?.some(x=>x.day===day&&x.type===newValue.type&&x.menu===newValue.menu&&x.time===newValue.time));
-  }catch(error){console.error('Meal save check failed',error)}
-  if(!verified){d.meals=JSON.parse(previous);return toast('تعذر حفظ الوجبة، لم تُغلق النافذة. حاول مرة أخرى.','error')}
+   verified=!!camp&&plan.every(entry=>
+     camp.prep?.__catering?.meals?.some(x=>x.day===entry.day&&x.type===newValue.type&&x.menu===newValue.menu&&x.time===entry.time)
+     &&(!entry.updatedTime||camp.prep?.__scheduleEdits?.[entry.day]?.[entry.slot.index]?.t===entry.updatedTime));
+  }catch(error){console.error('Meal and schedule save check failed',error)}
+  if(!verified){
+   d.meals=JSON.parse(oldMeals);S.prep.__scheduleEdits=JSON.parse(oldEdits);
+   return toast('تعذر حفظ الوجبة وتحديث الجدول. لم يُعتمد التغيير.','error');
+  }
   closeModal();render({preserveScroll:true});toast('تمت إضافة الوجبات إلى الأيام المحددة بنجاح.','success','top');return;
  }
  if(a==='save-special'){
@@ -457,6 +549,10 @@ document.addEventListener('change',ev=>{if(ev.target.closest('#modal')&&(ev.targ
 const budgetStyle=document.createElement('style');
 budgetStyle.textContent="\n.cp-budget-summary{--budget-border:#dde5ed;--budget-tone:#168660;margin:16px 0 20px;padding:20px 22px;border:1px solid var(--budget-border);background:var(--surface);border-radius:17px;box-shadow:0 5px 22px rgba(18,39,67,.035);direction:rtl}\n.cp-budget-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:18px}\n.cp-budget-kicker{display:block;font-size:11px;font-weight:700;color:#a45e28;margin-bottom:4px}\n.cp-budget-heading h2{margin:0;font-size:19px;font-weight:800;letter-spacing:-.3px;color:var(--fg)}\n.cp-budget-heading p{font-size:12px;color:var(--muted);margin:5px 0 0;line-height:1.7}\n.cp-budget-edit{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--soft);color:var(--fg);font:inherit;font-weight:700;font-size:12px;border-radius:9px;padding:10px 15px;white-space:nowrap;cursor:pointer}\n.cp-budget-edit:hover{border-color:var(--accent);background:var(--accentsoft)}\n.cp-budget-content{display:flex;align-items:center;gap:22px}\n.cp-budget-gauge{--budget-progress:0%;--budget-tone:#168660;flex:0 0 156px;width:156px;height:156px;border-radius:50%;background:conic-gradient(var(--budget-tone) var(--budget-progress),#e9eff4 0);display:grid;place-items:center;position:relative;direction:ltr}\n.cp-budget-gauge::before{content:'';position:absolute;inset:13px;border-radius:50%;background:var(--surface)}\n.cp-budget-gauge-inner{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;direction:rtl;color:var(--fg)}\n.cp-budget-gauge-inner strong{font-size:27px;line-height:1;font-weight:850;font-variant-numeric:tabular-nums}\n.cp-budget-gauge-inner small{font-size:11px;color:var(--muted)}\n.cp-budget-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;flex:1;min-width:0}\n.cp-budget-value{display:flex;flex-direction:column;justify-content:center;gap:9px;min-width:0;padding:16px 15px;background:var(--soft);border:1px solid var(--line);border-radius:12px}\n.cp-budget-value>span{font-size:11.5px;font-weight:700;color:var(--muted)}\n.cp-budget-value strong{font-weight:850;font-size:clamp(17px,1.7vw,24px);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--fg)}\n.cp-budget-value strong small{font-size:12px;font-weight:650;color:var(--muted)}\n.cp-budget-value>small{font-size:10.5px;color:var(--muted);line-height:1.5}\n.cp-budget-remaining{background:rgba(22,134,96,.06);border-color:rgba(22,134,96,.19)}\n.cp-budget-danger .cp-budget-remaining{background:rgba(199,76,61,.06);border-color:rgba(199,76,61,.23)}\n.cp-budget-bottom{border-top:1px solid var(--line);padding-top:14px;margin-top:17px;display:grid;grid-template-columns:auto minmax(150px,1fr);align-items:center;gap:10px 20px}\n.cp-budget-status{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:750;white-space:nowrap}\n.cp-budget-status.success{color:#168660}.cp-budget-status.warning{color:#b47b1b}.cp-budget-status.danger{color:#b6382e}\n.cp-budget-status-dot{width:8px;height:8px;flex:none;border-radius:50%;background:currentColor}\n.cp-budget-comparison{display:flex;gap:8px;align-items:center;direction:ltr}\n.cp-budget-comparison>span{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}\n.cp-budget-meter{height:9px;position:relative;background:#e7edf3;border-radius:100px;overflow:hidden;flex:1}\n.cp-budget-meter>span{display:block;height:100%;border-radius:100px;transition:width .25s ease}\n.cp-budget-meter .success{background:#168660}.cp-budget-meter .warning{background:#d28c27}.cp-budget-meter .danger{background:#c74c3d}\n.cp-budget-meter>i{position:absolute;top:0;bottom:0;border-left:2px solid rgba(60,77,95,.55)}\n.cp-budget-note{grid-column:1/-1;color:var(--muted);font-size:10px}\n.cm-days{border:1px solid var(--line);padding:10px;border-radius:9px}\n@media(max-width:850px){.cp-budget-content{gap:15px}.cp-budget-gauge{width:120px;height:120px;flex-basis:120px}.cp-budget-values{grid-template-columns:repeat(3,minmax(0,1fr))}.cp-budget-value{padding:12px}.cp-budget-value strong{font-size:17px}}\n@media(max-width:650px){.cp-budget-summary{padding:15px}.cp-budget-content{flex-direction:column;align-items:stretch}.cp-budget-gauge{align-self:center;width:140px;height:140px;flex-basis:140px}.cp-budget-values{grid-template-columns:1fr}.cp-budget-value{padding:13px}.cp-budget-value strong{font-size:22px}.cp-budget-bottom{grid-template-columns:1fr}.cp-budget-status{white-space:normal}}\n";
 document.head.append(budgetStyle);
+document.addEventListener('change',ev=>{
+ if(!ev.target.closest('#modal'))return;
+ if(ev.target.id==='cm-time-source'||ev.target.id==='cm-type'||ev.target.hasAttribute('data-cm-day'))mealSchedulePreview();
+},true);
 /* Navigation is centrally ordered in index.html. */
 PAGE_TITLES.meals=['إدارة الوجبات والتغذية','Meal preparation'];
 PAGES.meals=pageMeals;
