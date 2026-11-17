@@ -475,7 +475,37 @@ function handle(b){
  if(a==='save-counts'){S.meta.students=n($('#cp-students').value);d.staff={supervisors:n($('#cp-supervisors').value),trainers:n($('#cp-trainers').value),other:n($('#cp-other').value)};commit();toast('حُفظت أعداد المستفيدين.');return}
  if(a==='add-person'){const name=$('#cp-person-name').value.trim();if(name.length<2)return toast('اكتب اسمًا واضحًا.');if(participants().some(p=>p.name===name))return toast('الاسم موجود مسبقًا.');d.people.push({id:newId('guest-'),name});commit();return}
  if(a==='del-person'){if(d.special.some(s=>s.id===id))return toast('احذف احتياج التغذية الخاص لهذا المشارك أولًا.');d.people=d.people.filter(p=>p.id!==id);commit();return}
- if(a==='del-meal'){if(confirm('حذف الوجبة من الخطة؟')){d.meals=d.meals.filter(m=>m.id!==id);commit()}return}
+ if(a==='del-meal'){
+  const target=d.meals.find(m=>String(m.id)===String(id));
+  if(!target)return toast('هذه الوجبة غير موجودة؛ حدّث الصفحة وحاول مرة أخرى.','error','top');
+  openModal('<div class="catering-modal"><h2>تأكيد حذف الوجبة</h2><p>هل تريد حذف «'+e(target.menu||type(target.type))+'» من اليوم '+n(target.day)+'؟</p><p class="help">سيتم حذف هذه الوجبة من اليوم المحدد فقط، دون حذف بقية الوجبات المتكررة أو تعديل جدول الأنشطة.</p><div class="cp-actions"><button type="button" data-act="close">إلغاء</button><button type="button" class="danger" data-cp="confirm-delete-meal" data-id="'+e(target.id)+'">تأكيد الحذف</button></div></div>');
+  return;
+ }
+ if(a==='confirm-delete-meal'){
+  const target=d.meals.find(m=>String(m.id)===String(id));
+  if(!target)return toast('لم يتم العثور على الوجبة المحددة.','error','top');
+  const previous=d.meals.slice();
+  d.meals=previous.filter(m=>String(m.id)!==String(id));
+  if(d.meals.length===previous.length)return toast('لم يتغير سجل الوجبات.','error','top');
+  if(!save()){
+   d.meals=previous;
+   return toast('تعذر حفظ الحذف. لم يتغير سجل الوجبات.','error','top');
+  }
+  let confirmed=false;
+  try{
+   const stored=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
+   const meals=stored?.camps?.find(c=>c.id===S.activeId)?.prep?.__catering?.meals;
+   confirmed=Array.isArray(meals)&&!meals.some(m=>String(m.id)===String(id));
+  }catch(err){console.error('Meal deletion verification failed',err)}
+  if(!confirmed){
+   d.meals=previous;
+   return toast('تعذر تأكيد حفظ الحذف. راجع مساحة التخزين ثم أعد المحاولة.','error','top');
+  }
+  closeModal();
+  render({preserveScroll:true});
+  toast('تم حذف الوجبة من اليوم '+n(target.day)+' وحُفظ التغيير بنجاح.','success','top');
+  return;
+ }
  if(a==='del-special'){if(confirm('حذف الحالة الغذائية؟')){d.special=d.special.filter(s=>s.id!==id);d.meals.forEach(m=>m.specialIds=(m.specialIds||[]).filter(x=>x!==id));commit()}return}
  if(a==='save-meal'){
   const m=d.meals.find(x=>x.id===id),chosenDays=mealChosenDays();
