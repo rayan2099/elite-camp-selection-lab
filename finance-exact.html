@@ -750,7 +750,9 @@ if(financeScoped){
 
 if(!Number.isFinite(Number(state.vatRate)))state.vatRate=15;
 if(!['inclusive','unclassified'].includes(state.otherRevenueTaxMode))state.otherRevenueTaxMode='unclassified';
-const $=id=>document.getElementById(id);const n=x=>Math.max(0,Number(x)||0);const fmt=x=>Math.round(x).toLocaleString('en-US');const sar=x=>fmt(x)+' ر.س';const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));const save=()=>{try{localStorage.setItem(financeStoreKey,JSON.stringify(state));}catch(e){alert('تعذّر حفظ البيانات محلياً. صدّر CSV واحفظ نسخة احتياطية.');}};
+const $=id=>document.getElementById(id);const n=x=>Math.max(0,Number(x)||0);const fmt=x=>Math.round(x).toLocaleString('en-US');const sar=x=>fmt(x)+' ر.س';const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));const save=()=>{try{localStorage.setItem(financeStoreKey,JSON.stringify(state));return true;}catch(e){console.error('Financial data save failed',e);alert('تعذّر حفظ البيانات محلياً. لم يتم تأكيد التغيير.');return false;}};
+const financeVerifySave=check=>{try{const current=JSON.parse(localStorage.getItem(financeStoreKey)||'null');return !!current&&check(current);}catch(e){console.error('Financial verification failed',e);return false;}};
+if(!Array.isArray(state.deletedItems))state.deletedItems=[];
 if(!Array.isArray(state.collections))state.collections=[];
 if(!Array.isArray(state.audit))state.audit=[];
 if(!state.approval||typeof state.approval!=='object')state.approval={status:'draft',version:0,approvedAt:null,snapshot:null};
@@ -772,8 +774,48 @@ function figures(){
  const vatSales=tuitionVat+otherVat,netRevenue=revenue-vatSales,actualRevenue=actualTuition()+actualOtherRevenue();
  return {base,reserve,explicitReserve,estimated,actual,committed,revenue,netRevenue,vatSales,tuitionGross,otherGross,actualRevenue,profit:netRevenue-estimated,remaining:estimated-actual-committed};
 }
+function financeDeletedMessage(message,type){
+ let element=document.getElementById('financeDeletedFeedback');
+ if(!element){
+  element=document.createElement('div');element.id='financeDeletedFeedback';element.setAttribute('role','status');
+  element.style.cssText='position:fixed;top:18px;right:18px;z-index:10000;max-width:470px;padding:12px 18px;color:white;border-radius:10px;font-weight:700;box-shadow:0 8px 25px #0002';
+  document.body.appendChild(element);
+ }
+ element.style.background=type==='success'?'#147d50':'#b42318';element.textContent=message;element.hidden=false;
+ clearTimeout(window.__financeDeletedToast);window.__financeDeletedToast=setTimeout(()=>element.hidden=true,5000);
+}
+function financeRenderDeletedItems(){
+ let panel=document.getElementById('financeDeletedPanel');
+ if(!panel){
+  const target=document.getElementById('expenses');
+  if(!target)return;
+  panel=document.createElement('section');panel.id='financeDeletedPanel';
+  panel.style.cssText='margin:18px 0;padding:12px 15px;border:1px solid var(--line);border-radius:10px;background:var(--surface)';
+  target.insertAdjacentElement('afterend',panel);
+ }
+ const deleted=state.deletedItems||[];
+ panel.innerHTML='<details><summary style="cursor:pointer;font-weight:700">البنود المالية المحذوفة ('+deleted.length+')</summary>'
+  +(deleted.length?deleted.map(entry=>{
+   const item=entry.item;
+   return '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)"><div><b>'+esc(item.name)+'</b><small style="display:block;color:var(--muted)">التصنيف: '+esc(state.categories.find(c=>c.id===item.cat)?.name||item.cat)+' · '+sar(item.amount)+'</small></div><button type="button" class="small" data-finance-restore="'+esc(item.id)+'">استعادة</button></div>';
+  }).join(''):'<p class="small">لا توجد بنود محذوفة.</p>')+'</details>';
+ panel.querySelectorAll('[data-finance-restore]').forEach(btn=>btn.onclick=()=>{
+  if(!guardBudget())return;
+  const id=btn.dataset.financeRestore,index=state.deletedItems.findIndex(x=>x.item.id===id);
+  if(index<0||state.items.some(x=>x.id===id))return financeDeletedMessage('تعذرت الاستعادة: البند غير متاح أو موجود مسبقاً.','error');
+  const prevItems=state.items.slice(),prevDeleted=state.deletedItems.slice(),prevAudit=state.audit.slice();
+  const item=structuredClone(state.deletedItems[index].item);
+  state.items.push(item);state.deletedItems.splice(index,1);audit('استعادة بند',item.name);
+  if(!save()||!financeVerifySave(data=>data.items.some(x=>x.id===id&&x.cat===item.cat)&&!data.deletedItems?.some(x=>x.item?.id===id))){
+   state.items=prevItems;state.deletedItems=prevDeleted;state.audit=prevAudit;
+   return financeDeletedMessage('تعذرت استعادة البند ولم تتغير البيانات.','error');
+  }
+  render();financeDeletedMessage('تمت استعادة «'+item.name+'» بنفس تصنيفها الأصلي.','success');
+ });
+}
 function render(){const f=figures();
 const locked=budgetLocked(),approval=state.approval;
+financeRenderDeletedItems();
 $('financeApprovalStatus').textContent=({draft:'مسودة',review:'بانتظار المراجعة',approved:'معتمدة محلياً'})[approval.status]||'مسودة';
 $('financeApprovalTotal').textContent=sar(f.estimated);
 $('financeApprovalVersion').textContent='الإصدار '+(approval.version||0)+(approval.approvedAt?' · '+approval.approvedAt.replace('T',' ').slice(0,16):' · غير معتمد');
@@ -838,13 +880,25 @@ document.querySelectorAll('[data-reverse-payment]').forEach(el=>el.onclick=()=>{
 });
 document.querySelectorAll('[data-pay]').forEach(el=>el.onclick=()=>openPayment(el.dataset.pay));
 document.querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{
- const item=state.items.find(x=>x.id===el.dataset.del);
  if(!guardBudget())return;
- if(item&&n(item.paid)>0){alert('لا يمكن حذف بند عليه مدفوعات. ألغِ الدفعات أولاً أو احتفظ بالبند كسجل مالي.');return;}
- if(item&&(item.attachments||[]).length){alert('يحتوي هذا البند على مستندات مرفقة. احفظها أو احذفها من المرفقات أولاً لتجنب ضياع المستندات.');return;}
- if(item&&confirm('حذف بند «'+item.name+'»؟ لا يمكن التراجع.')){
-  state.items=state.items.filter(x=>x.id!==el.dataset.del);audit('حذف بند',item.name);save();render();
+ const id=el.dataset.del,item=state.items.find(x=>x.id===id);
+ if(!item)return alert('لم يتم العثور على البند؛ يرجى تحديث الجدول.');
+ if(n(item.paid)>0||((item.payments||[]).length)){
+  alert('لا يمكن حذف بند له مدفوعات مسجلة حفاظاً على السجل المالي. ألغِ الدفعات من تفاصيل البند أولاً، ثم أعد المحاولة.');
+  return;
  }
+ if(!confirm('حذف البند المالي «'+item.name+'» من الميزانية؟ يمكن استعادته من قائمة البنود المحذوفة.'))return;
+ const previousItems=state.items.slice(),previousDeleted=state.deletedItems.slice(),previousAudit=state.audit.slice();
+ state.items=state.items.filter(x=>x.id!==id);
+ state.deletedItems.push({item:structuredClone(item),deletedAt:new Date().toISOString()});
+ audit('حذف بند',item.name+' · التصنيف: '+(state.categories.find(c=>c.id===item.cat)?.name||item.cat));
+ const ok=save()&&financeVerifySave(data=>!data.items.some(x=>x.id===id)&&data.deletedItems?.some(x=>x.item?.id===id&&x.item.cat===item.cat));
+ if(!ok){
+  state.items=previousItems;state.deletedItems=previousDeleted;state.audit=previousAudit;
+  alert('تعذّر حفظ حذف البند. لم تتغير قائمة البنود؛ يرجى المحاولة مجدداً.');return;
+ }
+ render();
+ financeDeletedMessage('تم حذف البند «'+item.name+'» وحفظه في المحذوفات.','success');
 });
 $('collectionsBody').innerHTML=state.collections.length?state.collections.slice().reverse().map(x=>
  `<tr><td>${esc(x.date||'—')}</td><td>${x.kind==='tuition'?'رسوم الطلاب':'إيراد آخر'}</td><td>${esc(x.payer||'—')}</td><td>${sar(x.amount)}${x.ref?'<div class="fin-meta">مرجع: '+esc(x.ref)+'</div>':''}</td><td><button class="del" data-collection-del="${esc(x.id)}">حذف</button></td></tr>`
@@ -973,7 +1027,9 @@ $('saveItem').onclick=()=>{
   const x=state.items.find(row=>row.id===editingExpenseId);if(!x)return;
   if(n(x.paid)>0&&status==='estimated'){alert('لا يمكن إعادة بند له مدفوعات فعلية إلى «تقديري».');return;}
   if(amount<n(x.paid)&&!confirm('التقدير الجديد أقل من إجمالي المدفوع فعلياً. هل تريد حفظه مع إظهار تجاوز التكلفة؟'))return;
-  Object.assign(x,{name,cat:$('itemCat').value,amount,
+  const category=$('itemCat').value;
+  if(!state.categories.some(c=>c.id===category)){alert('التصنيف المحدد غير صالح، لم يُحفظ التعديل.');return;}
+  Object.assign(x,{name,cat:category,amount,
    status:n(x.paid)>0?'paid':status,method:$('calcMethod').value,
    qty:n($('itemQty').value),days:n($('itemDays').value),
    unitPrice:n($('unitPrice').value),extra:n($('extraCost').value),
