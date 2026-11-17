@@ -498,7 +498,7 @@ html[data-theme=dark] .daynum{background:var(--accent);color:#22140d}
 #modal{border:none;padding:0;border-radius:16px;max-width:min(760px,94vw);width:100%;background:var(--surface);color:var(--fg);box-shadow:0 30px 90px #07101f55}
 #modal::backdrop{background:#07101f66;backdrop-filter:blur(3px)}
 #modal .inner{padding:22px;max-height:88vh;overflow:auto}
-#modal .x{position:absolute;inset-inline-end:14px;top:12px;width:32px;height:32px;display:grid;place-items:center;border:none;border-radius:50%;background:var(--soft);font-size:14px;color:var(--muted);padding:0;line-height:1}
+.elite-modal-alert{position:sticky;top:0;z-index:5;display:flex;align-items:flex-start;gap:10px;padding:12px 14px;margin:0 34px 15px 0;border:1px solid #d8847d;border-inline-start:4px solid #b42318;border-radius:10px;background:#fff1ef;color:#852b25;font-size:13px;font-weight:650;line-height:1.75}.elite-modal-alert[hidden]{display:none!important}.elite-modal-alert-message{flex:1;white-space:pre-line}.elite-invalid-field{outline:2px solid #b42318!important;outline-offset:2px}.elite-invalid-field:focus{outline-color:#e87536!important}html[data-theme=dark] .elite-modal-alert{background:#431d22;color:#ffe3dc;border-color:#a84742}#modal .x{position:absolute;inset-inline-end:14px;top:12px;width:32px;height:32px;display:grid;place-items:center;border:none;border-radius:50%;background:var(--soft);font-size:14px;color:var(--muted);padding:0;line-height:1}
 #toasts{position:fixed;inset-inline-end:20px;bottom:20px;z-index:1000;display:flex;flex-direction:column;gap:8px;max-width:min(520px,calc(100vw - 32px))}
 #toasts.toast-top{top:20px;bottom:auto;inset-inline-end:20px}
 .toast{background:var(--navy);color:#fff;padding:10px 15px;border-radius:10px;font-size:12.5px;box-shadow:0 12px 30px #07101f55;animation:pop .25s ease}
@@ -1576,7 +1576,53 @@ const save=()=>{
 };
 /* Persist the 2027 camps right away so the finance «all camps» view can list them. */
 try{const raw=JSON.parse(localStorage.getItem('elite-select-v1')||'null');if(!raw||!raw.seed2027)localStorage.setItem('elite-select-v1',JSON.stringify(S))}catch(e){}
+function modalValidationField(msg){
+ const v=String(msg||'').toLowerCase();
+ const groups=[
+  [/وقت|توقيت|بداية|نهاية|time|clock|تعارض/,['seTimeStartHour','seTimeEndHour','eaStartHour','eaEndHour','cm-time','spSlot']],
+  [/يوم|أيام|day|الفترة/,['p1days','eDay','spDay']],
+  [/تفريع|نشاط فرعي|subactivit/,['eBreakdown','eActivityType']],
+  [/رياضة|sport/,['selectedSport']],
+  [/اسم|name|عنوان/,['seAr','eaName','fin-name']],
+  [/سعر|تكلفة|مبلغ|ميزانية|amount|price/,['cm-price','cm-budget-limit','fin-planUnit']],
+  [/مورد|supplier/,['cm-supplier']],
+  [/مشرف|مسؤول|supervisor/,['cm-supervisor']],
+  [/وجبة|وجبات|meal/,['cm-menu']]
+ ];
+ for(const [regex,ids] of groups){
+  if(!regex.test(v))continue;
+  for(const id of ids){
+   const field=document.getElementById(id)||document.querySelector('#modal [name="'+id+'"]');
+   if(field&&field.closest('#modal'))return field;
+  }
+ }
+ return null;
+}
+function modalValidationError(msg){
+ const m=document.getElementById('modal');
+ if(!m?.open)return false;
+ const inner=document.getElementById('modalInner');
+ if(!inner)return false;
+ let panel=inner.querySelector('.elite-modal-alert');
+ if(!panel){
+  panel=document.createElement('div');
+  panel.className='elite-modal-alert';
+  panel.setAttribute('role','alert');
+  panel.setAttribute('aria-live','assertive');
+  panel.innerHTML='<span aria-hidden="true">⚠</span><span class="elite-modal-alert-message"></span>';
+  const close=inner.querySelector('.x');
+  if(close)close.insertAdjacentElement('afterend',panel);else inner.prepend(panel);
+ }
+ panel.hidden=false;
+ panel.querySelector('.elite-modal-alert-message').textContent=String(msg??'');
+ inner.querySelectorAll('.elite-invalid-field').forEach(el=>{el.classList.remove('elite-invalid-field');el.removeAttribute('aria-invalid')});
+ const field=modalValidationField(msg);
+ if(field){field.classList.add('elite-invalid-field');field.setAttribute('aria-invalid','true')}
+ inner.scrollTop=0;
+ return true;
+}
 function toast(msg,variant,placement){
+ if(variant!=='success'&&modalValidationError(msg))return;
  const t=document.getElementById('toasts');if(!t)return;
  const type=variant==='success'?' toast-success':variant==='error'?' toast-error':'';
  t.classList.toggle('toast-top',placement==='top');
@@ -4125,6 +4171,11 @@ function openModal(html){
 }
 const closeModal=()=>{const m=$('#modal');if(m.open)m.close();pendingProgramChoice=null};
 $('#modal').addEventListener('close',()=>{pendingProgramChoice=null;});
+$('#modal').addEventListener('cancel',event=>event.preventDefault());
+$('#modal').addEventListener('input',event=>{
+ const field=event.target.closest('.elite-invalid-field');
+ if(field){field.classList.remove('elite-invalid-field');field.removeAttribute('aria-invalid')}
+});
 
 function guideModal(){
   const steps=lang==='ar'?[
@@ -4998,7 +5049,7 @@ document.addEventListener('change',e=>{
     S.prep[key][k]=k==='done'?t.checked:t.value;save();if(k==='done')render();return}
 });
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')closeModal();
+  if(e.key==='Escape'&&$('#modal')?.open){e.preventDefault();return;}
   if((e.key==='/'||e.key==='k')&&page==='library'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();$('#q')&&$('#q').focus()}
 });
 
