@@ -2811,6 +2811,7 @@ function eliteDeleteAddedActivity(day,id){
 }
 function dayTimeline(day,opts){
   const map=slotMap(day), o=opts||{};
+  const extra=eliteAddedActivities(day).slice().sort((a,b)=>(eliteActivityRange(a)?.start||0)-(eliteActivityRange(b)?.start||0));
   return `<div class="tl">${DAY_TEMPLATE.map((original,idx)=>{if(scheduleRowRemoved(day,idx))return '';const row=scheduleRow(day,idx);
     const items=scheduleSlotPrograms(day,idx,map);
     const customActivity=slotHasCustomActivity(day,idx);
@@ -2835,7 +2836,14 @@ function dayTimeline(day,opts){
       <div class="tltime">${row.t}</div>
       <div class="tldot">${tico(row.ic)}</div>
       <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${row.slot&&!items.length&&!customActivity?`<small class="tlwhy" style="display:block">${T('هذا عنوان فترة في قالب الجدول، وليس نشاطًا مُعيّنًا.','This is a timetable category, not an assigned activity.')}</small>`:''}${body}${linkedMealCards}${(!row.slot||(customActivity&&!items.length))&&typeof window.campScheduleAssignInline==='function'?window.campScheduleAssignInline('activity',day,idx):''}<button type="button" class="small schedule-edit-control noprint" data-act="editScheduleRow:${day},${idx}" title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button>${can('select')?`<button type="button" class="small danger noprint" data-act="confirmScheduleRowRemove:${day},${idx}" title="${T('حذف هذه الفعالية من جدول اليوم فقط','Remove this activity from this day only')}">${T('حذف','Delete')}</button>`:''}</div>
-    </div>`}).join('')}</div>${eliteUnmatchedMeals(day)}`;
+    </div>`}).join('')}
+    ${extra.map(row=>`<div class="tlrow fixed elite-added-activity">
+      <div class="tltime">${esc(row.t)}</div><div class="tldot">${tico(row.ic)}</div>
+      <div class="tlbody"><b>${esc(row.ar)}</b><span class="pill good">${T('فعالية مضافة يدويًا','Manually added activity')}</span>
+      ${can('select')?`<button type="button" class="small noprint" data-act="editAddedActivity:${day},${row.id}">${T('تعديل','Edit')}</button>
+      <button type="button" class="small danger noprint" data-act="deleteAddedActivity:${day},${row.id}">${T('حذف','Delete')}</button>`:''}</div>
+    </div>`).join('')}
+    </div>${eliteUnmatchedMeals(day)}`;
 }
 
 function confirmScheduleRowRemove(day,index){
@@ -3146,7 +3154,11 @@ function programSection(){
         <div><span>${T('اليوم من المعسكر','Day in camp')}</span><b>${n} / ${S.meta.days.length}</b></div>
       </div>
       <div class="printonly print-section-label"><b>${T('التسلسل الزمني للأنشطة','ACTIVITY TIMELINE')}</b><span>${T('الوقت / الفعالية / البرنامج','Time / Activity / Program')}</span></div>
-      <div class="noprint" style="display:flex;align-items:center;gap:8px;margin:9px 0 10px"><span class="pill orange">${T("جدول قابل للتعديل","Editable schedule")}</span><span class="help">${T("اضغط تعديل بجانب أي فترة لتغيير وقتها أو اسم الفعالية، أو تعديل البرنامج لتغيير التفريعات والأيام.","Select Edit next to any slot to change its time or activity; Edit program changes subactivities and days.")}</span></div>
+      <div class="noprint" style="display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap;margin:9px 0 10px">
+      <span class="pill orange">${T("جدول قابل للتعديل","Editable schedule")}</span>
+      <span class="help">${T("أضف نشاطاً جديداً أو عدّل الموجود. الفترات المحذوفة لا تمنع استخدام وقتها من جديد.","Add or edit activities. Deleted intervals free their time for new activities.")}</span>
+      ${can('select')?`<button type="button" class="primary" data-act="addDayActivity:${n}">${T('+ إضافة فعالية','+ Add activity')}</button>`:''}
+      </div>
       ${dayTimeline(n,{why:true})}
       <div class="noprint" style="padding:11px 13px;border:1px solid var(--line);border-radius:10px;margin-top:10px">
          <div class="row wrap" style="gap:8px"><b>${T('تحليل اليوم','Daily schedule analysis')}</b><span class="pill">${T('دون احتساب الصلوات في تحليل التكرار','Prayers excluded from repetition counts')}</span></div>
@@ -4602,6 +4614,18 @@ document.addEventListener('click',function(event){
   else if(action==='removeScheduleRow')removeScheduleRow(pair[0],pair[1]);
   else if(action==='restoreScheduleRow')restoreScheduleRow(pair[0],pair[1]);
  }catch(error){console.error('Schedule activity action failed',error);toast(T('تعذر إكمال الإجراء، حاول مجدداً.','Could not complete this action.'),'error')}
+},true);
+document.addEventListener('click',function(event){
+ const button=event.target.closest('button[data-act^="addDayActivity:"],button[data-act^="saveAddedActivity:"],button[data-act^="editAddedActivity:"],button[data-act^="deleteAddedActivity:"]');
+ if(!button)return;
+ event.preventDefault();event.stopImmediatePropagation();
+ const text=button.dataset.act||'',sep=text.indexOf(':'),action=text.slice(0,sep),parts=text.slice(sep+1).split(',');
+ try{
+  if(action==='addDayActivity')eliteActivityModal(Number(parts[0]));
+  if(action==='saveAddedActivity')eliteSaveAddedActivity(Number(parts[0]),parts[1]||'');
+  if(action==='editAddedActivity')eliteActivityModal(Number(parts[0]),parts[1]);
+  if(action==='deleteAddedActivity')eliteDeleteAddedActivity(Number(parts[0]),parts[1]);
+ }catch(error){console.error('Custom activity action failed',error);toast(T('تعذر تنفيذ إجراء الفعالية.','Activity action failed.'),'error')}
 },true);
 /* Confirm removal from both timetable and subactivity editor before any deletion. */
 document.addEventListener('click',function(event){
