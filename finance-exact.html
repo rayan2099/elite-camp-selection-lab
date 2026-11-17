@@ -1988,10 +1988,10 @@ render();
   const cards=[...grid.querySelectorAll('.cat')];
   const used=c=>state.items.some(i=>i.cat===c.dataset.cat)||(c.dataset.cat==='reserve'&&n(state.reservePct)>0&&state.items.length>0);
   const anyUsed=cards.some(used);let hidden=0;
-  cards.forEach(c=>{const u=used(c);c.classList.toggle('ux-empty',!u);const hide=anyUsed&&!u&&!showAllCats&&selectedCat!==c.dataset.cat;c.classList.toggle('ux-collapsed',hide);if(hide)hidden++;
+  cards.forEach(c=>{const u=used(c);c.classList.toggle('ux-empty',!u);const hide=!u&&!showAllCats&&selectedCat!==c.dataset.cat;c.classList.toggle('ux-collapsed',hide);if(hide)hidden++;
    c.tabIndex=0;c.setAttribute('role','button');c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();c.click()}};
    c.onclick=()=>{selectedCat=selectedCat===c.dataset.cat?null:c.dataset.cat;render();financeBringIntoView(byId('expenses'))}});
-  if(anyUsed){const t=el('button',{type:'button',class:'ux-cat-toggle'});t.textContent=showAllCats?'إخفاء التصنيفات الفارغة':'＋ عرض التصنيفات الفارغة ('+hidden+')';t.onclick=()=>{showAllCats=!showAllCats;decorateCategories()};grid.querySelector('.ux-cat-toggle')?.remove();if(hidden||showAllCats)grid.appendChild(t)}
+  if(cards.length){const t=el('button',{type:'button',class:'ux-cat-toggle'});t.textContent=showAllCats?'إخفاء التصنيفات الفارغة':'＋ عرض التصنيفات الفارغة ('+hidden+')';t.onclick=()=>{showAllCats=!showAllCats;decorateCategories()};grid.querySelector('.ux-cat-toggle')?.remove();if(hidden||showAllCats)grid.appendChild(t)}
  }
  function decorateLedger(){
   const body=byId('expensesBody');if(!body)return;
