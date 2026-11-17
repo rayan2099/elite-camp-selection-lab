@@ -4078,26 +4078,15 @@ function confirmTrayRemove(id){
 }
 function patch(id,k,v){
   const x=S.selected.find(s=>s.id===id);if(!x)return;
-  x[k]=k==='day'?(v?+v:null):v;S.draft=false;
+  const nextValue=k==='day'?(v?+v:null):v;
+  if(k==='day'&&x.day!==nextValue)x.slot=null;
+  x[k]=nextValue;S.draft=false;
   const it=ITEM(id);
   logIt(`تعديل «${it.ar}»: ${k==='day'?'اليوم '+v:k==='pri'?(v==='core'?'أساسي':'مساند'):'تحديث المبرر'}`,`Updated “${it.en}”: ${k}`);
   save();
 }
 function autoPlan(){
-  if(!can('select'))return;
-  const order=[...S.selected].sort((a,b)=>{
-    const A=ITEM(a.id),B=ITEM(b.id);
-    if(a.pri!==b.pri)return a.pri==='core'?-1:1;
-    return (B.load||0)-(A.load||0);
-  });
-  const loads=S.meta.days.map(()=>0);
-  order.forEach(x=>{
-    let best=0;
-    for(let i=0;i<loads.length;i++){if(loads[i]<loads[best])best=i}
-    x.day=best+1;loads[best]++;
-  });
-  logIt(T('توزيع تلقائي متوازن على أيام المعسكر','Auto-distributed across camp days').ar||'توزيع تلقائي متوازن على أيام المعسكر','Auto-distributed across camp days');
-  save();render();toast(T('وُزّعت البرامج على الأيام بأقل حمل.','Programs distributed with the lowest daily load.'));
+ return toast(T('التوزيع التلقائي متوقف. اختر اليوم والفترة لكل برنامج يدوياً.','Automatic distribution is disabled; schedule each program manually.'),'error');
 }
 
 /* ---------- النوافذ ---------- */
@@ -4482,7 +4471,9 @@ function saveEdit(id){
   const previousDraft=S.draft;
   const previousLogLength=S.log.length;
   x.pri=$('#ePri').value;
-  x.day=$('#eDay').value?+$('#eDay').value:null;
+  const chosenDay=$('#eDay').value?+$('#eDay').value:null;
+  if(x.day!==chosenDay)x.slot=null; // Changing the day requires explicitly selecting a new time slot.
+  x.day=chosenDay;
   x.why=$('#eWhy').value.trim();
   x.activityType=$('#eActivityType').value;
   if(item?.t==='sport')x.sportChoice=sport;
@@ -4632,6 +4623,7 @@ function exportCsv(){
 function addBrick(id){beginProgramChoice(id)}
 function placeBrick(id,day){
   const x=S.selected.find(s=>s.id===id);if(!x)return;
+  if(x.day!==(day>0?day:null))x.slot=null;
   x.day=day>0?day:null;held=null;
   const it=ITEM(id);
   logIt(day>0?`ثُبّتت «${it.ar}» في اليوم ${day}`:`أُعيدت «${it.ar}» إلى الصندوق`,day>0?`“${it.en}” snapped to day ${day}`:`“${it.en}” returned to tray`);
