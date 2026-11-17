@@ -2552,7 +2552,7 @@ function slotMap(day){
  return map;
 }
 function pendingSchedulePrograms(day){
- return S.selected.filter(x=>!SLOTS.includes(x.slot)&&(!day||!x.day||x.day===day)).map(x=>({x,i:ITEM(x.id)})).filter(o=>o.i);
+ return S.selected.filter(x=>!SLOTS.includes(x.slot)&&(day===undefined||day===null&&!x.day||Number.isInteger(day)&&x.day===day)).map(x=>({x,i:ITEM(x.id)})).filter(o=>o.i);
 }
 function scheduleRow(day,index){
  const override=S.prep?.__scheduleEdits?.[day]?.[index]||{};
@@ -3266,6 +3266,7 @@ function stepPlan(){
       <span class="help">${T('معاينة أولية لجدول يومي مبني على قالب ثابت؛ راجع أوقات الصلاة والجلسات والأنشطة قبل التنفيذ.','A preview based on a fixed template. Verify prayer times, sessions and activities before use.')}</span></div>
       <button class="primary" data-act="print">${T('طباعة','Print')}</button>
     </div>
+    ${elitePendingScheduleList(null)}
     <div class="spacer schedule-print-pages">${programSection()}</div>
     <div class="grid cols2 spacer print-supplement">
       <div class="card">
