@@ -5,7 +5,7 @@ const e=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&g
 const types=[['breakfast','إفطار'],['lunch','غداء'],['dinner','عشاء'],['snack','وجبة خفيفة'],['other','أخرى']];
 const needs=['المكسرات','الحليب','البيض','القمح/الجلوتين','السمسم','الأسماك','المحار','الصويا','أخرى'];
 const n=v=>Math.max(0,Math.floor(Number(v)||0)),money=v=>Math.max(0,Number(v)||0),fmt=v=>money(v).toLocaleString('en-US',{maximumFractionDigits:2});
-let section='schedule',dayChoice='all';
+let section='schedule',dayChoice='all',budgetEditedField='person';
 function db(){
  S.prep??={};
  if(!S.prep.__catering){
@@ -52,15 +52,25 @@ const cost=m=>regularUnits(m)*money(m.unitPrice)+specialsOf(m).length*money(m.sp
 function mealBudget(){
  const d=db();
  d.budget??={perStudent:50,period:'day',equipment:0};
+  d.budget.period='day';
  return d.budget;
 }
-function mealBudgetSummary(){
- const d=db(),b=mealBudget();
- const students=Math.max(1,n(S.meta.students)),days=Math.max(1,S.meta.days.length);
- const limit=money(b.perStudent)*students*(b.period==='camp'?1:days);
- const totalCost=d.meals.reduce((sum,m)=>sum+cost(m),0)+money(b.equipment);
- const rate=limit>0?totalCost/limit:(totalCost>0?2:0);
- return {limit,totalCost,rate,remaining:limit-totalCost,level:rate>1?'danger':rate>=0.75?'warning':'success'};
+function mealBudgetSummary(day){
+ const d=db(),b=mealBudget(),count=total(),days=S.meta.days.length;
+ const cap=money(b.perStudent)*count,dayIndex=Number(day);
+ const selected=Number.isInteger(dayIndex)&&dayIndex>=1&&dayIndex<=days?dayIndex:1;
+ const dayCost=d.meals.filter(m=>Number(m.day)===selected).reduce((v,m)=>v+cost(m),0);
+ const allCost=d.meals.reduce((v,m)=>v+cost(m),0);
+ const info=(limit,spent)=>{const rate=limit?spent/limit:spent?2:0;return {limit,spent,rate,remaining:limit-spent,level:rate>1?'danger':rate>=.75?'warning':'success'}};
+ return {daily:info(cap,dayCost),cumulative:info(cap*days,allCost),selected,count,days,equipment:money(b.equipment)};
+}
+function mealBudgetGauge(title,m){
+ const pct=Math.round(m.rate*100),color=m.level==='danger'?'#c74c3d':m.level==='warning'?'#d28c27':'#168660';
+ return '<div class="cp-budget-panel cp-budget-'+m.level+'"><h3>'+e(title)+'</h3><div class="cp-budget-content"><div class="cp-budget-gauge" role="meter" aria-label="'+e(title)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.min(100,pct)+'" style="--budget-progress:'+Math.min(100,pct)+'%;--budget-tone:'+color+'"><div class="cp-budget-gauge-inner"><strong>'+pct+'%</strong><small>المستخدم</small></div></div><div class="cp-budget-values">'+
+ '<div class="cp-budget-value"><span>السقف</span><strong>'+fmt(m.limit)+' ر.س</strong></div>'+
+ '<div class="cp-budget-value"><span>التكلفة</span><strong>'+fmt(m.spent)+' ر.س</strong></div>'+
+ '<div class="cp-budget-value"><span>'+(m.remaining<0?'التجاوز':'المتبقي')+'</span><strong>'+fmt(Math.abs(m.remaining))+' ر.س</strong></div></div></div>'+
+ '<div class="cp-budget-status '+m.level+'">'+(m.level==='danger'?'تجاوز السقف':m.level==='warning'?'قريب من السقف':'ضمن الميزانية')+'</div></div>';
 }
 const type=k=>types.find(x=>x[0]===k)?.[1]||'وجبة';
 function issues(m){
@@ -89,7 +99,7 @@ function pageMeals(){
  const d=db(),planned=d.meals.length,ready=d.meals.filter(m=>issues(m).length===0).length;
  const participantsCount=total(),plannedDays=new Set(d.meals.map(m=>m.day)).size,days=S.meta.days.length;
  const completion=planned?Math.round(ready/planned*100):0;
- const sum=d.meals.reduce((x,m)=>x+cost(m),0),budget=mealBudgetSummary(),pending=planned-ready,notPlanned=Math.max(0,days-plannedDays);
+ const sum=d.meals.reduce((x,m)=>x+cost(m),0),budget=mealBudgetSummary(dayChoice),pending=planned-ready,notPlanned=Math.max(0,days-plannedDays);
  const tabs=[['schedule','خطة الوجبات',planned],['counts','الأعداد والفريق',participantsCount],['special','التغذية الخاصة',d.special.length],['audit','مراجعة الجاهزية',pending+notPlanned]];
  return '<div class="catering-workspace">'+
  '<section class="catering-hero"><div><div class="catering-kicker">أكاديمية النخبة · الإدارة التشغيلية</div><h1>تجهيز الوجبات والتغذية</h1><p>نظرة واحدة على خطة الطعام: ماذا سيُقدَّم، ولمن، وكم نحتاج، ومن المسؤول عن الاستلام والتوزيع.</p></div>'+
@@ -99,15 +109,10 @@ function pageMeals(){
  '<div class="catering-summary-item"><small>الوجبات المخططة</small><strong>'+planned+'</strong><span>'+plannedDays+' من '+days+' أيام بها وجبات</span></div>'+
  '<div class="catering-summary-item"><small>الاحتياجات الغذائية الخاصة</small><strong>'+d.special.length+'</strong><span>يلزم توثيقها مع الأسرة والمورد</span></div>'+
  '<div class="catering-summary-item"><small>التكلفة التقديرية</small><strong>'+fmt(sum)+' <small>ر.س</small></strong><span>تشمل الأطباق الجماعية والفردية والخاصة</span></div></section>'+
- '<section class="cp-budget-summary cp-budget-'+budget.level+'" aria-label="مراقبة ميزانية الوجبات">'+
- '<div class="cp-budget-top"><div class="cp-budget-heading"><span class="cp-budget-kicker">الرقابة المالية · الوجبات والتجهيزات</span><h2>متابعة سقف الصرف</h2><p>راقب التكاليف المقدّرة مقارنة بالسقف المحدد للطلاب؛ لا يُمنع تسجيل أي مصروف.</p></div><button type="button" class="cp-budget-edit" data-cp="budget-settings">⚙ إعداد السقف</button></div>'+
- '<div class="cp-budget-content">'+
- '<div class="cp-budget-gauge" style="--budget-progress:'+Math.max(0,Math.min(100,budget.rate*100))+'%;--budget-tone:'+(budget.level==='danger'?'#c74c3d':budget.level==='warning'?'#d28c27':'#168660')+'" role="meter" aria-label="نسبة التكاليف المقدرة إلى سقف الصرف" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.min(100,Math.round(budget.rate*100))+'"><div class="cp-budget-gauge-inner"><strong>'+Math.round(budget.rate*100)+'%</strong><small>نسبة السقف</small></div></div>'+
- '<div class="cp-budget-values">'+
- '<div class="cp-budget-value"><span>السقف المعتمد للمتابعة</span><strong>'+fmt(budget.limit)+' <small>ر.س</small></strong><small>'+fmt(mealBudget().perStudent)+' ر.س للطالب · '+(mealBudget().period==='camp'?'لكامل المعسكر':'لكل يوم')+'</small></div>'+
- '<div class="cp-budget-value"><span>التكاليف المقدّرة</span><strong>'+fmt(budget.totalCost)+' <small>ر.س</small></strong><small>الوجبات والتجهيزات المسجّلة</small></div>'+
- '<div class="cp-budget-value cp-budget-remaining"><span>'+(budget.remaining<0?'التجاوز عن السقف':'المتبقي من السقف')+'</span><strong>'+fmt(Math.abs(budget.remaining))+' <small>ر.س</small></strong><small>'+(budget.remaining<0?'تحتاج الميزانية إلى مراجعة':'متاح وفق التقديرات الحالية')+'</small></div></div></div>'+
- '<div class="cp-budget-bottom"><div class="cp-budget-status '+budget.level+'"><span class="cp-budget-status-dot"></span>'+(budget.level==='danger'?'تجاوزت التكاليف السقف المحدد':budget.level==='warning'?'اقتربت التكاليف من السقف المحدد':'التكاليف ضمن المستوى المنخفض')+'</div><div class="cp-budget-comparison"><span>0%</span><div class="cp-budget-meter" aria-hidden="true"><span class="'+budget.level+'" style="width:'+Math.min(100,Math.max(0,budget.rate*100))+'%"></span><i style="left:75%"></i></div><span>100%</span></div><small class="cp-budget-note">الألوان: أخضر أقل من 75% · برتقالي من 75% إلى 100% · أحمر عند تجاوز السقف</small></div></section>'+
+ '<section class="cp-budget-summary" aria-label="ميزانية الوجبات">'+
+ '<div class="cp-budget-top"><div class="cp-budget-heading"><span class="cp-budget-kicker">الرقابة المالية · التغذية</span><h2>ميزانية الطعام اليومية والتراكمية</h2><p>سقف '+fmt(mealBudget().perStudent)+' ر.س لكل مستفيد يوميًا يشمل الإفطار والغداء والعشاء والسناكات معًا، وليس لكل وجبة.</p></div><button type="button" class="cp-budget-edit" data-cp="budget-settings">⚙ إعداد الميزانية</button></div>'+
+ '<div class="cp-budget-dual">'+mealBudgetGauge('اليوم '+budget.selected,budget.daily)+mealBudgetGauge('التراكمي لجميع أيام المعسكر',budget.cumulative)+'</div>'+
+ '<p class="cp-budget-note">سقف اليوم '+fmt(budget.daily.limit)+' ريالًا ('+budget.count+' مستفيدًا)، وسقف المعسكر '+fmt(budget.cumulative.limit)+' ريالًا ('+budget.days+' أيام). اختر يومًا من شريط الأيام لتغيير المؤشر اليومي. تكلفة التجهيزات '+fmt(budget.equipment)+' ريالًا منفصلة عن ميزانية الطعام.</p></section>'+
   '<section class="catering-progress"><div><div class="catering-progress-title"><strong>جاهزية الوجبات المسجلة</strong><span>'+ready+' من '+planned+' مستوفية</span></div><div class="catering-progress-track" role="progressbar" aria-valuenow="'+completion+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+completion+'%"></span></div><small>'+(pending?pending+' وجبة تحتاج استكمال المتطلبات. ':'')+(notPlanned?notPlanned+' أيام لم تُسجّل لها وجبات.':'راجع أعداد الحضور قبل تأكيد الكميات.')+'</small></div><button type="button" data-cp="tab" data-val="audit">عرض النواقص ←</button></section>'+
  '<nav class="cp-tabs" aria-label="أقسام إدارة التغذية">'+tabs.map(([id,label,num])=>'<button type="button" data-cp="tab" data-val="'+id+'" class="'+(section===id?'active':'')+'" aria-current="'+(section===id?'page':'false')+'">'+label+' <span class="number">'+num+'</span></button>').join('')+'</nav>'+
  '<main class="catering-section">'+(section==='schedule'?scheduleView():section==='counts'?countsView():section==='special'?specialView():auditView())+'</main>'+
@@ -424,12 +429,13 @@ function specialModal(id){
 }
 function commit(){save();render({preserveScroll:true})}
 function mealBudgetSettings(){
- const b=mealBudget();
- openModal('<div class="catering-modal"><h2>إعداد سقف الصرف</h2><p class="help">يُستخدم للمراقبة المالية ولا يغير فواتير الموردين أو قيود الإدارة المالية.</p><div class="cp-form">'
-  +'<label>السقف لكل طالب (ر.س)<input type="number" min="0" step=".01" id="cm-budget-limit" value="'+money(b.perStudent)+'"></label>'
-  +'<label>دورية السقف<select id="cm-budget-period"><option value="day" '+(b.period==='day'?'selected':'')+'>لكل يوم</option><option value="camp" '+(b.period==='camp'?'selected':'')+'>للمعسكر بالكامل</option></select></label>'
-  +'<label>تكلفة التجهيزات (ر.س)<input type="number" min="0" step=".01" id="cm-budget-equipment" value="'+money(b.equipment)+'"></label></div>'
-  +'<div class="cp-actions"><button data-act="close">إلغاء</button><button class="primary" data-cp="budget-save">حفظ السقف</button></div></div>');
+ const b=mealBudget(),people=total();budgetEditedField='person';
+ openModal('<div class="catering-modal"><h2>إعداد ميزانية التغذية اليومية</h2><p class="help">ميزانية واحدة يوميًا للشخص تشمل الإفطار والغداء والعشاء والسناكات. تعديل أي حقل يعيد حساب الآخر.</p><div class="cp-form">'+
+ '<label>السقف اليومي للشخص (ر.س)<input type="number" min="0" step=".01" id="cm-budget-limit" value="'+money(b.perStudent)+'"></label>'+
+ '<label>إجمالي السقف اليومي ('+people+' مستفيدًا) (ر.س)<input type="number" min="0" step=".01" id="cm-budget-daily-total" value="'+Number((money(b.perStudent)*people).toFixed(2))+'"></label>'+
+ '<label>تكلفة تجهيزات منفصلة (ر.س)<input type="number" min="0" step=".01" id="cm-budget-equipment" value="'+money(b.equipment)+'"></label>'+
+ '<p class="help full">مثال: 35 مستفيدًا × 50 ريالًا = 1,750 ريالًا في اليوم.</p></div>'+
+ '<div class="cp-actions"><button data-act="close">إلغاء</button><button class="primary" data-cp="budget-save">حفظ الميزانية</button></div></div>');
 }
 function handle(b){
  const a=b.dataset.cp,id=b.dataset.id,d=db();
@@ -455,8 +461,12 @@ function handle(b){
  if(a==='budget-settings'){mealBudgetSettings();return}
  if(a==='budget-save'){
   const old=JSON.stringify(mealBudget()),b=mealBudget();
-  b.perStudent=money($('#cm-budget-limit').value);b.period=$('#cm-budget-period').value==='camp'?'camp':'day';b.equipment=money($('#cm-budget-equipment').value);
-  save();
+  const p=$('#cm-budget-limit')?.value,daily=$('#cm-budget-daily-total')?.value,eq=$('#cm-budget-equipment')?.value,people=total();
+  if([p,daily,eq].some(v=>v===''||!Number.isFinite(+v)||+v<0))return toast('أدخل مبالغ صحيحة غير سالبة.','error');
+  if(budgetEditedField==='daily'&&!people)return toast('أدخل أعداد المستفيدين أولًا.','error');
+  b.perStudent=budgetEditedField==='daily'?Number((+daily/people).toFixed(6)):+p;
+  b.period='day';b.equipment=+eq;
+  if(!save()){db().budget=JSON.parse(old);return;}
   let ok=false;try{const raw=JSON.parse(localStorage.getItem('elite-select-v1')||'null');const persisted=raw?.camps?.find(c=>c.id===S.activeId)?.prep?.__catering?.budget;ok=!!persisted&&persisted.perStudent===b.perStudent&&persisted.period===b.period&&persisted.equipment===b.equipment;}catch(error){console.error('Budget save check failed',error)}
   if(!ok){db().budget=JSON.parse(old);return toast('تعذر حفظ السقف المالي.','error')}
   closeModal();render({preserveScroll:true});toast('تم حفظ سقف الصرف بنجاح.','success','top');return;
@@ -569,6 +579,14 @@ document.head.append(auditAccessStyle);
 const budgetStyle=document.createElement('style');
 budgetStyle.textContent="\n.cp-budget-summary{--budget-border:#dde5ed;--budget-tone:#168660;margin:16px 0 20px;padding:20px 22px;border:1px solid var(--budget-border);background:var(--surface);border-radius:17px;box-shadow:0 5px 22px rgba(18,39,67,.035);direction:rtl}\n.cp-budget-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:18px}\n.cp-budget-kicker{display:block;font-size:11px;font-weight:700;color:#a45e28;margin-bottom:4px}\n.cp-budget-heading h2{margin:0;font-size:19px;font-weight:800;letter-spacing:-.3px;color:var(--fg)}\n.cp-budget-heading p{font-size:12px;color:var(--muted);margin:5px 0 0;line-height:1.7}\n.cp-budget-edit{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--soft);color:var(--fg);font:inherit;font-weight:700;font-size:12px;border-radius:9px;padding:10px 15px;white-space:nowrap;cursor:pointer}\n.cp-budget-edit:hover{border-color:var(--accent);background:var(--accentsoft)}\n.cp-budget-content{display:flex;align-items:center;gap:22px}\n.cp-budget-gauge{--budget-progress:0%;--budget-tone:#168660;flex:0 0 156px;width:156px;height:156px;border-radius:50%;background:conic-gradient(var(--budget-tone) var(--budget-progress),#e9eff4 0);display:grid;place-items:center;position:relative;direction:ltr}\n.cp-budget-gauge::before{content:'';position:absolute;inset:13px;border-radius:50%;background:var(--surface)}\n.cp-budget-gauge-inner{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;direction:rtl;color:var(--fg)}\n.cp-budget-gauge-inner strong{font-size:27px;line-height:1;font-weight:850;font-variant-numeric:tabular-nums}\n.cp-budget-gauge-inner small{font-size:11px;color:var(--muted)}\n.cp-budget-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;flex:1;min-width:0}\n.cp-budget-value{display:flex;flex-direction:column;justify-content:center;gap:9px;min-width:0;padding:16px 15px;background:var(--soft);border:1px solid var(--line);border-radius:12px}\n.cp-budget-value>span{font-size:11.5px;font-weight:700;color:var(--muted)}\n.cp-budget-value strong{font-weight:850;font-size:clamp(17px,1.7vw,24px);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--fg)}\n.cp-budget-value strong small{font-size:12px;font-weight:650;color:var(--muted)}\n.cp-budget-value>small{font-size:10.5px;color:var(--muted);line-height:1.5}\n.cp-budget-remaining{background:rgba(22,134,96,.06);border-color:rgba(22,134,96,.19)}\n.cp-budget-danger .cp-budget-remaining{background:rgba(199,76,61,.06);border-color:rgba(199,76,61,.23)}\n.cp-budget-bottom{border-top:1px solid var(--line);padding-top:14px;margin-top:17px;display:grid;grid-template-columns:auto minmax(150px,1fr);align-items:center;gap:10px 20px}\n.cp-budget-status{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:750;white-space:nowrap}\n.cp-budget-status.success{color:#168660}.cp-budget-status.warning{color:#b47b1b}.cp-budget-status.danger{color:#b6382e}\n.cp-budget-status-dot{width:8px;height:8px;flex:none;border-radius:50%;background:currentColor}\n.cp-budget-comparison{display:flex;gap:8px;align-items:center;direction:ltr}\n.cp-budget-comparison>span{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}\n.cp-budget-meter{height:9px;position:relative;background:#e7edf3;border-radius:100px;overflow:hidden;flex:1}\n.cp-budget-meter>span{display:block;height:100%;border-radius:100px;transition:width .25s ease}\n.cp-budget-meter .success{background:#168660}.cp-budget-meter .warning{background:#d28c27}.cp-budget-meter .danger{background:#c74c3d}\n.cp-budget-meter>i{position:absolute;top:0;bottom:0;border-left:2px solid rgba(60,77,95,.55)}\n.cp-budget-note{grid-column:1/-1;color:var(--muted);font-size:10px}\n.cm-days{border:1px solid var(--line);padding:10px;border-radius:9px}\n@media(max-width:850px){.cp-budget-content{gap:15px}.cp-budget-gauge{width:120px;height:120px;flex-basis:120px}.cp-budget-values{grid-template-columns:repeat(3,minmax(0,1fr))}.cp-budget-value{padding:12px}.cp-budget-value strong{font-size:17px}}\n@media(max-width:650px){.cp-budget-summary{padding:15px}.cp-budget-content{flex-direction:column;align-items:stretch}.cp-budget-gauge{align-self:center;width:140px;height:140px;flex-basis:140px}.cp-budget-values{grid-template-columns:1fr}.cp-budget-value{padding:13px}.cp-budget-value strong{font-size:22px}.cp-budget-bottom{grid-template-columns:1fr}.cp-budget-status{white-space:normal}}\n";
 document.head.append(budgetStyle);
+const dualStyle=document.createElement('style');dualStyle.textContent='.cp-budget-dual{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.cp-budget-panel{min-width:0;border:1px solid var(--line);border-radius:12px;padding:16px}.cp-budget-panel h3{margin:0 0 14px;font-size:16px}.cp-budget-panel .cp-budget-content{gap:12px}.cp-budget-panel .cp-budget-gauge{width:110px;height:110px;flex-basis:110px}.cp-budget-panel .cp-budget-values{grid-template-columns:1fr;gap:5px}.cp-budget-panel .cp-budget-value{padding:8px;gap:4px}.cp-budget-panel .cp-budget-value strong{font-size:17px}.cp-budget-panel .cp-budget-status{margin-top:12px}.cp-budget-summary>.cp-budget-note{display:block;margin-top:14px}@media(max-width:1100px){.cp-budget-dual{grid-template-columns:1fr}}@media(max-width:650px){.cp-budget-panel .cp-budget-gauge{align-self:center}}';document.head.append(dualStyle);
+document.addEventListener('input',ev=>{
+ if(!ev.target.closest('#modal'))return;
+ const p=$('#cm-budget-limit'),d=$('#cm-budget-daily-total'),field=ev.target.id;
+ if(!p||!d)return;
+ if(field==='cm-budget-limit'){budgetEditedField='person';d.value=String(Number((money(p.value)*total()).toFixed(2)));}
+ if(field==='cm-budget-daily-total'){budgetEditedField='daily';if(total())p.value=String(Number((money(d.value)/total()).toFixed(6)));}
+},true);
 document.addEventListener('change',ev=>{
  if(!ev.target.closest('#modal'))return;
  if(ev.target.id==='cm-time-source'||ev.target.id==='cm-type'||ev.target.hasAttribute('data-cm-day'))mealSchedulePreview();
