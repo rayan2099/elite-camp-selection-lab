@@ -2604,13 +2604,21 @@ function eliteDuration(n){
 function eliteScheduleStats(day){
  const rows=DAY_TEMPLATE.map((r,i)=>({row:scheduleRow(day,i),index:i})),sessions=[],totals={program:0,other:0,prayer:0};
  for(const {row,index} of rows){
-  if(scheduleRowRemoved(day,index))continue;
+  if(scheduleRowRemoved(day,index)||elitePlaceholderCovered(day,index))continue;
   const parts=String(row.t||'').split(/\s*[–-]\s*/);
   if(parts.length!==2)continue;
   const start=eliteTimeMinutes(parts[0]),end=eliteTimeMinutes(parts[1]);
   if(start===null||end===null||end<=start)continue;
   const minutes=end-start,type=row.ic==='prayer'?'prayer':row.slot?'program':'other';
   totals[type]+=minutes;sessions.push({index,start,end,minutes,type,row});
+ }
+ for(const activity of eliteAddedActivities(day)){
+  const span=eliteActivityRange(activity);
+  if(span){
+   const minutes=span.end-span.start;
+   totals.other+=minutes;
+   sessions.push({index:-1,start:span.start,end:span.end,minutes,type:'other',row:activity});
+  }
  }
  // Totals are sums of allocated minutes, which can exceed elapsed clock time if
  // two activities overlap. Report both measures rather than silently double count.
@@ -2628,7 +2636,7 @@ function eliteScheduleStats(day){
   if(duration>0)overlaps.push({first:x,second:y,minutes:duration});
  }
  const scheduled=totals.program+totals.other+totals.prayer;
- return {sessions,totals,scheduled,actualMinutes,overlapMinutes,overlaps,unfilled:sessions.filter(s=>slotIsUnassigned(day,s.index))};
+ return {sessions,totals,scheduled,actualMinutes,overlapMinutes,overlaps,unfilled:sessions.filter(s=>s.index>=0&&slotIsUnassigned(day,s.index))};
 }
 function eliteSuggestions(day,slot){
  const preferred={badge:['lead','values','skills'],elite:['lead','skills','values'],workshop:['skills','stem','values'],sport:['sport'],culture:['values','lead','trips']}[slot]||[];
@@ -2705,7 +2713,7 @@ function eliteDayAnalysis(day){
       ${stat.overlaps.length?`<details class="elite-audit-overlaps"><summary>${T('عرض الفعاليات المتداخلة','View overlapping activities')} (${stat.overlaps.length})</summary>${stat.overlaps.map(pair=>`<div>${esc(T(pair.first.row.ar,pair.first.row.en))} × ${esc(T(pair.second.row.ar,pair.second.row.en))} · ${eliteQuantity(pair.minutes,'minute')}</div>`).join('')}</details>`:''}
     </section>
     <div class="elite-time-rows">
-      ${stat.sessions.map(a=>`<div class="elite-time-row" style="--time-accent:${colors[a.type]}" dir="rtl"><span class="elite-time-name">${esc(T(a.row.ar,a.row.en))}${slotIsUnassigned(day,a.index)?` <em>${T('(شاغرة)','(empty)')}</em>`:''}</span><time dir="ltr">${eliteClock(a.start)} – ${eliteClock(a.end)}</time><strong>${eliteQuantity(a.minutes,'minute')}</strong></div>`).join('')}
+      ${stat.sessions.map(a=>`<div class="elite-time-row" style="--time-accent:${colors[a.type]}" dir="rtl"><span class="elite-time-name">${esc(T(a.row.ar,a.row.en))}${a.index>=0&&slotIsUnassigned(day,a.index)?` <em>${T('(شاغرة)','(empty)')}</em>`:''}</span><time dir="ltr">${eliteClock(a.start)} – ${eliteClock(a.end)}</time><strong>${eliteQuantity(a.minutes,'minute')}</strong></div>`).join('')}
     </div>
     ${stat.unfilled.length?`<div class="elite-reallocate" dir="rtl">
       <div class="elite-reallocate-header"><div><b>${T('فرص إعادة التوزيع','Reallocation opportunities')}</b><p class="help">${T('اختر برنامجًا لإضافته مباشرة للجلسة الشاغرة.','Choose a program to add directly to the empty session.')}</p></div><span class="pill orange"><b>${eliteQuantity(stat.unfilled.reduce((n,a)=>n+a.minutes,0),'minute')}</b> · <b>${eliteQuantity(stat.unfilled.length,'session')}</b></span></div>
@@ -2756,10 +2764,18 @@ function eliteActivityRange(row){
  const start=eliteTimeMinutes(parts[0]),end=eliteTimeMinutes(parts[1]);
  return start!==null&&end!==null&&end>start?{start,end}:null;
 }
+function elitePlaceholderCovered(day,index){
+ if(!slotIsUnassigned(day,index))return false;
+ const slot=eliteActivityRange(scheduleRow(day,index));
+ return !!slot&&eliteAddedActivities(day).some(activity=>{
+  const span=eliteActivityRange(activity);
+  return !!span&&span.start<=slot.start&&span.end>=slot.end;
+ });
+}
 function eliteActivityConflicts(day,start,end,exclude){
  const rows=[];
  DAY_TEMPLATE.forEach((_,i)=>{
-  if(scheduleRowRemoved(day,i))return;
+  if(scheduleRowRemoved(day,i)||slotIsUnassigned(day,i))return;
   const row=scheduleRow(day,i),span=eliteActivityRange(row);
   if(span&&start<span.end&&end>span.start)rows.push(row.ar);
  });
@@ -2859,8 +2875,17 @@ function elitePendingScheduleList(day){
 }
 function dayTimeline(day,opts){
   const map=slotMap(day), o=opts||{};
-  const extra=eliteAddedActivities(day).slice().sort((a,b)=>(eliteActivityRange(a)?.start||0)-(eliteActivityRange(b)?.start||0));
-  return `<div class="tl">${DAY_TEMPLATE.map((original,idx)=>{if(scheduleRowRemoved(day,idx))return '';const row=scheduleRow(day,idx);
+  const timelineEntries=[
+    ...DAY_TEMPLATE.map((original,idx)=>({original,idx,added:false,start:eliteTimeMinutes(scheduleRow(day,idx).t.split(/\\s*[–-]\\s*/)[0])??9999})),
+    ...eliteAddedActivities(day).map(original=>({original,idx:-1,added:true,start:eliteActivityRange(original)?.start??9999}))
+  ].sort((a,b)=>a.start-b.start||(a.added?1:-1));
+  return `<div class="tl">${timelineEntries.map(({original,idx,added})=>{
+    if(added){const row=original;return `<div class="tlrow fixed elite-added-activity">
+      <div class="tltime">${esc(row.t)}</div><div class="tldot">${tico(row.ic)}</div>
+      <div class="tlbody"><b>${esc(row.ar)}</b><span class="pill good">${T('فعالية مضافة يدويًا','Manually added activity')}</span>
+      ${can('select')?`<button type="button" class="small noprint" data-act="editAddedActivity:${day},${row.id}">${T('تعديل','Edit')}</button>
+      <button type="button" class="small danger noprint" data-act="deleteAddedActivity:${day},${row.id}">${T('حذف','Delete')}</button>`:''}</div></div>`;}
+    if(scheduleRowRemoved(day,idx)||elitePlaceholderCovered(day,idx))return '';const row=scheduleRow(day,idx);
     const items=scheduleSlotPrograms(day,idx,map);
     const customActivity=slotHasCustomActivity(day,idx);
     const mealType=row.ic==='meal'?({2:'breakfast',8:'lunch',16:'dinner'}[idx]||null):null;
@@ -2885,12 +2910,7 @@ function dayTimeline(day,opts){
       <div class="tldot">${tico(row.ic)}</div>
       <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${row.slot&&!items.length&&!customActivity?`<small class="tlwhy" style="display:block">${T('هذا عنوان فترة في قالب الجدول، وليس نشاطًا مُعيّنًا.','This is a timetable category, not an assigned activity.')}</small>`:''}${body}${linkedMealCards}${(!row.slot||(customActivity&&!items.length))&&typeof window.campScheduleAssignInline==='function'?window.campScheduleAssignInline('activity',day,idx):''}<button type="button" class="small schedule-edit-control noprint" data-act="editScheduleRow:${day},${idx}" title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button>${can('select')?`<button type="button" class="small danger noprint" data-act="confirmScheduleRowRemove:${day},${idx}" title="${T('حذف هذه الفعالية من جدول اليوم فقط','Remove this activity from this day only')}">${T('حذف','Delete')}</button>`:''}</div>
     </div>`}).join('')}
-    ${extra.map(row=>`<div class="tlrow fixed elite-added-activity">
-      <div class="tltime">${esc(row.t)}</div><div class="tldot">${tico(row.ic)}</div>
-      <div class="tlbody"><b>${esc(row.ar)}</b><span class="pill good">${T('فعالية مضافة يدويًا','Manually added activity')}</span>
-      ${can('select')?`<button type="button" class="small noprint" data-act="editAddedActivity:${day},${row.id}">${T('تعديل','Edit')}</button>
-      <button type="button" class="small danger noprint" data-act="deleteAddedActivity:${day},${row.id}">${T('حذف','Delete')}</button>`:''}</div>
-    </div>`).join('')}
+
     </div>${eliteUnmatchedMeals(day)}`;
 }
 
