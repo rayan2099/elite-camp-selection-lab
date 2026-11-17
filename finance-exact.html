@@ -529,7 +529,8 @@ html.finance-embedded [hidden]{display:none!important}
 @media(prefers-reduced-motion:reduce){html.finance-embedded .btn,html.finance-embedded .fin-tab{transition:none!important;animation:none!important}}
 
 .fin-upload-help{margin:8px 0 10px;padding:10px 13px;border:1px solid #f3c59e;border-radius:9px;background:#fff8f1;color:#7c4a27;font-size:12px;line-height:1.8}html.finance-embedded .fin-row-actions button[data-fin-attachments]{background:#fff4e9;border-color:#ec915a;color:#8f4b24;font-weight:750}html.finance-embedded .fin-row-actions button[data-fin-attachments]:hover{background:#ffe9d8;border-color:#de742f}
-</style><script>if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('finance-embedded');</script></head><body><aside><div class="brand">✦ أكاديمية النخبة</div><p class="desc">منصة إدارة المعسكرات</p><nav><a href="#overview">◫ &nbsp; نظرة عامة</a><a href="#categories">▦ &nbsp; التصنيفات المالية</a><a href="#expenses" class="active">▣ &nbsp; إدارة المصروفات</a><a href="#revenues">◈ &nbsp; الإيرادات والتسعير</a><a href="#analysis">▤ &nbsp; التحليل والتقارير</a></nav><div class="side-note">💡 كل مصروف له حالة مستقلة: تقديري، ملتزم به، أو مدفوع فعلياً؛ لضمان تقارير مالية دقيقة.</div></aside><main>
+</style><script>if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('finance-embedded');</script><style id="finance-validation-style">.finance-inline-validation{position:sticky;top:0;z-index:9;margin:10px 0 15px;padding:12px 15px;border:1px solid #d8847d;border-inline-start:4px solid #b42318;background:#fff1ef;color:#852b25;border-radius:10px;font-size:13px;font-weight:700;line-height:1.7;white-space:pre-line}.finance-inline-validation[hidden]{display:none!important}.modal-shell [aria-invalid="true"]{outline:2px solid #b42318!important;outline-offset:2px}</style>
+</head><body><aside><div class="brand">✦ أكاديمية النخبة</div><p class="desc">منصة إدارة المعسكرات</p><nav><a href="#overview">◫ &nbsp; نظرة عامة</a><a href="#categories">▦ &nbsp; التصنيفات المالية</a><a href="#expenses" class="active">▣ &nbsp; إدارة المصروفات</a><a href="#revenues">◈ &nbsp; الإيرادات والتسعير</a><a href="#analysis">▤ &nbsp; التحليل والتقارير</a></nav><div class="side-note">💡 كل مصروف له حالة مستقلة: تقديري، ملتزم به، أو مدفوع فعلياً؛ لضمان تقارير مالية دقيقة.</div></aside><main>
 <div class="eyebrow">إدارة المعسكرات / الميزانية والتشغيل المالي</div><header class="heading" id="overview"><div><h1>الإدارة المالية للمعسكر</h1><p class="sub">من التخطيط والميزانية إلى مراقبة النفقات وتحليل نقطة التعادل — في مكان واحد.</p></div><div class="actions"><button class="btn" id="exportBtn">⇩ تصدير CSV</button><button class="btn" id="fullReportBtn">التقرير المالي PDF</button></div></header>
 <section class="report-sheet" id="financeReportView" hidden role="region" aria-label="التقرير المالي التنفيذي">
 <div class="report-actions"><button class="btn primary" id="printFinanceReport" type="button">فتح تقرير PDF للطباعة</button><button class="btn" id="browserPrintFinanceReport" type="button">طباعة المتصفح / حفظ PDF</button><button class="btn" id="downloadReportCsv" type="button">تصدير البيانات التفصيلية CSV</button><button class="btn" id="closeFinanceReport" type="button">إغلاق التقرير</button></div>
@@ -955,8 +956,37 @@ function financeShowGuide(which){
  for(const section of container.children)section.hidden=section.id!==which;
  financeBringIntoView($(which));
 }
+/* Keep validation visible inside the active finance editor instead of a browser
+   alert that obscures the form and causes users to lose their place. */
+function alert(message){
+ const shell=[...document.querySelectorAll('.modal-shell.open')].find(node=>!node.hidden);
+ if(!shell)return window.alert(message);
+ const root=shell.querySelector('.modal')||shell;
+ let notice=root.querySelector('.finance-inline-validation');
+ if(!notice){
+  notice=document.createElement('div');
+  notice.className='finance-inline-validation';
+  notice.setAttribute('role','alert');
+  notice.setAttribute('aria-live','assertive');
+  const head=root.querySelector('.between')||root.firstElementChild;
+  if(head)head.insertAdjacentElement('afterend',notice);else root.prepend(notice);
+ }
+ notice.textContent='⚠ '+String(message);
+ notice.hidden=false;
+ root.querySelectorAll('[aria-invalid="true"]').forEach(field=>field.removeAttribute('aria-invalid'));
+ const match=String(message).match(/اسم|مبلغ|قيمة|تاريخ|سعر|كمية|تصنيف|مرجع|وصف/);
+ const names={اسم:'itemName',مبلغ:'paymentAmount',قيمة:'paymentAmount',تاريخ:'paymentDate',سعر:'unitPrice',كمية:'itemQty',تصنيف:'itemCat',مرجع:'paymentReference',وصف:'itemName'};
+ const field=match&&shell.querySelector('#'+names[match[0]]);
+ if(field)field.setAttribute('aria-invalid','true');
+ root.scrollTop=0;
+ notice.scrollIntoView({block:'nearest',behavior:'auto'});
+}
+document.addEventListener('input',event=>{
+ if(event.target.matches('.modal-shell [aria-invalid="true"]'))event.target.removeAttribute('aria-invalid');
+},true);
 function financeShowEntry(id){
  const shell=$(id);
+ if(shell){const note=shell.querySelector('.finance-inline-validation');if(note)note.hidden=true;}
  if(!shell||!document.documentElement.classList.contains('finance-embedded'))return;
  const near=$('financeStepGuides');
  near.insertAdjacentElement('afterend',shell);
