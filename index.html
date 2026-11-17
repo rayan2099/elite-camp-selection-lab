@@ -1982,7 +1982,7 @@ function pageDays(){
     'حدّد اليوم المناسب لكل برنامج، وراجع عدد البرامج في كل يوم قبل معاينة الجدول.',
     'Distribute the selection across camp days to see daily load before the timetable.',
     `${ro?'':`<button data-act="go:selection">${T('قائمة الاختيار','Selection list')}</button>
-     <button class="primary" data-act="autoplan">${T('توزيع البرامج تلقائيًا','Auto-allocate programs')}</button>`}`)
+     <button class="primary" data-act="go:outputs">${T('الانتقال إلى الجدول','Open timetable')}</button>`}`)
   +`${ro?viewOnly():''}<div class="days">
     ${S.meta.days.map((d,i)=>{const n=i+1,items=S.selected.filter(x=>x.day===n),over=items.length>S.rules.perDayMax;
       return `<section class="daycol ${over?'over':''}">
@@ -2539,14 +2539,12 @@ function dayItems(day){
     .sort((a,b)=>(a.x.pri==='core'?0:1)-(b.x.pri==='core'?0:1));
 }
 function slotMap(day){
- const items=dayItems(day),map={};
- items.filter(o=>SLOTS.includes(o.x.slot)).forEach(o=>(map[o.x.slot]=map[o.x.slot]||[]).push(o));
- const empty=SLOTS.filter(slot=>!(map[slot]||[]).length);
- items.filter(o=>!SLOTS.includes(o.x.slot)).forEach(o=>{
-  const slot=empty.length?empty.shift():SLOTS[SLOTS.length-1];
-  (map[slot]=map[slot]||[]).push(o);
- });
+ const map={};
+ dayItems(day).filter(o=>SLOTS.includes(o.x.slot)).forEach(o=>(map[o.x.slot]=map[o.x.slot]||[]).push(o));
  return map;
+}
+function pendingSchedulePrograms(day){
+ return S.selected.filter(x=>!SLOTS.includes(x.slot)&&(!day||!x.day||x.day===day)).map(x=>({x,i:ITEM(x.id)})).filter(o=>o.i);
 }
 function scheduleRow(day,index){
  const override=S.prep?.__scheduleEdits?.[day]?.[index]||{};
@@ -4678,7 +4676,7 @@ document.addEventListener('click',e=>{
       if(!can('approve'))return;
       S.selected.forEach(x=>x.approved=true);logIt('اعتُمد الاختيار بالكامل','Full selection approved');
       save();render();toast(T('اعتُمدت كل البرامج المختارة.','All selected programs approved.'));},
-    autoplan:()=>autoPlan(),
+    autoplan:()=>toast(T('التوزيع التلقائي معطل. حدد البرنامج واليوم والفترة بنفسك.','Automatic distribution is disabled.'),'error'),
     print:()=>{closeModal();setTimeout(()=>window.print(),120)},
     exportJson:()=>exportJson(),
     importClick:()=>importClick(),
