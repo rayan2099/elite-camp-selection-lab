@@ -2590,7 +2590,23 @@ function eliteScheduleStats(day){
   const minutes=end-start,type=row.ic==='prayer'?'prayer':row.slot?'program':'other';
   totals[type]+=minutes;sessions.push({index,start,end,minutes,type,row});
  }
- return {sessions,totals,scheduled:totals.program+totals.other+totals.prayer,unfilled:sessions.filter(s=>slotIsUnassigned(day,s.index))};
+ // Totals are sums of allocated minutes, which can exceed elapsed clock time if
+ // two activities overlap. Report both measures rather than silently double count.
+ const boundaries=[...new Set(sessions.flatMap(x=>[x.start,x.end]))].sort((a,b)=>a-b);
+ let actualMinutes=0,overlapMinutes=0;
+ for(let i=1;i<boundaries.length;i++){
+  const start=boundaries[i-1],end=boundaries[i];
+  if(end<=start)continue;
+  const active=sessions.filter(x=>x.start<end&&x.end>start).length;
+  if(active){actualMinutes+=end-start;if(active>1)overlapMinutes+=(active-1)*(end-start);}
+ }
+ const overlaps=[];
+ for(let i=0;i<sessions.length;i++)for(let j=i+1;j<sessions.length;j++){
+  const x=sessions[i],y=sessions[j],duration=Math.min(x.end,y.end)-Math.max(x.start,y.start);
+  if(duration>0)overlaps.push({first:x,second:y,minutes:duration});
+ }
+ const scheduled=totals.program+totals.other+totals.prayer;
+ return {sessions,totals,scheduled,actualMinutes,overlapMinutes,overlaps,unfilled:sessions.filter(s=>slotIsUnassigned(day,s.index))};
 }
 function eliteSuggestions(day,slot){
  const preferred={badge:['lead','values','skills'],elite:['lead','skills','values'],workshop:['skills','stem','values'],sport:['sport'],culture:['values','lead','trips']}[slot]||[];
@@ -2650,7 +2666,14 @@ function eliteDayAnalysis(day){
       ${card(T('الأنشطة والراحة','Other activities & breaks'),stat.totals.other,colors.other,'break')}
       ${card(T('الصلوات ذات المدة المحددة','Timed prayers'),stat.totals.prayer,colors.prayer,'prayer')}
     </div>
-    <p class="help" style="margin:10px 0">${T('تُحسب المدد فقط للفترات التي تحتوي وقت بداية ونهاية. الأوقات المفردة لا تُضاف إلى الإجمالي. جلسات البرامج الشاغرة محسوبة ضمن وقت الجدول المخطط ومبيّنة أدناه.','Only activities with valid start and end times are counted. Single timestamps are excluded. Empty program slots remain included in planned timetable hours and are highlighted below.')}</p>
+    <p class="help" style="margin:10px 0">${T('الإجمالي المعروض هو مجموع مدد الفعاليات المسجلة وليس الزمن الفعلي دون تداخل. الأوقات المفردة لا تُحتسب، وتُحتسب الفترات الشاغرة ضمن التخطيط.','The displayed total sums scheduled durations; single timestamps are excluded, and empty slots count as planned time.')}</p>
+    <div class="note ${stat.overlapMinutes?'orange':''}" style="margin:10px 0">
+     <b>${T('تدقيق الوقت','Time audit')}:</b>
+     ${T('مجموع الفترات','Sum of intervals')} ${eliteQuantity(stat.scheduled,'minute')} ·
+     ${T('الزمن الفعلي دون ازدواج','Unique elapsed time')} ${eliteQuantity(stat.actualMinutes,'minute')} ·
+     ${T('دقائق الازدواج','Duplicated minutes')} ${eliteQuantity(stat.overlapMinutes,'minute')}
+     ${stat.overlaps.length? `<details style="margin-top:8px"><summary>${T('عرض التعارضات الزمنية','Show overlaps')} (${stat.overlaps.length})</summary>${stat.overlaps.map(pair=>`<div class="help">${esc(T(pair.first.row.ar,pair.first.row.en))} × ${esc(T(pair.second.row.ar,pair.second.row.en))} · ${eliteQuantity(pair.minutes,'minute')}</div>`).join('')}</details>`:`<span class="help">${T('لا توجد فترات متداخلة','No overlapping intervals')}</span>`}
+    </div>
     <div class="elite-time-rows">
       ${stat.sessions.map(a=>`<div class="elite-time-row" style="--time-accent:${colors[a.type]}" dir="rtl"><span class="elite-time-name">${esc(T(a.row.ar,a.row.en))}${slotIsUnassigned(day,a.index)?` <em>${T('(شاغرة)','(empty)')}</em>`:''}</span><time dir="ltr">${eliteClock(a.start)} – ${eliteClock(a.end)}</time><strong>${eliteQuantity(a.minutes,'minute')}</strong></div>`).join('')}
     </div>
