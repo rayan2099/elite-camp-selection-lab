@@ -2699,11 +2699,30 @@ function scheduleDiagnostics(day){
  return [...new Set(notes)];
 }
 
+function eliteMealsForDay(day){
+ const meals=S.prep?.__catering?.meals;
+ return Array.isArray(meals)?meals.filter(m=>Number(m.day)===Number(day)).sort((a,b)=>String(a.time||'').localeCompare(String(b.time||''))):[];
+}
+function eliteMealScheduleLabel(type){
+ return ({breakfast:T('إفطار','Breakfast'),lunch:T('غداء','Lunch'),dinner:T('عشاء','Dinner'),snack:T('وجبة خفيفة','Snack'),other:T('وجبة','Meal')})[type]||T('وجبة','Meal');
+}
+function eliteMealsScheduleCards(day,type){
+ const meals=eliteMealsForDay(day).filter(m=>m.type===type);
+ return meals.map(m=>'<div class="noprint" style="margin:6px 0;padding:9px;border:1px solid var(--line);background:var(--accentsoft);border-radius:8px"><b>'+esc(eliteMealScheduleLabel(m.type))+' · '+esc(m.menu||'')+'</b><span style="margin-inline:9px;color:var(--muted);font-size:11px" dir="ltr">'+esc(m.time||'—')+'</span><small class="help">'+T('مسجلة ضمن خطة الوجبات','From meal plan')+'</small></div>').join('');
+}
+function eliteUnmatchedMeals(day){
+ const meals=eliteMealsForDay(day).filter(m=>!['breakfast','lunch','dinner'].includes(m.type));
+ if(!meals.length)return '';
+ return '<div class="noprint" style="border:1px solid var(--line);padding:10px;border-radius:9px;margin:10px 0"><b>'+T('وجبات إضافية لهذا اليوم','Additional meals for this day')+'</b>'
+  +meals.map(m=>'<div style="display:flex;gap:8px;justify-content:space-between;padding:7px 0;border-top:1px solid var(--line)"><span>'+esc(eliteMealScheduleLabel(m.type))+' · '+esc(m.menu||'')+'</span><time dir="ltr">'+esc(m.time||'—')+'</time></div>').join('')+'</div>';
+}
 function dayTimeline(day,opts){
   const map=slotMap(day), o=opts||{};
   return `<div class="tl">${DAY_TEMPLATE.map((original,idx)=>{if(scheduleRowRemoved(day,idx))return '';const row=scheduleRow(day,idx);
     const items=scheduleSlotPrograms(day,idx,map);
     const customActivity=slotHasCustomActivity(day,idx);
+    const mealType=row.ic==='meal'?({2:'breakfast',8:'lunch',16:'dinner'}[idx]||null):null;
+    const linkedMealCards=mealType?eliteMealsScheduleCards(day,mealType):'';
     const body = row.slot
       ? (items.length
           ? items.map(it=>{
@@ -2722,8 +2741,8 @@ function dayTimeline(day,opts){
     return `<div class="tlrow ${row.slot?'prog':'fixed'} ${row.slot&&!items.length?'tl-empty':''}">
       <div class="tltime">${row.t}</div>
       <div class="tldot">${tico(row.ic)}</div>
-      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${row.slot&&!items.length&&!customActivity?`<small class="tlwhy" style="display:block">${T('هذا عنوان فترة في قالب الجدول، وليس نشاطًا مُعيّنًا.','This is a timetable category, not an assigned activity.')}</small>`:''}${body}${(!row.slot||(customActivity&&!items.length))&&typeof window.campScheduleAssignInline==='function'?window.campScheduleAssignInline('activity',day,idx):''}<button type="button" class="small schedule-edit-control noprint" data-act="editScheduleRow:${day},${idx}" title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button>${can('select')?`<button type="button" class="small danger noprint" data-act="confirmScheduleRowRemove:${day},${idx}" title="${T('حذف هذه الفعالية من جدول اليوم فقط','Remove this activity from this day only')}">${T('حذف','Delete')}</button>`:''}</div>
-    </div>`}).join('')}</div>`;
+      <div class="tlbody"><b>${esc(T(row.ar,row.en))}</b>${row.slot&&!items.length&&!customActivity?`<small class="tlwhy" style="display:block">${T('هذا عنوان فترة في قالب الجدول، وليس نشاطًا مُعيّنًا.','This is a timetable category, not an assigned activity.')}</small>`:''}${body}${linkedMealCards}${(!row.slot||(customActivity&&!items.length))&&typeof window.campScheduleAssignInline==='function'?window.campScheduleAssignInline('activity',day,idx):''}<button type="button" class="small schedule-edit-control noprint" data-act="editScheduleRow:${day},${idx}" title="${T('تعديل هذا النشاط من الجدول','Edit this activity from the schedule')}" style="margin-inline-start:auto">${T('تعديل','Edit')}</button>${can('select')?`<button type="button" class="small danger noprint" data-act="confirmScheduleRowRemove:${day},${idx}" title="${T('حذف هذه الفعالية من جدول اليوم فقط','Remove this activity from this day only')}">${T('حذف','Delete')}</button>`:''}</div>
+    </div>`}).join('')}</div>${eliteUnmatchedMeals(day)}`;
 }
 
 function confirmScheduleRowRemove(day,index){
