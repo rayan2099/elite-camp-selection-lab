@@ -112,7 +112,7 @@ function pageMeals(){
  '<section class="cp-budget-summary" aria-label="ميزانية الوجبات">'+
  '<div class="cp-budget-top"><div class="cp-budget-heading"><span class="cp-budget-kicker">الرقابة المالية · التغذية</span><h2>ميزانية الطعام اليومية والتراكمية</h2><p>سقف '+fmt(mealBudget().perStudent)+' ر.س لكل مستفيد يوميًا يشمل الإفطار والغداء والعشاء والسناكات معًا، وليس لكل وجبة.</p></div><button type="button" class="cp-budget-edit" data-cp="budget-settings">⚙ إعداد الميزانية</button></div>'+
  '<div class="cp-budget-dual">'+mealBudgetGauge('اليوم '+budget.selected,budget.daily)+mealBudgetGauge('التراكمي لجميع أيام المعسكر',budget.cumulative)+'</div>'+
- '<p class="cp-budget-note">سقف اليوم '+fmt(budget.daily.limit)+' ريالًا ('+budget.count+' مستفيدًا)، وسقف المعسكر '+fmt(budget.cumulative.limit)+' ريالًا ('+budget.days+' أيام). اختر يومًا من شريط الأيام لتغيير المؤشر اليومي. تكلفة التجهيزات '+fmt(budget.equipment)+' ريالًا منفصلة عن ميزانية الطعام.</p></section>'+
+ '<p class="cp-budget-note">سقف اليوم '+fmt(budget.daily.limit)+' ريالًا ('+budget.count+' مستفيدًا)، وسقف المعسكر '+fmt(budget.cumulative.limit)+' ريالًا ('+budget.days+' أيام). اختر يومًا من شريط الأيام لتغيير المؤشر اليومي.</p></section>'+
   '<section class="catering-progress"><div><div class="catering-progress-title"><strong>جاهزية الوجبات المسجلة</strong><span>'+ready+' من '+planned+' مستوفية</span></div><div class="catering-progress-track" role="progressbar" aria-valuenow="'+completion+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+completion+'%"></span></div><small>'+(pending?pending+' وجبة تحتاج استكمال المتطلبات. ':'')+(notPlanned?notPlanned+' أيام لم تُسجّل لها وجبات.':'راجع أعداد الحضور قبل تأكيد الكميات.')+'</small></div><button type="button" data-cp="tab" data-val="audit">عرض النواقص ←</button></section>'+
  '<nav class="cp-tabs" aria-label="أقسام إدارة التغذية">'+tabs.map(([id,label,num])=>'<button type="button" data-cp="tab" data-val="'+id+'" class="'+(section===id?'active':'')+'" aria-current="'+(section===id?'page':'false')+'">'+label+' <span class="number">'+num+'</span></button>').join('')+'</nav>'+
  '<main class="catering-section">'+(section==='schedule'?scheduleView():section==='counts'?countsView():section==='special'?specialView():auditView())+'</main>'+
@@ -433,7 +433,7 @@ function mealBudgetSettings(){
  openModal('<div class="catering-modal"><h2>إعداد ميزانية التغذية اليومية</h2><p class="help">ميزانية واحدة يوميًا للشخص تشمل الإفطار والغداء والعشاء والسناكات. تعديل أي حقل يعيد حساب الآخر.</p><div class="cp-form">'+
  '<label>السقف اليومي للشخص (ر.س)<input type="number" min="0" step=".01" id="cm-budget-limit" value="'+money(b.perStudent)+'"></label>'+
  '<label>إجمالي السقف اليومي ('+people+' مستفيدًا) (ر.س)<input type="number" min="0" step=".01" id="cm-budget-daily-total" value="'+Number((money(b.perStudent)*people).toFixed(2))+'"></label>'+
- '<label>تكلفة تجهيزات منفصلة (ر.س)<input type="number" min="0" step=".01" id="cm-budget-equipment" value="'+money(b.equipment)+'"></label>'+
+
  '<p class="help full">مثال: 35 مستفيدًا × 50 ريالًا = 1,750 ريالًا في اليوم.</p></div>'+
  '<div class="cp-actions"><button data-act="close">إلغاء</button><button class="primary" data-cp="budget-save">حفظ الميزانية</button></div></div>');
 }
@@ -461,11 +461,11 @@ function handle(b){
  if(a==='budget-settings'){mealBudgetSettings();return}
  if(a==='budget-save'){
   const old=JSON.stringify(mealBudget()),b=mealBudget();
-  const p=$('#cm-budget-limit')?.value,daily=$('#cm-budget-daily-total')?.value,eq=$('#cm-budget-equipment')?.value,people=total();
-  if([p,daily,eq].some(v=>v===''||!Number.isFinite(+v)||+v<0))return toast('أدخل مبالغ صحيحة غير سالبة.','error');
+  const p=$('#cm-budget-limit')?.value,daily=$('#cm-budget-daily-total')?.value,people=total();
+  if([p,daily].some(v=>v===''||!Number.isFinite(+v)||+v<0))return toast('أدخل مبالغ صحيحة غير سالبة.','error');
   if(budgetEditedField==='daily'&&!people)return toast('أدخل أعداد المستفيدين أولًا.','error');
   b.perStudent=budgetEditedField==='daily'?Number((+daily/people).toFixed(6)):+p;
-  b.period='day';b.equipment=+eq;
+  b.period='day'; // Preserve historical equipment data without exposing it in the food-budget editor.
   if(!save()){db().budget=JSON.parse(old);return;}
   let ok=false;try{const raw=JSON.parse(localStorage.getItem('elite-select-v1')||'null');const persisted=raw?.camps?.find(c=>c.id===S.activeId)?.prep?.__catering?.budget;ok=!!persisted&&persisted.perStudent===b.perStudent&&persisted.period===b.period&&persisted.equipment===b.equipment;}catch(error){console.error('Budget save check failed',error)}
   if(!ok){db().budget=JSON.parse(old);return toast('تعذر حفظ السقف المالي.','error')}
