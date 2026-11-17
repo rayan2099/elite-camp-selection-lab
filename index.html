@@ -2738,6 +2738,77 @@ function eliteUnmatchedMeals(day){
  return '<div class="noprint" style="border:1px solid var(--line);padding:10px;border-radius:9px;margin:10px 0"><b>'+T('وجبات إضافية لهذا اليوم','Additional meals for this day')+'</b>'
   +meals.map(m=>'<div style="display:flex;gap:8px;justify-content:space-between;padding:7px 0;border-top:1px solid var(--line)"><span>'+esc(eliteMealScheduleLabel(m.type))+' · '+esc(m.menu||'')+'</span><time dir="ltr">'+esc(m.time||'—')+'</time></div>').join('')+'</div>';
 }
+
+function eliteAddedActivities(day){
+ const list=S.prep?.__extraActivities;
+ return Array.isArray(list)?list.filter(x=>Number(x.day)===Number(day)):[];
+}
+function eliteActivityRange(row){
+ const parts=String(row.t||'').split(/\s*[–-]\s*/);
+ const start=eliteTimeMinutes(parts[0]),end=eliteTimeMinutes(parts[1]);
+ return start!==null&&end!==null&&end>start?{start,end}:null;
+}
+function eliteActivityConflicts(day,start,end,exclude){
+ const rows=[];
+ DAY_TEMPLATE.forEach((_,i)=>{
+  if(scheduleRowRemoved(day,i))return;
+  const row=scheduleRow(day,i),span=eliteActivityRange(row);
+  if(span&&start<span.end&&end>span.start)rows.push(row.ar);
+ });
+ eliteAddedActivities(day).filter(x=>x.id!==exclude).forEach(row=>{
+  const span=eliteActivityRange(row);
+  if(span&&start<span.end&&end>span.start)rows.push(row.ar);
+ });
+ return rows;
+}
+function eliteActivityModal(day,id){
+ if(!can('select'))return toast(T('لا تملك صلاحية إضافة الفعاليات.','Not allowed to add activities.'),'error');
+ const n=Number(day),old=eliteAddedActivities(n).find(x=>x.id===id);
+ if(!Number.isInteger(n)||n<1||n>S.meta.days.length)return;
+ const parts=String(old?.t||'09:00 – 10:00').split(/\s*[–-]\s*/);
+ const groups=[['practical','عملي'],['theoretical','نظري'],['recreational','ترفيهي وترويحي'],['meal','وجبة'],['other','أخرى']];
+ openModal('<h2>'+T(old?'تعديل الفعالية':'إضافة فعالية جديدة','Add or edit activity')+' · '+T('اليوم ','Day ')+n+'</h2>'
+  +'<p class="help">'+T('اختر اسم الفعالية ونوعها ووقتها. لا يمكن حفظ فعالية تتداخل مع فترة أخرى؛ ويمكن استخدام وقت فعالية محذوفة.','Choose activity name, type and time. Overlapping intervals cannot be saved.')+'</p>'
+  +'<div class="fields spacer">'
+  +'<label class="fld">'+T('اسم الفعالية','Activity name')+'<input id="eaName" maxlength="90" value="'+esc(old?.ar||'')+'" placeholder="'+T('مثال: استقبال المشاركين','e.g. Welcome')+'"></label>'
+  +'<label class="fld">'+T('نوع النشاط','Activity type')+'<select id="eaType">'+groups.map(([key,label])=>'<option value="'+key+'" '+((old?.activityType||'practical')===key?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'
+  +'<div class="fld">'+T('وقت البداية','Start time')+eliteTimePicker('eaStart',parts[0])+'</div>'
+  +'<div class="fld">'+T('وقت النهاية','End time')+eliteTimePicker('eaEnd',parts[1])+'</div></div>'
+  +'<div class="actions spacer" style="display:flex;gap:8px;justify-content:flex-end"><button type="button" data-act="close">'+T('إلغاء','Cancel')+'</button>'
+  +'<button type="button" class="primary" data-act="saveAddedActivity:'+n+','+(id||'')+'">'+T('حفظ الفعالية','Save activity')+'</button></div>');
+}
+function eliteSaveAddedActivity(day,id){
+ if(!can('select'))return;
+ const n=Number(day),name=$('#eaName')?.value.trim(),kind=$('#eaType')?.value;
+ const start=eliteReadTimePicker('eaStart'),end=eliteReadTimePicker('eaEnd');
+ if(!name||!start||!end||end<=start)return toast(T('حدد اسم الفعالية ووقت بداية ونهاية صحيحين.','Provide activity name and valid start/end times.'),'error');
+ const conflicts=eliteActivityConflicts(n,eliteTimeMinutes(start),eliteTimeMinutes(end),id);
+ if(conflicts.length)return toast(T('لا يمكن إضافة الفعالية لتعارضها مع: ','Time overlaps: ')+conflicts.join('، '),'error');
+ S.prep??={};S.prep.__extraActivities??=[];
+ const before=JSON.stringify(S.prep.__extraActivities);
+ const record={id:id||'custom-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),day:n,t:start+' – '+end,ar:name,en:name,ic:kind==='meal'?'meal':kind==='recreational'?'ball':'tools',activityType:kind};
+ const at=S.prep.__extraActivities.findIndex(x=>x.id===id&&x.day===n);
+ if(at<0)S.prep.__extraActivities.push(record);else S.prep.__extraActivities[at]=record;
+ save();
+ let verified=false;
+ try{
+  const persisted=JSON.parse(localStorage.getItem('elite-select-v1')||'null')?.camps?.find(c=>c.id===S.activeId)?.prep?.__extraActivities;
+  verified=Array.isArray(persisted)&&persisted.some(x=>x.id===record.id&&x.day===n&&x.t===record.t&&x.ar===record.ar);
+ }catch(e){console.error('Cannot verify custom activity',e)}
+ if(!verified){S.prep.__extraActivities=JSON.parse(before);return toast(T('لم يكتمل حفظ الفعالية.','Activity not saved.'),'error')}
+ closeModal();render({preserveScroll:true});toast(T('تمت إضافة الفعالية إلى الجدول بنجاح.','Activity added to timetable.'),'success','top');
+}
+function eliteDeleteAddedActivity(day,id){
+ if(!can('select'))return;
+ const record=eliteAddedActivities(day).find(x=>x.id===id);if(!record)return;
+ if(!confirm(T('هل تريد حذف «'+record.ar+'» من هذا اليوم؟','Delete this activity?')))return;
+ const before=JSON.stringify(S.prep.__extraActivities);
+ S.prep.__extraActivities=S.prep.__extraActivities.filter(x=>x.id!==id);save();
+ let verified=false;
+ try{const saved=JSON.parse(localStorage.getItem('elite-select-v1')||'null')?.camps?.find(c=>c.id===S.activeId)?.prep?.__extraActivities;verified=Array.isArray(saved)&&!saved.some(x=>x.id===id)}catch(e){}
+ if(!verified){S.prep.__extraActivities=JSON.parse(before);return toast(T('تعذر حفظ الحذف.','Deletion failed.'),'error')}
+ render({preserveScroll:true});toast(T('تم حذف الفعالية.','Activity deleted.'),'success','top');
+}
 function dayTimeline(day,opts){
   const map=slotMap(day), o=opts||{};
   return `<div class="tl">${DAY_TEMPLATE.map((original,idx)=>{if(scheduleRowRemoved(day,idx))return '';const row=scheduleRow(day,idx);
