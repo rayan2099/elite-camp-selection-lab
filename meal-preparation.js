@@ -494,7 +494,7 @@ function handle(b){
   const oldMeals=JSON.stringify(d.meals),oldEdits=JSON.stringify(S.prep.__scheduleEdits||{});
   const group=m?.repeatGroup||newId('repeat-');
   for(const entry of plan){
-   const existing=entry.day===m?.day?m:d.meals.find(x=>x.repeatGroup===group&&x.day===entry.day);
+   const existing=m&&(entry.day===m.day||(entry.day===chosenDays[0]&&!chosenDays.includes(m.day)))?m:d.meals.find(x=>x.repeatGroup===group&&x.day===entry.day);
    const value={...newValue,id:existing?.id||newId('meal-'),day:entry.day,time:entry.time,repeatGroup:group};
    if(existing)Object.assign(existing,value);
    else d.meals.push(value);
