@@ -498,7 +498,7 @@ html[data-theme=dark] .daynum{background:var(--accent);color:#22140d}
 #modal{border:none;padding:0;border-radius:16px;max-width:min(760px,94vw);width:100%;background:var(--surface);color:var(--fg);box-shadow:0 30px 90px #07101f55}
 #modal::backdrop{background:#07101f66;backdrop-filter:blur(3px)}
 #modal .inner{padding:22px;max-height:88vh;overflow:auto}
-.elite-modal-alert{position:sticky;top:0;z-index:5;display:flex;align-items:flex-start;gap:10px;padding:12px 14px;margin:0 34px 15px 0;border:1px solid #d8847d;border-inline-start:4px solid #b42318;border-radius:10px;background:#fff1ef;color:#852b25;font-size:13px;font-weight:650;line-height:1.75}.elite-modal-alert[hidden]{display:none!important}.elite-modal-alert-message{flex:1;white-space:pre-line}.elite-invalid-field{outline:2px solid #b42318!important;outline-offset:2px}.elite-invalid-field:focus{outline-color:#e87536!important}html[data-theme=dark] .elite-modal-alert{background:#431d22;color:#ffe3dc;border-color:#a84742}#modal .x{position:absolute;inset-inline-end:14px;top:12px;width:32px;height:32px;display:grid;place-items:center;border:none;border-radius:50%;background:var(--soft);font-size:14px;color:var(--muted);padding:0;line-height:1}
+.elite-modal-alert{position:sticky;top:0;z-index:5;display:flex;align-items:flex-start;gap:10px;padding:12px 14px;margin:0 34px 15px 0;border:1px solid #d8847d;border-inline-start:4px solid #b42318;border-radius:10px;background:#fff1ef;color:#852b25;font-size:13px;font-weight:650;line-height:1.75}.elite-modal-alert[hidden]{display:none!important}.elite-modal-alert-message{flex:1;white-space:pre-line}.elite-invalid-field{outline:2px solid #b42318!important;outline-offset:2px}.elite-invalid-field:focus{outline-color:#e87536!important}html[data-theme=dark] .elite-modal-alert{background:#431d22;color:#ffe3dc;border-color:#a84742}.elite-camp-total-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:13px 0}.elite-camp-total-cards>div{display:flex;flex-direction:column;gap:4px;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:12px}.elite-camp-total-cards strong{font-size:23px;font-variant-numeric:tabular-nums}.elite-camp-total-cards small,.elite-camp-total-cards span{font-size:11px;color:var(--muted)}.elite-camp-table-wrap{overflow-x:auto;margin:13px 0}.elite-camp-audit-table{width:100%;border-collapse:collapse;font-size:12px}.elite-camp-audit-table th,.elite-camp-audit-table td{padding:10px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}.elite-camp-audit-table th{background:var(--soft);white-space:nowrap}.elite-camp-audit-warning{display:block;color:var(--bad);font-weight:700}@media(max-width:850px){.elite-camp-total-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}#modal .x{position:absolute;inset-inline-end:14px;top:12px;width:32px;height:32px;display:grid;place-items:center;border:none;border-radius:50%;background:var(--soft);font-size:14px;color:var(--muted);padding:0;line-height:1}
 #toasts{position:fixed;inset-inline-end:20px;bottom:20px;z-index:1000;display:flex;flex-direction:column;gap:8px;max-width:min(520px,calc(100vw - 32px))}
 #toasts.toast-top{top:20px;bottom:auto;inset-inline-end:20px}
 .toast{background:var(--navy);color:#fff;padding:10px 15px;border-radius:10px;font-size:12.5px;box-shadow:0 12px 30px #07101f55;animation:pop .25s ease}
@@ -3381,6 +3381,35 @@ function programSection(){
   }).join('');
 }
 
+
+function eliteCampTotalAnalysis(){
+ const days=S.meta.days.map((_,i)=>({day:i+1,stat:eliteScheduleStats(i+1)}));
+ const sum=fn=>days.reduce((n,d)=>n+fn(d.stat),0);
+ const aggregate={program:sum(x=>x.totals.program),other:sum(x=>x.totals.other),prayer:sum(x=>x.totals.prayer),unique:sum(x=>x.actualMinutes),overlap:sum(x=>x.overlapMinutes)};
+ const templatePrayer=DAY_TEMPLATE.filter(x=>x.ic==='prayer').reduce((n,row)=>{
+  const span=eliteActivityRange(row);return n+(span?span.end-span.start:0);
+ },0);
+ const columns=[['البرامج','Programs',aggregate.program],['الأنشطة الأخرى','Other activities',aggregate.other],['الصلوات','Prayers',aggregate.prayer],['الوقت المحجوز دون تكرار','Time without duplicate',aggregate.unique],['دقائق التداخل','Overlap minutes',aggregate.overlap]];
+ const lines=days.map(({day,stat})=>{
+  const prayerEntries=stat.sessions.filter(x=>x.type==='prayer');
+  const detail=prayerEntries.map(x=>esc(T(x.row.ar,x.row.en))+' ('+eliteClock(x.start)+'–'+eliteClock(x.end)+': '+x.minutes+')').join('، ');
+  const difference=stat.totals.prayer-templatePrayer;
+  return '<tr><td>'+day+'</td><td>'+stat.totals.program+'</td><td>'+stat.totals.other+'</td>'+
+   '<td><strong>'+stat.totals.prayer+'</strong>'+(difference?'<small class="elite-camp-audit-warning">'+T('فرق عن القالب: ','Template difference: ')+(difference>0?'+':'')+difference+'</small>':'')+'</td>'+
+   '<td>'+stat.actualMinutes+'</td><td>'+stat.overlapMinutes+'</td>'+
+   '<td><small>'+ (detail||T('لا توجد صلاة ذات بداية ونهاية','No timed prayers')) +'</small></td></tr>';
+ }).join('');
+ const cards=columns.map(([ar,en,value])=>'<div><small>'+T(ar,en)+'</small><strong>'+value+'</strong><span>'+T('دقيقة','minutes')+'</span></div>').join('');
+ return '<section class="card spacer noprint elite-camp-summary" id="camp-time-summary">'+
+  '<h2>'+T('التحليل الإجمالي لجدول المعسكر','Overall camp timetable analysis')+'</h2>'+
+  '<p class="help">'+T('تظهر التحليلات بعد جداول الأيام كلها، وتحسب الفعاليات المجدولة فقط دون الفترات الشاغرة. تُحسب الدقائق المتداخلة مرة واحدة ضمن الوقت المحجوز.','The analysis follows all daily timetables and excludes empty sessions. Overlaps count once in unique allocated time.')+'</p>'+
+  '<div class="elite-camp-total-cards">'+cards+'</div>'+
+  '<div class="elite-camp-table-wrap"><table class="elite-camp-audit-table"><thead><tr><th>'+T('اليوم','Day')+'</th><th>'+T('البرامج','Programmes')+'</th><th>'+T('أنشطة أخرى','Other')+'</th><th>'+T('الصلوات','Prayer')+'</th><th>'+T('الوقت المحجوز','Allocated')+'</th><th>'+T('التداخل','Overlap')+'</th><th>'+T('تفاصيل الصلاة بالدقائق','Prayer calculation')+'</th></tr></thead><tbody>'+
+  lines+'</tbody></table></div>'+
+  '<p class="help">'+T('قالب الصلاة الافتراضي للفترات محددة المدة: ','Default template timed-prayer allocation: ')+templatePrayer+
+  T(' دقيقة يوميًا. أي اختلاف ظاهر في الجدول مصدره أوقات معدّلة أو مضافة ويمكن مراجعته من التفاصيل؛ لا تُفرض مدة ثابتة على التعديلات. صلاة الفجر إذا كانت بدون نهاية فلا تدخل في المجموع.',' minutes/day. Any difference comes from edited or added time spans; it is shown, not silently overwritten. Single-time prayers are excluded.')+'</p>'+
+  '</section>';
+}
 function stepPlan(){
   const rd=readiness(), f=fitStats(), na=needsAgg();
   const isFile=location.protocol==='file:';
@@ -3407,6 +3436,7 @@ function stepPlan(){
     </div>
     ${elitePendingScheduleList(null)}
     <div class="spacer schedule-print-pages">${programSection()}</div>
+     ${eliteCampTotalAnalysis()}
     <div class="grid cols2 spacer print-supplement">
       <div class="card">
         <h2>${T('متطلبات التجهيز','Prep requirements')}</h2>
