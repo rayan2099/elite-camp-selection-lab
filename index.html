@@ -2729,7 +2729,7 @@ function eliteScheduleStats(day){
  };
  for(const type of Object.keys(totals))totals[type]=mergedMinutes(sessions.filter(x=>x.type===type));
  const scheduled=totals.program+totals.other+totals.prayer;
- return {sessions,totals,scheduled,actualMinutes,overlapMinutes,overlaps,unfilled:unassignedSlots(day)};
+ return {sessions,totals,scheduled,actualMinutes,overlapMinutes,overlaps,unfilled:unassignedSlots(day).map(({index,row})=>{const span=eliteActivityRange(row);return {index,row,start:span?.start??0,end:span?.end??0,minutes:span?span.end-span.start:0,type:'program'};})};
 }
 function eliteSuggestions(day,slot){
  const preferred={badge:['lead','values','skills'],elite:['lead','skills','values'],workshop:['skills','stem','values'],sport:['sport'],culture:['values','lead','trips']}[slot]||[];
@@ -4658,6 +4658,9 @@ function saveEdit(id){
   if(x.day!==chosenDay||(Array.isArray(x.days)&&x.days.length&&JSON.stringify(x.days)!==JSON.stringify(chosenDays)))x.slot=null; // Explicit re-scheduling required after changed days.
   x.day=chosenDay;
   x.days=chosenDays;
+  if(x.daySlots&&typeof x.daySlots==='object'){
+    x.daySlots=Object.fromEntries(Object.entries(x.daySlots).filter(([d])=>chosenDays.includes(Number(d))));
+  }
   x.why=$('#eWhy').value.trim();
   x.activityType=$('#eActivityType').value;
   if(item?.t==='sport')x.sportChoice=sport;
