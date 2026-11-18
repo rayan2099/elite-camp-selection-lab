@@ -2744,6 +2744,10 @@ function eliteAddSuggestion(day,slot,id){
  if(!it)return toast(T('البرنامج غير موجود في المكتبة.','Program not found in library.'),'error');
  const position=DAY_TEMPLATE.findIndex(row=>row.slot===slot);
  if(position<0||!slotIsUnassigned(day,position))return toast(T('هذه الفترة لم تعد شاغرة. حدّث الجدول واختر فترة أخرى.','This session is no longer empty.'),'error');
+ const range=eliteActivityRange(scheduleRow(day,position));
+ if(!range)return toast(T('الفترة المختارة لا تتضمن وقت بداية ونهاية صالحين.','Invalid slot time.'),'error');
+ const conflicts=eliteActivityConflicts(day,range.start,range.end);
+ if(conflicts.length)return toast(T('لا يمكن الإضافة بسبب تعارض الوقت مع: ','Overlapping activity: ')+conflicts.join('، '),'error','top');
  // The same catalog program may be scheduled in multiple different days/slots.
  // Each placement has a stable unique key, retaining the original library identity.
  const instanceId=id+'__SLOT__'+day+'_'+slot;
@@ -2775,7 +2779,11 @@ function eliteDirectProgramModal(day){
  const n=Number(day);
  if(!can('select'))return toast(T('لا تملك صلاحية إضافة البرامج.','No permission to add programs.'),'error');
  if(!Number.isInteger(n)||n<1||n>S.meta.days.length)return;
- const free=unassignedSlots(n).filter(o=>!elitePlaceholderCovered(n,o.index));
+ const free=unassignedSlots(n).filter(o=>{
+  if(elitePlaceholderCovered(n,o.index))return false;
+  const range=eliteActivityRange(o.row);
+  return !!range&&!eliteActivityConflicts(n,range.start,range.end).length;
+ });
  if(!free.length)return toast(T('لا توجد فترة برنامج شاغرة. يمكنك إضافة فعالية بوقت مخصص.','No free programme session. Add a custom activity.'),'error','top');
  const pool=LIB.slice().sort((a,b)=>String(a.ar).localeCompare(String(b.ar),'ar'));
  openModal('<h2>إضافة برنامج إلى اليوم '+n+'</h2>'+
@@ -2975,6 +2983,10 @@ function eliteSaveScheduleProgram(id){
  const index=DAY_TEMPLATE.findIndex(x=>x.slot===slot);
  if(scheduleRowRemoved(day,index)||slotHasCustomActivity(day,index)||elitePlaceholderCovered(day,index))return toast(T('الفترة المحددة محذوفة أو مشغولة بنشاط آخر.','Selected slot is unavailable.'),'error');
  if((slotMap(day)[slot]||[]).some(o=>o.x.id!==id))return toast(T('الفترة مرتبطة مسبقاً ببرنامج آخر.','Another program already uses this slot.'),'error');
+ const range=eliteActivityRange(scheduleRow(day,index));
+ if(!range)return toast(T('وقت الفترة غير صالح.','Invalid slot time.'),'error');
+ const conflicts=eliteActivityConflicts(day,range.start,range.end);
+ if(conflicts.length)return toast(T('الفترة تتعارض مع: ','Slot overlaps with: ')+conflicts.join('، '),'error','top');
  const old={day:entry.day,slot:entry.slot,days:entry.days,daySlots:entry.daySlots};
  const slots={...(entry.daySlots||{})};slots[day]=slot;
  entry.daySlots=slots;
