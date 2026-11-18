@@ -2755,8 +2755,30 @@ function eliteAddSuggestion(day,slot,id){
    S.selected=previousSelected;S.draft=previousDraft;S.log.length=previousLogLength;
    return toast(T('تعذر حفظ البرنامج. لم يُضف إلى الجدول؛ يرجى إعادة المحاولة.','Could not save the program. Nothing was added.'),'error');
  }
+ if($('#modal')?.open)closeModal();
  render({preserveScroll:true});
- toast(T('تمت إضافة «'+it.ar+'» إلى جدول اليوم '+day+' بنجاح. يمكنك تحديد تفريعاته من تعديل البرنامج.','Added '+it.en+' to day '+day+'. Use Edit program to select subactivities.'),'success');
+ toast(T('تمت إضافة «'+it.ar+'» إلى جدول اليوم '+day+' بنجاح. يمكنك تحديد تفريعاته من تعديل البرنامج.','Added '+it.en+' to day '+day+'. Use Edit program to select subactivities.'),'success','top');
+}
+
+function eliteDirectProgramModal(day){
+ const n=Number(day);
+ if(!can('select'))return toast(T('لا تملك صلاحية إضافة البرامج.','No permission to add programs.'),'error');
+ if(!Number.isInteger(n)||n<1||n>S.meta.days.length)return;
+ const free=unassignedSlots(n).filter(o=>!elitePlaceholderCovered(n,o.index));
+ if(!free.length)return toast(T('لا توجد فترة برنامج شاغرة. يمكنك إضافة فعالية بوقت مخصص.','No free programme session. Add a custom activity.'),'error','top');
+ const pool=LIB.slice().sort((a,b)=>String(a.ar).localeCompare(String(b.ar),'ar'));
+ openModal('<h2>إضافة برنامج إلى اليوم '+n+'</h2>'+
+ '<p class="help">اختر برنامجاً من المكتبة وفترة شاغرة. لن يتغير ترتيب الأنشطة الأخرى.</p>'+
+ '<div class="fields spacer"><label class="fld">البرنامج<select id="directProgramId">'+pool.map(i=>'<option value="'+esc(i.id)+'">'+esc(L({ar:i.ar,en:i.en}))+'</option>').join('')+'</select></label>'+
+ '<label class="fld">الفترة الزمنية<select id="directProgramSlot">'+free.map(o=>'<option value="'+esc(o.row.slot)+'">'+esc(T(o.row.ar,o.row.en))+' · '+esc(o.row.t)+'</option>').join('')+'</select></label></div>'+
+ '<div class="actions spacer"><button type="button" data-act="close">إلغاء</button> <button type="button" class="primary" data-act="saveDirectProgram:'+n+'">إضافة البرنامج</button></div>');
+}
+function eliteSaveDirectProgram(day){
+ const id=$('#directProgramId')?.value,slot=$('#directProgramSlot')?.value,n=Number(day);
+ const index=DAY_TEMPLATE.findIndex(row=>row.slot===slot);
+ if(!id||!SLOTS.includes(slot)||index<0)return toast('اختر برنامجاً وفترة زمنية صحيحة.','error');
+ if(!slotIsUnassigned(n,index)||elitePlaceholderCovered(n,index))return toast('لم تعد الفترة شاغرة. اختر فترة أخرى.','error');
+ eliteAddSuggestion(n,slot,id);
 }
 function eliteDayAnalysis(day){
  const stat=eliteScheduleStats(day),colors={program:'#168660',other:'#2563eb',prayer:'#a16207'};
@@ -3336,7 +3358,7 @@ function programSection(){
       <div class="noprint" style="display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap;margin:9px 0 10px">
       <span class="pill orange">${T("جدول قابل للتعديل","Editable schedule")}</span>
       <span class="help">${T("أضف نشاطاً جديداً أو عدّل الموجود. الفترات المحذوفة لا تمنع استخدام وقتها من جديد.","Add or edit activities. Deleted intervals free their time for new activities.")}</span>
-      ${can('select')?`<button type="button" class="primary" data-act="addDayActivity:${n}">${T('+ إضافة فعالية','+ Add activity')}</button>`:''}
+      ${can('select')?`<button type="button" class="primary" data-act="directProgram:${n}">${T('+ إضافة برنامج','+ Add programme')}</button> <button type="button" class="small" data-act="addDayActivity:${n}">${T('+ إضافة فعالية','+ Add activity')}</button>`:''}
       </div>
       ${elitePendingScheduleList(n)}
       ${dayTimeline(n,{why:true})}
@@ -4842,6 +4864,16 @@ document.addEventListener('click',function(event){
  if(!id)return toast(T('تعذر تحديد البرنامج المطلوب حذفه.','Unable to identify the program.'),'error');
  try{confirmScheduleProgramRemove(id);}
  catch(error){console.error('Program removal confirmation failed',error);toast(T('تعذر فتح نافذة تأكيد الحذف.','Could not open removal confirmation.'),'error');}
+},true);
+document.addEventListener('click',function(event){
+ const button=event.target.closest('button[data-act^="directProgram:"],button[data-act^="saveDirectProgram:"]');
+ if(!button)return;
+ event.preventDefault();event.stopImmediatePropagation();
+ const value=button.dataset.act,separator=value.indexOf(':'),action=value.slice(0,separator),day=Number(value.slice(separator+1));
+ try{
+  if(action==='directProgram')eliteDirectProgramModal(day);
+  else eliteSaveDirectProgram(day);
+ }catch(error){console.error('Direct programme insertion failed',error);toast('تعذرت إضافة البرنامج.','error','top')}
 },true);
 /* Dedicated capture handler for the free-session suggestion button.
    Prevent other generic handlers from consuming or silently ignoring this click. */
