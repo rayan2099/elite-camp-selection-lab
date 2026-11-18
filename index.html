@@ -2603,13 +2603,38 @@ function dayItems(day){
     .filter(o=>o.i)
     .sort((a,b)=>(a.x.pri==='core'?0:1)-(b.x.pri==='core'?0:1));
 }
+function scheduledSlotForDay(entry,day){
+ const explicit=entry.daySlots?.[day];
+ if(explicit!==undefined)return SLOTS.includes(explicit)?explicit:null;
+ // Legacy slot values apply only to their original day. Multi-day selection
+ // must never place a programme in all chosen days automatically.
+ return Number(entry.day)===Number(day)&&SLOTS.includes(entry.slot)?entry.slot:null;
+}
 function slotMap(day){
  const map={};
- dayItems(day).filter(o=>SLOTS.includes(o.x.slot)).forEach(o=>(map[o.x.slot]=map[o.x.slot]||[]).push(o));
+ dayItems(day).forEach(o=>{
+  const slot=scheduledSlotForDay(o.x,day);
+  if(slot)(map[slot]=map[slot]||[]).push({...o,x:{...o.x,slot}});
+ });
  return map;
 }
 function pendingSchedulePrograms(day){
- return S.selected.filter(x=>!SLOTS.includes(x.slot)&&(day===undefined||day===null&&!x.day||Number.isInteger(day)&&x.day===day)).map(x=>({x,i:ITEM(x.id)})).filter(o=>o.i);
+ const rows=[];
+ for(const x of S.selected){
+  const i=ITEM(x.id);if(!i)continue;
+  const days=Array.isArray(x.days)&&x.days.length
+   ? [...new Set(x.days.map(Number).filter(d=>d>=1&&d<=S.meta.days.length))]
+   : Number.isInteger(Number(x.day))&&Number(x.day)>0?[Number(x.day)]:[];
+  if(!days.length){
+   if(day===undefined||day===null)rows.push({x,i,day:null});
+   continue;
+  }
+  for(const d of days){
+   if(day!==undefined&&day!==null&&Number(day)!==d)continue;
+   if(!scheduledSlotForDay(x,d))rows.push({x:{...x,day:d},i,day:d});
+  }
+ }
+ return rows;
 }
 function scheduleRow(day,index){
  const override=S.prep?.__scheduleEdits?.[day]?.[index]||{};
@@ -2891,16 +2916,20 @@ function eliteDeleteAddedActivity(day,id){
  render({preserveScroll:true});toast(T('تم حذف الفعالية.','Activity deleted.'),'success','top');
 }
 
-function eliteScheduleProgramModal(id){
+function eliteScheduleProgramModal(id,preferredDay){
  if(!can('select'))return toast(T('لا تملك صلاحية جدولة البرامج.','No permission to schedule programs.'),'error');
  const entry=S.selected.find(x=>x.id===id),item=ITEM(id);
  if(!entry||!item)return toast(T('البرنامج غير موجود.','Program not found.'),'error');
+ const chosen=Array.isArray(entry.days)&&entry.days.length?entry.days.map(Number):[Number(entry.day)].filter(Boolean);
+ const candidate=Number(preferredDay)||chosen[0]||Number(entry.day)||1;
+ const selectedDay=chosen.length>1&&!chosen.includes(candidate)?chosen[0]:candidate;
  const options=DAY_TEMPLATE.filter(x=>SLOTS.includes(x.slot));
+ const allowedDays=chosen.length>1?chosen:S.meta.days.map((_,i)=>i+1);
  openModal('<h2>'+T('جدولة برنامج','Schedule program')+'</h2>'
  +'<p class="help">'+esc(L({ar:item.ar,en:item.en}))+' · '+T('حدد اليوم والفترة بنفسك. لن يسند النظام البرامج عشوائياً.','Choose day and time slot; no automatic allocation.')+'</p>'
- +'<div class="fields spacer"><label class="fld">'+T('اليوم','Day')+'<select id="spDay">'+S.meta.days.map((day,i)=>'<option value="'+(i+1)+'" '+(entry.day===i+1?'selected':'')+'>'+T('اليوم ','Day ')+(i+1)+' · '+esc(L(day))+'</option>').join('')+'</select></label>'
- +'<label class="fld">'+T('الوقت / الفترة','Time slot')+'<select id="spSlot">'+options.map(x=>'<option value="'+x.slot+'" '+(entry.slot===x.slot?'selected':'')+'>'+esc(x.ar)+' · '+esc(x.t)+'</option>').join('')+'</select></label></div>'
- +'<p class="help">'+T('يمكن تعديل وقت الفترة من الجدول. لن يظهر البرنامج ضمن الأنشطة المجدولة حتى تحفظ اليوم والفترة.','You can edit the time of each slot in the timetable. The program is not scheduled until you save both choices.')+'</p>'
+ +'<div class="fields spacer"><label class="fld">'+T('اليوم','Day')+'<select id="spDay">'+allowedDays.map(d=>'<option value="'+d+'" '+(selectedDay===d?'selected':'')+'>'+T('اليوم ','Day ')+d+' · '+esc(L(S.meta.days[d-1]))+'</option>').join('')+'</select></label>'
+ +'<label class="fld">'+T('الوقت / الفترة','Time slot')+'<select id="spSlot">'+options.map(x=>'<option value="'+x.slot+'" '+(scheduledSlotForDay(entry,selectedDay)===x.slot?'selected':'')+'>'+esc(x.ar)+' · '+esc(scheduleRow(selectedDay,DAY_TEMPLATE.findIndex(r=>r.slot===x.slot)).t)+'</option>').join('')+'</select></label></div>'
+ +'<p class="help">'+T('تُحفظ فترة كل يوم على حدة. لن ينتقل البرنامج تلقائياً إلى الأيام الأخرى.','A separate slot is saved for each day; no automatic allocation to other days.')+'</p>'
  +'<div class="actions spacer"><button type="button" data-act="close">'+T('إلغاء','Cancel')+'</button>'
  +'<button type="button" class="primary" data-act="saveScheduleProgram:'+esc(id)+'">'+T('حفظ الجدولة','Save scheduling')+'</button></div>');
 }
@@ -2908,19 +2937,27 @@ function eliteSaveScheduleProgram(id){
  if(!can('select'))return;
  const entry=S.selected.find(x=>x.id===id),day=Number($('#spDay')?.value),slot=$('#spSlot')?.value;
  if(!entry||!Number.isInteger(day)||day<1||day>S.meta.days.length||!SLOTS.includes(slot))return toast(T('اختر يوماً وفترة زمنية صحيحة.','Select a valid day and time slot.'),'error');
+ const chosen=Array.isArray(entry.days)&&entry.days.length?entry.days.map(Number):[Number(entry.day)].filter(Boolean);
+ if(chosen.length>1&&!chosen.includes(day))return toast(T('هذا اليوم غير محدد ضمن أيام البرنامج.','This day is not selected for the program.'),'error');
  const index=DAY_TEMPLATE.findIndex(x=>x.slot===slot);
- if(scheduleRowRemoved(day,index)||slotHasCustomActivity(day,index))return toast(T('الفترة المحددة محذوفة أو مشغولة بنشاط يدوي.','Selected slot is removed or occupied.'),'error');
- if(S.selected.some(x=>x.id!==id&&x.day===day&&x.slot===slot))return toast(T('الفترة مرتبطة مسبقاً ببرنامج آخر.','Another program already uses this slot.'),'error');
- const old={day:entry.day,slot:entry.slot};
- entry.day=day;entry.slot=slot;save();
+ if(scheduleRowRemoved(day,index)||slotHasCustomActivity(day,index)||elitePlaceholderCovered(day,index))return toast(T('الفترة المحددة محذوفة أو مشغولة بنشاط آخر.','Selected slot is unavailable.'),'error');
+ if((slotMap(day)[slot]||[]).some(o=>o.x.id!==id))return toast(T('الفترة مرتبطة مسبقاً ببرنامج آخر.','Another program already uses this slot.'),'error');
+ const old={day:entry.day,slot:entry.slot,days:entry.days,daySlots:entry.daySlots};
+ const slots={...(entry.daySlots||{})};slots[day]=slot;
+ entry.daySlots=slots;
+ if(chosen.length<=1){
+  entry.day=day;entry.days=[day];entry.slot=slot;
+ }else if(Number(entry.day)===day){entry.slot=slot;}
  let persisted=false;
- try{
-  const data=JSON.parse(localStorage.getItem('elite-select-v1')||'null')?.camps?.find(c=>c.id===S.activeId)?.selected;
-  persisted=Array.isArray(data)&&data.some(x=>x.id===id&&x.day===day&&x.slot===slot);
- }catch(error){console.error('Schedule persistence failed',error)}
+ if(save()){
+  try{
+   const data=JSON.parse(localStorage.getItem('elite-select-v1')||'null')?.camps?.find(c=>c.id===S.activeId)?.selected;
+   persisted=Array.isArray(data)&&data.some(x=>x.id===id&&x.daySlots?.[day]===slot);
+  }catch(error){console.error('Schedule persistence failed',error)}
+ }
  if(!persisted){Object.assign(entry,old);return toast(T('لم يكتمل حفظ الجدولة.','Scheduling could not be saved.'),'error')}
  closeModal();render({preserveScroll:true});
- toast(T('تمت جدولة البرنامج في اليوم والفترة المحددين.','Program scheduled successfully.'),'success','top');
+ toast(T('حُفظت فترة البرنامج لليوم المحدد دون تغيير بقية الأيام.','Slot saved for this day only.'),'success','top');
 }
 function elitePendingScheduleList(day){
  const entries=pendingSchedulePrograms(day);
@@ -2928,7 +2965,7 @@ function elitePendingScheduleList(day){
  return '<section class="elite-pending-schedule noprint"><div class="row wrap" style="gap:10px"><b>'+T('برامج بانتظار الجدولة','Programs awaiting scheduling')+'</b><span class="pill orange">'+entries.length+'</span></div>'
  +'<p class="help">'+T('تم اختيار هذه البرامج، لكنها لن تظهر ضمن الجدول حتى تحدد اليوم والفترة الزمنية لكل برنامج.','These programs were selected but are not scheduled until you choose a day and time slot.')+'</p>'
  +entries.map(({x,i})=>'<div class="elite-pending-line"><span>'+esc(L({ar:i.ar,en:i.en}))+(x.day?' · '+T('اليوم ','Day ')+x.day:' · '+T('اليوم غير محدد','Day not set'))+'</span>'
- +'<button type="button" class="small" data-act="scheduleProgram:'+esc(x.id)+'">'+T('تحديد اليوم والوقت','Set day and time')+'</button></div>').join('')+'</section>';
+ +'<button type="button" class="small" data-act="scheduleProgram:'+esc(x.id)+','+(x.day||'')+'">'+T('تحديد اليوم والوقت','Set day and time')+'</button></div>').join('')+'</section>';
 }
 function dayTimeline(day,opts){
   const map=slotMap(day), o=opts||{};
@@ -4792,7 +4829,7 @@ document.addEventListener('click',function(event){
  event.preventDefault();event.stopImmediatePropagation();
  const value=button.dataset.act||'',split=value.indexOf(':'),action=value.slice(0,split),id=value.slice(split+1);
  try{
-  if(action==='scheduleProgram')eliteScheduleProgramModal(id);
+  if(action==='scheduleProgram'){const split=id.lastIndexOf(',');eliteScheduleProgramModal(split<0?id:id.slice(0,split),split<0?null:Number(id.slice(split+1)));}
   if(action==='saveScheduleProgram')eliteSaveScheduleProgram(id);
  }catch(error){console.error('Explicit program scheduling failed',error);toast(T('تعذر إكمال الجدولة.','Scheduling failed.'),'error')}
 },true);
