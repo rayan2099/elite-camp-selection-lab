@@ -3382,6 +3382,34 @@ function programSection(){
 }
 
 
+
+function eliteRestorePrayerTemplate(day){
+ const n=Number(day);
+ if(!can('select')||!Number.isInteger(n)||n<1||n>S.meta.days.length)return toast(T('ليس لديك صلاحية تعديل أوقات الصلاة.','Not permitted.'),'error');
+ if(!confirm(T('هل تريد إعادة أوقات الصلوات ذات المدد المحددة في هذا اليوم إلى أوقات قالب الجدول؟ لن تتغير بقية الأنشطة.','Restore timed prayer slots to template values for this day? Other activities remain unchanged.')))return;
+ S.prep??={};S.prep.__scheduleEdits??={};
+ const previous=JSON.stringify(S.prep.__scheduleEdits[n]||{});
+ const current=JSON.parse(previous);
+ DAY_TEMPLATE.forEach((row,index)=>{
+  if(row.ic!=='prayer')return;
+  const old=current[index];
+  if(!old)return;
+  const changed={...old,t:row.t};
+  delete changed.deleted;
+  current[index]=changed;
+ });
+ S.prep.__scheduleEdits[n]=current;
+ let ok=false;
+ if(save()){
+  try{
+   const stored=JSON.parse(localStorage.getItem('elite-select-v1')||'null')?.camps?.find(c=>c.id===S.activeId)?.prep?.__scheduleEdits?.[n];
+   ok=!!stored&&DAY_TEMPLATE.every((row,index)=>row.ic!=='prayer'||(!stored[index]?.deleted&&(!stored[index]?.t||stored[index].t===row.t)));
+  }catch(error){console.warn('Prayer template reset verification failed',error)}
+ }
+ if(!ok){S.prep.__scheduleEdits[n]=JSON.parse(previous);return toast(T('تعذر حفظ أوقات الصلاة.','Could not save prayer times.'),'error','top')}
+ render({preserveScroll:true});
+ toast(T('تمت إعادة أوقات الصلوات المحددة إلى القالب لهذا اليوم.','Timed prayer slots restored for this day.'),'success','top');
+}
 function eliteCampTotalAnalysis(){
  const days=S.meta.days.map((_,i)=>({day:i+1,stat:eliteScheduleStats(i+1)}));
  const sum=fn=>days.reduce((n,d)=>n+fn(d.stat),0);
@@ -3395,7 +3423,8 @@ function eliteCampTotalAnalysis(){
   const detail=prayerEntries.map(x=>esc(T(x.row.ar,x.row.en))+' ('+eliteClock(x.start)+'–'+eliteClock(x.end)+': '+x.minutes+')').join('، ');
   const difference=stat.totals.prayer-templatePrayer;
   return '<tr><td>'+day+'</td><td>'+stat.totals.program+'</td><td>'+stat.totals.other+'</td>'+
-   '<td><strong>'+stat.totals.prayer+'</strong>'+(difference?'<small class="elite-camp-audit-warning">'+T('فرق عن القالب: ','Template difference: ')+(difference>0?'+':'')+difference+'</small>':'')+'</td>'+
+   '<td><strong>'+stat.totals.prayer+'</strong>'+(difference?'<small class="elite-camp-audit-warning">'+T('فرق عن القالب: ','Template difference: ')+(difference>0?'+':'')+difference+'</small>': '')+
+    (difference&&can('select')?'<button type="button" class="small" data-act="resetPrayerTimes:'+day+'" style="margin-top:5px">'+T('استعادة مدد الصلاة من القالب','Restore prayer times')+'</button>':'')+'</td>'+
    '<td>'+stat.actualMinutes+'</td><td>'+stat.overlapMinutes+'</td>'+
    '<td><small>'+ (detail||T('لا توجد صلاة ذات بداية ونهاية','No timed prayers')) +'</small></td></tr>';
  }).join('');
@@ -4913,6 +4942,12 @@ document.addEventListener('click',function(event){
   if(action==='directProgram')eliteDirectProgramModal(day);
   else eliteSaveDirectProgram(day);
  }catch(error){console.error('Direct programme insertion failed',error);toast('تعذرت إضافة البرنامج.','error','top')}
+},true);
+document.addEventListener('click',function(event){
+ const button=event.target.closest('button[data-act^="resetPrayerTimes:"]');
+ if(!button)return;
+ event.preventDefault();event.stopImmediatePropagation();
+ eliteRestorePrayerTemplate(Number(button.dataset.act.slice('resetPrayerTimes:'.length)));
 },true);
 /* Dedicated capture handler for the free-session suggestion button.
    Prevent other generic handlers from consuming or silently ignoring this click. */
