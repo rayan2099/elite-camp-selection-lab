@@ -2638,7 +2638,15 @@ function pendingSchedulePrograms(day){
 }
 function scheduleRow(day,index){
  const override=S.prep?.__scheduleEdits?.[day]?.[index]||{};
- return {...DAY_TEMPLATE[index],...override};
+ const row={...DAY_TEMPLATE[index],...override};
+ // Catering records determine the displayed time of scheduled meals.
+ const type=({2:'breakfast',8:'lunch',16:'dinner'})[index],meals=S.prep?.__catering?.meals;
+ const meal=type&&Array.isArray(meals)?meals.find(m=>Number(m.day)===Number(day)&&m.type===type&&/^\d{2}:\d{2}$/.test(m.time||'')):null;
+ if(meal&&!override.deleted){
+  const span=eliteActivityRange(row),start=eliteTimeMinutes(meal.time),duration=span?span.end-span.start:40;
+  if(start!==null&&start+duration<=1440)row.t=meal.time+' – '+eliteClock(start+duration);
+ }
+ return row;
 }
 function scheduleRowRemoved(day,index){
  return S.prep?.__scheduleEdits?.[day]?.[index]?.deleted===true;
@@ -2784,18 +2792,31 @@ function eliteDirectProgramModal(day){
   const range=eliteActivityRange(o.row);
   return !!range&&!eliteActivityConflicts(n,range.start,range.end).length;
  });
- if(!free.length)return toast(T('لا توجد فترة برنامج شاغرة. يمكنك إضافة فعالية بوقت مخصص.','No free programme session. Add a custom activity.'),'error','top');
+ // Manual program time is available even when all template sessions are occupied.
  const pool=LIB.slice().sort((a,b)=>String(a.ar).localeCompare(String(b.ar),'ar'));
  openModal('<h2>إضافة برنامج إلى اليوم '+n+'</h2>'+
  '<p class="help">اختر برنامجاً من المكتبة وفترة شاغرة. لن يتغير ترتيب الأنشطة الأخرى.</p>'+
  '<div class="fields spacer"><label class="fld">البرنامج<select id="directProgramId">'+pool.map(i=>'<option value="'+esc(i.id)+'">'+esc(L({ar:i.ar,en:i.en}))+'</option>').join('')+'</select></label>'+
- '<label class="fld">الفترة الزمنية<select id="directProgramSlot">'+free.map(o=>'<option value="'+esc(o.row.slot)+'">'+esc(T(o.row.ar,o.row.en))+' · '+esc(o.row.t)+'</option>').join('')+'</select></label></div>'+
+ '<label class="fld">الفترة الزمنية<select id="directProgramSlot">'+free.map(o=>'<option value="'+esc(o.row.slot)+'">'+esc(T(o.row.ar,o.row.en))+' · '+esc(o.row.t)+'</option>').join('')+'<option value="custom">وقت مخصص أو فترة محذوفة</option></select></label>'+
+ '<div class="fld">وقت البداية'+eliteTimePicker('dpStart','09:00')+'</div><div class="fld">وقت النهاية'+eliteTimePicker('dpEnd','10:00')+'</div></div>'+
  '<div class="actions spacer"><button type="button" data-act="close">إلغاء</button> <button type="button" class="primary" data-act="saveDirectProgram:'+n+'">إضافة البرنامج</button></div>');
 }
 function eliteSaveDirectProgram(day){
- const id=$('#directProgramId')?.value,slot=$('#directProgramSlot')?.value,n=Number(day);
+ const id=$('#directProgramId')?.value,slot=$('#directProgramSlot')?.value,n=Number(day),item=ITEM(id);
+ if(!item||!Number.isInteger(n)||n<1||n>S.meta.days.length)return toast('اختر برنامجاً صحيحاً.','error');
+ if(slot==='custom'){
+  const start=eliteReadTimePicker('dpStart'),end=eliteReadTimePicker('dpEnd');
+  if(!start||!end||end<=start)return toast('حدد وقت بداية ونهاية صحيحين.','error');
+  const conflicts=eliteActivityConflicts(n,eliteTimeMinutes(start),eliteTimeMinutes(end));
+  if(conflicts.length)return toast('يتعارض البرنامج مع: '+[...new Set(conflicts)].join('، '),'error','top');
+  S.prep??={};S.prep.__extraActivities??=[];
+  const record={id:'program-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),sourceId:id,day:n,t:start+' – '+end,ar:item.ar,en:item.en,ic:'tools',activityType:activityType(item)};
+  S.prep.__extraActivities.push(record);
+  if(!save()){S.prep.__extraActivities=S.prep.__extraActivities.filter(x=>x.id!==record.id);return toast('تعذر حفظ البرنامج.','error');}
+  closeModal();render({preserveScroll:true});return toast('تمت إضافة البرنامج في الوقت المحدد.','success','top');
+ }
  const index=DAY_TEMPLATE.findIndex(row=>row.slot===slot);
- if(!id||!SLOTS.includes(slot)||index<0)return toast('اختر برنامجاً وفترة زمنية صحيحة.','error');
+ if(!SLOTS.includes(slot)||index<0)return toast('اختر فترة زمنية صحيحة.','error');
  if(!slotIsUnassigned(n,index)||elitePlaceholderCovered(n,index))return toast('لم تعد الفترة شاغرة. اختر فترة أخرى.','error');
  eliteAddSuggestion(n,slot,id);
 }
@@ -3308,7 +3329,12 @@ function saveScheduleRow(day,index){
   if(conflicts.length)return toast(T('وقت الفعالية يتعارض مع: ','Time conflicts with: ')+[...new Set(conflicts)].join('، '),'error','top');
  }
  S.prep.__scheduleEdits[n][j]={t,ar,en:en||ar};
+ const mealType=({2:'breakfast',8:'lunch',16:'dinner'})[j];
+ const linkedMeals=mealType&&Array.isArray(S.prep.__catering?.meals)?S.prep.__catering.meals.filter(m=>Number(m.day)===n&&m.type===mealType):[];
+ const oldMealTimes=linkedMeals.map(m=>m.time);
+ linkedMeals.forEach(m=>m.time=start);
  if(!save()){
+  linkedMeals.forEach((m,i)=>m.time=oldMealTimes[i]);
   if(previous)S.prep.__scheduleEdits[n][j]=previous;
   else delete S.prep.__scheduleEdits[n][j];
   return;
