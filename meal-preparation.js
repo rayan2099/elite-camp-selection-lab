@@ -310,6 +310,28 @@ function mealClockMinutes(v){
 function mealClockFromMinutes(value){
  return String(Math.floor(value/60)).padStart(2,'0')+':'+String(value%60).padStart(2,'0');
 }
+function mealTimeSelector(value){
+ const valid=mealClockMinutes(value)!==null?value:'13:00';
+ const [h,m]=valid.split(':').map(Number),hour=String(h%12||12),minute=String(m).padStart(2,'0'),period=h>=12?'pm':'am';
+ const options=(items,selected)=>items.map(v=>'<option value="'+v+'"'+(v===selected?' selected':'')+'>'+v+'</option>').join('');
+ return '<div class="cm-time-selectors" dir="rtl">'+
+  '<select id="cm-time-hour" aria-label="الساعة">'+options(Array.from({length:12},(_,i)=>String(i+1)),hour)+'</select>'+
+  '<span aria-hidden="true">:</span><select id="cm-time-minute" aria-label="الدقيقة">'+options(Array.from({length:60},(_,i)=>String(i).padStart(2,'0')),minute)+'</select>'+
+  '<select id="cm-time-period" aria-label="صباحًا أو مساءً"><option value="am"'+(period==='am'?' selected':'')+'>صباحًا</option><option value="pm"'+(period==='pm'?' selected':'')+'>مساءً</option></select>'+
+  '</div><input type="hidden" id="cm-time" value="'+e(valid)+'">';
+}
+function mealUpdateTimeSelectors(time,locked){
+ const valid=mealClockMinutes(time)!==null?time:'13:00';
+ const [h,m]=valid.split(':').map(Number);
+ const values={'cm-time-hour':String(h%12||12),'cm-time-minute':String(m).padStart(2,'0'),'cm-time-period':h>=12?'pm':'am'};
+ Object.entries(values).forEach(([id,value])=>{const field=document.getElementById(id);if(field){field.value=value;field.disabled=!!locked}});
+ const field=document.getElementById('cm-time');if(field)field.value=valid;
+}
+function mealReadTimeSelectors(){
+ const hour=Number(document.getElementById('cm-time-hour')?.value),minute=document.getElementById('cm-time-minute')?.value,period=document.getElementById('cm-time-period')?.value;
+ if(!Number.isInteger(hour)||hour<1||hour>12||!/^(?:[0-5]\d)$/.test(minute||'')||!['am','pm'].includes(period))return null;
+ return String(hour%12+(period==='pm'?12:0)).padStart(2,'0')+':'+minute;
+}
 function mealChosenDays(){
  return [...document.querySelectorAll('[data-cm-day]:checked')].map(x=>n(x.dataset.cmDay)).filter(day=>day>=1&&day<=S.meta.days.length);
 }
@@ -320,13 +342,9 @@ function mealSchedulePreview(){
  const slots=days.map(day=>({day,slot:mealScheduleSlot(day,type)}));
  const found=slots.filter(x=>x.slot),missing=slots.filter(x=>!x.slot);
  if(auto){
-  input.readOnly=true;
-  input.style.opacity='.75';
-  input.value=found[0]?.slot.start||'';
+  mealUpdateTimeSelectors(found[0]?.slot.start||input.value||'13:00',true);
  }else{
-  input.readOnly=false;
-  input.style.opacity='1';
-  if(!input.value)input.value=found[0]?.slot.start||'13:00';
+  mealUpdateTimeSelectors(input.value||found[0]?.slot.start||'13:00',false);
  }
  const different=new Set(found.map(x=>x.slot.start)).size>1;
  const list=found.map(x=>'اليوم '+x.day+': '+x.slot.start).join(' · ');
@@ -356,7 +374,7 @@ function mealModal(id){
  '<div class="full cm-days"><b>أيام تقديم الوجبة</b><p class="help">اختر يوماً أو عدة أيام؛ سيتم إنشاء وجبة مستقلة لكل يوم دون إعادة إدخال التفاصيل.</p><div class="cp-checkboxes">'+S.meta.days.map((day,i)=>'<label><input type="checkbox" data-cm-day="'+(i+1)+'" '+(v.day===i+1?'checked':'')+'>'+ 'اليوم '+(i+1)+' · '+e(L(day))+'</label>').join('')+'</div></div>'+
  '<label>نوع الوجبة<select id="cm-type">'+types.map(([id,label])=>'<option value="'+id+'" '+(v.type===id?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+
  '<label>مصدر وقت التقديم<select id="cm-time-source"><option value="schedule" '+(!m||mealScheduleSlot(v.day,v.type)?.start===v.time?'selected':'')+'>من جدول المعسكر (تلقائي)</option><option value="custom" '+(m&&mealScheduleSlot(v.day,v.type)?.start!==v.time?'selected':'')+'>تحديد وقت مختلف</option></select></label>'+
- '<label>وقت تقديم الوجبة<input type="time" id="cm-time" value="'+e(v.time)+'"><small class="help" id="cm-schedule-note" style="line-height:1.7"></small></label>'+
+ '<label>وقت تقديم الوجبة'+mealTimeSelector(v.time)+'<small class="help" id="cm-schedule-note" style="line-height:1.7"></small></label>'+
  '<label id="cm-servings-field">إجمالي المستفيدين من الوجبة<input type="number" min="0" id="cm-servings" value="'+(v.audienceMode==='selected'?(v.audienceIds||[]).length:servings(v))+'"><small class="help" id="cm-servings-explain">يشمل الطلاب والطاقم ما لم تحدد مجموعة طلاب معينة.</small></label>'+
  '<div class="full cm-audience-box"><div class="cm-audience-header"><div><b>لمن ستُقدم هذه الوجبة؟</b><small>اختر جميع المستفيدين أو مجموعة محددة من الطلاب. يفصل النظام الحالات الغذائية الخاصة تلقائيًا.</small></div><span class="cm-count-badge" id="cm-audience-label">جميع المستفيدين</span></div><div class="cm-audience-switch" role="group" aria-label="نطاق المستفيدين">'+
  '<label class="cm-audience-choice"><input name="cm-audience-mode" type="radio" value="all" '+((v.audienceMode||'all')==='all'?'checked':'')+'><span><strong>جميع المستفيدين</strong><small>الطلاب والطاقم بحسب العدد المسجل</small></span></label>'+
@@ -546,7 +564,9 @@ function handle(b){
    return mealFormError(missing);
   }
   const auto=$('#cm-time-source')?.value!=='custom';
-  const selectedTime=mealClockMinutes(newValue.time);
+  const pickedTime=auto?newValue.time:mealReadTimeSelectors();
+  if(!auto&&pickedTime!==null){newValue.time=pickedTime;$('#cm-time').value=pickedTime;}
+  const selectedTime=mealClockMinutes(pickedTime);
   if(!auto&&selectedTime===null)return mealFormError([{label:'وقت تقديم صحيح',selector:'#cm-time'}]);
   const plan=[],alerts=[];
   for(const day of chosenDays){
@@ -636,6 +656,9 @@ document.head.append(auditAccessStyle);
 const mealValidationStyle=document.createElement('style');
 mealValidationStyle.textContent='.cm-form-errors{background:#fff2f0;border:1px solid #e7a29d;color:#902e24;padding:11px 14px;border-radius:9px;font-weight:700;line-height:1.7}.cm-form-errors[hidden]{display:none!important}#modal .cm-invalid{outline:2px solid #c83e35!important;outline-offset:2px;scroll-margin-block:85px}';
 document.head.append(mealValidationStyle);
+const mealPickerStyle=document.createElement('style');
+mealPickerStyle.textContent='.cm-time-selectors{display:flex;align-items:center;gap:8px;width:100%;margin-top:5px}.cm-time-selectors select{min-width:0;flex:1;font:inherit;font-size:16px;font-weight:700;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:12px 9px;cursor:pointer;text-align:center}.cm-time-selectors select:last-child{flex:1.2}.cm-time-selectors select:disabled{opacity:.55;cursor:not-allowed;background:var(--soft)}.cm-time-selectors span{font-weight:800}.cm-time-selectors select:focus-visible{outline:2px solid var(--accent)}@media(max-width:490px){.cm-time-selectors{gap:4px}.cm-time-selectors select{font-size:13px;padding:11px 5px}}';
+document.head.append(mealPickerStyle);
 document.addEventListener('input',ev=>{if(ev.target.closest('.catering-modal'))mealFormError([])},true);
 document.addEventListener('change',ev=>{if(ev.target.closest('.catering-modal'))mealFormError([])},true);
 const budgetStyle=document.createElement('style');
@@ -651,6 +674,10 @@ document.addEventListener('input',ev=>{
 },true);
 document.addEventListener('change',ev=>{
  if(!ev.target.closest('#modal'))return;
+ if(['cm-time-hour','cm-time-minute','cm-time-period'].includes(ev.target.id)){
+  const selected=mealReadTimeSelectors();
+  if(selected!==null){const input=$('#cm-time');if(input)input.value=selected;}
+ }
  if(ev.target.id==='cm-time-source'||ev.target.id==='cm-type'||ev.target.hasAttribute('data-cm-day'))mealSchedulePreview();
 },true);
 /* Navigation is centrally ordered in index.html. */
