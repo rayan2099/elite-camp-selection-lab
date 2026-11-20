@@ -367,7 +367,7 @@ function mealModal(id){
  '<label>طريقة التقديم<select id="cm-mode"><option value="individual" '+((v.serviceMode||'individual')==='individual'?'selected':'')+'>وجبات فردية (وجبة لكل شخص)</option><option value="shared" '+(v.serviceMode==='shared'?'selected':'')+'>أطباق جماعية (طبق لمجموعة)</option></select></label>'+
  '<label class="cm-shared">الطبق الجماعي يكفي كم شخصًا؟<input type="number" min="2" max="100" id="cm-group-size" value="'+Math.max(2,n(v.peoplePerTray)||5)+'"></label>'+
  '<label class="cm-shared full">طريقة التوزيع والتجهيز<textarea id="cm-serving-notes" rows="2" placeholder="مثال: صحن رز ودجاج لكل 5 طلاب، يقدم على الطاولات حسب الفرق">'+e(v.servingNotes||'')+'</textarea></label>'+
- '<div class="full catering-modal-step">02 · قائمة الطعام والتوريد</div>'+ '<label class="full">القائمة الغذائية ومكوناتها<textarea id="cm-menu" rows="3">'+e(v.menu)+'</textarea></label>'+
+ '<div class="full catering-modal-step">02 · قائمة الطعام والتوريد</div>'+ '<label class="full">القائمة الغذائية ومكوناتها <small class="help">(اختياري عند الجدولة، يُستكمل قبل الاعتماد)</small><textarea id="cm-menu" placeholder="يمكن تحديد الطعام لاحقًا" rows="3">'+e(v.menu)+'</textarea></label>'+
  '<label>المورد / المطبخ<input id="cm-supplier" maxlength="120" value="'+e(v.supplier)+'"></label>'+
  '<label>موعد وصول الطعام<input id="cm-delivery" type="time" value="'+e(v.deliveryTime||'')+'"></label>'+
  '<label>موقع التقديم<input id="cm-location" maxlength="120" placeholder="مثال: صالة الطعام" value="'+e(v.serviceLocation||'')+'"></label>'+
@@ -383,9 +383,24 @@ function mealModal(id){
  '<label class="cm-compact-field cm-special-menu"><span>تفاصيل الوجبة البديلة</span><textarea id="cm-special-menu" rows="2" placeholder="مكونات الوجبة البديلة وطريقة تجهيزها">'+e(v.specialMenu)+'</textarea></label></div></div>'+
  '</div>'+
  '<div class="full cp-calc" id="cm-preview" aria-live="polite"></div>'+
+  '<div class="full cm-form-errors" id="cm-form-errors" role="alert" aria-live="assertive" hidden></div>'+
  '<label class="full cp-check"><input type="checkbox" id="cm-confirmed" '+(v.confirmed?'checked':'')+'> تم تأكيد الكميات والمكونات والتوقيت مع المورد</label></div>'+
  '<div class="cp-actions"><button data-act="close">إلغاء</button><button class="primary" data-cp="save-meal" data-id="'+e(id||'')+'">حفظ الوجبة</button></div></div>');
  updateMealPreview();mealSchedulePreview();
+}
+function mealFormError(fields){
+ const panel=document.getElementById('cm-form-errors');
+ document.querySelectorAll('#modal .cm-invalid').forEach(el=>el.classList.remove('cm-invalid'));
+ document.querySelectorAll('#modal [aria-invalid="true"]').forEach(el=>el.removeAttribute('aria-invalid'));
+ if(!fields.length){if(panel){panel.hidden=true;panel.textContent=''}return false;}
+ if(panel){panel.hidden=false;panel.textContent='يرجى استكمال: '+fields.map(x=>x.label).join('، ')+'.';}
+ fields.forEach(({selector})=>{
+  const el=document.querySelector(selector);
+  if(el){el.classList.add('cm-invalid');el.setAttribute('aria-invalid','true');}
+ });
+ const first=document.querySelector(fields[0].selector);
+ if(first){first.scrollIntoView({behavior:'smooth',block:'center'});first.focus({preventScroll:true})}
+ return true;
 }
 function updateMealPreview(){
  const mode=$('#cm-mode')?.value;if(!mode)return;
@@ -509,21 +524,30 @@ function handle(b){
  if(a==='del-special'){if(confirm('حذف الحالة الغذائية؟')){d.special=d.special.filter(s=>s.id!==id);d.meals.forEach(m=>m.specialIds=(m.specialIds||[]).filter(x=>x!==id));commit()}return}
  if(a==='save-meal'){
   const m=d.meals.find(x=>x.id===id),chosenDays=mealChosenDays();
-  if(!chosenDays.length)return toast('اختر يوماً واحداً على الأقل لتقديم الوجبة.');
+  if(!chosenDays.length)return mealFormError([{label:'يوم تقديم الوجبة',selector:'[data-cm-day]'}]);
   const newValue={id:m?.id||newId('meal-'),day:chosenDays[0],type:$('#cm-type').value,time:$('#cm-time').value,menu:$('#cm-menu').value.trim(),supplier:$('#cm-supplier').value.trim(),supervisorId:$('#cm-supervisor').value,audienceMode:document.querySelector('input[name="cm-audience-mode"]:checked')?.value||'all',audienceIds:[...document.querySelectorAll('[data-cm-student]:checked')].map(el=>el.dataset.cmStudent),serviceMode:$('#cm-mode').value,peoplePerTray:n($('#cm-group-size').value),servingNotes:$('#cm-serving-notes').value.trim(),deliveryTime:$('#cm-delivery').value,serviceLocation:$('#cm-location').value.trim(),equipment:$('#cm-equipment').value.trim(),servings:n($('#cm-servings').value),unitPrice:money($('#cm-price').value),specialPrice:money($('#cm-special-price').value),specialMenu:$('#cm-special-menu').value.trim(),specialIds:$$('[data-cm-special]:checked').map(x=>x.dataset.cmSpecial),confirmed:$('#cm-confirmed').checked};
-  if(!newValue.day||!newValue.menu||!newValue.time)return toast('اليوم وقائمة الطعام والتوقيت مطلوبة.');
+  const required=[];
+  if(!newValue.day)required.push({label:'يوم تقديم الوجبة',selector:'[data-cm-day]'});
+  if(!newValue.time)required.push({label:'وقت تقديم الوجبة',selector:'#cm-time'});
+  if(newValue.audienceMode==='all'&&newValue.servings<=0)required.push({label:'عدد المستفيدين',selector:'#cm-servings'});
+  if(mealFormError(required))return;
   if(newValue.audienceMode==='selected'){
    newValue.servings=newValue.audienceIds.length;
-   if(!newValue.audienceIds.length)return toast('اختر طالبًا واحدًا على الأقل لهذه الوجبة.');
+   if(!newValue.audienceIds.length)return mealFormError([{label:'الطلاب المستفيدون',selector:'#cm-student-picker'}]);
    if(newValue.audienceIds.some(studentId=>!participants().some(p=>p.id===studentId)))return toast('بعض الطلاب المحددين لم يعودوا في القائمة.');
    if(newValue.specialIds.some(studentId=>!newValue.audienceIds.includes(studentId)))return toast('يجب أن يكون الطالب ذو الوجبة الخاصة ضمن الطلاب المحددين.');
   }else newValue.audienceIds=[];
   if(newValue.specialIds.length>newValue.servings)return toast('عدد المستفيدين أقل من الحالات الخاصة.');
-  if(!newValue.supervisorId||!supervisorName(newValue.supervisorId))return toast('اختر المشرف المسؤول من فريق المعسكر قبل حفظ الوجبة.');
-  if(newValue.serviceMode==='shared'&&(newValue.peoplePerTray<2||!newValue.servingNotes))return toast('حدد عدد الأشخاص لكل طبق وطريقة التقديم الجماعي.');
+  // Supervisor and menu may be completed after scheduling; readiness checks still flag both.
+  if(newValue.serviceMode==='shared'&&(newValue.peoplePerTray<2||!newValue.servingNotes)){
+   const missing=[];
+   if(newValue.peoplePerTray<2)missing.push({label:'عدد الأفراد في الطبق الجماعي',selector:'#cm-group-size'});
+   if(!newValue.servingNotes)missing.push({label:'طريقة توزيع الأطباق',selector:'#cm-serving-notes'});
+   return mealFormError(missing);
+  }
   const auto=$('#cm-time-source')?.value!=='custom';
   const selectedTime=mealClockMinutes(newValue.time);
-  if(!auto&&selectedTime===null)return toast('اختر وقت تقديم صحيحاً.');
+  if(!auto&&selectedTime===null)return mealFormError([{label:'وقت تقديم صحيح',selector:'#cm-time'}]);
   const plan=[],alerts=[];
   for(const day of chosenDays){
    const slot=mealScheduleSlot(day,newValue.type);
@@ -562,7 +586,10 @@ function handle(b){
     S.prep.__scheduleEdits[entry.day][entry.slot.index]={...prev,t:entry.updatedTime};
    }
   }
-  save();
+  if(!save()){
+   d.meals=JSON.parse(oldMeals);S.prep.__scheduleEdits=JSON.parse(oldEdits);
+   return toast('تعذر حفظ الوجبة وتحديث الجدول. لم يُعتمد التغيير.','error');
+  }
   let verified=false;
   try{
    const persisted=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
@@ -575,7 +602,7 @@ function handle(b){
    d.meals=JSON.parse(oldMeals);S.prep.__scheduleEdits=JSON.parse(oldEdits);
    return toast('تعذر حفظ الوجبة وتحديث الجدول. لم يُعتمد التغيير.','error');
   }
-  closeModal();render({preserveScroll:true});toast('تمت إضافة الوجبات إلى الأيام المحددة بنجاح.','success','top');return;
+  closeModal();render({preserveScroll:true});toast('تم حفظ موعد الوجبة وتحديث الجدول. يمكن استكمال تفاصيل التغذية لاحقًا.','success','top');return;
  }
  if(a==='save-special'){
   const sid=id||$('#cs-id').value,allergens=$$('[data-cs-allergen]:checked').map(x=>x.dataset.csAllergen);
@@ -606,6 +633,11 @@ document.addEventListener('change',ev=>{if(ev.target.closest('#modal')&&(ev.targ
 const auditAccessStyle=document.createElement('style');
 auditAccessStyle.textContent='.catering-section{scroll-margin-top:90px}.catering-section:focus{outline:none}.catering-hero-actions [data-cp="tab"][data-val="audit"]{cursor:pointer}';
 document.head.append(auditAccessStyle);
+const mealValidationStyle=document.createElement('style');
+mealValidationStyle.textContent='.cm-form-errors{background:#fff2f0;border:1px solid #e7a29d;color:#902e24;padding:11px 14px;border-radius:9px;font-weight:700;line-height:1.7}.cm-form-errors[hidden]{display:none!important}#modal .cm-invalid{outline:2px solid #c83e35!important;outline-offset:2px;scroll-margin-block:85px}';
+document.head.append(mealValidationStyle);
+document.addEventListener('input',ev=>{if(ev.target.closest('.catering-modal'))mealFormError([])},true);
+document.addEventListener('change',ev=>{if(ev.target.closest('.catering-modal'))mealFormError([])},true);
 const budgetStyle=document.createElement('style');
 budgetStyle.textContent="\n.cp-budget-summary{--budget-border:#dde5ed;--budget-tone:#168660;margin:16px 0 20px;padding:20px 22px;border:1px solid var(--budget-border);background:var(--surface);border-radius:17px;box-shadow:0 5px 22px rgba(18,39,67,.035);direction:rtl}\n.cp-budget-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:18px}\n.cp-budget-kicker{display:block;font-size:11px;font-weight:700;color:#a45e28;margin-bottom:4px}\n.cp-budget-heading h2{margin:0;font-size:19px;font-weight:800;letter-spacing:-.3px;color:var(--fg)}\n.cp-budget-heading p{font-size:12px;color:var(--muted);margin:5px 0 0;line-height:1.7}\n.cp-budget-edit{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--soft);color:var(--fg);font:inherit;font-weight:700;font-size:12px;border-radius:9px;padding:10px 15px;white-space:nowrap;cursor:pointer}\n.cp-budget-edit:hover{border-color:var(--accent);background:var(--accentsoft)}\n.cp-budget-content{display:flex;align-items:center;gap:22px}\n.cp-budget-gauge{--budget-progress:0%;--budget-tone:#168660;flex:0 0 156px;width:156px;height:156px;border-radius:50%;background:conic-gradient(var(--budget-tone) var(--budget-progress),#e9eff4 0);display:grid;place-items:center;position:relative;direction:ltr}\n.cp-budget-gauge::before{content:'';position:absolute;inset:13px;border-radius:50%;background:var(--surface)}\n.cp-budget-gauge-inner{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;direction:rtl;color:var(--fg)}\n.cp-budget-gauge-inner strong{font-size:27px;line-height:1;font-weight:850;font-variant-numeric:tabular-nums}\n.cp-budget-gauge-inner small{font-size:11px;color:var(--muted)}\n.cp-budget-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;flex:1;min-width:0}\n.cp-budget-value{display:flex;flex-direction:column;justify-content:center;gap:9px;min-width:0;padding:16px 15px;background:var(--soft);border:1px solid var(--line);border-radius:12px}\n.cp-budget-value>span{font-size:11.5px;font-weight:700;color:var(--muted)}\n.cp-budget-value strong{font-weight:850;font-size:clamp(17px,1.7vw,24px);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--fg)}\n.cp-budget-value strong small{font-size:12px;font-weight:650;color:var(--muted)}\n.cp-budget-value>small{font-size:10.5px;color:var(--muted);line-height:1.5}\n.cp-budget-remaining{background:rgba(22,134,96,.06);border-color:rgba(22,134,96,.19)}\n.cp-budget-danger .cp-budget-remaining{background:rgba(199,76,61,.06);border-color:rgba(199,76,61,.23)}\n.cp-budget-bottom{border-top:1px solid var(--line);padding-top:14px;margin-top:17px;display:grid;grid-template-columns:auto minmax(150px,1fr);align-items:center;gap:10px 20px}\n.cp-budget-status{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:750;white-space:nowrap}\n.cp-budget-status.success{color:#168660}.cp-budget-status.warning{color:#b47b1b}.cp-budget-status.danger{color:#b6382e}\n.cp-budget-status-dot{width:8px;height:8px;flex:none;border-radius:50%;background:currentColor}\n.cp-budget-comparison{display:flex;gap:8px;align-items:center;direction:ltr}\n.cp-budget-comparison>span{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}\n.cp-budget-meter{height:9px;position:relative;background:#e7edf3;border-radius:100px;overflow:hidden;flex:1}\n.cp-budget-meter>span{display:block;height:100%;border-radius:100px;transition:width .25s ease}\n.cp-budget-meter .success{background:#168660}.cp-budget-meter .warning{background:#d28c27}.cp-budget-meter .danger{background:#c74c3d}\n.cp-budget-meter>i{position:absolute;top:0;bottom:0;border-left:2px solid rgba(60,77,95,.55)}\n.cp-budget-note{grid-column:1/-1;color:var(--muted);font-size:10px}\n.cm-days{border:1px solid var(--line);padding:10px;border-radius:9px}\n@media(max-width:850px){.cp-budget-content{gap:15px}.cp-budget-gauge{width:120px;height:120px;flex-basis:120px}.cp-budget-values{grid-template-columns:repeat(3,minmax(0,1fr))}.cp-budget-value{padding:12px}.cp-budget-value strong{font-size:17px}}\n@media(max-width:650px){.cp-budget-summary{padding:15px}.cp-budget-content{flex-direction:column;align-items:stretch}.cp-budget-gauge{align-self:center;width:140px;height:140px;flex-basis:140px}.cp-budget-values{grid-template-columns:1fr}.cp-budget-value{padding:13px}.cp-budget-value strong{font-size:22px}.cp-budget-bottom{grid-template-columns:1fr}.cp-budget-status{white-space:normal}}\n";
 document.head.append(budgetStyle);
