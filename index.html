@@ -2706,8 +2706,9 @@ function eliteScheduleStats(day){
   const span=eliteActivityRange(activity);
   if(span){
    const minutes=span.end-span.start;
-   totals.other+=minutes;
-   sessions.push({index:-1,start:span.start,end:span.end,minutes,type:'other',row:activity});
+   const category=activity.sourceId?'program':'other';
+   totals[category]+=minutes;
+   sessions.push({index:-1,start:span.start,end:span.end,minutes,type:category,row:activity});
   }
  }
  // Totals are sums of allocated minutes, which can exceed elapsed clock time if
@@ -2813,7 +2814,17 @@ function eliteSaveDirectProgram(day){
   const record={id:'program-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),sourceId:id,day:n,t:start+' – '+end,ar:item.ar,en:item.en,ic:'tools',activityType:activityType(item)};
   S.prep.__extraActivities.push(record);
   if(!save()){S.prep.__extraActivities=S.prep.__extraActivities.filter(x=>x.id!==record.id);return toast('تعذر حفظ البرنامج.','error');}
-  closeModal();render({preserveScroll:true});return toast('تمت إضافة البرنامج في الوقت المحدد.','success','top');
+  let persisted=false;
+  try{
+   const stored=JSON.parse(localStorage.getItem('elite-select-v1')||'null');
+   const saved=stored?.camps?.find(c=>c.id===S.activeId)?.prep?.__extraActivities||[];
+   persisted=saved.some(x=>x.id===record.id&&x.sourceId===id&&x.day===n&&x.t===record.t);
+  }catch(error){console.error('Manual program persistence check failed',error)}
+  if(!persisted){
+   S.prep.__extraActivities=S.prep.__extraActivities.filter(x=>x.id!==record.id);
+   return toast('لم يكتمل حفظ البرنامج، حاول مجددًا.','error','top');
+  }
+  closeModal();render({preserveScroll:true});return toast('تمت إضافة «'+item.ar+'» إلى جدول اليوم '+n+' في الوقت المحدد.','success','top');
  }
  const index=DAY_TEMPLATE.findIndex(row=>row.slot===slot);
  if(!SLOTS.includes(slot)||index<0)return toast('اختر فترة زمنية صحيحة.','error');
@@ -2955,6 +2966,7 @@ function eliteSaveAddedActivity(day,id){
  S.prep??={};S.prep.__extraActivities??=[];
  const before=JSON.stringify(S.prep.__extraActivities);
  const record={id:id||'custom-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),day:n,t:start+' – '+end,ar:name,en:name,ic:kind==='meal'?'meal':kind==='recreational'?'ball':'tools',activityType:kind};
+ if(old?.sourceId)record.sourceId=old.sourceId;
  const at=S.prep.__extraActivities.findIndex(x=>x.id===id&&x.day===n);
  if(at<0)S.prep.__extraActivities.push(record);else S.prep.__extraActivities[at]=record;
  save();
@@ -3040,9 +3052,10 @@ function dayTimeline(day,opts){
     ...eliteAddedActivities(day).map(original=>({original,idx:-1,added:true,start:eliteActivityRange(original)?.start??9999}))
   ].sort((a,b)=>a.start-b.start||(a.added?1:-1));
   return `<div class="tl">${timelineEntries.map(({original,idx,added})=>{
-    if(added){const row=original;return `<div class="tlrow fixed elite-added-activity">
+    if(added){const row=original,source=row.sourceId?ITEM(row.sourceId):null;return `<div class="tlrow fixed elite-added-activity">
       <div class="tltime">${esc(row.t)}</div><div class="tldot">${tico(row.ic)}</div>
-      <div class="tlbody"><b>${esc(row.ar)}</b><span class="pill good">${T('فعالية مضافة يدويًا','Manually added activity')}</span>
+      <div class="tlbody"><b>${esc(row.ar)}</b><span class="pill good">${source?T('برنامج من المكتبة · وقت مخصص','Library programme · custom time'):T('فعالية مضافة يدويًا','Manually added activity')}</span>
+      ${source?`<button type="button" class="small noprint" data-p1="detail" data-id="${esc(row.sourceId)}">${T('تفاصيل البرنامج','Programme details')}</button>`:''}
       ${can('select')?`<button type="button" class="small noprint" data-act="editAddedActivity:${day},${row.id}">${T('تعديل','Edit')}</button>
       <button type="button" class="small danger noprint" data-act="deleteAddedActivity:${day},${row.id}">${T('حذف','Delete')}</button>`:''}</div></div>`;}
     if(scheduleRowRemoved(day,idx)||elitePlaceholderCovered(day,idx))return '';const row=scheduleRow(day,idx);
