@@ -2636,11 +2636,32 @@ function pendingSchedulePrograms(day){
  }
  return rows;
 }
+// Match a meal by its activity name/identity, never by row index or cutlery icon.
+function eliteScheduleMealType(day,index){
+ const base=DAY_TEMPLATE[index];
+ if(!base)return null;
+ const override=S.prep?.__scheduleEdits?.[day]?.[index]||{};
+ if(override.deleted)return null;
+ const row={...base,...override};
+ const normalize=value=>String(value||'').trim().toLocaleLowerCase().replace(/[\u064b-\u065f\u0670]/g,'').replace(/[أإآ]/g,'ا').replace(/\s+/g,' ');
+ const ar=normalize(row.ar),en=normalize(row.en);
+ const names={breakfast:['الفطور','فطور','الافطار','افطار','breakfast'],lunch:['الغداء','غداء','lunch'],dinner:['العشاء','عشاء','dinner']};
+ for(const [type,aliases] of Object.entries(names)){
+  if(aliases.includes(ar)||aliases.includes(en))return type;
+ }
+ // Do not use the inherited default meal identity once someone renames the row.
+ if(row.mealType&&names[row.mealType]&&!Object.prototype.hasOwnProperty.call(override,'ar')&&!Object.prototype.hasOwnProperty.call(override,'en'))return row.mealType;
+ return null;
+}
+function eliteFindMealRow(day,type){
+ return DAY_TEMPLATE.findIndex((_,index)=>eliteScheduleMealType(day,index)===type);
+}
 function scheduleRow(day,index){
  const override=S.prep?.__scheduleEdits?.[day]?.[index]||{};
  const row={...DAY_TEMPLATE[index],...override};
- // Catering records determine the displayed time of scheduled meals.
- const type=({2:'breakfast',8:'lunch',16:'dinner'})[index],meals=S.prep?.__catering?.meals;
+ const type=eliteScheduleMealType(day,index),meals=S.prep?.__catering?.meals;
+ if(type)row.ic='meal';
+ else if(row.ic==='meal')row.ic='tools';
  const meal=type&&Array.isArray(meals)?meals.find(m=>Number(m.day)===Number(day)&&m.type===type&&/^\d{2}:\d{2}$/.test(m.time||'')):null;
  if(meal&&!override.deleted){
   const span=eliteActivityRange(row),start=eliteTimeMinutes(meal.time),duration=span?span.end-span.start:40;
@@ -3061,7 +3082,7 @@ function dayTimeline(day,opts){
     if(scheduleRowRemoved(day,idx)||elitePlaceholderCovered(day,idx))return '';const row=scheduleRow(day,idx);
     const items=scheduleSlotPrograms(day,idx,map);
     const customActivity=slotHasCustomActivity(day,idx);
-    const mealType=row.ic==='meal'?({2:'breakfast',8:'lunch',16:'dinner'}[idx]||null):null;
+    const mealType=eliteScheduleMealType(day,idx);
     const linkedMealCards=mealType?eliteMealsScheduleCards(day,mealType):'';
     const body = row.slot
       ? (items.length
@@ -3342,7 +3363,7 @@ function saveScheduleRow(day,index){
   if(conflicts.length)return toast(T('وقت الفعالية يتعارض مع: ','Time conflicts with: ')+[...new Set(conflicts)].join('، '),'error','top');
  }
  S.prep.__scheduleEdits[n][j]={t,ar,en:en||ar};
- const mealType=({2:'breakfast',8:'lunch',16:'dinner'})[j];
+ const mealType=eliteScheduleMealType(n,j);
  const linkedMeals=mealType&&Array.isArray(S.prep.__catering?.meals)?S.prep.__catering.meals.filter(m=>Number(m.day)===n&&m.type===mealType):[];
  const oldMealTimes=linkedMeals.map(m=>m.time);
  linkedMeals.forEach(m=>m.time=start);
