@@ -5018,6 +5018,25 @@ document.addEventListener('click',function(event){
   if(action==='saveScheduleProgram')eliteSaveScheduleProgram(id);
  }catch(error){console.error('Explicit program scheduling failed',error);toast(T('تعذر إكمال الجدولة.','Scheduling failed.'),'error')}
 },true);
+/* Save Decision: guaranteed click handling, safe retries and visible failures.
+   Capture before generic action listeners to avoid duplicate/ignored click paths. */
+document.addEventListener('click',function(event){
+ const button=event.target.closest('button[data-act^="saveEdit:"]');
+ if(!button||!button.closest('#modal'))return;
+ event.preventDefault();event.stopImmediatePropagation();
+ if(button.dataset.saving==='1')return;
+ const id=(button.dataset.act||'').slice('saveEdit:'.length);
+ if(!id)return decisionSaveError(T('تعذر تحديد البرنامج. أغلق النافذة ثم أعد فتحها.','Missing program identifier.'));
+ button.dataset.saving='1';
+ button.disabled=true;
+ try{saveEdit(id)}
+ catch(error){
+  console.error('Save Decision failed',error);
+  decisionSaveError(T('حدث خطأ غير متوقع أثناء حفظ القرار. لم يتم إغلاق النافذة؛ حاول مرة أخرى.','Unexpected save error. The form remains open; please retry.'));
+ }finally{
+  if(button.isConnected){button.disabled=false;delete button.dataset.saving}
+ }
+},true);
 /* Confirm removal from both timetable and subactivity editor before any deletion. */
 document.addEventListener('click',function(event){
  const button=event.target.closest('button[data-act^="confirmScheduleProgramRemove:"]');
