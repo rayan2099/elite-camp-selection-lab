@@ -2645,12 +2645,13 @@ function eliteScheduleMealType(day,index){
  const row={...base,...override};
  const normalize=value=>String(value||'').trim().toLocaleLowerCase().replace(/[\u064b-\u065f\u0670]/g,'').replace(/[أإآ]/g,'ا').replace(/\s+/g,' ');
  const ar=normalize(row.ar),en=normalize(row.en);
+ const titleEdited=Object.prototype.hasOwnProperty.call(override,'ar')||Object.prototype.hasOwnProperty.call(override,'en');
  const names={breakfast:['الفطور','فطور','الافطار','افطار','breakfast'],lunch:['الغداء','غداء','lunch'],dinner:['العشاء','عشاء','dinner']};
  for(const [type,aliases] of Object.entries(names)){
-  if(aliases.includes(ar)||aliases.includes(en))return type;
+  if(titleEdited?aliases.includes(ar)||(Object.prototype.hasOwnProperty.call(override,'en')&&aliases.includes(en)):aliases.includes(ar)||aliases.includes(en))return type;
  }
  // Do not use the inherited default meal identity once someone renames the row.
- if(row.mealType&&names[row.mealType]&&!Object.prototype.hasOwnProperty.call(override,'ar')&&!Object.prototype.hasOwnProperty.call(override,'en'))return row.mealType;
+ if(row.mealType&&names[row.mealType]&&!titleEdited)return row.mealType;
  return null;
 }
 function eliteFindMealRow(day,type){
