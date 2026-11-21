@@ -4370,6 +4370,8 @@ const closeModal=()=>{const m=$('#modal');if(m.open)m.close();pendingProgramChoi
 $('#modal').addEventListener('close',()=>{pendingProgramChoice=null;});
 $('#modal').addEventListener('cancel',event=>event.preventDefault());
 $('#modal').addEventListener('input',event=>{
+ const feedback=document.getElementById('decision-save-feedback');
+ if(feedback&&!feedback.hidden){feedback.hidden=true;feedback.textContent=''}
  const field=event.target.closest('.elite-invalid-field');
  if(field){field.classList.remove('elite-invalid-field');field.removeAttribute('aria-invalid')}
 });
@@ -4724,37 +4726,57 @@ function editModal(id){
     <div class="actions" style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end">
       ${can('approve')&&S.selected.some(p=>p.id===id)?`<button data-act="approve:${id}">${x.approved?T('سحب الاعتماد','Unapprove'):T('اعتماد','Approve')}</button>`:''}
       ${pendingProgramChoice?.id===id?`<button type="button" data-act="close">${T('إلغاء الإضافة','Cancel addition')}</button>`:can('select')?`<button type="button" class="danger" data-act="confirmScheduleProgramRemove:${esc(id)}">${T('حذف من الخطة','Remove from plan')}</button>`:''}
-      <button class="primary" data-act="saveEdit:${id}">${T('حفظ القرار','Save decision')}</button>
+      <div id="decision-save-feedback" role="alert" aria-live="assertive" hidden style="flex-basis:100%;order:2;padding:10px 12px;border:1px solid #d89a8b;border-radius:10px;background:#fff3ef;color:#8d3025;font-weight:700"></div>
+      <button type="button" class="primary" data-act="saveEdit:${id}">${T('حفظ القرار','Save decision')}</button>
     </div>`);
+}
+function decisionSaveError(message,selector){
+ const box=document.getElementById('decision-save-feedback');
+ if(box){
+  box.textContent=message;
+  box.hidden=false;
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+ }
+ const field=selector?document.querySelector('#modal '+selector):null;
+ if(field){
+  field.classList.add('elite-invalid-field');
+  field.setAttribute('aria-invalid','true');
+ }
+ if(!box)toast(message,'error','top');
+ return false;
 }
 function saveEdit(id){
   const existing=S.selected.find(s=>s.id===id);
-  if(!(can('select')||(can('scheduleEdit')&&existing)))return toast(T('التعديل غير متاح لهذا الدور.','Editing is not permitted for this role.'));
+  if(!(can('select')||(can('scheduleEdit')&&existing)))return decisionSaveError(T('التعديل غير متاح لهذا الدور.','Editing is not permitted for this role.'));
 
   const isNew=!existing&&pendingProgramChoice?.id===id;
   const x=existing||(isNew?pendingProgramChoice:null);
-  if(!x)return;
+  if(!x)return decisionSaveError(T('لم يتم العثور على البرنامج. أغلق النافذة وأعد فتحه.','Program not found. Reopen the form.'));
   const item=ITEM(id);
-  const sport=item?.t==='sport'?$('[name="selectedSport"]:checked')?.value||'':'';
-  if(item?.t==='sport'&&!sport)return toast(T('اختر رياضة واحدة أولًا.','Select one sport first.'));
+  if(!item)return decisionSaveError(T('البرنامج غير موجود في المكتبة.','Program missing from catalog.'));
+  const feedback=document.getElementById('decision-save-feedback');if(feedback){feedback.hidden=true;feedback.textContent=''}
+  const sport=item?.t==='sport'?document.querySelector('#modal [name="selectedSport"]:checked')?.value||'':'';
+  if(item?.t==='sport'&&!sport)return decisionSaveError(T('حدد الرياضة أولًا من القائمة الموجودة أعلى التفريعات، ثم اضغط حفظ القرار.','Select a sport above its subactivities before saving.'),'.elite-sport-pickbox');
   const choices=[...new Set([
     ...$$('[data-approved-phase]:checked').map(el=>el.value.trim()),
     ...$$('[data-sport-detail]:checked').map(el=>el.value.trim()),
     ...($('#eBreakdown')?.value||'').split(/\r?\n/).map(v=>v.trim()).filter(Boolean)
   ])];
-  if(!choices.length)return toast(T('اختر تفريعة واحدة على الأقل قبل الحفظ.','Select at least one subactivity before saving.'));
+  if(!choices.length)return decisionSaveError(T('اختر تفريعة واحدة على الأقل أو اكتب تفريعًا إضافيًا قبل الحفظ.','Select or enter at least one subactivity before saving.'),'.elite-subactivities');
   // Retain the last valid state until the browser confirms the updated selection was persisted.
   const previousSelected=JSON.stringify(S.selected);
   const previousDraft=S.draft;
   const previousLogLength=S.log.length;
   // Read the multi-day checkboxes BEFORE modifying state. The days belong to
   // this same transaction, not a second save after the modal is closed.
-  const dayPicker=$('#p1days');
+  const form=document.getElementById('modal');
+  const dayPicker=form?.querySelector('#p1days');
+  const dayInput=form?.querySelector('#eDay');
   const chosenDays=dayPicker
-    ? [...new Set($$('[data-p1day]:checked').map(el=>Number(el.dataset.p1day)))]
-    : ($('#eDay').value?[Number($('#eDay').value)]:[]);
-  if(dayPicker&&!chosenDays.length)return toast(T('اختر يومًا واحدًا على الأقل قبل الحفظ.','Select at least one day before saving.'),'error','top');
-  if(chosenDays.some(d=>!Number.isInteger(d)||d<1||d>S.meta.days.length))return toast(T('اختيار الأيام غير صالح.','Invalid day selection.'),'error','top');
+    ? [...new Set([...dayPicker.querySelectorAll('[data-p1day]:checked')].map(el=>Number(el.dataset.p1day)))]
+    : (dayInput?.value?[Number(dayInput.value)]:[]);
+  if(dayPicker&&!chosenDays.length)return decisionSaveError(T('حدد يومًا واحدًا على الأقل لحفظ البرنامج.','Select at least one day before saving.'),'#p1days');
+  if(chosenDays.some(d=>!Number.isInteger(d)||d<1||d>S.meta.days.length))return decisionSaveError(T('اختيار الأيام غير صالح.','Invalid day selection.'),'#p1days');
   const chosenDay=chosenDays[0]||null;
   x.pri=$('#ePri').value;
   if(x.day!==chosenDay||(Array.isArray(x.days)&&x.days.length&&JSON.stringify(x.days)!==JSON.stringify(chosenDays)))x.slot=null; // Explicit re-scheduling required after changed days.
@@ -4768,7 +4790,7 @@ function saveEdit(id){
   if(item?.t==='sport')x.sportChoice=sport;
   x.activityBreakdown=choices.join('\n');
   if(isNew){
-    if(isSel(id))return toast(T('البرنامج موجود في الخطة.','Program already selected.'));
+    if(isSel(id))return decisionSaveError(T('البرنامج موجود بالفعل في الخطة.','Program already selected.'));
     S.selected.push(x);
     S.draft=false;
     logIt(`أُضيف إلى الخطة بعد اختيار التفريعات: ${item.ar}`,`Added to plan after choosing subactivities: ${item.en}`);
@@ -4797,7 +4819,7 @@ function saveEdit(id){
     S.draft=previousDraft;
     S.log.length=previousLogLength;
     if(isNew)pendingProgramChoice=x;
-    return toast(T('لم يكتمل حفظ البرنامج. بقيت النافذة مفتوحة لإعادة المحاولة.','Program not saved. The form remains open to retry.'));
+    return decisionSaveError(T('تعذر تأكيد حفظ البرنامج في المتصفح. لم تُعتمد التغييرات؛ يمكنك المحاولة مرة أخرى دون فقدان المدخلات.','Could not verify saving. Retry without losing the form.'));
   }
   closeModal();render({preserveScroll:true});
   toast(isNew?T('تمت إضافة البرنامج وحفظ تفريعاته وأيامه بنجاح. انتقل إلى الجدول لتحديد الوقت يدويًا.','Program and days saved. Choose its timetable slot manually.'):T('تم حفظ البرنامج والتفريعات والأيام المحددة بنجاح.','Program, subactivities and days saved successfully.'),'success','top');
