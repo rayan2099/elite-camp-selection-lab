@@ -290,10 +290,10 @@ document.addEventListener('change',event=>{
  }
 },true);
 
-const MEAL_SCHEDULE_ROWS={breakfast:2,lunch:8,dinner:16};
 function mealScheduleSlot(day,type){
- const index=MEAL_SCHEDULE_ROWS[type];
- if(index===undefined||typeof scheduleRow!=='function'||(typeof scheduleRowRemoved==='function'&&scheduleRowRemoved(day,index)))return null;
+ // Resolve by the actual activity identity; never infer meal type from a cutlery icon or default index.
+ const index=typeof eliteFindMealRow==='function'?eliteFindMealRow(day,type):-1;
+ if(index<0||typeof scheduleRow!=='function'||(typeof scheduleRowRemoved==='function'&&scheduleRowRemoved(day,index)))return null;
  const row=scheduleRow(day,index);
  const parts=String(row?.t||'').split(/\s*[–-]\s*/);
  const start=typeof eliteParseClock==='function'?eliteParseClock(parts[0]):null;
